@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using Backend.Models;
 using Backend.Services;
 
@@ -16,14 +18,25 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<User>>> GetUsers()
     {
         var users = await _userService.GetAllUsersAsync();
         return Ok(users);
     }
 
+    [HttpGet("me")]
+    [Authorize]
+    public ActionResult GetCurrentUser()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var email = User.FindFirst(ClaimTypes.Email)?.Value;
+
+        return Ok(new { userId, email });
+    }
+
     [HttpPost("register")]
-    public async Task<ActionResult<User>> Register(User user)
+    public async Task<ActionResult<LoginResponse>> Register(User user)
     {
         var result = await _userService.RegisterUserAsync(user.Email, user.Password);
 
@@ -36,7 +49,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<User>> Login(User user)
+    public async Task<ActionResult<LoginResponse>> Login(User user)
     {
         var result = await _userService.LoginUserAsync(user.Email, user.Password);
 
