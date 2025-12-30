@@ -15,7 +15,14 @@ public class User
     public string Email { get; set; } = string.Empty;
     public int Age { get; set; }
     public Gender Gender { get; set; }
+    public bool IsAdmin { get; set; } = false;
 
     [JsonIgnore]
     public string Password { get; set; } = string.Empty;
+
+    [JsonIgnore]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    [JsonIgnore]
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

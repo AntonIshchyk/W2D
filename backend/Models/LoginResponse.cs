@@ -7,5 +7,6 @@ public class LoginResponse
     public string Name { get; set; } = string.Empty;
     public int Age { get; set; }
     public Gender Gender { get; set; }
+    public bool IsAdmin { get; set; }
     public string Token { get; set; } = string.Empty;
 }

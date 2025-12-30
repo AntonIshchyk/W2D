@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { Button } from './ui/button'
 
 interface UserInfo {
@@ -39,11 +40,12 @@ export function Home() {
     retry: false
   })
 
-  if (isError) {
-    localStorage.removeItem('token')
-    navigate('/login')
-    return null
-  }
+  useEffect(() => {
+    if (isError) {
+      localStorage.removeItem('token')
+      navigate('/login')
+    }
+  }, [isError, navigate])
 
   const handleLogout = () => {
     localStorage.removeItem('token')
@@ -56,6 +58,10 @@ export function Home() {
         <p className="text-gray-600">Loading...</p>
       </div>
     )
+  }
+
+  if (isError) {
+    return null
   }
 
   return (

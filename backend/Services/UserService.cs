@@ -59,6 +59,7 @@ public class UserService : IUserService
             Name = user.Name,
             Age = user.Age,
             Gender = user.Gender,
+            IsAdmin = user.IsAdmin,
             Token = token
         };
     }
@@ -89,6 +90,7 @@ public class UserService : IUserService
             Name = user.Name,
             Age = user.Age,
             Gender = user.Gender,
+            IsAdmin = user.IsAdmin,
             Token = token
         };
     }

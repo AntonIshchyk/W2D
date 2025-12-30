@@ -39,6 +39,7 @@ public class UsersControllerTests
             Name = user.Name,
             Age = user.Age,
             Gender = user.Gender,
+            IsAdmin = false,
             Token = "fake-token"
         };
         _mockUserService.Setup(x => x.RegisterUserAsync(user.Email, user.Password, user.Name, user.Age, user.Gender))
@@ -99,6 +100,7 @@ public class UsersControllerTests
             Name = user.Name,
             Age = user.Age,
             Gender = user.Gender,
+            IsAdmin = false,
             Token = "valid-jwt-token"
         };
         _mockUserService.Setup(x => x.LoginUserAsync(user.Email, user.Password))

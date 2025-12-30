@@ -55,12 +55,14 @@ public class UserServiceTests : IDisposable
         result.Name.Should().Be(name);
         result.Age.Should().Be(age);
         result.Gender.Should().Be(gender);
+        result.IsAdmin.Should().BeFalse(); // Default non-admin user
         result.UserId.Should().BeGreaterThan(0);
         result.Token.Should().Be("fake-jwt-token");
 
         var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         userInDb.Should().NotBeNull();
         userInDb!.Password.Should().NotBe(password); // Password should be hashed
+        userInDb.IsAdmin.Should().BeFalse(); // Default value
     }
 
     [Fact]
@@ -115,6 +117,7 @@ public class UserServiceTests : IDisposable
         result.Name.Should().Be("Login User");
         result.Age.Should().Be(27);
         result.Gender.Should().Be(Gender.Female);
+        result.IsAdmin.Should().BeFalse();
         result.UserId.Should().BeGreaterThan(0);
         result.Token.Should().Be("fake-jwt-token");
     }
@@ -146,6 +149,52 @@ public class UserServiceTests : IDisposable
 
         // Assert
         result.Should().BeNull();
+    }
+
+    #endregion
+
+    #region Admin Tests
+
+    [Fact]
+    public async Task RegisterUserAsync_DefaultUser_IsAdminIsFalse()
+    {
+        // Arrange
+        var email = "regular@example.com";
+        var password = "password123";
+
+        // Act
+        var result = await _userService.RegisterUserAsync(email, password, "Regular User", 25, Gender.Male);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.IsAdmin.Should().BeFalse();
+
+        var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        userInDb!.IsAdmin.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task RegisterUserAsync_AdminUserCreatedManually_IsAdminInResponse()
+    {
+        // Arrange - Create admin user directly in DB
+        var adminUser = new User
+        {
+            Email = "admin@example.com",
+            Password = BCrypt.Net.BCrypt.HashPassword("adminpass"),
+            Name = "Admin User",
+            Age = 35,
+            Gender = Gender.Male,
+            IsAdmin = true
+        };
+        _context.Users.Add(adminUser);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _userService.LoginUserAsync("admin@example.com", "adminpass");
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.IsAdmin.Should().BeTrue();
     }
 
     #endregion
