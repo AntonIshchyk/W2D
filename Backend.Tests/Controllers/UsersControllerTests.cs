@@ -24,14 +24,24 @@ public class UsersControllerTests
     public async Task Register_ValidUser_ReturnsOkWithLoginResponse()
     {
         // Arrange
-        var user = new User { Email = "test@example.com", Password = "password123" };
+        var user = new User
+        {
+            Name = "John Doe",
+            Email = "test@example.com",
+            Password = "password123",
+            Age = 25,
+            Gender = Gender.Male
+        };
         var expectedResponse = new LoginResponse
         {
             UserId = 1,
             Email = user.Email,
+            Name = user.Name,
+            Age = user.Age,
+            Gender = user.Gender,
             Token = "fake-token"
         };
-        _mockUserService.Setup(x => x.RegisterUserAsync(user.Email, user.Password))
+        _mockUserService.Setup(x => x.RegisterUserAsync(user.Email, user.Password, user.Name, user.Age, user.Gender))
             .ReturnsAsync(expectedResponse);
 
         // Act
@@ -48,8 +58,15 @@ public class UsersControllerTests
     public async Task Register_DuplicateEmail_ReturnsBadRequest()
     {
         // Arrange
-        var user = new User { Email = "duplicate@example.com", Password = "password123" };
-        _mockUserService.Setup(x => x.RegisterUserAsync(user.Email, user.Password))
+        var user = new User
+        {
+            Name = "Jane Doe",
+            Email = "duplicate@example.com",
+            Password = "password123",
+            Age = 30,
+            Gender = Gender.Female
+        };
+        _mockUserService.Setup(x => x.RegisterUserAsync(user.Email, user.Password, user.Name, user.Age, user.Gender))
             .ReturnsAsync((LoginResponse?)null);
 
         // Act
@@ -67,11 +84,21 @@ public class UsersControllerTests
     public async Task Login_ValidCredentials_ReturnsOkWithToken()
     {
         // Arrange
-        var user = new User { Email = "test@example.com", Password = "password123" };
+        var user = new User
+        {
+            Name = "John Doe",
+            Email = "test@example.com",
+            Password = "password123",
+            Age = 25,
+            Gender = Gender.Male
+        };
         var expectedResponse = new LoginResponse
         {
             UserId = 1,
             Email = user.Email,
+            Name = user.Name,
+            Age = user.Age,
+            Gender = user.Gender,
             Token = "valid-jwt-token"
         };
         _mockUserService.Setup(x => x.LoginUserAsync(user.Email, user.Password))
@@ -91,7 +118,14 @@ public class UsersControllerTests
     public async Task Login_InvalidCredentials_ReturnsUnauthorized()
     {
         // Arrange
-        var user = new User { Email = "test@example.com", Password = "wrongPassword" };
+        var user = new User
+        {
+            Name = "John Doe",
+            Email = "test@example.com",
+            Password = "wrongPassword",
+            Age = 25,
+            Gender = Gender.Male
+        };
         _mockUserService.Setup(x => x.LoginUserAsync(user.Email, user.Password))
             .ReturnsAsync((LoginResponse?)null);
 
@@ -107,7 +141,14 @@ public class UsersControllerTests
     public async Task Login_UserDoesNotExist_ReturnsUnauthorized()
     {
         // Arrange
-        var user = new User { Email = "nonexistent@example.com", Password = "password123" };
+        var user = new User
+        {
+            Name = "Nonexistent User",
+            Email = "nonexistent@example.com",
+            Password = "password123",
+            Age = 25,
+            Gender = Gender.Male
+        };
         _mockUserService.Setup(x => x.LoginUserAsync(user.Email, user.Password))
             .ReturnsAsync((LoginResponse?)null);
 
@@ -128,9 +169,9 @@ public class UsersControllerTests
         // Arrange
         var users = new List<User>
         {
-            new User { Id = 1, Email = "user1@example.com" },
-            new User { Id = 2, Email = "user2@example.com" },
-            new User { Id = 3, Email = "user3@example.com" }
+            new User { Id = 1, Name = "User One", Email = "user1@example.com", Age = 25, Gender = Gender.Male },
+            new User { Id = 2, Name = "User Two", Email = "user2@example.com", Age = 30, Gender = Gender.Female },
+            new User { Id = 3, Name = "User Three", Email = "user3@example.com", Age = 28, Gender = Gender.Male }
         };
         _mockUserService.Setup(x => x.GetAllUsersAsync())
             .ReturnsAsync(users);
@@ -152,8 +193,15 @@ public class UsersControllerTests
     public async Task Register_ServiceThrowsException_ExceptionPropagates()
     {
         // Arrange
-        var user = new User { Email = "test@example.com", Password = "password123" };
-        _mockUserService.Setup(x => x.RegisterUserAsync(user.Email, user.Password))
+        var user = new User
+        {
+            Name = "Test User",
+            Email = "test@example.com",
+            Password = "password123",
+            Age = 25,
+            Gender = Gender.Male
+        };
+        _mockUserService.Setup(x => x.RegisterUserAsync(user.Email, user.Password, user.Name, user.Age, user.Gender))
             .ThrowsAsync(new Exception("Database error"));
 
         // Act & Assert
@@ -164,7 +212,14 @@ public class UsersControllerTests
     public async Task Login_ServiceThrowsException_ExceptionPropagates()
     {
         // Arrange
-        var user = new User { Email = "test@example.com", Password = "password123" };
+        var user = new User
+        {
+            Name = "Test User",
+            Email = "test@example.com",
+            Password = "password123",
+            Age = 25,
+            Gender = Gender.Male
+        };
         _mockUserService.Setup(x => x.LoginUserAsync(user.Email, user.Password))
             .ThrowsAsync(new Exception("Database error"));
 

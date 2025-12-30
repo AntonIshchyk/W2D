@@ -27,18 +27,36 @@ public class UsersController : ControllerBase
 
     [HttpGet("me")]
     [Authorize]
-    public ActionResult GetCurrentUser()
+    public async Task<ActionResult> GetCurrentUser()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var email = User.FindFirst(ClaimTypes.Email)?.Value;
 
-        return Ok(new { userId, email });
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var user = await _userService.GetUserByIdAsync(int.Parse(userId));
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(new
+        {
+            userId = user.Id,
+            email = user.Email,
+            name = user.Name,
+            age = user.Age,
+            gender = user.Gender
+        });
     }
 
     [HttpPost("register")]
     public async Task<ActionResult<LoginResponse>> Register(User user)
     {
-        var result = await _userService.RegisterUserAsync(user.Email, user.Password);
+        var result = await _userService.RegisterUserAsync(user.Email, user.Password, user.Name, user.Age, user.Gender);
 
         if (result == null)
         {

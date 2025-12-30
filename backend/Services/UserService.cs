@@ -20,7 +20,12 @@ public class UserService : IUserService
         return await _context.Users.ToListAsync();
     }
 
-    public async Task<LoginResponse?> RegisterUserAsync(string email, string password)
+    public async Task<User?> GetUserByIdAsync(int id)
+    {
+        return await _context.Users.FindAsync(id);
+    }
+
+    public async Task<LoginResponse?> RegisterUserAsync(string email, string password, string name, int age, Gender gender)
     {
         // Check if user already exists
         if (await _context.Users.AnyAsync(u => u.Email == email))
@@ -35,7 +40,10 @@ public class UserService : IUserService
         var user = new User
         {
             Email = email,
-            Password = hashedPassword
+            Password = hashedPassword,
+            Name = name,
+            Age = age,
+            Gender = gender
         };
 
         _context.Users.Add(user);
@@ -48,6 +56,9 @@ public class UserService : IUserService
         {
             UserId = user.Id,
             Email = user.Email,
+            Name = user.Name,
+            Age = user.Age,
+            Gender = user.Gender,
             Token = token
         };
     }
@@ -75,6 +86,9 @@ public class UserService : IUserService
         {
             UserId = user.Id,
             Email = user.Email,
+            Name = user.Name,
+            Age = user.Age,
+            Gender = user.Gender,
             Token = token
         };
     }

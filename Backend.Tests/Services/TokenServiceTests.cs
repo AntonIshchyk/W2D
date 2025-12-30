@@ -35,7 +35,10 @@ public class TokenServiceTests
         var user = new User
         {
             Id = 1,
-            Email = "test@example.com"
+            Name = "Test User",
+            Email = "test@example.com",
+            Age = 25,
+            Gender = Gender.Male
         };
 
         // Act
@@ -53,7 +56,10 @@ public class TokenServiceTests
         var user = new User
         {
             Id = 42,
-            Email = "claims@example.com"
+            Name = "Claims User",
+            Email = "claims@example.com",
+            Age = 30,
+            Gender = Gender.Female
         };
 
         // Act
@@ -76,7 +82,10 @@ public class TokenServiceTests
         var user = new User
         {
             Id = 1,
-            Email = "test@example.com"
+            Name = "Test User",
+            Email = "test@example.com",
+            Age = 25,
+            Gender = Gender.Male
         };
 
         // Act
@@ -97,18 +106,22 @@ public class TokenServiceTests
         var user = new User
         {
             Id = 1,
-            Email = "test@example.com"
+            Name = "Test User",
+            Email = "test@example.com",
+            Age = 25,
+            Gender = Gender.Male
         };
+    };
 
-        // Act
-        var token = _tokenService.GenerateToken(user);
+    // Act
+    var token = _tokenService.GenerateToken(user);
 
-        // Assert
-        var handler = new JwtSecurityTokenHandler();
-        var jwtToken = handler.ReadJwtToken(token);
+    // Assert
+    var handler = new JwtSecurityTokenHandler();
+    var jwtToken = handler.ReadJwtToken(token);
 
-        jwtToken.ValidTo.Should().BeAfter(DateTime.UtcNow);
-        jwtToken.ValidTo.Should().BeCloseTo(DateTime.UtcNow.AddHours(24), TimeSpan.FromMinutes(1));
+    jwtToken.ValidTo.Should().BeAfter(DateTime.UtcNow);
+    jwtToken.ValidTo.Should().BeCloseTo(DateTime.UtcNow.AddHours(24), TimeSpan.FromMinutes(1));
     }
 
     [Fact]

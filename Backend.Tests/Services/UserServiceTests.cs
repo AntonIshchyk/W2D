@@ -40,15 +40,21 @@ public class UserServiceTests : IDisposable
     public async Task RegisterUserAsync_ValidUser_ReturnsLoginResponse()
     {
         // Arrange
+        var name = "John Doe";
         var email = "test@example.com";
         var password = "password123";
+        var age = 25;
+        var gender = Gender.Male;
 
         // Act
-        var result = await _userService.RegisterUserAsync(email, password);
+        var result = await _userService.RegisterUserAsync(email, password, name, age, gender);
 
         // Assert
         result.Should().NotBeNull();
         result!.Email.Should().Be(email);
+        result.Name.Should().Be(name);
+        result.Age.Should().Be(age);
+        result.Gender.Should().Be(gender);
         result.UserId.Should().BeGreaterThan(0);
         result.Token.Should().Be("fake-jwt-token");
 
@@ -63,10 +69,10 @@ public class UserServiceTests : IDisposable
         // Arrange
         var email = "duplicate@example.com";
         var password = "password123";
-        await _userService.RegisterUserAsync(email, password);
+        await _userService.RegisterUserAsync(email, password, "Jane Doe", 30, Gender.Female);
 
         // Act
-        var result = await _userService.RegisterUserAsync(email, "differentPassword");
+        var result = await _userService.RegisterUserAsync(email, "differentPassword", "Different User", 25, Gender.Male);
 
         // Assert
         result.Should().BeNull();
@@ -80,7 +86,7 @@ public class UserServiceTests : IDisposable
         var password = "mySecurePassword123!";
 
         // Act
-        await _userService.RegisterUserAsync(email, password);
+        await _userService.RegisterUserAsync(email, password, "Secure User", 28, Gender.Male);
 
         // Assert
         var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -98,7 +104,7 @@ public class UserServiceTests : IDisposable
         // Arrange
         var email = "login@example.com";
         var password = "password123";
-        await _userService.RegisterUserAsync(email, password);
+        await _userService.RegisterUserAsync(email, password, "Login User", 27, Gender.Female);
 
         // Act
         var result = await _userService.LoginUserAsync(email, password);
@@ -106,6 +112,9 @@ public class UserServiceTests : IDisposable
         // Assert
         result.Should().NotBeNull();
         result!.Email.Should().Be(email);
+        result.Name.Should().Be("Login User");
+        result.Age.Should().Be(27);
+        result.Gender.Should().Be(Gender.Female);
         result.UserId.Should().BeGreaterThan(0);
         result.Token.Should().Be("fake-jwt-token");
     }
@@ -116,7 +125,7 @@ public class UserServiceTests : IDisposable
         // Arrange
         var email = "user@example.com";
         var password = "correctPassword";
-        await _userService.RegisterUserAsync(email, password);
+        await _userService.RegisterUserAsync(email, password, "Test User", 26, Gender.Male);
 
         // Act
         var result = await _userService.LoginUserAsync(email, "wrongPassword");
@@ -153,8 +162,8 @@ public class UserServiceTests : IDisposable
         var user2Password = "password2";
 
         // Act
-        await _userService.RegisterUserAsync(user1Email, user1Password);
-        await _userService.RegisterUserAsync(user2Email, user2Password);
+        await _userService.RegisterUserAsync(user1Email, user1Password, "User One", 25, Gender.Male);
+        await _userService.RegisterUserAsync(user2Email, user2Password, "User Two", 30, Gender.Female);
 
         var login1 = await _userService.LoginUserAsync(user1Email, user1Password);
         var login2 = await _userService.LoginUserAsync(user2Email, user2Password);
@@ -171,9 +180,9 @@ public class UserServiceTests : IDisposable
     public async Task GetAllUsersAsync_ReturnsAllUsers()
     {
         // Arrange
-        await _userService.RegisterUserAsync("user1@example.com", "pass1");
-        await _userService.RegisterUserAsync("user2@example.com", "pass2");
-        await _userService.RegisterUserAsync("user3@example.com", "pass3");
+        await _userService.RegisterUserAsync("user1@example.com", "pass1", "User One", 25, Gender.Male);
+        await _userService.RegisterUserAsync("user2@example.com", "pass2", "User Two", 30, Gender.Female);
+        await _userService.RegisterUserAsync("user3@example.com", "pass3", "User Three", 28, Gender.Male);
 
         // Act
         var result = await _userService.GetAllUsersAsync();

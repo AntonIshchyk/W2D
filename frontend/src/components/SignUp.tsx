@@ -5,13 +5,19 @@ import { Input } from './ui/input'
 import { Label } from './ui/label'
 
 interface SignUpData {
+  name: string
   email: string
   password: string
+  age: number
+  gender: 'Male' | 'Female'
 }
 
 interface SignUpResponse {
   token: string
   email: string
+  name: string
+  age: number
+  gender: 'Male' | 'Female'
 }
 
 async function signUpUser(data: SignUpData): Promise<SignUpResponse> {
@@ -30,8 +36,11 @@ async function signUpUser(data: SignUpData): Promise<SignUpResponse> {
 }
 
 export function SignUp() {
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [age, setAge] = useState('')
+  const [gender, setGender] = useState<'Male' | 'Female'>('Male')
 
   const mutation = useMutation({
     mutationFn: signUpUser,
@@ -39,7 +48,13 @@ export function SignUp() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    mutation.mutate({ email, password })
+    mutation.mutate({ 
+      name,
+      email, 
+      password,
+      age: parseInt(age),
+      gender
+    })
   }
 
   return (
@@ -48,6 +63,18 @@ export function SignUp() {
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Sign up</h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="John Doe"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -70,6 +97,50 @@ export function SignUp() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="age">Age</Label>
+            <Input
+              id="age"
+              type="number"
+              placeholder="18"
+              value={age}
+              onChange={(e) => setAge(e.target.value)}
+              required
+              min="1"
+              max="120"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Gender</Label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="gender"
+                  value="Male"
+                  checked={gender === 'Male'}
+                  onChange={(e) => setGender(e.target.value as 'Male' | 'Female')}
+                  required
+                  className="w-4 h-4 cursor-pointer"
+                />
+                <span className="text-sm">Male</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="gender"
+                  value="Female"
+                  checked={gender === 'Female'}
+                  onChange={(e) => setGender(e.target.value as 'Male' | 'Female')}
+                  required
+                  className="w-4 h-4 cursor-pointer"
+                />
+                <span className="text-sm">Female</span>
+              </label>
+            </div>
           </div>
 
           <Button 
