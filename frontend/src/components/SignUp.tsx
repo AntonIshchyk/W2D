@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
@@ -36,18 +37,24 @@ async function signUpUser(data: SignUpData): Promise<SignUpResponse> {
 }
 
 export function SignUp() {
+  const navigate = useNavigate()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [age, setAge] = useState('')
-  const [gender, setGender] = useState<'Male' | 'Female'>('Male')
+  const [gender, setGender] = useState<'Male' | 'Female' | ''>('')
 
   const mutation = useMutation({
     mutationFn: signUpUser,
+    onSuccess: (data) => {
+      localStorage.setItem('token', data.token)
+      navigate('/')
+    }
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    if (!gender) return
     mutation.mutate({ 
       name,
       email, 
@@ -159,6 +166,15 @@ export function SignUp() {
             <p className="text-red-600 text-sm">{mutation.error.message}</p>
           )}
         </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            Already have an account?{' '}
+            <Link to="/login" className="text-blue-600 hover:text-blue-800 font-medium">
+              Login
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   )
