@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { Button } from './ui/button'
+import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 
 interface UserInfo {
   userId: number
@@ -18,10 +19,8 @@ async function fetchCurrentUser(): Promise<UserInfo> {
     throw new Error('No token')
   }
 
-  const response = await fetch('http://localhost:5207/api/users/me', {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
+  const response = await fetch(API_ENDPOINTS.users.me, {
+    headers: getAuthHeaders()
   })
 
   if (!response.ok) {

@@ -51,6 +51,26 @@ public class ActivitiesController : ControllerBase
             return Unauthorized();
         }
 
+        // Validate CategoryId exists
+        if (!await _activityService.CategoryExistsAsync(activity.CategoryId))
+        {
+            return BadRequest(new { message = "Invalid CategoryId. Category does not exist." });
+        }
+
+        // Validate Tags exist and replace with tracked entities
+        if (activity.Tags != null && activity.Tags.Any())
+        {
+            var tagIds = activity.Tags.Select(t => t.Id).ToList();
+            var existingTags = await _activityService.GetTagsByIdsAsync(tagIds);
+
+            if (existingTags.Count() != tagIds.Count)
+            {
+                return BadRequest(new { message = "One or more Tag IDs are invalid." });
+            }
+
+            activity.Tags = existingTags.ToList();
+        }
+
         activity.CreatedByUserId = userId.Value;
 
         var createdActivity = await _activityService.CreateActivityAsync(activity);
@@ -76,10 +96,30 @@ public class ActivitiesController : ControllerBase
             return NotFound(new { message = "Activity not found" });
         }
 
-        // Only creator can update (or admin - we'll add admin check later)
-        if (existingActivity.CreatedByUserId != userId.Value)
+        // Only creator or admin can update
+        if (existingActivity.CreatedByUserId != userId.Value && !User.IsAdmin())
         {
             return Forbid();
+        }
+
+        // Validate CategoryId exists
+        if (!await _activityService.CategoryExistsAsync(activity.CategoryId))
+        {
+            return BadRequest(new { message = "Invalid CategoryId. Category does not exist." });
+        }
+
+        // Validate Tags exist
+        if (activity.Tags != null && activity.Tags.Any())
+        {
+            var tagIds = activity.Tags.Select(t => t.Id).ToList();
+            var existingTags = await _activityService.GetTagsByIdsAsync(tagIds);
+
+            if (existingTags.Count() != tagIds.Count)
+            {
+                return BadRequest(new { message = "One or more Tag IDs are invalid." });
+            }
+
+            activity.Tags = existingTags.ToList();
         }
 
         var updatedActivity = await _activityService.UpdateActivityAsync(id, activity);
@@ -105,8 +145,8 @@ public class ActivitiesController : ControllerBase
             return NotFound(new { message = "Activity not found" });
         }
 
-        // Only creator can delete (or admin - we'll add admin check later)
-        if (activity.CreatedByUserId != userId.Value)
+        // Only creator or admin can delete
+        if (activity.CreatedByUserId != userId.Value && !User.IsAdmin())
         {
             return Forbid();
         }

@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
+import { API_ENDPOINTS } from '../config/api'
 
 interface LoginData {
   email: string
@@ -20,7 +21,7 @@ interface LoginResponse {
 }
 
 async function loginUser(data: LoginData): Promise<LoginResponse> {
-  const response = await fetch('http://localhost:5207/api/users/login', {
+  const response = await fetch(API_ENDPOINTS.users.login, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),

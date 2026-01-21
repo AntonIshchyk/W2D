@@ -11,22 +11,53 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<Activity> Activities { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<Tag> Tags { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // Activity relationships
+        // Activity - CreatedBy relationship
         modelBuilder.Entity<Activity>()
             .HasOne(a => a.CreatedBy)
             .WithMany()
             .HasForeignKey(a => a.CreatedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // Activity - ApprovedBy relationship
         modelBuilder.Entity<Activity>()
             .HasOne(a => a.ApprovedBy)
             .WithMany()
             .HasForeignKey(a => a.ApprovedByUserId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // Activity - Category relationship
+        modelBuilder.Entity<Activity>()
+            .HasOne(a => a.Category)
+            .WithMany(c => c.Activities)
+            .HasForeignKey(a => a.CategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Activity - Tag many-to-many relationship
+        modelBuilder.Entity<Activity>()
+            .HasMany(a => a.Tags)
+            .WithMany(t => t.Activities)
+            .UsingEntity(j => j.ToTable("ActivityTags"));
+
+        // Tag unique name constraint
+        modelBuilder.Entity<Tag>()
+            .HasIndex(t => t.Name)
+            .IsUnique();
+
+        // Category unique name constraint
+        modelBuilder.Entity<Category>()
+            .HasIndex(c => c.Name)
+            .IsUnique();
+
+        // User unique email constraint
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Email)
+            .IsUnique();
     }
 }

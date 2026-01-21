@@ -12,4 +12,6 @@ public interface IActivityService
     Task<bool> DeleteActivityAsync(int id);
     Task<Activity?> ApproveActivityAsync(int id, int approvedByUserId);
     Task<Activity?> RejectActivityAsync(int id);
+    Task<bool> CategoryExistsAsync(int categoryId);
+    Task<IEnumerable<Tag>> GetTagsByIdsAsync(IEnumerable<int> tagIds);
 }

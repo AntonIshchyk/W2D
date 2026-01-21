@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
+import { API_ENDPOINTS } from '../config/api'
 
 interface SignUpData {
   name: string
@@ -22,7 +23,7 @@ interface SignUpResponse {
 }
 
 async function signUpUser(data: SignUpData): Promise<SignUpResponse> {
-  const response = await fetch('http://localhost:5207/api/users/register', {
+  const response = await fetch(API_ENDPOINTS.users.register, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),

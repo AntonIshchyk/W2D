@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace Backend.Models;
@@ -10,19 +11,38 @@ public enum Gender
 
 public class User
 {
+    public User()
+    {
+        IsAdmin = false;
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
     public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(100)]
+    public string Name { get; set; } = null!;
+
+    [Required]
+    [EmailAddress]
+    [MaxLength(255)]
+    public string Email { get; set; } = null!;
+
+    [Range(1, 120)]
     public int Age { get; set; }
+
     public Gender Gender { get; set; }
-    public bool IsAdmin { get; set; } = false;
+
+    public bool IsAdmin { get; set; }
+
+    [Required]
+    [JsonIgnore]
+    public string Password { get; set; } = null!;
 
     [JsonIgnore]
-    public string Password { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
 
     [JsonIgnore]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    [JsonIgnore]
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; }
 }

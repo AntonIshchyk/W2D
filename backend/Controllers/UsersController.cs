@@ -54,9 +54,9 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<LoginResponse>> Register(User user)
+    public async Task<ActionResult<LoginResponse>> Register(RegisterRequest request)
     {
-        var result = await _userService.RegisterUserAsync(user.Email, user.Password, user.Name, user.Age, user.Gender);
+        var result = await _userService.RegisterUserAsync(request.Email, request.Password, request.Name, request.Age, request.Gender);
 
         if (result == null)
         {
@@ -67,9 +67,9 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<LoginResponse>> Login(User user)
+    public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
     {
-        var result = await _userService.LoginUserAsync(user.Email, user.Password);
+        var result = await _userService.LoginUserAsync(request.Email, request.Password);
 
         if (result == null)
         {
