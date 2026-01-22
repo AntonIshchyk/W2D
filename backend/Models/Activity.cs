@@ -3,18 +3,8 @@ using System.Text.Json.Serialization;
 
 namespace Backend.Models;
 
-public class Activity
+public class Activity : BaseModel
 {
-    public Activity()
-    {
-        Tags = new List<Tag>();
-        Status = ActivityStatus.Pending;
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public int Id { get; set; }
-
     [Required]
     [MaxLength(200)]
     public string Title { get; set; } = null!;
@@ -38,20 +28,14 @@ public class Activity
 
     public EntryLevel? EntryLevel { get; set; }
 
-    public List<Tag> Tags { get; set; }
+    public List<Tag> Tags { get; set; } = new List<Tag>();
 
     [Required]
     public int CreatedByUserId { get; set; }
     public User? CreatedBy { get; set; }
 
-    public ActivityStatus Status { get; set; }
+    public ActivityStatus Status { get; set; } = ActivityStatus.Pending;
 
     public int? ApprovedByUserId { get; set; }
     public User? ApprovedBy { get; set; }
-
-    [JsonIgnore]
-    public DateTime CreatedAt { get; set; }
-
-    [JsonIgnore]
-    public DateTime UpdatedAt { get; set; }
 }

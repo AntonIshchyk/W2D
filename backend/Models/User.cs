@@ -9,17 +9,8 @@ public enum Gender
     Female
 }
 
-public class User
+public class User : BaseModel
 {
-    public User()
-    {
-        IsAdmin = false;
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public int Id { get; set; }
-
     [Required]
     [MaxLength(100)]
     public string Name { get; set; } = null!;
@@ -34,15 +25,9 @@ public class User
 
     public Gender Gender { get; set; }
 
-    public bool IsAdmin { get; set; }
+    public bool IsAdmin { get; set; } = false;
 
     [Required]
     [JsonIgnore]
     public string Password { get; set; } = null!;
-
-    [JsonIgnore]
-    public DateTime CreatedAt { get; set; }
-
-    [JsonIgnore]
-    public DateTime UpdatedAt { get; set; }
 }
