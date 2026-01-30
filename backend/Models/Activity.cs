@@ -30,8 +30,7 @@ public class Activity : BaseModel
 
     public List<Tag> Tags { get; set; } = new List<Tag>();
 
-    [Required]
-    public int CreatedByUserId { get; set; }
+    public int? CreatedByUserId { get; set; }
     public User? CreatedBy { get; set; }
 
     public ActivityStatus Status { get; set; } = ActivityStatus.Pending;

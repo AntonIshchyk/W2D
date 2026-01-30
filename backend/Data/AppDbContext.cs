@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Backend.Models;
 
 namespace Backend.Data;
@@ -59,5 +60,8 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
+
+        // Seed database with activities, categories, and tags
+        DatabaseSeeder.SeedData(modelBuilder);
     }
 }
