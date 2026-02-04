@@ -23,13 +23,30 @@ public class ActivityService : IActivityService
             .ToListAsync();
     }
 
-    public async Task<PaginatedResult<Activity>> GetActivitiesAsync(int pageNumber = 1, int pageSize = 10)
+    public async Task<PaginatedResult<Activity>> GetActivitiesAsync(int pageNumber = 1, int pageSize = 10, int? categoryId = null, List<int>? tagIds = null)
     {
         var query = _context.Activities
             .AsNoTracking()
             .Include(a => a.Category)
             .Include(a => a.Tags)
-            .OrderByDescending(a => a.CreatedAt);
+            .AsQueryable();
+
+        // Filter by category if provided
+        if (categoryId.HasValue)
+        {
+            query = query.Where(a => a.CategoryId == categoryId.Value);
+        }
+
+        // Filter by tags if provided (activities must have ALL specified tags)
+        if (tagIds != null && tagIds.Any())
+        {
+            foreach (var tagId in tagIds)
+            {
+                query = query.Where(a => a.Tags.Any(t => t.Id == tagId));
+            }
+        }
+
+        query = query.OrderByDescending(a => a.CreatedAt);
 
         var totalCount = await query.CountAsync();
 

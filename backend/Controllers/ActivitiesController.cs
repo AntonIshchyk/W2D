@@ -18,14 +18,18 @@ public class ActivitiesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<PaginatedResult<Activity>>> GetActivities([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<PaginatedResult<Activity>>> GetActivities(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] int? categoryId = null,
+        [FromQuery] List<int>? tagIds = null)
     {
         if (pageNumber < 1 || pageSize < 1 || pageSize > 100)
         {
             return BadRequest(new { message = "Invalid pagination parameters. PageNumber must be >= 1 and PageSize must be between 1 and 100." });
         }
 
-        var result = await _activityService.GetActivitiesAsync(pageNumber, pageSize);
+        var result = await _activityService.GetActivitiesAsync(pageNumber, pageSize, categoryId, tagIds);
 
         return Ok(result);
     }

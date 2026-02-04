@@ -10,6 +10,13 @@ public class AppDbContext : DbContext
     {
     }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        optionsBuilder.ConfigureWarnings(warnings =>
+            warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
+    }
+
     public DbSet<User> Users { get; set; }
     public DbSet<Activity> Activities { get; set; }
     public DbSet<Category> Categories { get; set; }

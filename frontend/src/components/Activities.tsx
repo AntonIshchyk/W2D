@@ -68,8 +68,21 @@ async function fetchCurrentUser(): Promise<UserInfo> {
   return response.json()
 }
 
-async function fetchActivities(pageNumber: number): Promise<PaginatedResult> {
-  const response = await fetch(`${API_ENDPOINTS.activities.base}?pageNumber=${pageNumber}&pageSize=10`)
+async function fetchActivities(pageNumber: number, categoryId?: number, tagIds?: number[]): Promise<PaginatedResult> {
+  const params = new URLSearchParams({
+    pageNumber: pageNumber.toString(),
+    pageSize: '10'
+  })
+
+  if (categoryId) {
+    params.append('categoryId', categoryId.toString())
+  }
+
+  if (tagIds && tagIds.length > 0) {
+    tagIds.forEach(id => params.append('tagIds', id.toString()))
+  }
+
+  const response = await fetch(`${API_ENDPOINTS.activities.base}?${params}`)
 
   if (!response.ok) {
     throw new Error('Failed to fetch activities')
@@ -78,9 +91,31 @@ async function fetchActivities(pageNumber: number): Promise<PaginatedResult> {
   return response.json()
 }
 
+async function fetchCategories(): Promise<Category[]> {
+  const response = await fetch(API_ENDPOINTS.categories.base)
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch categories')
+  }
+
+  return response.json()
+}
+
+async function fetchTags(): Promise<Tag[]> {
+  const response = await fetch(API_ENDPOINTS.tags.base)
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch tags')
+  }
+
+  return response.json()
+}
+
 export function Activities() {
   const navigate = useNavigate()
   const [currentPage, setCurrentPage] = useState(1)
+  const [selectedCategory, setSelectedCategory] = useState<number | undefined>(undefined)
+  const [selectedTags, setSelectedTags] = useState<number[]>([])
   
   const { data: user, isError } = useQuery({
     queryKey: ['currentUser'],
@@ -88,9 +123,21 @@ export function Activities() {
     retry: false
   })
 
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories,
+    retry: false
+  })
+
+  const { data: tags } = useQuery({
+    queryKey: ['tags'],
+    queryFn: fetchTags,
+    retry: false
+  })
+
   const { data: activitiesData, isLoading: activitiesLoading } = useQuery({
-    queryKey: ['activities', currentPage],
-    queryFn: () => fetchActivities(currentPage),
+    queryKey: ['activities', currentPage, selectedCategory, selectedTags],
+    queryFn: () => fetchActivities(currentPage, selectedCategory, selectedTags),
     retry: false
   })
 
@@ -100,6 +147,19 @@ export function Activities() {
       navigate('/login')
     }
   }, [isError, navigate])
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [selectedCategory, selectedTags])
+
+  const handleTagToggle = (tagId: number) => {
+    setSelectedTags(prev => 
+      prev.includes(tagId) 
+        ? prev.filter(id => id !== tagId)
+        : [...prev, tagId]
+    )
+  }
 
   if (isError) {
     return null
@@ -113,10 +173,65 @@ export function Activities() {
         <div className="bg-white rounded-lg shadow-md p-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">Activities</h1>
           
-          {activitiesLoading ? (
-            <p className="text-gray-600">Loading activities...</p>
-          ) : (
-            <div className="space-y-4">
+          {/* Filters */}
+          <div className="mb-6 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Filter by Category
+              </label>
+              <select
+                value={selectedCategory ?? ''}
+                onChange={(e) => setSelectedCategory(e.target.value ? Number(e.target.value) : undefined)}
+                className="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">All Categories</option>
+                {categories?.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Filter by Tags
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {tags?.map((tag) => (
+                  <button
+                    key={tag.id}
+                    onClick={() => handleTagToggle(tag.id)}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                      selectedTags.includes(tag.id)
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    {tag.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {(selectedCategory || selectedTags.length > 0) && (
+              <button
+                onClick={() => {
+                  setSelectedCategory(undefined)
+                  setSelectedTags([])
+                }}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Clear all filters
+              </button>
+            )}
+          </div>
+
+          <div className="border-t pt-6">
+            {activitiesLoading ? (
+              <p className="text-gray-600">Loading activities...</p>
+            ) : (
+              <div className="space-y-4">
               {activitiesData?.items.map((activity) => (
                 <div key={activity.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex justify-between items-start mb-2">
@@ -139,7 +254,11 @@ export function Activities() {
               ))}
               
               {activitiesData && activitiesData.items.length === 0 && (
-                <p className="text-gray-500 text-center py-8">No activities found</p>
+                <p className="text-gray-500 text-center py-8">
+                  {selectedCategory || selectedTags.length > 0 
+                    ? 'No activities found matching your filters' 
+                    : 'No activities found'}
+                </p>
               )}
               
               {activitiesData && activitiesData.totalCount > 0 && (
@@ -169,7 +288,8 @@ export function Activities() {
                 </div>
               )}
             </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

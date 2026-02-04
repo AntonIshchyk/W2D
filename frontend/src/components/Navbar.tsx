@@ -40,11 +40,6 @@ export function Navbar({ userName }: NavbarProps) {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            {userName && (
-              <span className="text-sm text-gray-600">
-                Welcome, <span className="font-medium">{userName}</span>
-              </span>
-            )}
             <Button onClick={handleLogout} variant="outline" size="sm">
               Logout
             </Button>
