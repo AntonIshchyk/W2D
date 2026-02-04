@@ -19,13 +19,6 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Activity - CreatedBy relationship
-        modelBuilder.Entity<Activity>()
-            .HasOne(a => a.CreatedBy)
-            .WithMany()
-            .HasForeignKey(a => a.CreatedByUserId)
-            .OnDelete(DeleteBehavior.Restrict);
-
         // Activity - Category relationship
         modelBuilder.Entity<Activity>()
             .HasOne(a => a.Category)

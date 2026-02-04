@@ -17,18 +17,40 @@ public class ActivityService : IActivityService
     {
         return await _context.Activities
             .AsNoTracking()
-            .Include(a => a.CreatedBy)
             .Include(a => a.Category)
             .Include(a => a.Tags)
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
     }
 
+    public async Task<PaginatedResult<Activity>> GetActivitiesAsync(int pageNumber = 1, int pageSize = 10)
+    {
+        var query = _context.Activities
+            .AsNoTracking()
+            .Include(a => a.Category)
+            .Include(a => a.Tags)
+            .OrderByDescending(a => a.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PaginatedResult<Activity>
+        {
+            Items = items,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        };
+    }
+
     public async Task<Activity?> GetActivityByIdAsync(int id)
     {
         return await _context.Activities
             .AsNoTracking()
-            .Include(a => a.CreatedBy)
             .Include(a => a.Category)
             .Include(a => a.Tags)
             .FirstOrDefaultAsync(a => a.Id == id);

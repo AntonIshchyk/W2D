@@ -29,7 +29,4 @@ public class Activity : BaseModel
     public EntryLevel? EntryLevel { get; set; }
 
     public List<Tag> Tags { get; set; } = new List<Tag>();
-
-    public int? CreatedByUserId { get; set; }
-    public User? CreatedBy { get; set; }
 }

@@ -18,11 +18,16 @@ public class ActivitiesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Activity>>> GetActivities()
+    public async Task<ActionResult<PaginatedResult<Activity>>> GetActivities([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
-        var activities = await _activityService.GetAllActivitiesAsync();
+        if (pageNumber < 1 || pageSize < 1 || pageSize > 100)
+        {
+            return BadRequest(new { message = "Invalid pagination parameters. PageNumber must be >= 1 and PageSize must be between 1 and 100." });
+        }
 
-        return Ok(activities);
+        var result = await _activityService.GetActivitiesAsync(pageNumber, pageSize);
+
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
@@ -69,8 +74,6 @@ public class ActivitiesController : ControllerBase
             activity.Tags = existingTags.ToList();
         }
 
-        activity.CreatedByUserId = userId.Value;
-
         var createdActivity = await _activityService.CreateActivityAsync(activity);
 
         return CreatedAtAction(nameof(GetActivity), new { id = createdActivity.Id }, createdActivity);
@@ -92,12 +95,6 @@ public class ActivitiesController : ControllerBase
         if (existingActivity == null)
         {
             return NotFound(new { message = "Activity not found" });
-        }
-
-        // Only creator or admin can update
-        if (existingActivity.CreatedByUserId != userId.Value && !User.IsAdmin())
-        {
-            return Forbid();
         }
 
         // Validate CategoryId exists
@@ -141,12 +138,6 @@ public class ActivitiesController : ControllerBase
         if (activity == null)
         {
             return NotFound(new { message = "Activity not found" });
-        }
-
-        // Only creator or admin can delete
-        if (activity.CreatedByUserId != userId.Value && !User.IsAdmin())
-        {
-            return Forbid();
         }
 
         var deleted = await _activityService.DeleteActivityAsync(id);

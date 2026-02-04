@@ -41,25 +41,54 @@ public class ActivitiesControllerTests
     #region GetActivities Tests
 
     [Fact]
-    public async Task GetActivities_ReturnsAllActivities()
+    public async Task GetActivities_ReturnsPagedActivities()
     {
         // Arrange
-        var allActivities = new List<Activity>
+        var paginatedResult = new PaginatedResult<Activity>
         {
-            new Activity { Id = 1, Title = "Activity 1" },
-            new Activity { Id = 2, Title = "Activity 2" },
-            new Activity { Id = 3, Title = "Activity 3" }
+            Items = new List<Activity>
+            {
+                new Activity { Id = 1, Title = "Activity 1" },
+                new Activity { Id = 2, Title = "Activity 2" },
+                new Activity { Id = 3, Title = "Activity 3" }
+            },
+            PageNumber = 1,
+            PageSize = 10,
+            TotalCount = 3
         };
-        _mockActivityService.Setup(x => x.GetAllActivitiesAsync())
-            .ReturnsAsync(allActivities);
+        _mockActivityService.Setup(x => x.GetActivitiesAsync(1, 10))
+            .ReturnsAsync(paginatedResult);
 
         // Act
-        var result = await _controller.GetActivities();
+        var result = await _controller.GetActivities(1, 10);
 
         // Assert
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var activities = okResult.Value.Should().BeAssignableTo<IEnumerable<Activity>>().Subject;
-        activities.Should().HaveCount(3);
+        var pagedResult = okResult.Value.Should().BeOfType<PaginatedResult<Activity>>().Subject;
+        pagedResult.Items.Should().HaveCount(3);
+        pagedResult.PageNumber.Should().Be(1);
+        pagedResult.PageSize.Should().Be(10);
+        pagedResult.TotalCount.Should().Be(3);
+    }
+
+    [Fact]
+    public async Task GetActivities_WithInvalidPageNumber_ReturnsBadRequest()
+    {
+        // Act
+        var result = await _controller.GetActivities(0, 10);
+
+        // Assert
+        result.Result.Should().BeOfType<BadRequestObjectResult>();
+    }
+
+    [Fact]
+    public async Task GetActivities_WithInvalidPageSize_ReturnsBadRequest()
+    {
+        // Act
+        var result = await _controller.GetActivities(1, 101);
+
+        // Assert
+        result.Result.Should().BeOfType<BadRequestObjectResult>();
     }
 
     #endregion
@@ -116,8 +145,7 @@ public class ActivitiesControllerTests
         {
             Id = 1,
             Title = activity.Title,
-            Description = activity.Description,
-            CreatedByUserId = 1
+            Description = activity.Description
         };
         _mockActivityService.Setup(x => x.CreateActivityAsync(It.IsAny<Activity>()))
             .ReturnsAsync(createdActivity);
@@ -128,7 +156,7 @@ public class ActivitiesControllerTests
         // Assert
         var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
         var returnedActivity = createdResult.Value.Should().BeOfType<Activity>().Subject;
-        returnedActivity.CreatedByUserId.Should().Be(1);
+        returnedActivity.Title.Should().Be("New Activity");
     }
 
     [Fact]
@@ -150,21 +178,19 @@ public class ActivitiesControllerTests
     #region UpdateActivity Tests
 
     [Fact]
-    public async Task UpdateActivity_CreatorUpdatesOwnActivity_ReturnsUpdatedActivity()
+    public async Task UpdateActivity_AuthenticatedUser_ReturnsUpdatedActivity()
     {
         // Arrange
         SetupControllerUser(userId: 1);
         var existingActivity = new Activity
         {
             Id = 1,
-            Title = "Original",
-            CreatedByUserId = 1
+            Title = "Original"
         };
         var updatedActivity = new Activity
         {
             Id = 1,
-            Title = "Updated",
-            CreatedByUserId = 1
+            Title = "Updated"
         };
         _mockActivityService.Setup(x => x.GetActivityByIdAsync(1))
             .ReturnsAsync(existingActivity);
@@ -178,27 +204,6 @@ public class ActivitiesControllerTests
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
         var returnedActivity = okResult.Value.Should().BeOfType<Activity>().Subject;
         returnedActivity.Title.Should().Be("Updated");
-    }
-
-    [Fact]
-    public async Task UpdateActivity_NonCreatorUpdatesActivity_ReturnsForbid()
-    {
-        // Arrange
-        SetupControllerUser(userId: 2);
-        var existingActivity = new Activity
-        {
-            Id = 1,
-            Title = "Original",
-            CreatedByUserId = 1 // Different user
-        };
-        _mockActivityService.Setup(x => x.GetActivityByIdAsync(1))
-            .ReturnsAsync(existingActivity);
-
-        // Act
-        var result = await _controller.UpdateActivity(1, existingActivity);
-
-        // Assert
-        result.Result.Should().BeOfType<ForbidResult>();
     }
 
     [Fact]
@@ -221,15 +226,14 @@ public class ActivitiesControllerTests
     #region DeleteActivity Tests
 
     [Fact]
-    public async Task DeleteActivity_CreatorDeletesOwnActivity_ReturnsNoContent()
+    public async Task DeleteActivity_AuthenticatedUser_ReturnsNoContent()
     {
         // Arrange
         SetupControllerUser(userId: 1);
         var activity = new Activity
         {
             Id = 1,
-            Title = "To Delete",
-            CreatedByUserId = 1
+            Title = "To Delete"
         };
         _mockActivityService.Setup(x => x.GetActivityByIdAsync(1))
             .ReturnsAsync(activity);
@@ -241,27 +245,6 @@ public class ActivitiesControllerTests
 
         // Assert
         result.Should().BeOfType<NoContentResult>();
-    }
-
-    [Fact]
-    public async Task DeleteActivity_NonCreatorDeletesActivity_ReturnsForbid()
-    {
-        // Arrange
-        SetupControllerUser(userId: 2);
-        var activity = new Activity
-        {
-            Id = 1,
-            Title = "To Delete",
-            CreatedByUserId = 1 // Different user
-        };
-        _mockActivityService.Setup(x => x.GetActivityByIdAsync(1))
-            .ReturnsAsync(activity);
-
-        // Act
-        var result = await _controller.DeleteActivity(1);
-
-        // Assert
-        result.Should().BeOfType<ForbidResult>();
     }
 
     #endregion
