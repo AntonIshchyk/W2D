@@ -41,42 +41,20 @@ public class ActivitiesControllerTests
     #region GetActivities Tests
 
     [Fact]
-    public async Task GetActivities_WithApprovedOnlyTrue_ReturnsOnlyApprovedActivities()
-    {
-        // Arrange
-        var approvedActivities = new List<Activity>
-        {
-            new Activity { Id = 1, Title = "Activity 1", Status = ActivityStatus.Approved },
-            new Activity { Id = 2, Title = "Activity 2", Status = ActivityStatus.Approved }
-        };
-        _mockActivityService.Setup(x => x.GetApprovedActivitiesAsync())
-            .ReturnsAsync(approvedActivities);
-
-        // Act
-        var result = await _controller.GetActivities(approvedOnly: true);
-
-        // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var activities = okResult.Value.Should().BeAssignableTo<IEnumerable<Activity>>().Subject;
-        activities.Should().HaveCount(2);
-        activities.Should().OnlyContain(a => a.Status == ActivityStatus.Approved);
-    }
-
-    [Fact]
-    public async Task GetActivities_WithApprovedOnlyFalse_ReturnsAllActivities()
+    public async Task GetActivities_ReturnsAllActivities()
     {
         // Arrange
         var allActivities = new List<Activity>
         {
-            new Activity { Id = 1, Title = "Activity 1", Status = ActivityStatus.Approved },
-            new Activity { Id = 2, Title = "Activity 2", Status = ActivityStatus.Pending },
-            new Activity { Id = 3, Title = "Activity 3", Status = ActivityStatus.Rejected }
+            new Activity { Id = 1, Title = "Activity 1" },
+            new Activity { Id = 2, Title = "Activity 2" },
+            new Activity { Id = 3, Title = "Activity 3" }
         };
         _mockActivityService.Setup(x => x.GetAllActivitiesAsync())
             .ReturnsAsync(allActivities);
 
         // Act
-        var result = await _controller.GetActivities(approvedOnly: false);
+        var result = await _controller.GetActivities();
 
         // Assert
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
@@ -287,140 +265,5 @@ public class ActivitiesControllerTests
     }
 
     #endregion
-
-    #region ApproveActivity Tests
-
-    [Fact]
-    public async Task ApproveActivity_AdminUser_ApprovesActivity()
-    {
-        // Arrange
-        SetupControllerUser(userId: 1, isAdmin: true);
-        var approvedActivity = new Activity
-        {
-            Id = 1,
-            Title = "Activity",
-            Status = ActivityStatus.Approved,
-            ApprovedByUserId = 1
-        };
-        _mockActivityService.Setup(x => x.ApproveActivityAsync(1, 1))
-            .ReturnsAsync(approvedActivity);
-
-        // Act
-        var result = await _controller.ApproveActivity(1);
-
-        // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var activity = okResult.Value.Should().BeOfType<Activity>().Subject;
-        activity.Status.Should().Be(ActivityStatus.Approved);
-        activity.ApprovedByUserId.Should().Be(1);
-    }
-
-    [Fact]
-    public async Task ApproveActivity_NonAdminUser_ReturnsForbid()
-    {
-        // Arrange
-        SetupControllerUser(userId: 1, isAdmin: false);
-
-        // Act
-        var result = await _controller.ApproveActivity(1);
-
-        // Assert
-        result.Result.Should().BeOfType<ForbidResult>();
-    }
-
-    [Fact]
-    public async Task ApproveActivity_ActivityNotFound_ReturnsNotFound()
-    {
-        // Arrange
-        SetupControllerUser(userId: 1, isAdmin: true);
-        _mockActivityService.Setup(x => x.ApproveActivityAsync(999, 1))
-            .ReturnsAsync((Activity?)null);
-
-        // Act
-        var result = await _controller.ApproveActivity(999);
-
-        // Assert
-        result.Result.Should().BeOfType<NotFoundObjectResult>();
-    }
-
-    [Fact]
-    public async Task ApproveActivity_NoUserClaim_ReturnsUnauthorized()
-    {
-        // Arrange - Don't set up user
-
-        // Act
-        var result = await _controller.ApproveActivity(1);
-
-        // Assert
-        result.Result.Should().BeOfType<UnauthorizedResult>();
-    }
-
-    #endregion
-
-    #region RejectActivity Tests
-
-    [Fact]
-    public async Task RejectActivity_AdminUser_RejectsActivity()
-    {
-        // Arrange
-        SetupControllerUser(userId: 1, isAdmin: true);
-        var rejectedActivity = new Activity
-        {
-            Id = 1,
-            Title = "Activity",
-            Status = ActivityStatus.Rejected
-        };
-        _mockActivityService.Setup(x => x.RejectActivityAsync(1))
-            .ReturnsAsync(rejectedActivity);
-
-        // Act
-        var result = await _controller.RejectActivity(1);
-
-        // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var activity = okResult.Value.Should().BeOfType<Activity>().Subject;
-        activity.Status.Should().Be(ActivityStatus.Rejected);
-    }
-
-    [Fact]
-    public async Task RejectActivity_NonAdminUser_ReturnsForbid()
-    {
-        // Arrange
-        SetupControllerUser(userId: 1, isAdmin: false);
-
-        // Act
-        var result = await _controller.RejectActivity(1);
-
-        // Assert
-        result.Result.Should().BeOfType<ForbidResult>();
-    }
-
-    [Fact]
-    public async Task RejectActivity_ActivityNotFound_ReturnsNotFound()
-    {
-        // Arrange
-        SetupControllerUser(userId: 1, isAdmin: true);
-        _mockActivityService.Setup(x => x.RejectActivityAsync(999))
-            .ReturnsAsync((Activity?)null);
-
-        // Act
-        var result = await _controller.RejectActivity(999);
-
-        // Assert
-        result.Result.Should().BeOfType<NotFoundObjectResult>();
-    }
-
-    [Fact]
-    public async Task RejectActivity_NoUserClaim_ReturnsUnauthorized()
-    {
-        // Arrange - Don't set up user
-
-        // Act
-        var result = await _controller.RejectActivity(1);
-
-        // Assert
-        result.Result.Should().BeOfType<UnauthorizedResult>();
-    }
-
-    #endregion
 }
+

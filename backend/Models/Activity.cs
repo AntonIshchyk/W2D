@@ -32,9 +32,4 @@ public class Activity : BaseModel
 
     public int? CreatedByUserId { get; set; }
     public User? CreatedBy { get; set; }
-
-    public ActivityStatus Status { get; set; } = ActivityStatus.Pending;
-
-    public int? ApprovedByUserId { get; set; }
-    public User? ApprovedBy { get; set; }
 }

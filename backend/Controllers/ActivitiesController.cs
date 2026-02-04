@@ -18,11 +18,9 @@ public class ActivitiesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Activity>>> GetActivities([FromQuery] bool approvedOnly = true)
+    public async Task<ActionResult<IEnumerable<Activity>>> GetActivities()
     {
-        var activities = approvedOnly
-            ? await _activityService.GetApprovedActivitiesAsync()
-            : await _activityService.GetAllActivitiesAsync();
+        var activities = await _activityService.GetAllActivitiesAsync();
 
         return Ok(activities);
     }
@@ -154,57 +152,5 @@ public class ActivitiesController : ControllerBase
         var deleted = await _activityService.DeleteActivityAsync(id);
 
         return NoContent();
-    }
-
-    [HttpPost("{id}/approve")]
-    [Authorize]
-    public async Task<ActionResult<Activity>> ApproveActivity(int id)
-    {
-        var userId = User.GetUserId();
-
-        if (userId == null)
-        {
-            return Unauthorized();
-        }
-
-        if (!User.IsAdmin())
-        {
-            return Forbid();
-        }
-
-        var approvedActivity = await _activityService.ApproveActivityAsync(id, userId.Value);
-
-        if (approvedActivity == null)
-        {
-            return NotFound(new { message = "Activity not found" });
-        }
-
-        return Ok(approvedActivity);
-    }
-
-    [HttpPost("{id}/reject")]
-    [Authorize]
-    public async Task<ActionResult<Activity>> RejectActivity(int id)
-    {
-        var userId = User.GetUserId();
-
-        if (userId == null)
-        {
-            return Unauthorized();
-        }
-
-        if (!User.IsAdmin())
-        {
-            return Forbid();
-        }
-
-        var rejectedActivity = await _activityService.RejectActivityAsync(id);
-
-        if (rejectedActivity == null)
-        {
-            return NotFound(new { message = "Activity not found" });
-        }
-
-        return Ok(rejectedActivity);
     }
 }

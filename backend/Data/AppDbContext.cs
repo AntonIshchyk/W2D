@@ -26,13 +26,6 @@ public class AppDbContext : DbContext
             .HasForeignKey(a => a.CreatedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Activity - ApprovedBy relationship
-        modelBuilder.Entity<Activity>()
-            .HasOne(a => a.ApprovedBy)
-            .WithMany()
-            .HasForeignKey(a => a.ApprovedByUserId)
-            .OnDelete(DeleteBehavior.SetNull);
-
         // Activity - Category relationship
         modelBuilder.Entity<Activity>()
             .HasOne(a => a.Category)

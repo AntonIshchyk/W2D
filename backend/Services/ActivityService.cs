@@ -18,22 +18,8 @@ public class ActivityService : IActivityService
         return await _context.Activities
             .AsNoTracking()
             .Include(a => a.CreatedBy)
-            .Include(a => a.ApprovedBy)
             .Include(a => a.Category)
             .Include(a => a.Tags)
-            .OrderByDescending(a => a.CreatedAt)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<Activity>> GetApprovedActivitiesAsync()
-    {
-        return await _context.Activities
-            .AsNoTracking()
-            .Include(a => a.CreatedBy)
-            .Include(a => a.ApprovedBy)
-            .Include(a => a.Category)
-            .Include(a => a.Tags)
-            .Where(a => a.Status == ActivityStatus.Approved)
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
     }
@@ -43,7 +29,6 @@ public class ActivityService : IActivityService
         return await _context.Activities
             .AsNoTracking()
             .Include(a => a.CreatedBy)
-            .Include(a => a.ApprovedBy)
             .Include(a => a.Category)
             .Include(a => a.Tags)
             .FirstOrDefaultAsync(a => a.Id == id);
@@ -110,45 +95,6 @@ public class ActivityService : IActivityService
         await _context.SaveChangesAsync();
 
         return true;
-    }
-
-    public async Task<Activity?> ApproveActivityAsync(int id, int approvedByUserId)
-    {
-        var activity = await _context.Activities
-            .Include(a => a.Tags)
-            .FirstOrDefaultAsync(a => a.Id == id);
-
-        if (activity == null)
-        {
-            return null;
-        }
-
-        activity.Status = ActivityStatus.Approved;
-        activity.ApprovedByUserId = approvedByUserId;
-        activity.UpdatedAt = DateTime.UtcNow;
-
-        await _context.SaveChangesAsync();
-
-        return activity;
-    }
-
-    public async Task<Activity?> RejectActivityAsync(int id)
-    {
-        var activity = await _context.Activities
-            .Include(a => a.Tags)
-            .FirstOrDefaultAsync(a => a.Id == id);
-
-        if (activity == null)
-        {
-            return null;
-        }
-
-        activity.Status = ActivityStatus.Rejected;
-        activity.UpdatedAt = DateTime.UtcNow;
-
-        await _context.SaveChangesAsync();
-
-        return activity;
     }
 
     public async Task<bool> CategoryExistsAsync(int categoryId)
