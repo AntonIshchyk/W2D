@@ -138,7 +138,8 @@ export function Activities() {
   const { data: activitiesData, isLoading: activitiesLoading } = useQuery({
     queryKey: ['activities', currentPage, selectedCategory, selectedTags],
     queryFn: () => fetchActivities(currentPage, selectedCategory, selectedTags),
-    retry: false
+    retry: false,
+    placeholderData: (previousData) => previousData
   })
 
   useEffect(() => {
@@ -228,10 +229,11 @@ export function Activities() {
           </div>
 
           <div className="border-t pt-6">
-            {activitiesLoading ? (
-              <p className="text-gray-600">Loading activities...</p>
-            ) : (
-              <div className="space-y-4">
+            <div className={`space-y-4 transition-opacity duration-200 ${activitiesLoading && !activitiesData ? 'opacity-50' : 'opacity-100'}`}>
+              {!activitiesData && activitiesLoading ? (
+                <p className="text-gray-600">Loading activities...</p>
+              ) : (
+                <>
               {activitiesData?.items.map((activity) => (
                 <div key={activity.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex justify-between items-start mb-2">
@@ -287,8 +289,9 @@ export function Activities() {
                   </div>
                 </div>
               )}
+                </>
+              )}
             </div>
-            )}
           </div>
         </div>
       </div>
