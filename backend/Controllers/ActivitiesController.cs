@@ -8,6 +8,7 @@ namespace Backend.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ActivitiesController : ControllerBase
 {
     private readonly IActivityService _activityService;
@@ -48,16 +49,8 @@ public class ActivitiesController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize]
     public async Task<ActionResult<Activity>> CreateActivity(Activity activity)
     {
-        var userId = User.GetUserId();
-
-        if (userId == null)
-        {
-            return Unauthorized();
-        }
-
         // Validate CategoryId exists
         if (!await _activityService.CategoryExistsAsync(activity.CategoryId))
         {
@@ -84,16 +77,8 @@ public class ActivitiesController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize]
     public async Task<ActionResult<Activity>> UpdateActivity(int id, Activity activity)
     {
-        var userId = User.GetUserId();
-
-        if (userId == null)
-        {
-            return Unauthorized();
-        }
-
         var existingActivity = await _activityService.GetActivityByIdAsync(id);
 
         if (existingActivity == null)
@@ -127,16 +112,8 @@ public class ActivitiesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize]
     public async Task<ActionResult> DeleteActivity(int id)
     {
-        var userId = User.GetUserId();
-
-        if (userId == null)
-        {
-            return Unauthorized();
-        }
-
         var activity = await _activityService.GetActivityByIdAsync(id);
 
         if (activity == null)
@@ -144,7 +121,7 @@ public class ActivitiesController : ControllerBase
             return NotFound(new { message = "Activity not found" });
         }
 
-        var deleted = await _activityService.DeleteActivityAsync(id);
+        await _activityService.DeleteActivityAsync(id);
 
         return NoContent();
     }

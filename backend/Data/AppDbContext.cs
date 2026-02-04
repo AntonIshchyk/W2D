@@ -21,6 +21,7 @@ public class AppDbContext : DbContext
     public DbSet<Activity> Activities { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<Tag> Tags { get; set; }
+    public DbSet<ActivitySchedule> ActivitySchedules { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -53,6 +54,20 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
+
+        // ActivitySchedule - User relationship
+        modelBuilder.Entity<ActivitySchedule>()
+            .HasOne(s => s.User)
+            .WithMany()
+            .HasForeignKey(s => s.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // ActivitySchedule - Activity relationship
+        modelBuilder.Entity<ActivitySchedule>()
+            .HasOne(s => s.Activity)
+            .WithMany()
+            .HasForeignKey(s => s.ActivityId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Seed database with activities, categories, and tags
         DatabaseSeeder.SeedData(modelBuilder);

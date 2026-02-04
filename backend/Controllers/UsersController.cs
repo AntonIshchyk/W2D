@@ -29,12 +29,7 @@ public class UsersController : ControllerBase
     [Authorize]
     public async Task<ActionResult> GetCurrentUser()
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (userId == null)
-        {
-            return Unauthorized();
-        }
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
         var user = await _userService.GetUserByIdAsync(int.Parse(userId));
 

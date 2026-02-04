@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { Button } from './ui/button'
@@ -82,7 +82,9 @@ async function fetchActivities(pageNumber: number, categoryId?: number, tagIds?:
     tagIds.forEach(id => params.append('tagIds', id.toString()))
   }
 
-  const response = await fetch(`${API_ENDPOINTS.activities.base}?${params}`)
+  const response = await fetch(`${API_ENDPOINTS.activities.base}?${params}`, {
+    headers: getAuthHeaders()
+  })
 
   if (!response.ok) {
     throw new Error('Failed to fetch activities')
@@ -153,6 +155,59 @@ export function Activities() {
   useEffect(() => {
     setCurrentPage(1)
   }, [selectedCategory, selectedTags])
+
+  const queryClient = useQueryClient()
+  const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false)
+  const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null)
+  const [plannedDate, setPlannedDate] = useState('')
+  const [notes, setNotes] = useState('')
+
+  const scheduleMutation = useMutation({
+    mutationFn: async (data: { activityId: number; plannedDate: string; notes?: string }) => {
+      const response = await fetch(API_ENDPOINTS.schedules.base, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          activityId: data.activityId,
+          plannedDate: data.plannedDate,
+          notes: data.notes
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to schedule activity')
+      }
+
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schedules'] })
+      setScheduleDialogOpen(false)
+      setSelectedActivityId(null)
+      setPlannedDate('')
+      setNotes('')
+    }
+  })
+
+  const handleScheduleClick = (activityId: number) => {
+    setSelectedActivityId(activityId)
+    setScheduleDialogOpen(true)
+  }
+
+  const handleScheduleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (selectedActivityId && plannedDate) {
+      // Convert date to ISO string format for API
+      const dateObj = new Date(plannedDate)
+      dateObj.setHours(12, 0, 0, 0) // Set to noon to avoid timezone issues
+      
+      scheduleMutation.mutate({
+        activityId: selectedActivityId,
+        plannedDate: dateObj.toISOString(),
+        notes: notes || undefined
+      })
+    }
+  }
 
   const handleTagToggle = (tagId: number) => {
     setSelectedTags(prev => 
@@ -239,18 +294,27 @@ export function Activities() {
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="text-lg font-semibold text-gray-900">{activity.title}</h3>
                     {activity.category && (
-                      <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                      <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded whitespace-nowrap">
                         {activity.category.name}
                       </span>
                     )}
                   </div>
-                  <p className="text-gray-600 text-sm mb-2">{activity.description}</p>
-                  <div className="flex gap-2 flex-wrap">
-                    {activity.tags.map((tag) => (
-                      <span key={tag.id} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
-                        {tag.name}
-                      </span>
-                    ))}
+                  <p className="text-gray-600 text-sm mb-3">{activity.description}</p>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex gap-2 flex-wrap flex-1 min-w-0">
+                      {activity.tags.map((tag) => (
+                        <span key={tag.id} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
+                          {tag.name}
+                        </span>
+                      ))}
+                    </div>
+                    <Button
+                      onClick={() => handleScheduleClick(activity.id)}
+                      size="sm"
+                      className="text-xs flex-shrink-0"
+                    >
+                      Plan Activity
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -295,6 +359,73 @@ export function Activities() {
           </div>
         </div>
       </div>
+
+      {/* Schedule Dialog */}
+      {scheduleDialogOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4"
+          style={{ zIndex: 9999 }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setScheduleDialogOpen(false)
+              setSelectedActivityId(null)
+              setPlannedDate('')
+              setNotes('')
+            }
+          }}
+        >
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full relative" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Plan Activity</h2>
+            <form onSubmit={handleScheduleSubmit}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Planned Date
+                </label>
+                <input
+                  type="date"
+                  value={plannedDate}
+                  onChange={(e) => setPlannedDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Notes (Optional)
+                </label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Add any notes about this activity..."
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setScheduleDialogOpen(false)
+                    setSelectedActivityId(null)
+                    setPlannedDate('')
+                    setNotes('')
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={scheduleMutation.isPending}
+                >
+                  {scheduleMutation.isPending ? 'Scheduling...' : 'Schedule'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
