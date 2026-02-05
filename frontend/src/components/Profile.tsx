@@ -65,18 +65,6 @@ async function fetchPlannedActivities(): Promise<ActivitySchedule[]> {
   return response.json()
 }
 
-async function fetchCompletedActivities(): Promise<ActivitySchedule[]> {
-  const response = await fetch(API_ENDPOINTS.schedules.completed, {
-    headers: getAuthHeaders()
-  })
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch completed activities')
-  }
-
-  return response.json()
-}
-
 async function fetchHistoryActivities(): Promise<ActivitySchedule[]> {
   const response = await fetch(API_ENDPOINTS.schedules.history, {
     headers: getAuthHeaders()
