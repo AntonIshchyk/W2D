@@ -1,50 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
-import { useNavigate, Link } from 'react-router-dom'
-import { useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { Navbar } from './Navbar'
-import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
-
-interface UserInfo {
-  userId: number
-  email: string
-  name: string
-  age: number
-  gender: string
-}
-
-async function fetchCurrentUser(): Promise<UserInfo> {
-  const token = localStorage.getItem('token')
-  
-  if (!token) {
-    throw new Error('No token')
-  }
-
-  const response = await fetch(API_ENDPOINTS.users.me, {
-    headers: getAuthHeaders()
-  })
-
-  if (!response.ok) {
-    throw new Error('Unauthorized')
-  }
-
-  return response.json()
-}
+import { fetchCurrentUser } from '../lib/auth'
+import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 
 export function Home() {
-  const navigate = useNavigate()
-  
   const { data: user, isLoading, isError } = useQuery({
     queryKey: ['currentUser'],
     queryFn: fetchCurrentUser,
     retry: false
   })
 
-  useEffect(() => {
-    if (isError) {
-      localStorage.removeItem('token')
-      navigate('/login')
-    }
-  }, [isError, navigate])
+  useAuthErrorHandler(isError)
 
   if (isLoading) {
     return (
@@ -60,7 +27,7 @@ export function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar userName={user?.name} />
+      <Navbar />
       
       <div className="max-w-4xl mx-auto p-4 py-16">
         <div className="text-center mb-12">

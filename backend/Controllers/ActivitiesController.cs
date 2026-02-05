@@ -18,6 +18,31 @@ public class ActivitiesController : ControllerBase
         _activityService = activityService;
     }
 
+    private async Task<IActionResult?> ValidateAndSetTags(Activity activity)
+    {
+        // Validate CategoryId exists
+        if (!await _activityService.CategoryExistsAsync(activity.CategoryId))
+        {
+            return BadRequest(new { message = "Invalid CategoryId. Category does not exist." });
+        }
+
+        // Validate Tags exist and replace with tracked entities
+        if (activity.Tags != null && activity.Tags.Any())
+        {
+            var tagIds = activity.Tags.Select(t => t.Id).ToList();
+            var existingTags = await _activityService.GetTagsByIdsAsync(tagIds);
+
+            if (existingTags.Count() != tagIds.Count)
+            {
+                return BadRequest(new { message = "One or more Tag IDs are invalid." });
+            }
+
+            activity.Tags = existingTags.ToList();
+        }
+
+        return null; // No error
+    }
+
     [HttpGet]
     public async Task<ActionResult<PaginatedResult<Activity>>> GetActivities(
         [FromQuery] int pageNumber = 1,
@@ -51,24 +76,10 @@ public class ActivitiesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Activity>> CreateActivity(Activity activity)
     {
-        // Validate CategoryId exists
-        if (!await _activityService.CategoryExistsAsync(activity.CategoryId))
+        var validationError = await ValidateAndSetTags(activity);
+        if (validationError != null)
         {
-            return BadRequest(new { message = "Invalid CategoryId. Category does not exist." });
-        }
-
-        // Validate Tags exist and replace with tracked entities
-        if (activity.Tags != null && activity.Tags.Any())
-        {
-            var tagIds = activity.Tags.Select(t => t.Id).ToList();
-            var existingTags = await _activityService.GetTagsByIdsAsync(tagIds);
-
-            if (existingTags.Count() != tagIds.Count)
-            {
-                return BadRequest(new { message = "One or more Tag IDs are invalid." });
-            }
-
-            activity.Tags = existingTags.ToList();
+            return validationError;
         }
 
         var createdActivity = await _activityService.CreateActivityAsync(activity);
@@ -86,24 +97,10 @@ public class ActivitiesController : ControllerBase
             return NotFound(new { message = "Activity not found" });
         }
 
-        // Validate CategoryId exists
-        if (!await _activityService.CategoryExistsAsync(activity.CategoryId))
+        var validationError = await ValidateAndSetTags(activity);
+        if (validationError != null)
         {
-            return BadRequest(new { message = "Invalid CategoryId. Category does not exist." });
-        }
-
-        // Validate Tags exist
-        if (activity.Tags != null && activity.Tags.Any())
-        {
-            var tagIds = activity.Tags.Select(t => t.Id).ToList();
-            var existingTags = await _activityService.GetTagsByIdsAsync(tagIds);
-
-            if (existingTags.Count() != tagIds.Count)
-            {
-                return BadRequest(new { message = "One or more Tag IDs are invalid." });
-            }
-
-            activity.Tags = existingTags.ToList();
+            return validationError;
         }
 
         var updatedActivity = await _activityService.UpdateActivityAsync(id, activity);

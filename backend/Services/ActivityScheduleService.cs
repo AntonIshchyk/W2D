@@ -13,6 +13,15 @@ public class ActivityScheduleService : IActivityScheduleService
         _context = context;
     }
 
+    private static IQueryable<ActivitySchedule> IncludeActivityDetails(IQueryable<ActivitySchedule> query)
+    {
+        return query
+            .Include(s => s.Activity)
+                .ThenInclude(a => a!.Category)
+            .Include(s => s.Activity)
+                .ThenInclude(a => a!.Tags);
+    }
+
     public async Task<ActivitySchedule> ScheduleActivityAsync(int userId, int activityId, DateTime plannedDate, string? notes = null)
     {
         var schedule = new ActivitySchedule
@@ -53,12 +62,7 @@ public class ActivityScheduleService : IActivityScheduleService
 
     public async Task<IEnumerable<ActivitySchedule>> GetUserScheduledActivitiesAsync(int userId)
     {
-        return await _context.ActivitySchedules
-            .AsNoTracking()
-            .Include(s => s.Activity)
-                .ThenInclude(a => a!.Category)
-            .Include(s => s.Activity)
-                .ThenInclude(a => a!.Tags)
+        return await IncludeActivityDetails(_context.ActivitySchedules.AsNoTracking())
             .Where(s => s.UserId == userId && s.Status == ScheduleStatus.Planned)
             .OrderBy(s => s.PlannedDate)
             .ToListAsync();
@@ -66,12 +70,7 @@ public class ActivityScheduleService : IActivityScheduleService
 
     public async Task<IEnumerable<ActivitySchedule>> GetUserCompletedActivitiesAsync(int userId)
     {
-        return await _context.ActivitySchedules
-            .AsNoTracking()
-            .Include(s => s.Activity)
-                .ThenInclude(a => a!.Category)
-            .Include(s => s.Activity)
-                .ThenInclude(a => a!.Tags)
+        return await IncludeActivityDetails(_context.ActivitySchedules.AsNoTracking())
             .Where(s => s.UserId == userId && s.Status == ScheduleStatus.Completed)
             .OrderByDescending(s => s.CompletedDate)
             .ToListAsync();
@@ -79,12 +78,7 @@ public class ActivityScheduleService : IActivityScheduleService
 
     public async Task<IEnumerable<ActivitySchedule>> GetUserHistoryAsync(int userId)
     {
-        return await _context.ActivitySchedules
-            .AsNoTracking()
-            .Include(s => s.Activity)
-                .ThenInclude(a => a!.Category)
-            .Include(s => s.Activity)
-                .ThenInclude(a => a!.Tags)
+        return await IncludeActivityDetails(_context.ActivitySchedules.AsNoTracking())
             .Where(s => s.UserId == userId && (s.Status == ScheduleStatus.Completed || s.Status == ScheduleStatus.Cancelled))
             .OrderByDescending(s => s.CompletedDate ?? s.UpdatedAt)
             .ToListAsync();
@@ -92,22 +86,13 @@ public class ActivityScheduleService : IActivityScheduleService
 
     public async Task<ActivitySchedule?> GetScheduleByIdAsync(int id, int userId)
     {
-        return await _context.ActivitySchedules
-            .AsNoTracking()
-            .Include(s => s.Activity)
-                .ThenInclude(a => a!.Category)
-            .Include(s => s.Activity)
-                .ThenInclude(a => a!.Tags)
+        return await IncludeActivityDetails(_context.ActivitySchedules.AsNoTracking())
             .FirstOrDefaultAsync(s => s.Id == id && s.UserId == userId);
     }
 
     public async Task<ActivitySchedule?> MarkAsCompletedAsync(int id, int userId, DateTime? completedDate = null)
     {
-        var schedule = await _context.ActivitySchedules
-            .Include(s => s.Activity)
-                .ThenInclude(a => a!.Category)
-            .Include(s => s.Activity)
-                .ThenInclude(a => a!.Tags)
+        var schedule = await IncludeActivityDetails(_context.ActivitySchedules)
             .FirstOrDefaultAsync(s => s.Id == id && s.UserId == userId);
 
         if (schedule == null)
@@ -126,11 +111,7 @@ public class ActivityScheduleService : IActivityScheduleService
 
     public async Task<ActivitySchedule?> CancelScheduleAsync(int id, int userId)
     {
-        var schedule = await _context.ActivitySchedules
-            .Include(s => s.Activity)
-                .ThenInclude(a => a!.Category)
-            .Include(s => s.Activity)
-                .ThenInclude(a => a!.Tags)
+        var schedule = await IncludeActivityDetails(_context.ActivitySchedules)
             .FirstOrDefaultAsync(s => s.Id == id && s.UserId == userId);
 
         if (schedule == null)

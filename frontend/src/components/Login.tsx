@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { GoogleLogin } from '@react-oauth/google'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
@@ -42,6 +43,27 @@ export function Login() {
 
   const mutation = useMutation({
     mutationFn: loginUser,
+    onSuccess: (data) => {
+      localStorage.setItem('token', data.token)
+      navigate('/')
+    }
+  })
+
+  const googleMutation = useMutation({
+    mutationFn: async (credential: string) => {
+      const response = await fetch(API_ENDPOINTS.users.googleLogin, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Google login failed')
+      }
+
+      return response.json()
+    },
     onSuccess: (data) => {
       localStorage.setItem('token', data.token)
       navigate('/')
@@ -102,6 +124,33 @@ export function Login() {
           )}
         </form>
 
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500">Or continue with</span>
+          </div>
+        </div>
+
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={(credentialResponse) => {
+              if (credentialResponse.credential) {
+                googleMutation.mutate(credentialResponse.credential)
+              }
+            }}
+            onError={() => {
+              console.error('Google Login Failed')
+            }}
+            useOneTap
+          />
+        </div>
+
+        {googleMutation.isError && (
+          <p className="text-red-600 text-sm text-center mt-2">{googleMutation.error.message}</p>
+        )}
+
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Don't have an account?{' '}
@@ -114,3 +163,4 @@ export function Login() {
     </div>
   )
 }
+

@@ -1,17 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from './ui/button'
 import { Navbar } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
-
-interface UserInfo {
-  userId: number
-  email: string
-  name: string
-  age: number
-  gender: string
-}
+import { fetchCurrentUser } from '../lib/auth'
+import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 
 interface Tag {
   id: number
@@ -48,24 +41,6 @@ interface PaginatedResult {
   totalPages: number
   hasPreviousPage: boolean
   hasNextPage: boolean
-}
-
-async function fetchCurrentUser(): Promise<UserInfo> {
-  const token = localStorage.getItem('token')
-  
-  if (!token) {
-    throw new Error('No token')
-  }
-
-  const response = await fetch(API_ENDPOINTS.users.me, {
-    headers: getAuthHeaders()
-  })
-
-  if (!response.ok) {
-    throw new Error('Unauthorized')
-  }
-
-  return response.json()
 }
 
 async function fetchActivities(pageNumber: number, categoryId?: number, tagIds?: number[]): Promise<PaginatedResult> {
@@ -114,12 +89,11 @@ async function fetchTags(): Promise<Tag[]> {
 }
 
 export function Activities() {
-  const navigate = useNavigate()
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>(undefined)
   const [selectedTags, setSelectedTags] = useState<number[]>([])
   
-  const { data: user, isError } = useQuery({
+  const { isError } = useQuery({
     queryKey: ['currentUser'],
     queryFn: fetchCurrentUser,
     retry: false
@@ -144,12 +118,7 @@ export function Activities() {
     placeholderData: (previousData) => previousData
   })
 
-  useEffect(() => {
-    if (isError) {
-      localStorage.removeItem('token')
-      navigate('/login')
-    }
-  }, [isError, navigate])
+  useAuthErrorHandler(isError)
 
   // Reset to page 1 when filters change
   useEffect(() => {

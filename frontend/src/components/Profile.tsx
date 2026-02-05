@@ -1,17 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from './ui/button'
 import { Navbar } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
-
-interface UserInfo {
-  userId: number
-  email: string
-  name: string
-  age: number
-  gender: string
-}
+import { fetchCurrentUser } from '../lib/auth'
+import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 
 interface ActivitySchedule {
   id: number
@@ -33,24 +26,6 @@ interface ActivitySchedule {
       name: string
     }>
   }
-}
-
-async function fetchCurrentUser(): Promise<UserInfo> {
-  const token = localStorage.getItem('token')
-  
-  if (!token) {
-    throw new Error('No token')
-  }
-
-  const response = await fetch(API_ENDPOINTS.users.me, {
-    headers: getAuthHeaders()
-  })
-
-  if (!response.ok) {
-    throw new Error('Unauthorized')
-  }
-
-  return response.json()
 }
 
 async function fetchPlannedActivities(): Promise<ActivitySchedule[]> {
@@ -78,7 +53,6 @@ async function fetchHistoryActivities(): Promise<ActivitySchedule[]> {
 }
 
 export function Profile() {
-  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<'profile' | 'planned' | 'completed'>('profile')
   
@@ -139,12 +113,7 @@ export function Profile() {
     }
   })
 
-  useEffect(() => {
-    if (isError) {
-      localStorage.removeItem('token')
-      navigate('/login')
-    }
-  }, [isError, navigate])
+  useAuthErrorHandler(isError)
 
   if (isLoading) {
     return (

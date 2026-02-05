@@ -25,6 +25,27 @@ public class UserService : IUserService
         return await _context.Users.FindAsync(id);
     }
 
+    public async Task<User?> GetUserByEmailAsync(string email)
+    {
+        return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+    }
+
+    public LoginResponse GenerateTokenForUserAsync(User user)
+    {
+        var token = _tokenService.GenerateToken(user);
+
+        return new LoginResponse
+        {
+            UserId = user.Id,
+            Email = user.Email,
+            Name = user.Name,
+            Age = user.Age,
+            Gender = user.Gender,
+            IsAdmin = user.IsAdmin,
+            Token = token
+        };
+    }
+
     public async Task<LoginResponse?> RegisterUserAsync(string email, string password, string name, int age, Gender gender)
     {
         // Check if user already exists
@@ -49,19 +70,7 @@ public class UserService : IUserService
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        // Generate JWT token
-        var token = _tokenService.GenerateToken(user);
-
-        return new LoginResponse
-        {
-            UserId = user.Id,
-            Email = user.Email,
-            Name = user.Name,
-            Age = user.Age,
-            Gender = user.Gender,
-            IsAdmin = user.IsAdmin,
-            Token = token
-        };
+        return GenerateTokenForUserAsync(user);
     }
 
     public async Task<LoginResponse?> LoginUserAsync(string email, string password)
@@ -80,18 +89,6 @@ public class UserService : IUserService
             return null;
         }
 
-        // Generate JWT token
-        var token = _tokenService.GenerateToken(user);
-
-        return new LoginResponse
-        {
-            UserId = user.Id,
-            Email = user.Email,
-            Name = user.Name,
-            Age = user.Age,
-            Gender = user.Gender,
-            IsAdmin = user.IsAdmin,
-            Token = token
-        };
+        return GenerateTokenForUserAsync(user);
     }
 }
