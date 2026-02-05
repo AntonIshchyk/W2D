@@ -40,14 +40,12 @@ public class UserService : IUserService
             UserId = user.Id,
             Email = user.Email,
             Name = user.Name,
-            Age = user.Age,
-            Gender = user.Gender,
             IsAdmin = user.IsAdmin,
             Token = token
         };
     }
 
-    public async Task<LoginResponse?> RegisterUserAsync(string email, string password, string name, int age, Gender gender)
+    public async Task<LoginResponse?> RegisterUserAsync(string email, string password, string name)
     {
         // Check if user already exists
         if (await _context.Users.AnyAsync(u => u.Email == email))
@@ -63,9 +61,7 @@ public class UserService : IUserService
         {
             Email = email,
             Password = hashedPassword,
-            Name = name,
-            Age = age,
-            Gender = gender
+            Name = name
         };
 
         _context.Users.Add(user);

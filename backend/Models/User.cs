@@ -3,12 +3,6 @@ using System.Text.Json.Serialization;
 
 namespace Backend.Models;
 
-public enum Gender
-{
-    Male,
-    Female
-}
-
 public class User : BaseModel
 {
     [Required]
@@ -19,11 +13,6 @@ public class User : BaseModel
     [EmailAddress]
     [MaxLength(255)]
     public string Email { get; set; } = null!;
-
-    [Range(1, 120)]
-    public int Age { get; set; }
-
-    public Gender Gender { get; set; }
 
     public bool IsAdmin { get; set; } = false;
 

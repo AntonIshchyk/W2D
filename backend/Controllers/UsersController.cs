@@ -23,31 +23,24 @@ public class UsersController : ControllerBase
 
     [HttpGet("me")]
     [Authorize]
-    public async Task<ActionResult> GetCurrentUser()
+    public ActionResult GetCurrentUser()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-
-        var user = await _userService.GetUserByIdAsync(int.Parse(userId));
-
-        if (user == null)
-        {
-            return NotFound();
-        }
+        var email = User.FindFirst(ClaimTypes.Email)!.Value;
+        var name = User.FindFirst(ClaimTypes.Name)!.Value;
 
         return Ok(new
         {
-            userId = user.Id,
-            email = user.Email,
-            name = user.Name,
-            age = user.Age,
-            gender = user.Gender
+            userId = int.Parse(userId),
+            email,
+            name
         });
     }
 
     [HttpPost("register")]
     public async Task<ActionResult<LoginResponse>> Register(RegisterRequest request)
     {
-        var result = await _userService.RegisterUserAsync(request.Email, request.Password, request.Name, request.Age, request.Gender);
+        var result = await _userService.RegisterUserAsync(request.Email, request.Password, request.Name);
 
         if (result == null)
         {
@@ -105,13 +98,10 @@ public class UsersController : ControllerBase
             }
 
             // New user, create account
-            // For Google sign-in, use a random password and set default values
             var result = await _userService.RegisterUserAsync(
                 payload.Email,
                 Guid.NewGuid().ToString(),
-                payload.Name ?? payload.Email.Split('@')[0],
-                25,
-                Gender.Male
+                payload.Name ?? payload.Email.Split('@')[0]
             );
 
             if (result == null)

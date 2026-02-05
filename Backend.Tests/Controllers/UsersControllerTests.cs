@@ -32,21 +32,17 @@ public class UsersControllerTests
         {
             Name = "John Doe",
             Email = "test@example.com",
-            Password = "password123",
-            Age = 25,
-            Gender = Gender.Male
+            Password = "password123"
         };
         var expectedResponse = new LoginResponse
         {
             UserId = 1,
             Email = registerRequest.Email,
             Name = registerRequest.Name,
-            Age = registerRequest.Age,
-            Gender = registerRequest.Gender,
             IsAdmin = false,
             Token = "fake-token"
         };
-        _mockUserService.Setup(x => x.RegisterUserAsync(registerRequest.Email, registerRequest.Password, registerRequest.Name, registerRequest.Age, registerRequest.Gender))
+        _mockUserService.Setup(x => x.RegisterUserAsync(registerRequest.Email, registerRequest.Password, registerRequest.Name))
             .ReturnsAsync(expectedResponse);
 
         // Act
@@ -67,11 +63,9 @@ public class UsersControllerTests
         {
             Name = "Jane Doe",
             Email = "duplicate@example.com",
-            Password = "password123",
-            Age = 30,
-            Gender = Gender.Female
+            Password = "password123"
         };
-        _mockUserService.Setup(x => x.RegisterUserAsync(registerRequest.Email, registerRequest.Password, registerRequest.Name, registerRequest.Age, registerRequest.Gender))
+        _mockUserService.Setup(x => x.RegisterUserAsync(registerRequest.Email, registerRequest.Password, registerRequest.Name))
             .ReturnsAsync((LoginResponse?)null);
 
         // Act
@@ -99,8 +93,6 @@ public class UsersControllerTests
             UserId = 1,
             Email = loginRequest.Email,
             Name = "John Doe",
-            Age = 25,
-            Gender = Gender.Male,
             IsAdmin = false,
             Token = "valid-jwt-token"
         };
@@ -168,11 +160,9 @@ public class UsersControllerTests
         {
             Name = "Test User",
             Email = "test@example.com",
-            Password = "password123",
-            Age = 25,
-            Gender = Gender.Male
+            Password = "password123"
         };
-        _mockUserService.Setup(x => x.RegisterUserAsync(registerRequest.Email, registerRequest.Password, registerRequest.Name, registerRequest.Age, registerRequest.Gender))
+        _mockUserService.Setup(x => x.RegisterUserAsync(registerRequest.Email, registerRequest.Password, registerRequest.Name))
             .ThrowsAsync(new Exception("Database error"));
 
         // Act & Assert
