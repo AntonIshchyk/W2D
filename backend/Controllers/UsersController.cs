@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using Backend.Models;
 using Backend.DTOs;
 using Backend.Services;
 using Google.Apis.Auth;

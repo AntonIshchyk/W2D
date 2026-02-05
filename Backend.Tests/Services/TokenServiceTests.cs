@@ -36,9 +36,7 @@ public class TokenServiceTests
         {
             Id = 1,
             Name = "Test User",
-            Email = "test@example.com",
-            Age = 25,
-            Gender = Gender.Male
+            Email = "test@example.com"
         };
 
         // Act
@@ -57,9 +55,7 @@ public class TokenServiceTests
         {
             Id = 42,
             Name = "Claims User",
-            Email = "claims@example.com",
-            Age = 30,
-            Gender = Gender.Female
+            Email = "claims@example.com"
         };
 
         // Act
@@ -83,9 +79,7 @@ public class TokenServiceTests
         {
             Id = 1,
             Name = "Test User",
-            Email = "test@example.com",
-            Age = 25,
-            Gender = Gender.Male
+            Email = "test@example.com"
         };
 
         // Act
@@ -107,9 +101,7 @@ public class TokenServiceTests
         {
             Id = 1,
             Name = "Test User",
-            Email = "test@example.com",
-            Age = 25,
-            Gender = Gender.Male
+            Email = "test@example.com"
         };
 
         // Act
