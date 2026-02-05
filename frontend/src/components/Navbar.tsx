@@ -1,11 +1,8 @@
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { Button } from './ui/button'
 
-interface NavbarProps {
-  userName?: string
-}
 
-export function Navbar({ userName }: NavbarProps) {
+export function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
 

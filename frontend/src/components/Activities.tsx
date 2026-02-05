@@ -223,7 +223,7 @@ export function Activities() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar userName={user?.name} />
+      <Navbar />
       
       <div className="max-w-6xl mx-auto p-4 py-8">
         <div className="bg-white rounded-lg shadow-md p-8">
@@ -311,7 +311,7 @@ export function Activities() {
                     <Button
                       onClick={() => handleScheduleClick(activity.id)}
                       size="sm"
-                      className="text-xs flex-shrink-0"
+                      className="text-xs shrink-0"
                     >
                       Plan Activity
                     </Button>
