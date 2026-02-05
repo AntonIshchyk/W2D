@@ -56,7 +56,7 @@ public class ActivitiesControllerTests
             PageSize = 10,
             TotalCount = 3
         };
-        _mockActivityService.Setup(x => x.GetActivitiesAsync(1, 10))
+        _mockActivityService.Setup(x => x.GetActivitiesAsync(It.IsAny<int>(), It.IsAny<int>(), null, null))
             .ReturnsAsync(paginatedResult);
 
         // Act
@@ -139,14 +139,18 @@ public class ActivitiesControllerTests
         var activity = new Activity
         {
             Title = "New Activity",
-            Description = "Test Description"
+            Description = "Test Description",
+            CategoryId = 1
         };
         var createdActivity = new Activity
         {
             Id = 1,
             Title = activity.Title,
-            Description = activity.Description
+            Description = activity.Description,
+            CategoryId = 1
         };
+        _mockActivityService.Setup(x => x.CategoryExistsAsync(1))
+            .ReturnsAsync(true);
         _mockActivityService.Setup(x => x.CreateActivityAsync(It.IsAny<Activity>()))
             .ReturnsAsync(createdActivity);
 
@@ -160,17 +164,24 @@ public class ActivitiesControllerTests
     }
 
     [Fact]
-    public async Task CreateActivity_NoUserClaim_ReturnsUnauthorized()
+    public async Task CreateActivity_InvalidCategory_ReturnsBadRequest()
     {
         // Arrange
-        var activity = new Activity { Title = "Test" };
-        // Don't set up user
+        SetupControllerUser(userId: 1);
+        var activity = new Activity
+        {
+            Title = "Test",
+            Description = "Test Description",
+            CategoryId = 999
+        };
+        _mockActivityService.Setup(x => x.CategoryExistsAsync(999))
+            .ReturnsAsync(false);
 
         // Act
         var result = await _controller.CreateActivity(activity);
 
         // Assert
-        result.Result.Should().BeOfType<UnauthorizedResult>();
+        result.Result.Should().BeOfType<BadRequestObjectResult>();
     }
 
     #endregion
@@ -185,15 +196,21 @@ public class ActivitiesControllerTests
         var existingActivity = new Activity
         {
             Id = 1,
-            Title = "Original"
+            Title = "Original",
+            Description = "Description",
+            CategoryId = 1
         };
         var updatedActivity = new Activity
         {
             Id = 1,
-            Title = "Updated"
+            Title = "Updated",
+            Description = "Updated Description",
+            CategoryId = 1
         };
         _mockActivityService.Setup(x => x.GetActivityByIdAsync(1))
             .ReturnsAsync(existingActivity);
+        _mockActivityService.Setup(x => x.CategoryExistsAsync(1))
+            .ReturnsAsync(true);
         _mockActivityService.Setup(x => x.UpdateActivityAsync(1, It.IsAny<Activity>()))
             .ReturnsAsync(updatedActivity);
 

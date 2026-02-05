@@ -18,7 +18,7 @@ public class ActivitiesController : ControllerBase
         _activityService = activityService;
     }
 
-    private async Task<IActionResult?> ValidateAndSetTags(Activity activity)
+    private async Task<ActionResult<Activity>?> ValidateAndSetTags(Activity activity)
     {
         // Validate CategoryId exists
         if (!await _activityService.CategoryExistsAsync(activity.CategoryId))
