@@ -135,7 +135,7 @@ public class ActivitiesControllerTests
     public async Task CreateActivity_AuthenticatedUser_CreatesActivity()
     {
         // Arrange
-        SetupControllerUser(userId: 1);
+        SetupControllerUser(userId: 1, isAdmin: true);
         var activity = new Activity
         {
             Title = "New Activity",
@@ -192,7 +192,7 @@ public class ActivitiesControllerTests
     public async Task UpdateActivity_AuthenticatedUser_ReturnsUpdatedActivity()
     {
         // Arrange
-        SetupControllerUser(userId: 1);
+        SetupControllerUser(userId: 1, isAdmin: true);
         var existingActivity = new Activity
         {
             Id = 1,
@@ -246,7 +246,7 @@ public class ActivitiesControllerTests
     public async Task DeleteActivity_AuthenticatedUser_ReturnsNoContent()
     {
         // Arrange
-        SetupControllerUser(userId: 1);
+        SetupControllerUser(userId: 1, isAdmin: true);
         var activity = new Activity
         {
             Id = 1,

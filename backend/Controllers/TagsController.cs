@@ -44,14 +44,9 @@ public class TagsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Tag>> CreateTag(Tag tag)
     {
-        if (!User.IsAdmin())
-        {
-            return Forbid();
-        }
-
         // Check if tag with same name already exists
         if (await _context.Tags.AnyAsync(t => t.Name == tag.Name))
         {
@@ -65,14 +60,9 @@ public class TagsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Tag>> UpdateTag(int id, Tag tag)
     {
-        if (!User.IsAdmin())
-        {
-            return Forbid();
-        }
-
         var existingTag = await _context.Tags.FindAsync(id);
 
         if (existingTag == null)
@@ -95,14 +85,9 @@ public class TagsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult> DeleteTag(int id)
     {
-        if (!User.IsAdmin())
-        {
-            return Forbid();
-        }
-
         var tag = await _context.Tags
             .Include(t => t.Activities)
             .FirstOrDefaultAsync(t => t.Id == id);

@@ -44,14 +44,9 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Category>> CreateCategory(Category category)
     {
-        if (!User.IsAdmin())
-        {
-            return Forbid();
-        }
-
         // Check if category with same name already exists
         if (await _context.Categories.AnyAsync(c => c.Name == category.Name))
         {
@@ -65,14 +60,9 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Category>> UpdateCategory(int id, Category category)
     {
-        if (!User.IsAdmin())
-        {
-            return Forbid();
-        }
-
         var existingCategory = await _context.Categories.FindAsync(id);
 
         if (existingCategory == null)
@@ -95,14 +85,9 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult> DeleteCategory(int id)
     {
-        if (!User.IsAdmin())
-        {
-            return Forbid();
-        }
-
         var category = await _context.Categories
             .Include(c => c.Activities)
             .FirstOrDefaultAsync(c => c.Id == id);

@@ -157,32 +157,6 @@ public class UsersControllerTests
 
     #endregion
 
-    #region GetUsers Tests
-
-    [Fact]
-    public async Task GetUsers_ReturnsAllUsers()
-    {
-        // Arrange
-        var users = new List<User>
-        {
-            new User { Id = 1, Name = "User One", Email = "user1@example.com", Age = 25, Gender = Gender.Male },
-            new User { Id = 2, Name = "User Two", Email = "user2@example.com", Age = 30, Gender = Gender.Female },
-            new User { Id = 3, Name = "User Three", Email = "user3@example.com", Age = 28, Gender = Gender.Male }
-        };
-        _mockUserService.Setup(x => x.GetAllUsersAsync())
-            .ReturnsAsync(users);
-
-        // Act
-        var result = await _controller.GetUsers();
-
-        // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedUsers = okResult.Value.Should().BeAssignableTo<IEnumerable<User>>().Subject;
-        returnedUsers.Should().HaveCount(3);
-    }
-
-    #endregion
-
     #region Edge Cases
 
     [Fact]

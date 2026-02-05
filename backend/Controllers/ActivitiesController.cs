@@ -74,6 +74,7 @@ public class ActivitiesController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Activity>> CreateActivity(Activity activity)
     {
         var validationError = await ValidateAndSetTags(activity);
@@ -88,6 +89,7 @@ public class ActivitiesController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Activity>> UpdateActivity(int id, Activity activity)
     {
         var existingActivity = await _activityService.GetActivityByIdAsync(id);
@@ -109,6 +111,7 @@ public class ActivitiesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult> DeleteActivity(int id)
     {
         var activity = await _activityService.GetActivityByIdAsync(id);

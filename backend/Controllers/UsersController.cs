@@ -20,14 +20,6 @@ public class UsersController : ControllerBase
         _configuration = configuration;
     }
 
-    [HttpGet]
-    [Authorize]
-    public async Task<ActionResult<IEnumerable<User>>> GetUsers()
-    {
-        var users = await _userService.GetAllUsersAsync();
-        return Ok(users);
-    }
-
     [HttpGet("me")]
     [Authorize]
     public async Task<ActionResult> GetCurrentUser()

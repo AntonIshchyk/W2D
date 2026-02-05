@@ -7,13 +7,10 @@ export const API_ENDPOINTS = {
     login: `${API_BASE_URL}/api/users/login`,
     googleLogin: `${API_BASE_URL}/api/users/google-login`,
     me: `${API_BASE_URL}/api/users/me`,
-    list: `${API_BASE_URL}/api/users`,
   },
   activities: {
     base: `${API_BASE_URL}/api/activities`,
     byId: (id: number) => `${API_BASE_URL}/api/activities/${id}`,
-    approve: (id: number) => `${API_BASE_URL}/api/activities/${id}/approve`,
-    reject: (id: number) => `${API_BASE_URL}/api/activities/${id}/reject`,
   },
   categories: {
     base: `${API_BASE_URL}/api/categories`,
