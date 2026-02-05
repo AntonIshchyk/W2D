@@ -21,7 +21,7 @@ public class AppDbContext : DbContext
     public DbSet<Activity> Activities { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<Tag> Tags { get; set; }
-    public DbSet<ActivitySchedule> ActivitySchedules { get; set; }
+    public DbSet<UserActivity> UserActivities { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -55,19 +55,36 @@ public class AppDbContext : DbContext
             .HasIndex(u => u.Email)
             .IsUnique();
 
-        // ActivitySchedule - User relationship
-        modelBuilder.Entity<ActivitySchedule>()
+        // UserActivity - User relationship
+        modelBuilder.Entity<UserActivity>()
             .HasOne(s => s.User)
             .WithMany()
             .HasForeignKey(s => s.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // ActivitySchedule - Activity relationship
-        modelBuilder.Entity<ActivitySchedule>()
+        // UserActivity - Activity relationship
+        modelBuilder.Entity<UserActivity>()
             .HasOne(s => s.Activity)
             .WithMany()
             .HasForeignKey(s => s.ActivityId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // Map UserActivity to the existing ActivitySchedules table
+        modelBuilder.Entity<UserActivity>()
+            .ToTable("ActivitySchedules");
+
+        // Performance indexes
+        modelBuilder.Entity<UserActivity>()
+            .HasIndex(s => new { s.UserId, s.Status })
+            .HasDatabaseName("IX_ActivitySchedules_UserId_Status");
+
+        modelBuilder.Entity<UserActivity>()
+            .HasIndex(s => s.PlannedDate)
+            .HasDatabaseName("IX_ActivitySchedules_PlannedDate");
+
+        modelBuilder.Entity<Activity>()
+            .HasIndex(a => a.CategoryId)
+            .HasDatabaseName("IX_Activities_CategoryId");
 
         // Seed database with activities, categories, and tags
         DatabaseSeeder.SeedData(modelBuilder);

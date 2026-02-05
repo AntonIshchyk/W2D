@@ -24,7 +24,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
-builder.Services.AddScoped<IActivityScheduleService, ActivityScheduleService>();
+builder.Services.AddScoped<IUserActivityService, UserActivityService>();
 
 // Configure JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Backend.Models;
 
-public class ActivitySchedule : BaseModel
+public class UserActivity : BaseModel
 {
     public int UserId { get; set; }
 
