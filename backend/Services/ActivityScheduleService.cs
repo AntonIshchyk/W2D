@@ -16,10 +16,10 @@ public class ActivityScheduleService : IActivityScheduleService
     private static IQueryable<ActivitySchedule> IncludeActivityDetails(IQueryable<ActivitySchedule> query)
     {
         return query
-            .Include(s => s.Activity)
-                .ThenInclude(a => a!.Category)
-            .Include(s => s.Activity)
-                .ThenInclude(a => a!.Tags);
+            .Include(s => s.Activity!)
+                .ThenInclude(a => a.Category)
+            .Include(s => s.Activity!)
+                .ThenInclude(a => a.Tags);
     }
 
     public async Task<ActivitySchedule> ScheduleActivityAsync(int userId, int activityId, DateTime plannedDate, string? notes = null)

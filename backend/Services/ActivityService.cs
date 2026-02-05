@@ -41,10 +41,7 @@ public class ActivityService : IActivityService
         // Filter by tags if provided (activities must have ALL specified tags)
         if (tagIds != null && tagIds.Any())
         {
-            foreach (var tagId in tagIds)
-            {
-                query = query.Where(a => a.Tags.Any(t => t.Id == tagId));
-            }
+            query = query.Where(a => a.Tags.Count(t => tagIds.Contains(t.Id)) == tagIds.Count);
         }
 
         query = query.OrderByDescending(a => a.CreatedAt);

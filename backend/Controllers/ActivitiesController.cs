@@ -114,14 +114,12 @@ public class ActivitiesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult> DeleteActivity(int id)
     {
-        var activity = await _activityService.GetActivityByIdAsync(id);
+        var deleted = await _activityService.DeleteActivityAsync(id);
 
-        if (activity == null)
+        if (!deleted)
         {
             return NotFound(new { message = "Activity not found" });
         }
-
-        await _activityService.DeleteActivityAsync(id);
 
         return NoContent();
     }
