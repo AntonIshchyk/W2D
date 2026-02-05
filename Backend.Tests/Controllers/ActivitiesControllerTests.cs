@@ -6,6 +6,7 @@ using Backend.Controllers;
 using Backend.Models;
 using Backend.Services;
 using System.Security.Claims;
+using Backend.DTOs;
 
 namespace Backend.Tests.Controllers;
 

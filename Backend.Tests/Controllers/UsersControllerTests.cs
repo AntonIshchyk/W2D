@@ -5,6 +5,7 @@ using FluentAssertions;
 using Backend.Controllers;
 using Backend.Models;
 using Backend.Services;
+using Backend.DTOs;
 
 namespace Backend.Tests.Controllers;
 

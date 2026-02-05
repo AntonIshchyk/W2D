@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Backend.Models;
+using Backend.DTOs;
 using Backend.Services;
 using Backend.Extensions;
 
@@ -134,16 +135,4 @@ public class ActivitySchedulesController : ControllerBase
 
         return NoContent();
     }
-}
-
-public class ScheduleActivityRequest
-{
-    public int ActivityId { get; set; }
-    public DateTime PlannedDate { get; set; }
-    public string? Notes { get; set; }
-}
-
-public class CompleteActivityRequest
-{
-    public DateTime? CompletedDate { get; set; }
 }

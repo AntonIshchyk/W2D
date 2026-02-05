@@ -1,4 +1,6 @@
-namespace Backend.Models;
+using Backend.Models;
+
+namespace Backend.DTOs;
 
 public class LoginResponse
 {
