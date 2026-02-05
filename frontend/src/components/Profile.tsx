@@ -18,7 +18,7 @@ interface ActivitySchedule {
   activityId: number
   plannedDate: string
   completedDate?: string
-  status: number
+  status: string
   notes?: string
   activity: {
     id: number
@@ -113,16 +113,6 @@ export function Profile() {
     retry: false,
     enabled: !!user
   })
-
-  // Log errors for debugging
-  useEffect(() => {
-    if (plannedError) {
-      console.error('Planned activities error:', plannedError)
-    }
-    if (historyError) {
-      console.error('History activities error:', historyError)
-    }
-  }, [plannedError, historyError])
 
   const completeMutation = useMutation({
     mutationFn: async (scheduleId: number) => {
@@ -257,7 +247,7 @@ export function Profile() {
             <h1 className="text-3xl font-bold text-gray-900 mb-6">Planned Activities</h1>
             {plannedError && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-                Error loading planned activities. Please check the console.
+                Error loading planned activities.
               </div>
             )}
             <div className="space-y-4">
@@ -321,32 +311,42 @@ export function Profile() {
             <h1 className="text-3xl font-bold text-gray-900 mb-6">Activity History</h1>
             {historyError && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-                Error loading history. Please check the console.
+                Error loading history.
               </div>
             )}
             <div className="space-y-4">
               {historyActivities && historyActivities.length > 0 ? (
-                historyActivities.map((schedule) => (
-                  <div key={schedule.id} className={`border border-gray-200 rounded-lg p-4 ${
-                    schedule.status === 1 ? 'bg-green-50' : schedule.status === 2 ? 'bg-red-50' : ''
+                historyActivities.map((schedule) => {
+                  const isCompleted = schedule.status === "Completed"
+                  return (
+                  <div key={schedule.id} className={`rounded-lg p-4 border-l-4 ${
+                    isCompleted 
+                      ? 'bg-green-50 border-green-500' 
+                      : 'bg-red-50 border-red-500'
                   }`}>
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
+                          {isCompleted ? (
+                            <svg className="w-5 h-5 text-green-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                          ) : (
+                            <svg className="w-5 h-5 text-red-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                            </svg>
+                          )}
                           <h3 className="text-lg font-semibold text-gray-900">{schedule.activity.title}</h3>
-                          {schedule.status === 1 && (
-                            <span className="bg-green-600 text-white text-xs font-medium px-2 py-0.5 rounded">
-                              Completed
-                            </span>
-                          )}
-                          {schedule.status === 2 && (
-                            <span className="bg-red-600 text-white text-xs font-medium px-2 py-0.5 rounded">
-                              Cancelled
-                            </span>
-                          )}
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded ${
+                            isCompleted 
+                              ? 'bg-green-600 text-white' 
+                              : 'bg-red-600 text-white'
+                          }`}>
+                            {isCompleted ? 'Completed' : 'Cancelled'}
+                          </span>
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {schedule.status === 1 && schedule.completedDate
+                        <p className="text-sm text-gray-600 mt-1 ml-7">
+                          {isCompleted && schedule.completedDate
                             ? `Completed on: ${new Date(schedule.completedDate).toLocaleDateString()}`
                             : `Planned for: ${new Date(schedule.plannedDate).toLocaleDateString()}`
                           }
@@ -358,11 +358,11 @@ export function Profile() {
                         </span>
                       )}
                     </div>
-                    <p className="text-gray-600 text-sm mb-2">{schedule.activity.description}</p>
+                    <p className="text-gray-600 text-sm mb-2 ml-7">{schedule.activity.description}</p>
                     {schedule.notes && (
-                      <p className="text-gray-900 text-sm mb-2"><span className="font-medium">Note:</span> {schedule.notes}</p>
+                      <p className="text-gray-900 text-sm mb-2 ml-7"><span className="font-medium">Note:</span> {schedule.notes}</p>
                     )}
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex gap-2 flex-wrap ml-7">
                       {schedule.activity.tags.map((tag) => (
                         <span key={tag.id} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
                           {tag.name}
@@ -370,7 +370,8 @@ export function Profile() {
                       ))}
                     </div>
                   </div>
-                ))
+                  )
+                })
               ) : (
                 <p className="text-gray-500 text-center py-8">No activity history yet</p>
               )}
