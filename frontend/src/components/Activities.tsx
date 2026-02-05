@@ -102,13 +102,15 @@ export function Activities() {
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: fetchCategories,
-    retry: false
+    staleTime: Infinity,
+    gcTime: Infinity
   })
 
   const { data: tags } = useQuery({
     queryKey: ['tags'],
     queryFn: fetchTags,
-    retry: false
+    staleTime: Infinity,
+    gcTime: Infinity
   })
 
   const { data: activitiesData, isLoading: activitiesLoading } = useQuery({
