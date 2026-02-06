@@ -24,7 +24,7 @@ public class UserActivityService : IUserActivityService
 
     public async Task<UserActivity> ScheduleActivityAsync(int userId, int activityId, DateTime plannedDate, string? notes = null)
     {
-        var userActivity = new UserActivity
+        UserActivity userActivity = new UserActivity
         {
             UserId = userId,
             ActivityId = activityId,
@@ -92,7 +92,7 @@ public class UserActivityService : IUserActivityService
 
     public async Task<UserActivity?> MarkAsCompletedAsync(int id, int userId, DateTime? completedDate = null)
     {
-        var userActivity = await IncludeActivityDetails(_context.UserActivities)
+        UserActivity? userActivity = await IncludeActivityDetails(_context.UserActivities)
             .FirstOrDefaultAsync(s => s.Id == id && s.UserId == userId);
 
         if (userActivity == null)
@@ -111,7 +111,7 @@ public class UserActivityService : IUserActivityService
 
     public async Task<UserActivity?> CancelUserActivityAsync(int id, int userId)
     {
-        var userActivity = await IncludeActivityDetails(_context.UserActivities)
+        UserActivity? userActivity = await IncludeActivityDetails(_context.UserActivities)
             .FirstOrDefaultAsync(s => s.Id == id && s.UserId == userId);
 
         if (userActivity == null)
@@ -129,7 +129,7 @@ public class UserActivityService : IUserActivityService
 
     public async Task<bool> DeleteUserActivityAsync(int id, int userId)
     {
-        var userActivity = await _context.UserActivities
+        UserActivity? userActivity = await _context.UserActivities
             .FirstOrDefaultAsync(s => s.Id == id && s.UserId == userId);
 
         if (userActivity == null)

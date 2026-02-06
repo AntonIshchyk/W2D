@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 using Backend.Data;
 using Backend.Services;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers()
@@ -64,9 +64,9 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Ensure database is created
-using (var scope = app.Services.CreateScope())
+using (IServiceScope scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     context.Database.EnsureCreated();
 }
 

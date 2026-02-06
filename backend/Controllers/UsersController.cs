@@ -24,9 +24,9 @@ public class UsersController : ControllerBase
     [Authorize]
     public ActionResult GetCurrentUser()
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        var email = User.FindFirst(ClaimTypes.Email)!.Value;
-        var name = User.FindFirst(ClaimTypes.Name)!.Value;
+        string userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        string email = User.FindFirst(ClaimTypes.Email)!.Value;
+        string name = User.FindFirst(ClaimTypes.Name)!.Value;
 
         return Ok(new
         {
@@ -39,7 +39,7 @@ public class UsersController : ControllerBase
     [HttpPost("register")]
     public async Task<ActionResult<LoginResponse>> Register(RegisterRequest request)
     {
-        var result = await _userService.RegisterUserAsync(request.Email, request.Password, request.Name);
+        LoginResponse? result = await _userService.RegisterUserAsync(request.Email, request.Password, request.Name);
 
         if (result == null)
         {
@@ -52,7 +52,7 @@ public class UsersController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
     {
-        var result = await _userService.LoginUserAsync(request.Email, request.Password);
+        LoginResponse? result = await _userService.LoginUserAsync(request.Email, request.Password);
 
         if (result == null)
         {
@@ -67,19 +67,19 @@ public class UsersController : ControllerBase
     {
         try
         {
-            var clientId = _configuration["Google:ClientId"];
+            string? clientId = _configuration["Google:ClientId"];
 
             if (string.IsNullOrEmpty(clientId))
             {
                 return StatusCode(500, new { message = "Google Client ID not configured" });
             }
 
-            var settings = new GoogleJsonWebSignature.ValidationSettings
+            GoogleJsonWebSignature.ValidationSettings settings = new GoogleJsonWebSignature.ValidationSettings
             {
                 Audience = new[] { clientId }
             };
 
-            var payload = await GoogleJsonWebSignature.ValidateAsync(request.Credential, settings);
+            GoogleJsonWebSignature.Payload? payload = await GoogleJsonWebSignature.ValidateAsync(request.Credential, settings);
 
             if (payload == null)
             {
@@ -87,17 +87,17 @@ public class UsersController : ControllerBase
             }
 
             // Try to find existing user by email
-            var existingUser = await _userService.GetUserByEmailAsync(payload.Email);
+            User? existingUser = await _userService.GetUserByEmailAsync(payload.Email);
 
             if (existingUser != null)
             {
                 // User exists, just login
-                var loginResponse = _userService.GenerateTokenForUserAsync(existingUser);
+                LoginResponse loginResponse = _userService.GenerateTokenForUserAsync(existingUser);
                 return Ok(loginResponse);
             }
 
             // New user, create account
-            var result = await _userService.RegisterUserAsync(
+            LoginResponse? result = await _userService.RegisterUserAsync(
                 payload.Email,
                 Guid.NewGuid().ToString(),
                 payload.Name ?? payload.Email.Split('@')[0]

@@ -20,7 +20,7 @@ public class TagsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Tag>>> GetTags()
     {
-        var tags = await _context.Tags
+        List<Tag> tags = await _context.Tags
             .OrderBy(t => t.Name)
             .ToListAsync();
 
@@ -30,7 +30,7 @@ public class TagsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Tag>> GetTag(int id)
     {
-        var tag = await _context.Tags
+        Tag? tag = await _context.Tags
             .Include(t => t.Activities)
             .FirstOrDefaultAsync(t => t.Id == id);
 
@@ -62,7 +62,7 @@ public class TagsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Tag>> UpdateTag(int id, Tag tag)
     {
-        var existingTag = await _context.Tags.FindAsync(id);
+        Tag? existingTag = await _context.Tags.FindAsync(id);
 
         if (existingTag == null)
         {
@@ -87,7 +87,7 @@ public class TagsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult> DeleteTag(int id)
     {
-        var tag = await _context.Tags
+        Tag? tag = await _context.Tags
             .Include(t => t.Activities)
             .FirstOrDefaultAsync(t => t.Id == id);
 

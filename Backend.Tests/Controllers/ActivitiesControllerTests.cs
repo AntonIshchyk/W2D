@@ -23,15 +23,15 @@ public class ActivitiesControllerTests
 
     private void SetupControllerUser(int userId, bool isAdmin = false)
     {
-        var claims = new List<Claim>
+        List<Claim> claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
             new Claim(ClaimTypes.Email, "test@example.com"),
             new Claim(ClaimTypes.Role, isAdmin ? "Admin" : "User")
         };
 
-        var identity = new ClaimsIdentity(claims, "TestAuth");
-        var claimsPrincipal = new ClaimsPrincipal(identity);
+        ClaimsIdentity identity = new ClaimsIdentity(claims, "TestAuth");
+        ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(identity);
 
         _controller.ControllerContext = new ControllerContext
         {
@@ -45,7 +45,7 @@ public class ActivitiesControllerTests
     public async Task GetActivities_ReturnsScrollResults()
     {
         // Arrange
-        var scrollResult = new ScrollResult<Activity>
+        ScrollResult<Activity> scrollResult = new ScrollResult<Activity>
         {
             Items = new List<Activity>
             {
@@ -61,11 +61,11 @@ public class ActivitiesControllerTests
             .ReturnsAsync(scrollResult);
 
         // Act
-        var result = await _controller.GetActivities();
+        ActionResult<ScrollResult<Activity>> result = await _controller.GetActivities();
 
         // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var scrolledResult = okResult.Value.Should().BeOfType<ScrollResult<Activity>>().Subject;
+        OkObjectResult okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        ScrollResult<Activity> scrolledResult = okResult.Value.Should().BeOfType<ScrollResult<Activity>>().Subject;
         scrolledResult.Items.Should().HaveCount(3);
         scrolledResult.NextCursor.Should().Be(1);
         scrolledResult.HasMore.Should().BeFalse();
@@ -76,7 +76,7 @@ public class ActivitiesControllerTests
     public async Task GetActivities_WithInvalidLimit_ReturnsBadRequest()
     {
         // Act
-        var result = await _controller.GetActivities(limit: 0);
+        ActionResult<ScrollResult<Activity>> result = await _controller.GetActivities(limit: 0);
 
         // Assert
         result.Result.Should().BeOfType<BadRequestObjectResult>();
@@ -86,7 +86,7 @@ public class ActivitiesControllerTests
     public async Task GetActivities_WithLimitTooLarge_ReturnsBadRequest()
     {
         // Act
-        var result = await _controller.GetActivities(limit: 101);
+        ActionResult<ScrollResult<Activity>> result = await _controller.GetActivities(limit: 101);
 
         // Assert
         result.Result.Should().BeOfType<BadRequestObjectResult>();
@@ -100,16 +100,16 @@ public class ActivitiesControllerTests
     public async Task GetActivity_ExistingActivity_ReturnsActivity()
     {
         // Arrange
-        var activity = new Activity { Id = 1, Title = "Test Activity" };
+        Activity activity = new Activity { Id = 1, Title = "Test Activity" };
         _mockActivityService.Setup(x => x.GetActivityByIdAsync(1))
             .ReturnsAsync(activity);
 
         // Act
-        var result = await _controller.GetActivity(1);
+        ActionResult<Activity> result = await _controller.GetActivity(1);
 
         // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedActivity = okResult.Value.Should().BeOfType<Activity>().Subject;
+        OkObjectResult okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        Activity returnedActivity = okResult.Value.Should().BeOfType<Activity>().Subject;
         returnedActivity.Id.Should().Be(1);
         returnedActivity.Title.Should().Be("Test Activity");
     }
@@ -122,7 +122,7 @@ public class ActivitiesControllerTests
             .ReturnsAsync((Activity?)null);
 
         // Act
-        var result = await _controller.GetActivity(999);
+        ActionResult<Activity> result = await _controller.GetActivity(999);
 
         // Assert
         result.Result.Should().BeOfType<NotFoundObjectResult>();
@@ -137,13 +137,13 @@ public class ActivitiesControllerTests
     {
         // Arrange
         SetupControllerUser(userId: 1, isAdmin: true);
-        var activity = new Activity
+        Activity activity = new Activity
         {
             Title = "New Activity",
             Description = "Test Description",
             CategoryId = 1
         };
-        var createdActivity = new Activity
+        Activity createdActivity = new Activity
         {
             Id = 1,
             Title = activity.Title,
@@ -156,11 +156,11 @@ public class ActivitiesControllerTests
             .ReturnsAsync(createdActivity);
 
         // Act
-        var result = await _controller.CreateActivity(activity);
+        ActionResult<Activity> result = await _controller.CreateActivity(activity);
 
         // Assert
-        var createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
-        var returnedActivity = createdResult.Value.Should().BeOfType<Activity>().Subject;
+        CreatedAtActionResult createdResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
+        Activity returnedActivity = createdResult.Value.Should().BeOfType<Activity>().Subject;
         returnedActivity.Title.Should().Be("New Activity");
     }
 
@@ -169,7 +169,7 @@ public class ActivitiesControllerTests
     {
         // Arrange
         SetupControllerUser(userId: 1);
-        var activity = new Activity
+        Activity activity = new Activity
         {
             Title = "Test",
             Description = "Test Description",
@@ -179,7 +179,7 @@ public class ActivitiesControllerTests
             .ReturnsAsync(false);
 
         // Act
-        var result = await _controller.CreateActivity(activity);
+        ActionResult<Activity> result = await _controller.CreateActivity(activity);
 
         // Assert
         result.Result.Should().BeOfType<BadRequestObjectResult>();
@@ -194,14 +194,14 @@ public class ActivitiesControllerTests
     {
         // Arrange
         SetupControllerUser(userId: 1, isAdmin: true);
-        var existingActivity = new Activity
+        Activity existingActivity = new Activity
         {
             Id = 1,
             Title = "Original",
             Description = "Description",
             CategoryId = 1
         };
-        var updatedActivity = new Activity
+        Activity updatedActivity = new Activity
         {
             Id = 1,
             Title = "Updated",
@@ -216,11 +216,11 @@ public class ActivitiesControllerTests
             .ReturnsAsync(updatedActivity);
 
         // Act
-        var result = await _controller.UpdateActivity(1, updatedActivity);
+        ActionResult<Activity> result = await _controller.UpdateActivity(1, updatedActivity);
 
         // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedActivity = okResult.Value.Should().BeOfType<Activity>().Subject;
+        OkObjectResult okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        Activity returnedActivity = okResult.Value.Should().BeOfType<Activity>().Subject;
         returnedActivity.Title.Should().Be("Updated");
     }
 
@@ -233,7 +233,7 @@ public class ActivitiesControllerTests
             .ReturnsAsync((Activity?)null);
 
         // Act
-        var result = await _controller.UpdateActivity(999, new Activity());
+        ActionResult<Activity> result = await _controller.UpdateActivity(999, new Activity());
 
         // Assert
         result.Result.Should().BeOfType<NotFoundObjectResult>();
@@ -248,7 +248,7 @@ public class ActivitiesControllerTests
     {
         // Arrange
         SetupControllerUser(userId: 1, isAdmin: true);
-        var activity = new Activity
+        Activity activity = new Activity
         {
             Id = 1,
             Title = "To Delete"
@@ -259,7 +259,7 @@ public class ActivitiesControllerTests
             .ReturnsAsync(true);
 
         // Act
-        var result = await _controller.DeleteActivity(1);
+        ActionResult result = await _controller.DeleteActivity(1);
 
         // Assert
         result.Should().BeOfType<NoContentResult>();

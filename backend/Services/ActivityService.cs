@@ -26,7 +26,7 @@ public class ActivityService : IActivityService
 
     public async Task<ScrollResult<Activity>> GetActivitiesAsync(int? cursor = null, int limit = 20, int? categoryId = null, List<int>? tagIds = null)
     {
-        var query = _context.Activities
+        IQueryable<Activity> query = _context.Activities
             .AsNoTracking()
             .Include(a => a.Category)
             .Include(a => a.Tags)
@@ -50,20 +50,20 @@ public class ActivityService : IActivityService
             query = query.Where(a => a.Id < cursor.Value);
         }
 
-        var totalCount = await _context.Activities.CountAsync();
+        int totalCount = await _context.Activities.CountAsync();
 
         // Fetch one extra item to determine if there are more results
-        var items = await query
+        List<Activity> items = await query
             .Take(limit + 1)
             .ToListAsync();
 
-        var hasMore = items.Count > limit;
+        bool hasMore = items.Count > limit;
         if (hasMore)
         {
             items = items.Take(limit).ToList();
         }
 
-        var nextCursor = items.Any() ? items.Last().Id : (int?)null;
+        int? nextCursor = items.Any() ? items.Last().Id : (int?)null;
 
         return new ScrollResult<Activity>
         {
@@ -93,7 +93,7 @@ public class ActivityService : IActivityService
 
     public async Task<Activity?> UpdateActivityAsync(int id, Activity activity)
     {
-        var existingActivity = await _context.Activities
+        Activity? existingActivity = await _context.Activities
             .Include(a => a.Tags)
             .FirstOrDefaultAsync(a => a.Id == id);
 
@@ -116,7 +116,7 @@ public class ActivityService : IActivityService
         existingActivity.Tags.Clear();
         if (activity.Tags != null)
         {
-            foreach (var tag in activity.Tags)
+            foreach (Tag tag in activity.Tags)
             {
                 existingActivity.Tags.Add(tag);
             }
@@ -131,7 +131,7 @@ public class ActivityService : IActivityService
 
     public async Task<bool> DeleteActivityAsync(int id)
     {
-        var activity = await _context.Activities
+        Activity? activity = await _context.Activities
             .Include(a => a.Tags)
             .FirstOrDefaultAsync(a => a.Id == id);
 

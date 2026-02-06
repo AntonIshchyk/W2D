@@ -22,12 +22,12 @@ public class TokenService : ITokenService
 
     public string GenerateToken(User user)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+        SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
             _configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured")));
 
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
+        Claim[] claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.Email),
@@ -35,7 +35,7 @@ public class TokenService : ITokenService
             new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User")
         };
 
-        var token = new JwtSecurityToken(
+        JwtSecurityToken token = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"],
             audience: _configuration["Jwt:Audience"],
             claims: claims,

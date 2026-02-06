@@ -29,8 +29,8 @@ public class ActivitiesController : ControllerBase
         // Validate Tags exist and replace with tracked entities
         if (activity.Tags != null && activity.Tags.Any())
         {
-            var tagIds = activity.Tags.Select(t => t.Id).ToList();
-            var existingTags = await _activityService.GetTagsByIdsAsync(tagIds);
+            List<int> tagIds = activity.Tags.Select(t => t.Id).ToList();
+            IEnumerable<Tag> existingTags = await _activityService.GetTagsByIdsAsync(tagIds);
 
             if (existingTags.Count() != tagIds.Count)
             {
@@ -55,7 +55,7 @@ public class ActivitiesController : ControllerBase
             return BadRequest(new { message = "Invalid limit parameter. Limit must be between 1 and 100." });
         }
 
-        var result = await _activityService.GetActivitiesAsync(cursor, limit, categoryId, tagIds);
+        ScrollResult<Activity> result = await _activityService.GetActivitiesAsync(cursor, limit, categoryId, tagIds);
 
         return Ok(result);
     }
@@ -63,7 +63,7 @@ public class ActivitiesController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Activity>> GetActivity(int id)
     {
-        var activity = await _activityService.GetActivityByIdAsync(id);
+        Activity? activity = await _activityService.GetActivityByIdAsync(id);
 
         if (activity == null)
         {
@@ -77,13 +77,13 @@ public class ActivitiesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Activity>> CreateActivity(Activity activity)
     {
-        var validationError = await ValidateAndSetTags(activity);
+        ActionResult<Activity>? validationError = await ValidateAndSetTags(activity);
         if (validationError != null)
         {
             return validationError;
         }
 
-        var createdActivity = await _activityService.CreateActivityAsync(activity);
+        Activity createdActivity = await _activityService.CreateActivityAsync(activity);
 
         return CreatedAtAction(nameof(GetActivity), new { id = createdActivity.Id }, createdActivity);
     }
@@ -92,20 +92,20 @@ public class ActivitiesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Activity>> UpdateActivity(int id, Activity activity)
     {
-        var existingActivity = await _activityService.GetActivityByIdAsync(id);
+        Activity? existingActivity = await _activityService.GetActivityByIdAsync(id);
 
         if (existingActivity == null)
         {
             return NotFound(new { message = "Activity not found" });
         }
 
-        var validationError = await ValidateAndSetTags(activity);
+        ActionResult<Activity>? validationError = await ValidateAndSetTags(activity);
         if (validationError != null)
         {
             return validationError;
         }
 
-        var updatedActivity = await _activityService.UpdateActivityAsync(id, activity);
+        Activity? updatedActivity = await _activityService.UpdateActivityAsync(id, activity);
 
         return Ok(updatedActivity);
     }
@@ -114,7 +114,7 @@ public class ActivitiesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult> DeleteActivity(int id)
     {
-        var deleted = await _activityService.DeleteActivityAsync(id);
+        bool deleted = await _activityService.DeleteActivityAsync(id);
 
         if (!deleted)
         {

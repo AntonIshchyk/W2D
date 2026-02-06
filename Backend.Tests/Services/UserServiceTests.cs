@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using FluentAssertions;
 using Backend.Data;
+using Backend.DTOs;
 using Backend.Models;
 using Backend.Services;
 
@@ -16,7 +17,7 @@ public class UserServiceTests : IDisposable
     public UserServiceTests()
     {
         // Setup in-memory database
-        var options = new DbContextOptionsBuilder<AppDbContext>()
+        DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
@@ -40,12 +41,12 @@ public class UserServiceTests : IDisposable
     public async Task RegisterUserAsync_ValidUser_ReturnsLoginResponse()
     {
         // Arrange
-        var name = "John Doe";
-        var email = "test@example.com";
-        var password = "password123";
+        string name = "John Doe";
+        string email = "test@example.com";
+        string password = "password123";
 
         // Act
-        var result = await _userService.RegisterUserAsync(email, password, name);
+        LoginResponse? result = await _userService.RegisterUserAsync(email, password, name);
 
         // Assert
         result.Should().NotBeNull();
@@ -55,7 +56,7 @@ public class UserServiceTests : IDisposable
         result.UserId.Should().BeGreaterThan(0);
         result.Token.Should().Be("fake-jwt-token");
 
-        var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        User? userInDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         userInDb.Should().NotBeNull();
         userInDb!.Password.Should().NotBe(password); // Password should be hashed
         userInDb.IsAdmin.Should().BeFalse(); // Default value
@@ -65,12 +66,12 @@ public class UserServiceTests : IDisposable
     public async Task RegisterUserAsync_DuplicateEmail_ReturnsNull()
     {
         // Arrange
-        var email = "duplicate@example.com";
-        var password = "password123";
+        string email = "duplicate@example.com";
+        string password = "password123";
         await _userService.RegisterUserAsync(email, password, "Jane Doe");
 
         // Act
-        var result = await _userService.RegisterUserAsync(email, "differentPassword", "Different User");
+        LoginResponse? result = await _userService.RegisterUserAsync(email, "differentPassword", "Different User");
 
         // Assert
         result.Should().BeNull();
@@ -80,14 +81,14 @@ public class UserServiceTests : IDisposable
     public async Task RegisterUserAsync_PasswordIsHashed_NotStoredInPlainText()
     {
         // Arrange
-        var email = "secure@example.com";
-        var password = "mySecurePassword123!";
+        string email = "secure@example.com";
+        string password = "mySecurePassword123!";
 
         // Act
         await _userService.RegisterUserAsync(email, password, "Secure User");
 
         // Assert
-        var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        User? userInDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         userInDb!.Password.Should().NotBe(password);
         userInDb.Password.Should().StartWith("$2"); // BCrypt hash starts with $2
     }
@@ -100,12 +101,12 @@ public class UserServiceTests : IDisposable
     public async Task LoginUserAsync_ValidCredentials_ReturnsLoginResponse()
     {
         // Arrange
-        var email = "login@example.com";
-        var password = "password123";
+        string email = "login@example.com";
+        string password = "password123";
         await _userService.RegisterUserAsync(email, password, "Login User");
 
         // Act
-        var result = await _userService.LoginUserAsync(email, password);
+        LoginResponse? result = await _userService.LoginUserAsync(email, password);
 
         // Assert
         result.Should().NotBeNull();
@@ -120,12 +121,12 @@ public class UserServiceTests : IDisposable
     public async Task LoginUserAsync_WrongPassword_ReturnsNull()
     {
         // Arrange
-        var email = "user@example.com";
-        var password = "correctPassword";
+        string email = "user@example.com";
+        string password = "correctPassword";
         await _userService.RegisterUserAsync(email, password, "Test User");
 
         // Act
-        var result = await _userService.LoginUserAsync(email, "wrongPassword");
+        LoginResponse? result = await _userService.LoginUserAsync(email, "wrongPassword");
 
         // Assert
         result.Should().BeNull();
@@ -135,11 +136,11 @@ public class UserServiceTests : IDisposable
     public async Task LoginUserAsync_UserDoesNotExist_ReturnsNull()
     {
         // Arrange
-        var email = "nonexistent@example.com";
-        var password = "password123";
+        string email = "nonexistent@example.com";
+        string password = "password123";
 
         // Act
-        var result = await _userService.LoginUserAsync(email, password);
+        LoginResponse? result = await _userService.LoginUserAsync(email, password);
 
         // Assert
         result.Should().BeNull();
@@ -153,17 +154,17 @@ public class UserServiceTests : IDisposable
     public async Task RegisterUserAsync_DefaultUser_IsAdminIsFalse()
     {
         // Arrange
-        var email = "regular@example.com";
-        var password = "password123";
+        string email = "regular@example.com";
+        string password = "password123";
 
         // Act
-        var result = await _userService.RegisterUserAsync(email, password, "Regular User");
+        LoginResponse? result = await _userService.RegisterUserAsync(email, password, "Regular User");
 
         // Assert
         result.Should().NotBeNull();
         result!.IsAdmin.Should().BeFalse();
 
-        var userInDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        User? userInDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         userInDb!.IsAdmin.Should().BeFalse();
     }
 
@@ -171,7 +172,7 @@ public class UserServiceTests : IDisposable
     public async Task RegisterUserAsync_AdminUserCreatedManually_IsAdminInResponse()
     {
         // Arrange - Create admin user directly in DB
-        var adminUser = new User
+        User adminUser = new User
         {
             Email = "admin@example.com",
             Password = BCrypt.Net.BCrypt.HashPassword("adminpass"),
@@ -182,7 +183,7 @@ public class UserServiceTests : IDisposable
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _userService.LoginUserAsync("admin@example.com", "adminpass");
+        LoginResponse? result = await _userService.LoginUserAsync("admin@example.com", "adminpass");
 
         // Assert
         result.Should().NotBeNull();
@@ -197,18 +198,18 @@ public class UserServiceTests : IDisposable
     public async Task RegisterAndLogin_MultipleUsers_WorksIndependently()
     {
         // Arrange
-        var user1Email = "user1@example.com";
-        var user1Password = "password1";
-        var user2Email = "user2@example.com";
-        var user2Password = "password2";
+        string user1Email = "user1@example.com";
+        string user1Password = "password1";
+        string user2Email = "user2@example.com";
+        string user2Password = "password2";
 
         // Act
         await _userService.RegisterUserAsync(user1Email, user1Password, "User One");
         await _userService.RegisterUserAsync(user2Email, user2Password, "User Two");
 
-        var login1 = await _userService.LoginUserAsync(user1Email, user1Password);
-        var login2 = await _userService.LoginUserAsync(user2Email, user2Password);
-        var crossLogin = await _userService.LoginUserAsync(user1Email, user2Password);
+        LoginResponse? login1 = await _userService.LoginUserAsync(user1Email, user1Password);
+        LoginResponse? login2 = await _userService.LoginUserAsync(user2Email, user2Password);
+        LoginResponse? crossLogin = await _userService.LoginUserAsync(user1Email, user2Password);
 
         // Assert
         login1.Should().NotBeNull();
@@ -226,7 +227,7 @@ public class UserServiceTests : IDisposable
         await _userService.RegisterUserAsync("user3@example.com", "pass3", "User Three");
 
         // Act
-        var result = await _userService.GetAllUsersAsync();
+        IEnumerable<User> result = await _userService.GetAllUsersAsync();
 
         // Assert
         result.Should().HaveCount(3);

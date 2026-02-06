@@ -33,7 +33,7 @@ public class UserService : IUserService
 
     public LoginResponse GenerateTokenForUserAsync(User user)
     {
-        var token = _tokenService.GenerateToken(user);
+        string token = _tokenService.GenerateToken(user);
 
         return new LoginResponse
         {
@@ -54,10 +54,10 @@ public class UserService : IUserService
         }
 
         // Hash the password
-        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
         // Create new user
-        var user = new User
+        User user = new User
         {
             Email = email,
             Password = hashedPassword,
@@ -73,7 +73,7 @@ public class UserService : IUserService
     public async Task<LoginResponse?> LoginUserAsync(string email, string password)
     {
         // Find user by email
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
         if (user == null)
         {

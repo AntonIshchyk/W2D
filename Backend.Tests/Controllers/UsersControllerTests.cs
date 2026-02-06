@@ -28,13 +28,13 @@ public class UsersControllerTests
     public async Task Register_ValidUser_ReturnsOkWithLoginResponse()
     {
         // Arrange
-        var registerRequest = new RegisterRequest
+        RegisterRequest registerRequest = new RegisterRequest
         {
             Name = "John Doe",
             Email = "test@example.com",
             Password = "password123"
         };
-        var expectedResponse = new LoginResponse
+        LoginResponse expectedResponse = new LoginResponse
         {
             UserId = 1,
             Email = registerRequest.Email,
@@ -46,11 +46,11 @@ public class UsersControllerTests
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.Register(registerRequest);
+        ActionResult<LoginResponse> result = await _controller.Register(registerRequest);
 
         // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var response = okResult.Value.Should().BeOfType<LoginResponse>().Subject;
+        OkObjectResult okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        LoginResponse response = okResult.Value.Should().BeOfType<LoginResponse>().Subject;
         response.Email.Should().Be(registerRequest.Email);
         response.Token.Should().Be("fake-token");
     }
@@ -59,7 +59,7 @@ public class UsersControllerTests
     public async Task Register_DuplicateEmail_ReturnsBadRequest()
     {
         // Arrange
-        var registerRequest = new RegisterRequest
+        RegisterRequest registerRequest = new RegisterRequest
         {
             Name = "Jane Doe",
             Email = "duplicate@example.com",
@@ -69,7 +69,7 @@ public class UsersControllerTests
             .ReturnsAsync((LoginResponse?)null);
 
         // Act
-        var result = await _controller.Register(registerRequest);
+        ActionResult<LoginResponse> result = await _controller.Register(registerRequest);
 
         // Assert
         result.Result.Should().BeOfType<BadRequestObjectResult>();
@@ -83,12 +83,12 @@ public class UsersControllerTests
     public async Task Login_ValidCredentials_ReturnsOkWithToken()
     {
         // Arrange
-        var loginRequest = new LoginRequest
+        LoginRequest loginRequest = new LoginRequest
         {
             Email = "test@example.com",
             Password = "password123"
         };
-        var expectedResponse = new LoginResponse
+        LoginResponse expectedResponse = new LoginResponse
         {
             UserId = 1,
             Email = loginRequest.Email,
@@ -100,11 +100,11 @@ public class UsersControllerTests
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.Login(loginRequest);
+        ActionResult<LoginResponse> result = await _controller.Login(loginRequest);
 
         // Assert
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var response = okResult.Value.Should().BeOfType<LoginResponse>().Subject;
+        OkObjectResult okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        LoginResponse response = okResult.Value.Should().BeOfType<LoginResponse>().Subject;
         response.Email.Should().Be(loginRequest.Email);
         response.Token.Should().Be("valid-jwt-token");
     }
@@ -113,7 +113,7 @@ public class UsersControllerTests
     public async Task Login_InvalidCredentials_ReturnsUnauthorized()
     {
         // Arrange
-        var loginRequest = new LoginRequest
+        LoginRequest loginRequest = new LoginRequest
         {
             Email = "test@example.com",
             Password = "wrongPassword"
@@ -122,10 +122,10 @@ public class UsersControllerTests
             .ReturnsAsync((LoginResponse?)null);
 
         // Act
-        var result = await _controller.Login(loginRequest);
+        ActionResult<LoginResponse> result = await _controller.Login(loginRequest);
 
         // Assert
-        var unauthorizedResult = result.Result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
+        UnauthorizedObjectResult unauthorizedResult = result.Result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
         unauthorizedResult.StatusCode.Should().Be(401);
     }
 
@@ -133,7 +133,7 @@ public class UsersControllerTests
     public async Task Login_UserDoesNotExist_ReturnsUnauthorized()
     {
         // Arrange
-        var loginRequest = new LoginRequest
+        LoginRequest loginRequest = new LoginRequest
         {
             Email = "nonexistent@example.com",
             Password = "password123"
@@ -142,7 +142,7 @@ public class UsersControllerTests
             .ReturnsAsync((LoginResponse?)null);
 
         // Act
-        var result = await _controller.Login(loginRequest);
+        ActionResult<LoginResponse> result = await _controller.Login(loginRequest);
 
         // Assert
         result.Result.Should().BeOfType<UnauthorizedObjectResult>();
@@ -156,7 +156,7 @@ public class UsersControllerTests
     public async Task Register_ServiceThrowsException_ExceptionPropagates()
     {
         // Arrange
-        var registerRequest = new RegisterRequest
+        RegisterRequest registerRequest = new RegisterRequest
         {
             Name = "Test User",
             Email = "test@example.com",
@@ -173,7 +173,7 @@ public class UsersControllerTests
     public async Task Login_ServiceThrowsException_ExceptionPropagates()
     {
         // Arrange
-        var loginRequest = new LoginRequest
+        LoginRequest loginRequest = new LoginRequest
         {
             Email = "test@example.com",
             Password = "password123"

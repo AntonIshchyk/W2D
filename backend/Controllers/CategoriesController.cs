@@ -20,7 +20,7 @@ public class CategoriesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
     {
-        var categories = await _context.Categories
+        List<Category> categories = await _context.Categories
             .OrderBy(c => c.Name)
             .ToListAsync();
 
@@ -30,7 +30,7 @@ public class CategoriesController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Category>> GetCategory(int id)
     {
-        var category = await _context.Categories
+        Category? category = await _context.Categories
             .Include(c => c.Activities)
             .FirstOrDefaultAsync(c => c.Id == id);
 
@@ -62,7 +62,7 @@ public class CategoriesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Category>> UpdateCategory(int id, Category category)
     {
-        var existingCategory = await _context.Categories.FindAsync(id);
+        Category? existingCategory = await _context.Categories.FindAsync(id);
 
         if (existingCategory == null)
         {
@@ -87,7 +87,7 @@ public class CategoriesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult> DeleteCategory(int id)
     {
-        var category = await _context.Categories
+        Category? category = await _context.Categories
             .Include(c => c.Activities)
             .FirstOrDefaultAsync(c => c.Id == id);
 

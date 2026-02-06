@@ -8,7 +8,7 @@ public static class DatabaseSeeder
     public static void SeedData(ModelBuilder modelBuilder)
     {
         // Seed Categories
-        var categories = new[]
+        Category[] categories = new[]
         {
             new Category { Id = 1, Name = "Sports" },
             new Category { Id = 2, Name = "Fitness" },
@@ -29,7 +29,7 @@ public static class DatabaseSeeder
         modelBuilder.Entity<Category>().HasData(categories);
 
         // Seed Tags
-        var tags = new[]
+        Tag[] tags = new[]
         {
             new Tag { Id = 1, Name = "Team" },
             new Tag { Id = 2, Name = "Individual" },
@@ -60,7 +60,7 @@ public static class DatabaseSeeder
         modelBuilder.Entity<Tag>().HasData(tags);
 
         // Seed Activities (using CreatedByUserId = 1, assuming admin will exist)
-        var activities = new List<Activity>
+        List<Activity> activities = new List<Activity>
         {
             // Ball Sports (10 activities)
             new Activity { Id = 1, Title = "Football (Soccer)", Description = "Play football with friends or join a local team. A great team sport that builds endurance, coordination, and teamwork skills.", CategoryId = 1, LocationType = LocationType.Outdoor, CostLevel = CostLevel.Low, PhysicalActivityLevel = PhysicalActivityLevel.High, Sociability = Sociability.Group, EquipmentLevel = EquipmentLevel.Minimal, EntryLevel = EntryLevel.Easy },
@@ -252,12 +252,12 @@ public static class DatabaseSeeder
         modelBuilder.Entity<Activity>().HasData(activities);
 
         // Seed Activity-Tag relationships - comprehensive tagging for all activities
-        var activityTags = new List<object>();
+        List<object> activityTags = new List<object>();
 
         // Helper to add tags more easily
         void AddTags(int activityId, params int[] tagIds)
         {
-            foreach (var tagId in tagIds)
+            foreach (int tagId in tagIds)
             {
                 activityTags.Add(new { ActivitiesId = activityId, TagsId = tagId });
             }

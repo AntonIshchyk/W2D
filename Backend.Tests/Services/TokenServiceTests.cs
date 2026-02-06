@@ -14,7 +14,7 @@ public class TokenServiceTests
 
     public TokenServiceTests()
     {
-        var configDict = new Dictionary<string, string>
+        Dictionary<string, string?> configDict = new Dictionary<string, string?>
         {
             { "Jwt:Key", "placeHolderSecretKeyThatIsAtLeast32CharactersLong!" },
             { "Jwt:Issuer", "Backend" },
@@ -32,7 +32,7 @@ public class TokenServiceTests
     public void GenerateToken_ValidUser_ReturnsValidJwtToken()
     {
         // Arrange
-        var user = new User
+        User user = new User
         {
             Id = 1,
             Name = "Test User",
@@ -40,7 +40,7 @@ public class TokenServiceTests
         };
 
         // Act
-        var token = _tokenService.GenerateToken(user);
+        string token = _tokenService.GenerateToken(user);
 
         // Assert
         token.Should().NotBeNullOrEmpty();
@@ -51,7 +51,7 @@ public class TokenServiceTests
     public void GenerateToken_ValidUser_TokenContainsUserClaims()
     {
         // Arrange
-        var user = new User
+        User user = new User
         {
             Id = 42,
             Name = "Claims User",
@@ -59,11 +59,11 @@ public class TokenServiceTests
         };
 
         // Act
-        var token = _tokenService.GenerateToken(user);
+        string token = _tokenService.GenerateToken(user);
 
         // Assert
-        var handler = new JwtSecurityTokenHandler();
-        var jwtToken = handler.ReadJwtToken(token);
+        JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+        JwtSecurityToken jwtToken = handler.ReadJwtToken(token);
 
         jwtToken.Claims.Should().Contain(c =>
             c.Type == ClaimTypes.NameIdentifier && c.Value == "42");
@@ -75,7 +75,7 @@ public class TokenServiceTests
     public void GenerateToken_ValidUser_TokenHasCorrectIssuerAndAudience()
     {
         // Arrange
-        var user = new User
+        User user = new User
         {
             Id = 1,
             Name = "Test User",
@@ -83,11 +83,11 @@ public class TokenServiceTests
         };
 
         // Act
-        var token = _tokenService.GenerateToken(user);
+        string token = _tokenService.GenerateToken(user);
 
         // Assert
-        var handler = new JwtSecurityTokenHandler();
-        var jwtToken = handler.ReadJwtToken(token);
+        JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+        JwtSecurityToken jwtToken = handler.ReadJwtToken(token);
 
         jwtToken.Issuer.Should().Be("Backend");
         jwtToken.Audiences.Should().Contain("Frontend");
@@ -97,7 +97,7 @@ public class TokenServiceTests
     public void GenerateToken_ValidUser_TokenHasExpirationTime()
     {
         // Arrange
-        var user = new User
+        User user = new User
         {
             Id = 1,
             Name = "Test User",
@@ -105,11 +105,11 @@ public class TokenServiceTests
         };
 
         // Act
-        var token = _tokenService.GenerateToken(user);
+        string token = _tokenService.GenerateToken(user);
 
         // Assert
-        var handler = new JwtSecurityTokenHandler();
-        var jwtToken = handler.ReadJwtToken(token);
+        JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+        JwtSecurityToken jwtToken = handler.ReadJwtToken(token);
 
         jwtToken.ValidTo.Should().BeAfter(DateTime.UtcNow);
         jwtToken.ValidTo.Should().BeCloseTo(DateTime.UtcNow.AddHours(24), TimeSpan.FromMinutes(1));
@@ -119,12 +119,12 @@ public class TokenServiceTests
     public void GenerateToken_DifferentUsers_GenerateDifferentTokens()
     {
         // Arrange
-        var user1 = new User { Id = 1, Email = "user1@example.com" };
-        var user2 = new User { Id = 2, Email = "user2@example.com" };
+        User user1 = new User { Id = 1, Email = "user1@example.com" };
+        User user2 = new User { Id = 2, Email = "user2@example.com" };
 
         // Act
-        var token1 = _tokenService.GenerateToken(user1);
-        var token2 = _tokenService.GenerateToken(user2);
+        string token1 = _tokenService.GenerateToken(user1);
+        string token2 = _tokenService.GenerateToken(user2);
 
         // Assert
         token1.Should().NotBe(token2);
@@ -134,16 +134,16 @@ public class TokenServiceTests
     public void GenerateToken_MissingJwtKey_ThrowsException()
     {
         // Arrange
-        var configDict = new Dictionary<string, string>
+        Dictionary<string, string?> configDict = new Dictionary<string, string?>
         {
             { "Jwt:Issuer", "Backend" },
             { "Jwt:Audience", "Frontend" }
         };
-        var config = new ConfigurationBuilder()
+        IConfigurationRoot config = new ConfigurationBuilder()
             .AddInMemoryCollection(configDict!)
             .Build();
-        var service = new TokenService(config);
-        var user = new User { Id = 1, Email = "test@example.com" };
+        TokenService service = new TokenService(config);
+        User user = new User { Id = 1, Email = "test@example.com" };
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => service.GenerateToken(user));
