@@ -42,51 +42,51 @@ public class ActivitiesControllerTests
     #region GetActivities Tests
 
     [Fact]
-    public async Task GetActivities_ReturnsPagedActivities()
+    public async Task GetActivities_ReturnsScrollResults()
     {
         // Arrange
-        var paginatedResult = new PaginatedResult<Activity>
+        var scrollResult = new ScrollResult<Activity>
         {
             Items = new List<Activity>
             {
-                new Activity { Id = 1, Title = "Activity 1" },
+                new Activity { Id = 3, Title = "Activity 3" },
                 new Activity { Id = 2, Title = "Activity 2" },
-                new Activity { Id = 3, Title = "Activity 3" }
+                new Activity { Id = 1, Title = "Activity 1" }
             },
-            PageNumber = 1,
-            PageSize = 10,
+            NextCursor = 1,
+            HasMore = false,
             TotalCount = 3
         };
-        _mockActivityService.Setup(x => x.GetActivitiesAsync(It.IsAny<int>(), It.IsAny<int>(), null, null))
-            .ReturnsAsync(paginatedResult);
+        _mockActivityService.Setup(x => x.GetActivitiesAsync(null, 20, null, null))
+            .ReturnsAsync(scrollResult);
 
         // Act
-        var result = await _controller.GetActivities(1, 10);
+        var result = await _controller.GetActivities();
 
         // Assert
         var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var pagedResult = okResult.Value.Should().BeOfType<PaginatedResult<Activity>>().Subject;
-        pagedResult.Items.Should().HaveCount(3);
-        pagedResult.PageNumber.Should().Be(1);
-        pagedResult.PageSize.Should().Be(10);
-        pagedResult.TotalCount.Should().Be(3);
+        var scrolledResult = okResult.Value.Should().BeOfType<ScrollResult<Activity>>().Subject;
+        scrolledResult.Items.Should().HaveCount(3);
+        scrolledResult.NextCursor.Should().Be(1);
+        scrolledResult.HasMore.Should().BeFalse();
+        scrolledResult.TotalCount.Should().Be(3);
     }
 
     [Fact]
-    public async Task GetActivities_WithInvalidPageNumber_ReturnsBadRequest()
+    public async Task GetActivities_WithInvalidLimit_ReturnsBadRequest()
     {
         // Act
-        var result = await _controller.GetActivities(0, 10);
+        var result = await _controller.GetActivities(limit: 0);
 
         // Assert
         result.Result.Should().BeOfType<BadRequestObjectResult>();
     }
 
     [Fact]
-    public async Task GetActivities_WithInvalidPageSize_ReturnsBadRequest()
+    public async Task GetActivities_WithLimitTooLarge_ReturnsBadRequest()
     {
         // Act
-        var result = await _controller.GetActivities(1, 101);
+        var result = await _controller.GetActivities(limit: 101);
 
         // Assert
         result.Result.Should().BeOfType<BadRequestObjectResult>();

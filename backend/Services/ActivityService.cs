@@ -24,7 +24,7 @@ public class ActivityService : IActivityService
             .ToListAsync();
     }
 
-    public async Task<PaginatedResult<Activity>> GetActivitiesAsync(int pageNumber = 1, int pageSize = 10, int? categoryId = null, List<int>? tagIds = null)
+    public async Task<ScrollResult<Activity>> GetActivitiesAsync(int? cursor = null, int limit = 20, int? categoryId = null, List<int>? tagIds = null)
     {
         var query = _context.Activities
             .AsNoTracking()
@@ -39,25 +39,37 @@ public class ActivityService : IActivityService
         }
 
         // Filter by tags if provided (activities must have ALL specified tags)
-        if (tagIds != null && tagIds.Any())
+        if (tagIds != null && tagIds.Count != 0)
         {
             query = query.Where(a => a.Tags.Count(t => tagIds.Contains(t.Id)) == tagIds.Count);
         }
 
-        query = query.OrderByDescending(a => a.CreatedAt);
+        // Apply cursor if provided
+        if (cursor.HasValue)
+        {
+            query = query.Where(a => a.Id < cursor.Value);
+        }
 
-        var totalCount = await query.CountAsync();
+        var totalCount = await _context.Activities.CountAsync();
 
+        // Fetch one extra item to determine if there are more results
         var items = await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
+            .Take(limit + 1)
             .ToListAsync();
 
-        return new PaginatedResult<Activity>
+        var hasMore = items.Count > limit;
+        if (hasMore)
+        {
+            items = items.Take(limit).ToList();
+        }
+
+        var nextCursor = items.Any() ? items.Last().Id : (int?)null;
+
+        return new ScrollResult<Activity>
         {
             Items = items,
-            PageNumber = pageNumber,
-            PageSize = pageSize,
+            NextCursor = hasMore ? nextCursor : null,
+            HasMore = hasMore,
             TotalCount = totalCount
         };
     }

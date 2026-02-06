@@ -1,5 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState, useEffect } from 'react'
+import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from './ui/button'
 import { Navbar } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
@@ -33,21 +33,21 @@ interface Activity {
   updatedAt: string
 }
 
-interface PaginatedResult {
+interface ScrollResult {
   items: Activity[]
-  pageNumber: number
-  pageSize: number
+  nextCursor: number | null
+  hasMore: boolean
   totalCount: number
-  totalPages: number
-  hasPreviousPage: boolean
-  hasNextPage: boolean
 }
 
-async function fetchActivities(pageNumber: number, categoryId?: number, tagIds?: number[]): Promise<PaginatedResult> {
+async function fetchActivities(cursor: number | null, categoryId?: number, tagIds?: number[]): Promise<ScrollResult> {
   const params = new URLSearchParams({
-    pageNumber: pageNumber.toString(),
-    pageSize: '10'
+    limit: '20'
   })
+
+  if (cursor !== null) {
+    params.append('cursor', cursor.toString())
+  }
 
   if (categoryId) {
     params.append('categoryId', categoryId.toString())
@@ -89,9 +89,9 @@ async function fetchTags(): Promise<Tag[]> {
 }
 
 export function Activities() {
-  const [currentPage, setCurrentPage] = useState(1)
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>(undefined)
   const [selectedTags, setSelectedTags] = useState<number[]>([])
+  const observerTarget = useRef<HTMLDivElement>(null)
   
   const { isError } = useQuery({
     queryKey: ['currentUser'],
@@ -113,25 +113,51 @@ export function Activities() {
     gcTime: Infinity
   })
 
-  const { data: activitiesData, isLoading: activitiesLoading } = useQuery({
-    queryKey: ['activities', currentPage, selectedCategory, selectedTags],
-    queryFn: () => fetchActivities(currentPage, selectedCategory, selectedTags),
-    retry: false,
-    placeholderData: (previousData) => previousData
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading
+  } = useInfiniteQuery({
+    queryKey: ['activities', selectedCategory, selectedTags],
+    queryFn: ({ pageParam }) => fetchActivities(pageParam, selectedCategory, selectedTags),
+    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
+    initialPageParam: null as number | null,
+    retry: false
   })
 
   useAuthErrorHandler(isError)
 
-  // Reset to page 1 when filters change
+  // Intersection Observer for infinite scroll
+  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+    const [target] = entries
+    if (target.isIntersecting && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage()
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
+
   useEffect(() => {
-    setCurrentPage(1)
-  }, [selectedCategory, selectedTags])
+    const element = observerTarget.current
+    const option = { threshold: 0.1 }
+    const observer = new IntersectionObserver(handleObserver, option)
+    
+    if (element) observer.observe(element)
+    
+    return () => {
+      if (element) observer.unobserve(element)
+    }
+  }, [handleObserver])
 
   const queryClient = useQueryClient()
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false)
   const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null)
   const [plannedDate, setPlannedDate] = useState('')
   const [notes, setNotes] = useState('')
+
+  // Flatten all activities from all pages
+  const allActivities = data?.pages.flatMap(page => page.items) ?? []
+  const totalCount = data?.pages[0]?.totalCount ?? 0
 
   const scheduleMutation = useMutation({
     mutationFn: async (data: { activityId: number; plannedDate: string; notes?: string }) => {
@@ -255,12 +281,12 @@ export function Activities() {
           </div>
 
           <div className="border-t pt-6">
-            <div className={`space-y-4 transition-opacity duration-200 ${activitiesLoading && !activitiesData ? 'opacity-50' : 'opacity-100'}`}>
-              {!activitiesData && activitiesLoading ? (
+            <div className="space-y-4">
+              {isLoading ? (
                 <p className="text-gray-600">Loading activities...</p>
               ) : (
                 <>
-              {activitiesData?.items.map((activity) => (
+              {allActivities.map((activity) => (
                 <div key={activity.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="text-lg font-semibold text-gray-900">{activity.title}</h3>
@@ -290,7 +316,7 @@ export function Activities() {
                 </div>
               ))}
               
-              {activitiesData && activitiesData.items.length === 0 && (
+              {allActivities.length === 0 && !isLoading && (
                 <p className="text-gray-500 text-center py-8">
                   {selectedCategory || selectedTags.length > 0 
                     ? 'No activities found matching your filters' 
@@ -298,32 +324,20 @@ export function Activities() {
                 </p>
               )}
               
-              {activitiesData && activitiesData.totalCount > 0 && (
-                <div className="mt-6 flex items-center justify-between border-t pt-4">
-                  <div className="text-sm text-gray-600">
-                    Showing {activitiesData.items.length} of {activitiesData.totalCount} activities
-                    (Page {activitiesData.pageNumber} of {activitiesData.totalPages})
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => setCurrentPage(p => p - 1)}
-                      disabled={!activitiesData.hasPreviousPage}
-                      variant="outline"
-                      size="sm"
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      onClick={() => setCurrentPage(p => p + 1)}
-                      disabled={!activitiesData.hasNextPage}
-                      variant="outline"
-                      size="sm"
-                    >
-                      Next
-                    </Button>
+              {allActivities.length > 0 && (
+                <div className="mt-6 border-t pt-4">
+                  <div className="text-sm text-gray-600 text-center">
+                    Showing {allActivities.length} of {totalCount} activities
                   </div>
                 </div>
               )}
+
+              {/* Intersection Observer Target */}
+              <div ref={observerTarget} className="h-10 flex items-center justify-center">
+                {isFetchingNextPage && (
+                  <p className="text-gray-500 text-sm">Loading more activities...</p>
+                )}
+              </div>
                 </>
               )}
             </div>
