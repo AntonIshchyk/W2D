@@ -21,13 +21,13 @@ export const API_ENDPOINTS = {
     byId: (id: number) => `${API_BASE_URL}/api/tags/${id}`,
   },
   schedules: {
-    base: `${API_BASE_URL}/api/activityschedules`,
-    planned: `${API_BASE_URL}/api/activityschedules/planned`,
-    completed: `${API_BASE_URL}/api/activityschedules/completed`,
-    history: `${API_BASE_URL}/api/activityschedules/history`,
-    byId: (id: number) => `${API_BASE_URL}/api/activityschedules/${id}`,
-    complete: (id: number) => `${API_BASE_URL}/api/activityschedules/${id}/complete`,
-    cancel: (id: number) => `${API_BASE_URL}/api/activityschedules/${id}/cancel`,
+    base: `${API_BASE_URL}/api/useractivities`,
+    planned: `${API_BASE_URL}/api/useractivities/planned`,
+    completed: `${API_BASE_URL}/api/useractivities/completed`,
+    history: `${API_BASE_URL}/api/useractivities/history`,
+    byId: (id: number) => `${API_BASE_URL}/api/useractivities/${id}`,
+    complete: (id: number) => `${API_BASE_URL}/api/useractivities/${id}/complete`,
+    cancel: (id: number) => `${API_BASE_URL}/api/useractivities/${id}/cancel`,
   },
 } as const;
 

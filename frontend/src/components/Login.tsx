@@ -17,8 +17,6 @@ interface LoginResponse {
   userId: number
   email: string
   name: string
-  age: number
-  gender: 'Male' | 'Female'
 }
 
 async function loginUser(data: LoginData): Promise<LoginResponse> {

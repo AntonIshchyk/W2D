@@ -4,8 +4,6 @@ export interface UserInfo {
   userId: number
   email: string
   name: string
-  age: number
-  gender: string
 }
 
 export async function fetchCurrentUser(): Promise<UserInfo> {

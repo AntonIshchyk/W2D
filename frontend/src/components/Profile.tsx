@@ -186,14 +186,6 @@ export function Profile() {
                 <label className="text-sm font-medium text-gray-500">Email</label>
                 <p className="text-lg text-gray-900">{user.email}</p>
               </div>
-              <div className="border-b pb-4">
-                <label className="text-sm font-medium text-gray-500">Age</label>
-                <p className="text-lg text-gray-900">{user.age}</p>
-              </div>
-              <div className="border-b pb-4">
-                <label className="text-sm font-medium text-gray-500">Gender</label>
-                <p className="text-lg text-gray-900">{user.gender}</p>
-              </div>
             </div>
           </div>
         )}

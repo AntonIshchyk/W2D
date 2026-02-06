@@ -10,16 +10,12 @@ interface SignUpData {
   name: string
   email: string
   password: string
-  age: number
-  gender: 'Male' | 'Female'
 }
 
 interface SignUpResponse {
   token: string
   email: string
   name: string
-  age: number
-  gender: 'Male' | 'Female'
 }
 
 async function signUpUser(data: SignUpData): Promise<SignUpResponse> {
@@ -42,8 +38,6 @@ export function SignUp() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [age, setAge] = useState('')
-  const [gender, setGender] = useState<'Male' | 'Female' | ''>('')
 
   const mutation = useMutation({
     mutationFn: signUpUser,
@@ -55,13 +49,10 @@ export function SignUp() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!gender) return
     mutation.mutate({ 
       name,
       email, 
-      password,
-      age: parseInt(age),
-      gender
+      password
     })
   }
 
@@ -108,50 +99,6 @@ export function SignUp() {
               autoComplete="new-password"
               required
             />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="age">Age</Label>
-            <Input
-              id="age"
-              type="number"
-              placeholder="18"
-              value={age}
-              onChange={(e) => setAge(e.target.value)}
-              required
-              min="1"
-              max="120"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Gender</Label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="gender"
-                  value="Male"
-                  checked={gender === 'Male'}
-                  onChange={(e) => setGender(e.target.value as 'Male' | 'Female')}
-                  required
-                  className="w-4 h-4 cursor-pointer"
-                />
-                <span className="text-sm">Male</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="gender"
-                  value="Female"
-                  checked={gender === 'Female'}
-                  onChange={(e) => setGender(e.target.value as 'Male' | 'Female')}
-                  required
-                  className="w-4 h-4 cursor-pointer"
-                />
-                <span className="text-sm">Female</span>
-              </label>
-            </div>
           </div>
 
           <Button 
