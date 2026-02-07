@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ApiError } from '../lib/auth'
+import { clearAuthToken } from './useAuthSync'
 
 /**
  * Custom hook to handle authentication errors by redirecting to login.
@@ -11,7 +12,7 @@ export function useAuthErrorHandler(isError: boolean, error?: Error | null) {
 
   useEffect(() => {
     if (isError && error instanceof ApiError && error.status === 401) {
-      localStorage.removeItem('token')
+      clearAuthToken()
       navigate('/login')
     }
   }, [isError, error, navigate])

@@ -348,7 +348,7 @@ export function Posts() {
 
                     {/* Footer */}
                     <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400">
-                      {post.rating && (
+                      {post.rating != null && post.rating > 0 && (
                         <span className="flex items-center gap-0.5">
                           {[...Array(post.rating)].map((_, i) => (
                             <svg key={i} className="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">

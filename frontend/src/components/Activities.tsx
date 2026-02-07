@@ -23,12 +23,12 @@ interface Activity {
   description: string
   categoryId: number
   category?: Category
-  locationType: number
-  costLevel?: number
-  physicalActivityLevel?: number
-  sociability?: number
-  equipmentLevel?: number
-  entryLevel?: number
+  locationType: string
+  costLevel?: string
+  physicalActivityLevel?: string
+  sociability?: string
+  equipmentLevel?: string
+  entryLevel?: string
   tags: Tag[]
   createdAt: string
   updatedAt: string
@@ -219,9 +219,9 @@ export function Activities() {
     return null
   }
 
-  const locationLabels: Record<number, string> = { 0: 'Indoor', 1: 'Outdoor', 2: 'Both' }
-  const costLabels: Record<number, string> = { 0: 'Free', 1: '$', 2: '$$', 3: '$$$' }
-  const physicalLabels: Record<number, string> = { 0: 'Chill', 1: 'Light', 2: 'Moderate', 3: 'Intense' }
+  const locationLabels: Record<string, string> = { 'Any': 'Any Location', 'Indoor': 'Indoor', 'Outdoor': 'Outdoor', 'Online': 'Online' }
+  const costLabels: Record<string, string> = { 'Low': '$', 'Medium': '$$', 'High': '$$$' }
+  const physicalLabels: Record<string, string> = { 'Low': 'Chill', 'Medium': 'Moderate', 'High': 'Intense' }
 
   return (
     <PageLayout>
