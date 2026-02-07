@@ -74,9 +74,19 @@ export function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Login</h2>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Left branding panel */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gray-900 items-end p-12">
+        <div>
+          <h1 className="text-5xl font-black text-white tracking-tight mb-3">W2D</h1>
+          <p className="text-gray-500 text-sm">Figure out what to do.</p>
+        </div>
+      </div>
+
+      {/* Right form panel */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-sm">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">Sign in</h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -150,14 +160,15 @@ export function Login() {
         )}
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-400">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-blue-600 hover:text-blue-800 font-medium">
+            <Link to="/signup" className="text-gray-900 hover:underline font-medium">
               Sign up
             </Link>
           </p>
         </div>
       </div>
+    </div>
     </div>
   )
 }

@@ -2,7 +2,7 @@ import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tansta
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from './ui/button'
-import { Navbar } from './Navbar'
+import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { fetchCurrentUser } from '../lib/auth'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
@@ -169,7 +169,6 @@ export function Posts() {
 
   // Flatten all posts from all pages
   const allPosts = data?.pages.flatMap(page => page.items) ?? []
-  const totalCount = data?.pages[0]?.totalCount ?? 0
 
   const handleVote = (postId: number, currentVote: number | undefined, newValue: number) => {
     // If clicking the same vote, remove it (set to 0)
@@ -197,215 +196,193 @@ export function Posts() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
-      <div className="max-w-4xl mx-auto p-4 py-8">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Community Posts</h1>
-            {currentUser && (
-              <Button onClick={() => navigate('/posts/create')}>
-                Create Post
-              </Button>
-            )}
+    <PageLayout>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Posts</h1>
+        {currentUser && (
+          <Button onClick={() => navigate('/posts/create')} className="text-sm">
+            New Post
+          </Button>
+        )}
+      </div>
+
+      {/* Filters — compact inline bar */}
+      <div className="flex items-center gap-4 flex-wrap mb-6 pb-5 border-b border-gray-200">
+        {/* Sort tabs */}
+        <div className="flex bg-gray-100 rounded-lg p-0.5">
+          {[
+            { value: 'new', label: 'New' },
+            { value: 'hot', label: 'Hot' },
+            { value: 'top', label: 'Top' }
+          ].map((s) => (
+            <button
+              key={s.value}
+              onClick={() => setSortBy(s.value)}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                sortBy === s.value
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Activity filter */}
+        <select
+          value={selectedActivity ?? ''}
+          onChange={(e) => setSelectedActivity(e.target.value ? Number(e.target.value) : undefined)}
+          className="text-xs text-gray-600 bg-transparent border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-gray-400"
+        >
+          <option value="">All activities</option>
+          {activities?.map((activity) => (
+            <option key={activity.id} value={activity.id}>
+              {activity.title}
+            </option>
+          ))}
+        </select>
+
+        {/* Type pills */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {Object.entries(POST_TYPE_LABELS).map(([value, label]) => (
+            <button
+              key={value}
+              onClick={() => setSelectedType(selectedType === Number(value) ? undefined : Number(value))}
+              className={`px-2.5 py-1 rounded-md text-xs transition-all ${
+                selectedType === Number(value)
+                  ? 'bg-gray-900 text-white'
+                  : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-400'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {(selectedActivity || selectedType || sortBy !== 'new') && (
+          <button
+            onClick={() => { setSelectedActivity(undefined); setSelectedType(undefined); setSortBy('new') }}
+            className="text-xs text-gray-400 hover:text-gray-600 underline"
+          >
+            clear
+          </button>
+        )}
+      </div>
+
+      {/* Post list — compact density */}
+      <div className="max-w-4xl">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <p className="text-sm text-gray-400 tracking-wide uppercase">Loading...</p>
           </div>
-          
-          {/* Filters */}
-          <div className="mb-6 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sort By
-                </label>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="new">New (Latest First)</option>
-                  <option value="hot">Hot (Most Popular)</option>
-                  <option value="top">Top (Highest Rated)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Filter by Activity
-                </label>
-                <select
-                  value={selectedActivity ?? ''}
-                  onChange={(e) => setSelectedActivity(e.target.value ? Number(e.target.value) : undefined)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Activities</option>
-                  {activities?.map((activity) => (
-                    <option key={activity.id} value={activity.id}>
-                      {activity.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Filter by Type
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(POST_TYPE_LABELS).map(([value, label]) => (
-                  <button
-                    key={value}
-                    onClick={() => setSelectedType(selectedType === Number(value) ? undefined : Number(value))}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      selectedType === Number(value)
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {(selectedActivity || selectedType || sortBy !== 'new') && (
-              <button
-                onClick={() => {
-                  setSelectedActivity(undefined)
-                  setSelectedType(undefined)
-                  setSortBy('new')
-                }}
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-              >
-                Clear all filters
-              </button>
-            )}
-          </div>
-
-          <div className="border-t pt-6">
-            <div className="space-y-6">
-              {isLoading ? (
-                <p className="text-gray-600">Loading posts...</p>
-              ) : (
-                <>
-                  {allPosts.map((post) => (
-                    <div key={post.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                      <div className="flex gap-4">
-                        {/* Vote buttons */}
-                        <div className="flex flex-col items-center gap-1">
-                          <button
-                            onClick={() => handleVote(post.id, post.currentUserVote, 1)}
-                            disabled={!currentUser}
-                            className={`p-1 rounded hover:bg-gray-100 transition-colors ${
-                              post.currentUserVote === 1 ? 'text-orange-600' : 'text-gray-400'
-                            } ${!currentUser ? 'cursor-not-allowed opacity-50' : ''}`}
-                          >
-                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" />
-                            </svg>
-                          </button>
-                          <span className={`text-sm font-semibold ${
-                            post.score > 0 ? 'text-orange-600' : post.score < 0 ? 'text-blue-600' : 'text-gray-600'
-                          }`}>
-                            {post.score}
-                          </span>
-                          <button
-                            onClick={() => handleVote(post.id, post.currentUserVote, -1)}
-                            disabled={!currentUser}
-                            className={`p-1 rounded hover:bg-gray-100 transition-colors ${
-                              post.currentUserVote === -1 ? 'text-blue-600' : 'text-gray-400'
-                            } ${!currentUser ? 'cursor-not-allowed opacity-50' : ''}`}
-                          >
-                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" />
-                            </svg>
-                          </button>
-                        </div>
-
-                        {/* Post content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2 flex-wrap">
-                            <span className={`text-xs font-medium px-2.5 py-0.5 rounded ${
-                              POST_TYPE_COLORS[post.type as PostType]
-                            }`}>
-                              {POST_TYPE_LABELS[post.type as PostType]}
-                            </span>
-                            {post.activityTitle && (
-                              <span className="text-xs text-gray-600">
-                                • {post.activityTitle}
-                              </span>
-                            )}
-                          </div>
-                          
-                          <h3 
-                            className="text-xl font-semibold text-gray-900 mb-2 cursor-pointer hover:text-blue-600"
-                            onClick={() => navigate(`/posts/${post.id}`)}
-                          >
-                            {post.title}
-                          </h3>
-                          
-                          <p className="text-gray-700 mb-3 line-clamp-3">{post.content}</p>
-                          
-                          {post.rating && (
-                            <div className="flex items-center gap-1 mb-2">
-                              {[...Array(5)].map((_, i) => (
-                                <svg
-                                  key={i}
-                                  className={`w-4 h-4 ${i < post.rating! ? 'text-yellow-400' : 'text-gray-300'}`}
-                                  fill="currentColor"
-                                  viewBox="0 0 20 20"
-                                >
-                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                              ))}
-                            </div>
-                          )}
-                          
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <span>by {post.userName || 'Anonymous'}</span>
-                            <span>•</span>
-                            <span>{formatDate(post.createdAt)}</span>
-                            {post.commentCount > 0 && (
-                              <>
-                                <span>•</span>
-                                <span>{post.commentCount} comments</span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {allPosts.length === 0 && !isLoading && (
-                    <p className="text-gray-500 text-center py-8">
-                      {selectedActivity || selectedType
-                        ? 'No posts found matching your filters' 
-                        : 'No posts yet. Be the first to create one!'}
-                    </p>
-                  )}
-                  
-                  {allPosts.length > 0 && (
-                    <div className="mt-6 border-t pt-4">
-                      <div className="text-sm text-gray-600 text-center">
-                        Showing {allPosts.length} of {totalCount} posts
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Intersection Observer Target */}
-                  <div ref={observerTarget} className="h-10 flex items-center justify-center">
-                    {isFetchingNextPage && (
-                      <p className="text-gray-500 text-sm">Loading more posts...</p>
-                    )}
+        ) : (
+          <>
+            <div className="divide-y divide-gray-100">
+              {allPosts.map((post) => (
+                <div key={post.id} className="group py-4 flex gap-4">
+                  {/* Compact vote */}
+                  <div className="flex flex-col items-center gap-0.5 pt-0.5">
+                    <button
+                      onClick={() => handleVote(post.id, post.currentUserVote, 1)}
+                      disabled={!currentUser}
+                      className={`p-0.5 rounded transition-colors ${
+                        post.currentUserVote === 1 ? 'text-orange-500' : 'text-gray-300 hover:text-gray-500'
+                      } ${!currentUser ? 'cursor-not-allowed' : ''}`}
+                    >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" />
+                      </svg>
+                    </button>
+                    <span className={`text-xs font-semibold tabular-nums ${
+                      post.score > 0 ? 'text-orange-500' : post.score < 0 ? 'text-blue-500' : 'text-gray-400'
+                    }`}>
+                      {post.score}
+                    </span>
+                    <button
+                      onClick={() => handleVote(post.id, post.currentUserVote, -1)}
+                      disabled={!currentUser}
+                      className={`p-0.5 rounded transition-colors ${
+                        post.currentUserVote === -1 ? 'text-blue-500' : 'text-gray-300 hover:text-gray-500'
+                      } ${!currentUser ? 'cursor-not-allowed' : ''}`}
+                    >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" />
+                      </svg>
+                    </button>
                   </div>
-                </>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    {/* Meta line */}
+                    <div className="flex items-center gap-2 mb-1 text-xs text-gray-400">
+                      <span className={`font-medium px-1.5 py-0.5 rounded text-[11px] ${
+                        POST_TYPE_COLORS[post.type as PostType]
+                      }`}>
+                        {POST_TYPE_LABELS[post.type as PostType]}
+                      </span>
+                      <span>{post.userName || 'Anon'}</span>
+                      <span className="text-gray-300">&middot;</span>
+                      <span>{formatDate(post.createdAt)}</span>
+                      {post.activityTitle && (
+                        <>
+                          <span className="text-gray-300">&middot;</span>
+                          <span className="text-gray-500">{post.activityTitle}</span>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Title */}
+                    <h3 
+                      className="text-sm font-semibold text-gray-900 mb-1 cursor-pointer hover:text-blue-600 transition-colors"
+                      onClick={() => navigate(`/posts/${post.id}`)}
+                    >
+                      {post.title}
+                    </h3>
+                    
+                    {/* Preview text */}
+                    <p className="text-sm text-gray-500 line-clamp-1">{post.content}</p>
+
+                    {/* Footer */}
+                    <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400">
+                      {post.rating && (
+                        <span className="flex items-center gap-0.5">
+                          {[...Array(post.rating)].map((_, i) => (
+                            <svg key={i} className="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          ))}
+                        </span>
+                      )}
+                      {post.commentCount > 0 && (
+                        <span>{post.commentCount} comments</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {allPosts.length === 0 && (
+              <div className="text-center py-20">
+                <p className="text-gray-400">
+                  {selectedActivity || selectedType
+                    ? 'Nothing matches those filters' 
+                    : 'No posts yet'}
+                </p>
+              </div>
+            )}
+
+            {/* Infinite scroll target */}
+            <div ref={observerTarget} className="h-10 flex items-center justify-center">
+              {isFetchingNextPage && (
+                <p className="text-xs text-gray-400">Loading more...</p>
               )}
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
-    </div>
+    </PageLayout>
   )
 }

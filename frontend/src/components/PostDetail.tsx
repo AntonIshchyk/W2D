@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Button } from './ui/button'
-import { Navbar } from './Navbar'
+import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { PostType } from '../types/posts'
 import type { Post } from '../types/posts'
@@ -122,47 +121,43 @@ export function PostDetail() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="max-w-4xl mx-auto p-4 py-8">
-          <div className="bg-white rounded-lg shadow-md p-8">
-            <p className="text-gray-600">Loading post...</p>
-          </div>
+      <PageLayout>
+        <div className="flex items-center justify-center py-20">
+          <p className="text-sm text-gray-400 tracking-wide uppercase">Loading...</p>
         </div>
-      </div>
+      </PageLayout>
     )
   }
 
   if (isError || !post) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="max-w-4xl mx-auto p-4 py-8">
-          <div className="bg-white rounded-lg shadow-md p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Post Not Found</h2>
-            <p className="text-gray-600 mb-6">The post you're looking for doesn't exist or has been removed.</p>
-            <Button onClick={() => navigate('/posts')}>
-              Back to Posts
-            </Button>
-          </div>
+      <PageLayout>
+        <div className="max-w-3xl">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Not Found</h2>
+          <p className="text-sm text-gray-500 mb-4">This post doesn't exist or has been removed.</p>
+          <button onClick={() => navigate('/posts')} className="text-sm text-gray-400 hover:text-gray-600 underline">
+            Back to posts
+          </button>
         </div>
-      </div>
+      </PageLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
-      <div className="max-w-4xl mx-auto p-4 py-8">
-        <div className="mb-4">
-          <Button variant="outline" onClick={() => navigate('/posts')}>
-            ← Back to Posts
-          </Button>
-        </div>
+    <PageLayout>
+      <div className="max-w-3xl">
+        {/* Back link */}
+        <button
+          onClick={() => navigate('/posts')}
+          className="text-xs text-gray-400 hover:text-gray-600 mb-6 flex items-center gap-1 transition-colors"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Posts
+        </button>
 
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <div className="flex gap-6">
+        <div className="flex gap-6">
             {/* Vote buttons */}
             <div className="flex flex-col items-center gap-2 pt-2">
               <button
@@ -297,21 +292,19 @@ export function PostDetail() {
 
               {/* Action buttons for post owner */}
               {currentUser && currentUser.userId === post.userId && (
-                <div className="flex gap-2 pt-6 border-t">
-                  <Button
-                    variant="outline"
+                <div className="pt-6 border-t">
+                  <button
                     onClick={handleDelete}
                     disabled={deleteMutation.isPending}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="text-xs font-medium text-gray-400 hover:text-red-500 transition-colors"
                   >
-                    {deleteMutation.isPending ? 'Deleting...' : 'Delete Post'}
-                  </Button>
+                    {deleteMutation.isPending ? 'Deleting...' : 'Delete this post'}
+                  </button>
                 </div>
               )}
             </div>
           </div>
         </div>
-      </div>
-    </div>
+    </PageLayout>
   )
 }

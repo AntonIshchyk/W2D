@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from './ui/button'
-import { Navbar } from './Navbar'
+import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { fetchCurrentUser } from '../lib/auth'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
@@ -219,138 +219,175 @@ export function Activities() {
     return null
   }
 
+  const locationLabels: Record<number, string> = { 0: 'Indoor', 1: 'Outdoor', 2: 'Both' }
+  const costLabels: Record<number, string> = { 0: 'Free', 1: '$', 2: '$$', 3: '$$$' }
+  const physicalLabels: Record<number, string> = { 0: 'Chill', 1: 'Light', 2: 'Moderate', 3: 'Intense' }
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
-      <div className="max-w-6xl mx-auto p-4 py-8">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">Activities</h1>
-          
-          {/* Filters */}
-          <div className="mb-6 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Filter by Category
-              </label>
-              <select
-                value={selectedCategory ?? ''}
-                onChange={(e) => setSelectedCategory(e.target.value ? Number(e.target.value) : undefined)}
-                className="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+    <PageLayout>
+      {/* Header row */}
+      <div className="flex items-end justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Activities</h1>
+          {totalCount > 0 && (
+            <p className="text-sm text-gray-400 mt-1">{totalCount} total</p>
+          )}
+        </div>
+      </div>
+
+      {/* Inline filters */}
+      <div className="mb-8 space-y-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Category as pills */}
+          <button
+            onClick={() => setSelectedCategory(undefined)}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              !selectedCategory
+                ? 'bg-gray-900 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            All
+          </button>
+          {categories?.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => setSelectedCategory(selectedCategory === category.id ? undefined : category.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                selectedCategory === category.id
+                  ? 'bg-gray-900 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {category.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Tags as smaller toggles */}
+        {tags && tags.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-gray-400 mr-1">Tags</span>
+            {tags.map((tag) => (
+              <button
+                key={tag.id}
+                onClick={() => handleTagToggle(tag.id)}
+                className={`px-2.5 py-1 rounded-md text-xs transition-all ${
+                  selectedTags.includes(tag.id)
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-400'
+                }`}
               >
-                <option value="">All Categories</option>
-                {categories?.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Filter by Tags
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {tags?.map((tag) => (
-                  <button
-                    key={tag.id}
-                    onClick={() => handleTagToggle(tag.id)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      selectedTags.includes(tag.id)
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    {tag.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
+                {tag.name}
+              </button>
+            ))}
             {(selectedCategory || selectedTags.length > 0) && (
               <button
-                onClick={() => {
-                  setSelectedCategory(undefined)
-                  setSelectedTags([])
-                }}
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                onClick={() => { setSelectedCategory(undefined); setSelectedTags([]) }}
+                className="text-xs text-gray-400 hover:text-gray-600 ml-2 underline"
               >
-                Clear all filters
+                clear
               </button>
             )}
           </div>
+        )}
+      </div>
 
-          <div className="border-t pt-6">
-            <div className="space-y-4">
-              {isLoading ? (
-                <p className="text-gray-600">Loading activities...</p>
-              ) : (
-                <>
-              {allActivities.map((activity) => (
-                <div key={activity.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">{activity.title}</h3>
-                    {activity.category && (
-                      <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded whitespace-nowrap">
-                        {activity.category.name}
+      {/* Activity grid */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <p className="text-sm text-gray-400 tracking-wide uppercase">Loading...</p>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {allActivities.map((activity) => (
+              <div
+                key={activity.id}
+                className="group bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-400 hover:shadow-sm transition-all duration-200 flex flex-col"
+              >
+                {/* Top: category badge */}
+                <div className="flex items-start justify-between mb-3">
+                  <h3 className="text-base font-semibold text-gray-900 leading-snug pr-2">
+                    {activity.title}
+                  </h3>
+                  {activity.category && (
+                    <span className="shrink-0 text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                      {activity.category.name}
+                    </span>
+                  )}
+                </div>
+
+                {/* Description */}
+                <p className="text-sm text-gray-500 line-clamp-2 mb-4 flex-1">
+                  {activity.description}
+                </p>
+
+                {/* Meta chips */}
+                <div className="flex items-center gap-2 flex-wrap mb-4 text-[11px]">
+                  {activity.locationType !== undefined && locationLabels[activity.locationType] && (
+                    <span className="bg-gray-50 text-gray-500 px-2 py-0.5 rounded">
+                      {locationLabels[activity.locationType]}
+                    </span>
+                  )}
+                  {activity.costLevel !== undefined && costLabels[activity.costLevel] && (
+                    <span className="bg-gray-50 text-gray-500 px-2 py-0.5 rounded">
+                      {costLabels[activity.costLevel]}
+                    </span>
+                  )}
+                  {activity.physicalActivityLevel !== undefined && physicalLabels[activity.physicalActivityLevel] && (
+                    <span className="bg-gray-50 text-gray-500 px-2 py-0.5 rounded">
+                      {physicalLabels[activity.physicalActivityLevel]}
+                    </span>
+                  )}
+                </div>
+
+                {/* Tags + action */}
+                <div className="flex items-end justify-between gap-3 pt-3 border-t border-gray-100">
+                  <div className="flex gap-1.5 flex-wrap min-w-0">
+                    {activity.tags.slice(0, 3).map((tag) => (
+                      <span key={tag.id} className="text-[11px] text-gray-400">
+                        #{tag.name}
                       </span>
+                    ))}
+                    {activity.tags.length > 3 && (
+                      <span className="text-[11px] text-gray-300">+{activity.tags.length - 3}</span>
                     )}
                   </div>
-                  <p className="text-gray-600 text-sm mb-3">{activity.description}</p>
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex gap-2 flex-wrap flex-1 min-w-0">
-                      {activity.tags.map((tag) => (
-                        <span key={tag.id} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
-                          {tag.name}
-                        </span>
-                      ))}
-                    </div>
-                    <Button
-                      onClick={() => handleScheduleClick(activity.id)}
-                      size="sm"
-                      className="text-xs shrink-0"
-                    >
-                      Plan Activity
-                    </Button>
-                  </div>
+                  <button
+                    onClick={() => handleScheduleClick(activity.id)}
+                    className="shrink-0 text-xs font-medium text-gray-400 hover:text-gray-900 opacity-0 group-hover:opacity-100 transition-all"
+                  >
+                    + Plan
+                  </button>
                 </div>
-              ))}
-              
-              {allActivities.length === 0 && !isLoading && (
-                <p className="text-gray-500 text-center py-8">
-                  {selectedCategory || selectedTags.length > 0 
-                    ? 'No activities found matching your filters' 
-                    : 'No activities found'}
-                </p>
-              )}
-              
-              {allActivities.length > 0 && (
-                <div className="mt-6 border-t pt-4">
-                  <div className="text-sm text-gray-600 text-center">
-                    Showing {allActivities.length} of {totalCount} activities
-                  </div>
-                </div>
-              )}
-
-              {/* Intersection Observer Target */}
-              <div ref={observerTarget} className="h-10 flex items-center justify-center">
-                {isFetchingNextPage && (
-                  <p className="text-gray-500 text-sm">Loading more activities...</p>
-                )}
               </div>
-                </>
-              )}
-            </div>
+            ))}
           </div>
-        </div>
-      </div>
+
+          {allActivities.length === 0 && (
+            <div className="text-center py-20">
+              <p className="text-gray-400">
+                {selectedCategory || selectedTags.length > 0 
+                  ? 'Nothing matches those filters' 
+                  : 'No activities yet'}
+              </p>
+            </div>
+          )}
+
+          {/* Infinite scroll target */}
+          <div ref={observerTarget} className="h-10 flex items-center justify-center mt-6">
+            {isFetchingNextPage && (
+              <p className="text-xs text-gray-400">Loading more...</p>
+            )}
+          </div>
+        </>
+      )}
 
       {/* Schedule Dialog */}
       {scheduleDialogOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4"
-          style={{ zIndex: 9999 }}
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-100"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setScheduleDialogOpen(false)
@@ -360,12 +397,12 @@ export function Activities() {
             }
           }}
         >
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full relative" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Plan Activity</h2>
+          <div className="bg-white rounded-2xl shadow-2xl p-7 max-w-sm w-full relative" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-semibold text-gray-900 mb-5">Plan Activity</h2>
             <form onSubmit={handleScheduleSubmit}>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Planned Date
+                <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">
+                  Date
                 </label>
                 <input
                   type="date"
@@ -373,19 +410,19 @@ export function Activities() {
                   onChange={(e) => setPlannedDate(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 text-sm"
                 />
               </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Notes (Optional)
+              <div className="mb-5">
+                <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">
+                  Notes
                 </label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Add any notes about this activity..."
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 text-sm"
+                  placeholder="Optional notes..."
                 />
               </div>
               <div className="flex justify-end gap-2">
@@ -398,20 +435,22 @@ export function Activities() {
                     setPlannedDate('')
                     setNotes('')
                   }}
+                  className="text-sm"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={scheduleMutation.isPending}
+                  className="text-sm"
                 >
-                  {scheduleMutation.isPending ? 'Scheduling...' : 'Schedule'}
+                  {scheduleMutation.isPending ? 'Saving...' : 'Schedule'}
                 </Button>
               </div>
             </form>
           </div>
         </div>
       )}
-    </div>
+    </PageLayout>
   )
 }

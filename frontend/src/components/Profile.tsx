@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Button } from './ui/button'
-import { Navbar } from './Navbar'
+import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { fetchCurrentUser } from '../lib/auth'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
@@ -54,7 +53,7 @@ async function fetchHistoryActivities(): Promise<ActivitySchedule[]> {
 
 export function Profile() {
   const queryClient = useQueryClient()
-  const [activeTab, setActiveTab] = useState<'profile' | 'planned' | 'completed'>('profile')
+  const [activeTab, setActiveTab] = useState<'planned' | 'completed'>('planned')
   
   const { data: user, isLoading, isError } = useQuery({
     queryKey: ['currentUser'],
@@ -117,12 +116,11 @@ export function Profile() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
+      <PageLayout>
         <div className="flex items-center justify-center py-20">
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-sm text-gray-400 tracking-wide uppercase">Loading...</p>
         </div>
-      </div>
+      </PageLayout>
     )
   }
 
@@ -135,199 +133,189 @@ export function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
-      <div className="max-w-6xl mx-auto p-4 py-8">
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => setActiveTab('profile')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'profile'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            Profile
-          </button>
-          <button
-            onClick={() => setActiveTab('planned')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'planned'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            Planned Activities ({plannedActivities?.length ?? 0})
-          </button>
-          <button
-            onClick={() => setActiveTab('completed')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'completed'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            History ({historyActivities?.length ?? 0})
-          </button>
+    <PageLayout>
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
+        {/* Left — sticky user card */}
+        <div className="lg:sticky lg:top-10 lg:self-start">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6">
+            {/* Avatar placeholder */}
+            <div className="w-14 h-14 bg-gray-900 rounded-full flex items-center justify-center text-white text-xl font-bold mb-4">
+              {user.name.charAt(0).toUpperCase()}
+            </div>
+            <h2 className="text-lg font-semibold text-gray-900">{user.name}</h2>
+            <p className="text-sm text-gray-400 mt-0.5">{user.email}</p>
+
+            {/* Stats */}
+            <div className="flex gap-4 mt-5 pt-5 border-t border-gray-100">
+              <div>
+                <div className="text-lg font-semibold text-gray-900">{plannedActivities?.length ?? 0}</div>
+                <div className="text-[11px] text-gray-400 uppercase tracking-wide">Planned</div>
+              </div>
+              <div>
+                <div className="text-lg font-semibold text-gray-900">
+                  {historyActivities?.filter(s => s.status === 'Completed').length ?? 0}
+                </div>
+                <div className="text-[11px] text-gray-400 uppercase tracking-wide">Done</div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Profile Tab */}
-        {activeTab === 'profile' && (
-          <div className="bg-white rounded-lg shadow-md p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">Your Profile</h1>
-            <div className="space-y-4">
-              <div className="border-b pb-4">
-                <label className="text-sm font-medium text-gray-500">Name</label>
-                <p className="text-lg text-gray-900">{user.name}</p>
-              </div>
-              <div className="border-b pb-4">
-                <label className="text-sm font-medium text-gray-500">Email</label>
-                <p className="text-lg text-gray-900">{user.email}</p>
-              </div>
-            </div>
+        {/* Right — content area */}
+        <div>
+          {/* Tab row */}
+          <div className="flex gap-1 mb-6 bg-gray-100 rounded-lg p-0.5 w-fit">
+            <button
+              onClick={() => setActiveTab('planned')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                activeTab === 'planned'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Planned
+            </button>
+            <button
+              onClick={() => setActiveTab('completed')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                activeTab === 'completed'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              History
+            </button>
           </div>
-        )}
 
-        {/* Planned Activities Tab */}
-        {activeTab === 'planned' && (
-          <div className="bg-white rounded-lg shadow-md p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">Planned Activities</h1>
-            {plannedError && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-                Error loading planned activities.
-              </div>
-            )}
-            <div className="space-y-4">
-              {plannedActivities && plannedActivities.length > 0 ? (
-                plannedActivities.map((schedule) => (
-                  <div key={schedule.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900">{schedule.activity.title}</h3>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Planned for: {new Date(schedule.plannedDate).toLocaleDateString()}
-                        </p>
-                      </div>
-                      {schedule.activity.category && (
-                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                          {schedule.activity.category.name}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-gray-600 text-sm mb-2">{schedule.activity.description}</p>
-                    {schedule.notes && (
-                      <p className="text-gray-900 text-sm mb-2"><span className="font-medium">Note:</span> {schedule.notes}</p>
-                    )}
-                    <div className="flex gap-2 flex-wrap mb-3">
-                      {schedule.activity.tags.map((tag) => (
-                        <span key={tag.id} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
-                          {tag.name}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => completeMutation.mutate(schedule.id)}
-                        disabled={completeMutation.isPending}
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        Mark as Completed
-                      </Button>
-                      <Button
-                        onClick={() => cancelMutation.mutate(schedule.id)}
-                        disabled={cancelMutation.isPending}
-                        size="sm"
-                        className="bg-red-600 hover:bg-red-700 text-white"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500 text-center py-8">No planned activities yet</p>
+          {/* Planned Activities */}
+          {activeTab === 'planned' && (
+            <div>
+              {plannedError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
+                  Error loading planned activities.
+                </div>
               )}
-            </div>
-          </div>
-        )}
-
-        {/* Completed Activities Tab */}
-        {activeTab === 'completed' && (
-          <div className="bg-white rounded-lg shadow-md p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">Activity History</h1>
-            {historyError && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-                Error loading history.
+              <div className="space-y-3">
+                {plannedActivities && plannedActivities.length > 0 ? (
+                  plannedActivities.map((schedule) => (
+                    <div key={schedule.id} className="bg-white border border-gray-200 rounded-xl p-5 group hover:border-gray-400 transition-colors">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h3 className="text-sm font-semibold text-gray-900">{schedule.activity.title}</h3>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {new Date(schedule.plannedDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                          </p>
+                        </div>
+                        {schedule.activity.category && (
+                          <span className="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                            {schedule.activity.category.name}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500 line-clamp-1 mb-3">{schedule.activity.description}</p>
+                      {schedule.notes && (
+                        <p className="text-xs text-gray-500 mb-3 italic">{schedule.notes}</p>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <div className="flex gap-1.5 flex-wrap">
+                          {schedule.activity.tags.map((tag) => (
+                            <span key={tag.id} className="text-[11px] text-gray-400">#{tag.name}</span>
+                          ))}
+                        </div>
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => completeMutation.mutate(schedule.id)}
+                            disabled={completeMutation.isPending}
+                            className="text-xs font-medium text-green-600 hover:text-green-700"
+                          >
+                            Done
+                          </button>
+                          <button
+                            onClick={() => cancelMutation.mutate(schedule.id)}
+                            disabled={cancelMutation.isPending}
+                            className="text-xs font-medium text-gray-400 hover:text-red-500"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-16">
+                    <p className="text-gray-400 text-sm">No planned activities</p>
+                  </div>
+                )}
               </div>
-            )}
-            <div className="space-y-4">
-              {historyActivities && historyActivities.length > 0 ? (
-                historyActivities.map((schedule) => {
-                  const isCompleted = schedule.status === "Completed"
-                  return (
-                  <div key={schedule.id} className={`rounded-lg p-4 border-l-4 ${
-                    isCompleted 
-                      ? 'bg-green-50 border-green-500' 
-                      : 'bg-red-50 border-red-500'
-                  }`}>
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
+            </div>
+          )}
+
+          {/* History */}
+          {activeTab === 'completed' && (
+            <div>
+              {historyError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
+                  Error loading history.
+                </div>
+              )}
+              <div className="space-y-3">
+                {historyActivities && historyActivities.length > 0 ? (
+                  historyActivities.map((schedule) => {
+                    const isCompleted = schedule.status === "Completed"
+                    return (
+                      <div key={schedule.id} className={`border rounded-xl p-5 flex items-start gap-3 ${
+                        isCompleted 
+                          ? 'bg-green-50/50 border-green-200' 
+                          : 'bg-red-50/50 border-red-200'
+                      }`}>
+                        {/* Status icon */}
+                        <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${
+                          isCompleted ? 'bg-green-100' : 'bg-red-100'
+                        }`}>
                           {isCompleted ? (
-                            <svg className="w-5 h-5 text-green-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
                           ) : (
-                            <svg className="w-5 h-5 text-red-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                            <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                             </svg>
                           )}
-                          <h3 className="text-lg font-semibold text-gray-900">{schedule.activity.title}</h3>
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded ${
-                            isCompleted 
-                              ? 'bg-green-600 text-white' 
-                              : 'bg-red-600 text-white'
-                          }`}>
-                            {isCompleted ? 'Completed' : 'Cancelled'}
-                          </span>
                         </div>
-                        <p className="text-sm text-gray-600 mt-1 ml-7">
-                          {isCompleted && schedule.completedDate
-                            ? `Completed on: ${new Date(schedule.completedDate).toLocaleDateString()}`
-                            : `Planned for: ${new Date(schedule.plannedDate).toLocaleDateString()}`
-                          }
-                        </p>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <h3 className="text-sm font-semibold text-gray-900">{schedule.activity.title}</h3>
+                          </div>
+                          <p className="text-xs text-gray-400">
+                            {isCompleted && schedule.completedDate
+                              ? `Completed ${new Date(schedule.completedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                              : `Was planned for ${new Date(schedule.plannedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                            }
+                          </p>
+                          {schedule.notes && (
+                            <p className="text-xs text-gray-500 mt-1 italic">{schedule.notes}</p>
+                          )}
+                        </div>
+
+                        {schedule.activity.category && (
+                          <span className="shrink-0 text-[11px] font-medium text-gray-500 bg-white/60 px-2 py-0.5 rounded-full">
+                            {schedule.activity.category.name}
+                          </span>
+                        )}
                       </div>
-                      {schedule.activity.category && (
-                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                          {schedule.activity.category.name}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-gray-600 text-sm mb-2 ml-7">{schedule.activity.description}</p>
-                    {schedule.notes && (
-                      <p className="text-gray-900 text-sm mb-2 ml-7"><span className="font-medium">Note:</span> {schedule.notes}</p>
-                    )}
-                    <div className="flex gap-2 flex-wrap ml-7">
-                      {schedule.activity.tags.map((tag) => (
-                        <span key={tag.id} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
-                          {tag.name}
-                        </span>
-                      ))}
-                    </div>
+                    )
+                  })
+                ) : (
+                  <div className="text-center py-16">
+                    <p className="text-gray-400 text-sm">No history yet</p>
                   </div>
-                  )
-                })
-              ) : (
-                <p className="text-gray-500 text-center py-8">No activity history yet</p>
-              )}
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+    </PageLayout>
   )
 }
