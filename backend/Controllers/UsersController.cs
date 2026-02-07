@@ -27,15 +27,20 @@ public class UsersController : ControllerBase
     [Authorize]
     public ActionResult GetCurrentUser()
     {
-        string userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        string email = User.FindFirst(ClaimTypes.Email)!.Value;
-        string name = User.FindFirst(ClaimTypes.Name)!.Value;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        var emailClaim = User.FindFirst(ClaimTypes.Email);
+        var nameClaim = User.FindFirst(ClaimTypes.Name);
+
+        if (userIdClaim == null || emailClaim == null || nameClaim == null)
+        {
+            return Unauthorized(new { message = "Invalid token claims" });
+        }
 
         return Ok(new
         {
-            userId = int.Parse(userId),
-            email,
-            name
+            userId = int.Parse(userIdClaim.Value),
+            email = emailClaim.Value,
+            name = nameClaim.Value
         });
     }
 
@@ -113,9 +118,9 @@ public class UsersController : ControllerBase
 
             return Ok(result);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return Unauthorized(new { message = "Google authentication failed", error = ex.Message });
+            return Unauthorized(new { message = "Google authentication failed" });
         }
     }
 }

@@ -6,6 +6,7 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { API_ENDPOINTS } from '../config/api'
+import { setAuthToken } from '../hooks/useAuthSync'
 
 interface LoginData {
   email: string
@@ -27,8 +28,9 @@ async function loginUser(data: LoginData): Promise<LoginResponse> {
   })
 
   if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.message || 'Login failed')
+    let errorMsg = 'Login failed'
+    try { const body = await response.json(); errorMsg = body.message || errorMsg } catch {}
+    throw new Error(errorMsg)
   }
 
   return response.json()
@@ -42,7 +44,7 @@ export function Login() {
   const mutation = useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
-      localStorage.setItem('token', data.token)
+      setAuthToken(data.token)
       navigate('/')
     }
   })
@@ -56,14 +58,15 @@ export function Login() {
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Google login failed')
+        let errorMsg = 'Google login failed'
+        try { const body = await response.json(); errorMsg = body.message || errorMsg } catch {}
+        throw new Error(errorMsg)
       }
 
       return response.json()
     },
     onSuccess: (data) => {
-      localStorage.setItem('token', data.token)
+      setAuthToken(data.token)
       navigate('/')
     }
   })
@@ -123,10 +126,6 @@ export function Login() {
             {mutation.isPending ? 'Loading...' : 'Login'}
           </Button>
 
-          {mutation.isSuccess && (
-            <p className="text-green-600 text-sm">Login successful!</p>
-          )}
-          
           {mutation.isError && (
             <p className="text-red-600 text-sm">{mutation.error.message}</p>
           )}

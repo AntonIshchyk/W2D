@@ -65,7 +65,7 @@ export function PostDetail() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
-  const { data: currentUser, isError: userError } = useQuery({
+  const { data: currentUser, isError: userError, error: userQueryError } = useQuery({
     queryKey: ['currentUser'],
     queryFn: fetchCurrentUser,
     retry: false
@@ -74,7 +74,7 @@ export function PostDetail() {
   const { data: post, isLoading, isError } = useQuery({
     queryKey: ['post', id],
     queryFn: () => fetchPost(Number(id)),
-    enabled: !!id
+    enabled: !!id && !isNaN(Number(id))
   })
 
   const voteMutation = useMutation({
@@ -94,7 +94,7 @@ export function PostDetail() {
     }
   })
 
-  useAuthErrorHandler(userError)
+  useAuthErrorHandler(userError, userQueryError)
 
   const handleVote = (currentVote: number | undefined, newValue: number) => {
     if (!currentUser || !id) return
@@ -163,6 +163,7 @@ export function PostDetail() {
               <button
                 onClick={() => handleVote(post.currentUserVote, 1)}
                 disabled={!currentUser}
+                aria-label="Upvote"
                 className={`p-2 rounded hover:bg-gray-100 transition-colors ${
                   post.currentUserVote === 1 ? 'text-orange-600' : 'text-gray-400'
                 } ${!currentUser ? 'cursor-not-allowed opacity-50' : ''}`}
@@ -179,6 +180,7 @@ export function PostDetail() {
               <button
                 onClick={() => handleVote(post.currentUserVote, -1)}
                 disabled={!currentUser}
+                aria-label="Downvote"
                 className={`p-2 rounded hover:bg-gray-100 transition-colors ${
                   post.currentUserVote === -1 ? 'text-blue-600' : 'text-gray-400'
                 } ${!currentUser ? 'cursor-not-allowed opacity-50' : ''}`}
@@ -193,9 +195,9 @@ export function PostDetail() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-4 flex-wrap">
                 <span className={`text-sm font-medium px-3 py-1 rounded ${
-                  POST_TYPE_COLORS[post.type as PostType]
+                  POST_TYPE_COLORS[post.type as PostType] ?? 'bg-gray-100 text-gray-800'
                 }`}>
-                  {POST_TYPE_LABELS[post.type as PostType]}
+                  {POST_TYPE_LABELS[post.type as PostType] ?? 'Other'}
                 </span>
                 {post.activityTitle && (
                   <span className="text-sm text-gray-600">
@@ -300,6 +302,11 @@ export function PostDetail() {
                   >
                     {deleteMutation.isPending ? 'Deleting...' : 'Delete this post'}
                   </button>
+                  {deleteMutation.isError && (
+                    <p className="text-xs text-red-500 mt-2">
+                      {deleteMutation.error?.message || 'Failed to delete post'}
+                    </p>
+                  )}
                 </div>
               )}
             </div>

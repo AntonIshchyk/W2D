@@ -143,7 +143,9 @@ public class PostService : IPostService
         // Map to PostResponse
         List<PostResponse> postResponses = items.Select(p =>
         {
-            int? vote = userVotes.TryGetValue(p.Id, out int voteValue) ? voteValue : 0;
+            int? vote = currentUserId.HasValue
+                ? (userVotes.TryGetValue(p.Id, out int voteValue) ? voteValue : 0)
+                : null;
             return MapToPostResponse(p, vote);
         }).ToList();
 
@@ -268,9 +270,15 @@ public class PostService : IPostService
             return null;
         }
 
-        // Validate business rules
-        ValidateLocationPairing(request.Latitude, request.Longitude);
-        ValidateCostCurrencyPairing(request.Cost, request.CurrencyCode);
+        // Validate business rules against final entity state (merge request into existing)
+        double? finalLat = request.Latitude ?? existingPost.Latitude;
+        double? finalLng = request.Longitude ?? existingPost.Longitude;
+        ValidateLocationPairing(finalLat, finalLng);
+
+        decimal? finalCost = request.Cost ?? existingPost.Cost;
+        string? finalCurrency = request.CurrencyCode ?? existingPost.CurrencyCode;
+        ValidateCostCurrencyPairing(finalCost, finalCurrency);
+
         ValidatePhotoUrls(request.PhotoUrls);
 
         // Update only provided fields
@@ -364,6 +372,12 @@ public class PostService : IPostService
 
     public async Task<bool> VotePostAsync(int postId, int userId, int value)
     {
+        // Validate vote value in service layer
+        if (value is not (-1 or 0 or 1))
+        {
+            throw new ArgumentException("Vote value must be -1, 0, or 1");
+        }
+
         // Verify post exists
         bool postExists = await _context.Posts
             .AnyAsync(p => p.Id == postId);
@@ -373,54 +387,66 @@ public class PostService : IPostService
             return false;
         }
 
-        PostVote? existingVote = await _context.PostVotes
-            .FirstOrDefaultAsync(v => v.UserId == userId && v.PostId == postId);
-
-        int scoreDelta = 0;
-
-        if (value == 0)
+        // Wrap in transaction to prevent score corruption
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
         {
-            // Remove vote
-            if (existingVote != null)
+            PostVote? existingVote = await _context.PostVotes
+                .FirstOrDefaultAsync(v => v.UserId == userId && v.PostId == postId);
+
+            int scoreDelta = 0;
+
+            if (value == 0)
             {
-                scoreDelta = -existingVote.Value;
-                _context.PostVotes.Remove(existingVote);
-            }
-        }
-        else
-        {
-            if (existingVote != null)
-            {
-                // Update existing vote
-                scoreDelta = value - existingVote.Value;
-                existingVote.Value = value;
-                existingVote.UpdatedAt = DateTime.UtcNow;
+                // Remove vote
+                if (existingVote != null)
+                {
+                    scoreDelta = -existingVote.Value;
+                    _context.PostVotes.Remove(existingVote);
+                }
             }
             else
             {
-                // Create new vote
-                scoreDelta = value;
-                PostVote newVote = new()
+                if (existingVote != null)
                 {
-                    UserId = userId,
-                    PostId = postId,
-                    Value = value
-                };
-                _context.PostVotes.Add(newVote);
+                    // Update existing vote
+                    scoreDelta = value - existingVote.Value;
+                    existingVote.Value = value;
+                    existingVote.UpdatedAt = DateTime.UtcNow;
+                }
+                else
+                {
+                    // Create new vote
+                    scoreDelta = value;
+                    PostVote newVote = new()
+                    {
+                        UserId = userId,
+                        PostId = postId,
+                        Value = value
+                    };
+                    _context.PostVotes.Add(newVote);
+                }
             }
-        }
 
-        // Atomically update score to prevent race conditions
-        if (scoreDelta != 0)
+            // Save vote record first
+            await _context.SaveChangesAsync();
+
+            // Then atomically update score
+            if (scoreDelta != 0)
+            {
+                await _context.Posts
+                    .Where(p => p.Id == postId)
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.Score, x => x.Score + scoreDelta));
+            }
+
+            await transaction.CommitAsync();
+            return true;
+        }
+        catch
         {
-            await _context.Posts
-                .Where(p => p.Id == postId)
-                .ExecuteUpdateAsync(p => p.SetProperty(x => x.Score, x => x.Score + scoreDelta));
+            await transaction.RollbackAsync();
+            throw;
         }
-
-        await _context.SaveChangesAsync();
-
-        return true;
     }
 
     public async Task<bool> ActivityExistsAsync(int activityId)

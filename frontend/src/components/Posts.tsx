@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { Button } from './ui/button'
 import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
@@ -107,7 +107,7 @@ export function Posts() {
   const [sortBy, setSortBy] = useState<string>('new')
   const observerTarget = useRef<HTMLDivElement>(null)
   
-  const { data: currentUser, isError } = useQuery({
+  const { data: currentUser, isError, error: userError } = useQuery({
     queryKey: ['currentUser'],
     queryFn: fetchCurrentUser,
     retry: false
@@ -145,7 +145,7 @@ export function Posts() {
     }
   })
 
-  useAuthErrorHandler(isError)
+  useAuthErrorHandler(isError, userError)
 
   // Intersection Observer for infinite scroll
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
@@ -287,6 +287,7 @@ export function Posts() {
                     <button
                       onClick={() => handleVote(post.id, post.currentUserVote, 1)}
                       disabled={!currentUser}
+                      aria-label="Upvote"
                       className={`p-0.5 rounded transition-colors ${
                         post.currentUserVote === 1 ? 'text-orange-500' : 'text-gray-300 hover:text-gray-500'
                       } ${!currentUser ? 'cursor-not-allowed' : ''}`}
@@ -303,6 +304,7 @@ export function Posts() {
                     <button
                       onClick={() => handleVote(post.id, post.currentUserVote, -1)}
                       disabled={!currentUser}
+                      aria-label="Downvote"
                       className={`p-0.5 rounded transition-colors ${
                         post.currentUserVote === -1 ? 'text-blue-500' : 'text-gray-300 hover:text-gray-500'
                       } ${!currentUser ? 'cursor-not-allowed' : ''}`}
@@ -318,9 +320,9 @@ export function Posts() {
                     {/* Meta line */}
                     <div className="flex items-center gap-2 mb-1 text-xs text-gray-400">
                       <span className={`font-medium px-1.5 py-0.5 rounded text-[11px] ${
-                        POST_TYPE_COLORS[post.type as PostType]
+                        POST_TYPE_COLORS[post.type as PostType] ?? 'bg-gray-100 text-gray-800'
                       }`}>
-                        {POST_TYPE_LABELS[post.type as PostType]}
+                        {POST_TYPE_LABELS[post.type as PostType] ?? 'Other'}
                       </span>
                       <span>{post.userName || 'Anon'}</span>
                       <span className="text-gray-300">&middot;</span>
@@ -334,12 +336,12 @@ export function Posts() {
                     </div>
 
                     {/* Title */}
-                    <h3 
-                      className="text-sm font-semibold text-gray-900 mb-1 cursor-pointer hover:text-blue-600 transition-colors"
-                      onClick={() => navigate(`/posts/${post.id}`)}
+                    <Link 
+                      to={`/posts/${post.id}`}
+                      className="text-sm font-semibold text-gray-900 mb-1 block hover:text-blue-600 transition-colors"
                     >
                       {post.title}
-                    </h3>
+                    </Link>
                     
                     {/* Preview text */}
                     <p className="text-sm text-gray-500 line-clamp-1">{post.content}</p>

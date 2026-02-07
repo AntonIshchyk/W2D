@@ -94,7 +94,7 @@ export function Activities() {
   const [selectedTags, setSelectedTags] = useState<number[]>([])
   const observerTarget = useRef<HTMLDivElement>(null)
   
-  const { isError } = useQuery({
+  const { isError, error: userError } = useQuery({
     queryKey: ['currentUser'],
     queryFn: fetchCurrentUser,
     retry: false
@@ -128,7 +128,7 @@ export function Activities() {
     retry: false
   })
 
-  useAuthErrorHandler(isError)
+  useAuthErrorHandler(isError, userError)
 
   // Intersection Observer for infinite scroll
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
@@ -356,7 +356,7 @@ export function Activities() {
                   </div>
                   <button
                     onClick={() => handleScheduleClick(activity.id)}
-                    className="shrink-0 text-xs font-medium text-gray-400 hover:text-gray-900 opacity-0 group-hover:opacity-100 transition-all"
+                    className="shrink-0 text-xs font-medium text-gray-400 hover:text-gray-900 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 transition-all"
                   >
                     + Plan
                   </button>
@@ -387,7 +387,10 @@ export function Activities() {
       {/* Schedule Dialog */}
       {scheduleDialogOpen && (
         <div 
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-100"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="schedule-dialog-title"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setScheduleDialogOpen(false)
@@ -396,9 +399,17 @@ export function Activities() {
               setNotes('')
             }
           }}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              setScheduleDialogOpen(false)
+              setSelectedActivityId(null)
+              setPlannedDate('')
+              setNotes('')
+            }
+          }}
         >
           <div className="bg-white rounded-2xl shadow-2xl p-7 max-w-sm w-full relative" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-semibold text-gray-900 mb-5">Plan Activity</h2>
+            <h2 id="schedule-dialog-title" className="text-lg font-semibold text-gray-900 mb-5">Plan Activity</h2>
             <form onSubmit={handleScheduleSubmit}>
               <div className="mb-4">
                 <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">
@@ -447,6 +458,11 @@ export function Activities() {
                   {scheduleMutation.isPending ? 'Saving...' : 'Schedule'}
                 </Button>
               </div>
+              {scheduleMutation.isError && (
+                <p className="text-xs text-red-500 mt-3">
+                  {scheduleMutation.error?.message || 'Failed to schedule activity'}
+                </p>
+              )}
             </form>
           </div>
         </div>

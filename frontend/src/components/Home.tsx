@@ -5,13 +5,13 @@ import { fetchCurrentUser } from '../lib/auth'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 
 export function Home() {
-  const { data: user, isLoading, isError } = useQuery({
+  const { data: user, isLoading, isError, error: userError } = useQuery({
     queryKey: ['currentUser'],
     queryFn: fetchCurrentUser,
     retry: false
   })
 
-  useAuthErrorHandler(isError)
+  useAuthErrorHandler(isError, userError)
 
   if (isLoading) {
     return (

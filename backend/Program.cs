@@ -23,7 +23,7 @@ builder.Services.AddControllers()
 
 // Configure Entity Framework with SQLite
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=app.db"));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Register services
 builder.Services.AddScoped<IUserService, UserService>();
@@ -101,11 +101,11 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Ensure database is created
+// Ensure database is migrated
 using (IServiceScope scope = app.Services.CreateScope())
 {
     AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    context.Database.EnsureCreated();
+    context.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.

@@ -55,7 +55,7 @@ export function Profile() {
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<'planned' | 'completed'>('planned')
   
-  const { data: user, isLoading, isError } = useQuery({
+  const { data: user, isLoading, isError, error: userError } = useQuery({
     queryKey: ['currentUser'],
     queryFn: fetchCurrentUser,
     retry: false
@@ -112,7 +112,7 @@ export function Profile() {
     }
   })
 
-  useAuthErrorHandler(isError)
+  useAuthErrorHandler(isError, userError)
 
   if (isLoading) {
     return (

@@ -56,6 +56,7 @@ public class ActivityService : IActivityService
 
         // Fetch one extra item to determine if there are more results
         List<Activity> items = await query
+            .OrderByDescending(a => a.Id)
             .Take(limit + 1)
             .ToListAsync();
 

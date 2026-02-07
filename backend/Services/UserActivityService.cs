@@ -100,6 +100,11 @@ public class UserActivityService : IUserActivityService
             return null;
         }
 
+        if (userActivity.Status != ScheduleStatus.Planned)
+        {
+            throw new InvalidOperationException($"Cannot complete an activity with status '{userActivity.Status}'. Only planned activities can be completed.");
+        }
+
         userActivity.Status = ScheduleStatus.Completed;
         userActivity.CompletedDate = completedDate ?? DateTime.UtcNow;
         userActivity.UpdatedAt = DateTime.UtcNow;
@@ -117,6 +122,11 @@ public class UserActivityService : IUserActivityService
         if (userActivity == null)
         {
             return null;
+        }
+
+        if (userActivity.Status != ScheduleStatus.Planned)
+        {
+            throw new InvalidOperationException($"Cannot cancel an activity with status '{userActivity.Status}'. Only planned activities can be cancelled.");
         }
 
         userActivity.Status = ScheduleStatus.Cancelled;

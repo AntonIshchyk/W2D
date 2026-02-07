@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Navigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from './ui/button'
 import { PageLayout } from './Navbar'
@@ -36,8 +36,9 @@ async function createPost(data: CreatePostRequest): Promise<void> {
   })
 
   if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.message || 'Failed to create post')
+    let errorMsg = 'Failed to create post'
+    try { const body = await response.json(); errorMsg = body.message || errorMsg } catch {}
+    throw new Error(errorMsg)
   }
 }
 
@@ -63,7 +64,7 @@ export function CreatePost() {
   const [cost, setCost] = useState<number | ''>('')
   const [currencyCode, setCurrencyCode] = useState('USD')
 
-  const { data: currentUser, isError } = useQuery({
+  const { data: currentUser, isError, error: userError } = useQuery({
     queryKey: ['currentUser'],
     queryFn: fetchCurrentUser,
     retry: false
@@ -83,15 +84,14 @@ export function CreatePost() {
     }
   })
 
-  useAuthErrorHandler(isError)
+  useAuthErrorHandler(isError, userError)
 
   if (isError) {
     return null
   }
 
   if (!currentUser) {
-    navigate('/login')
-    return null
+    return <Navigate to="/login" replace />
   }
 
   const handleSubmit = (e: React.FormEvent) => {

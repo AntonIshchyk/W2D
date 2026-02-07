@@ -1,4 +1,5 @@
 import { useNavigate, Link, useLocation } from 'react-router-dom'
+import { clearAuthToken } from '../hooks/useAuthSync'
 
 
 export function Navbar() {
@@ -6,7 +7,7 @@ export function Navbar() {
   const location = useLocation()
 
   const handleLogout = () => {
-    localStorage.removeItem('token')
+    clearAuthToken()
     navigate('/login')
   }
 

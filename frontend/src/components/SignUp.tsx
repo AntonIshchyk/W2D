@@ -5,6 +5,7 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { API_ENDPOINTS } from '../config/api'
+import { setAuthToken } from '../hooks/useAuthSync'
 
 interface SignUpData {
   name: string
@@ -26,8 +27,9 @@ async function signUpUser(data: SignUpData): Promise<SignUpResponse> {
   })
 
   if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.message || 'Sign up failed')
+    let errorMsg = 'Sign up failed'
+    try { const body = await response.json(); errorMsg = body.message || errorMsg } catch {}
+    throw new Error(errorMsg)
   }
 
   return response.json()
@@ -42,7 +44,7 @@ export function SignUp() {
   const mutation = useMutation({
     mutationFn: signUpUser,
     onSuccess: (data) => {
-      localStorage.setItem('token', data.token)
+      setAuthToken(data.token)
       navigate('/')
     }
   })
