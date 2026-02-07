@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260130162105_InitialCreateWithSeedData")]
-    partial class InitialCreateWithSeedData
+    [Migration("20260207110500_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -3218,9 +3218,6 @@ namespace Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("ApprovedByUserId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("CategoryId")
                         .HasColumnType("INTEGER");
 
@@ -3229,9 +3226,6 @@ namespace Backend.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
-
-                    b.Property<int?>("CreatedByUserId")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -3252,9 +3246,6 @@ namespace Backend.Migrations
                     b.Property<int?>("Sociability")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -3265,11 +3256,8 @@ namespace Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApprovedByUserId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("CreatedByUserId");
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("IX_Activities_CategoryId");
 
                     b.ToTable("Activities");
 
@@ -3279,2400 +3267,2250 @@ namespace Backend.Migrations
                             Id = 1,
                             CategoryId = 1,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(1135),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(7235),
                             Description = "Play football with friends or join a local team. A great team sport that builds endurance, coordination, and teamwork skills.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 2,
                             PhysicalActivityLevel = 2,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Football (Soccer)",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(1135)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(7235)
                         },
                         new
                         {
                             Id = 2,
                             CategoryId = 1,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(3994),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8547),
                             Description = "Shoot hoops at your local court. Can be played solo for practice or in teams for competitive games.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 2,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Basketball",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(3995)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8547)
                         },
                         new
                         {
                             Id = 3,
                             CategoryId = 1,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4000),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8550),
                             Description = "Play beach or indoor volleyball. A fun team sport that doesn't require extensive equipment.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 1,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Volleyball",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4001)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8550)
                         },
                         new
                         {
                             Id = 4,
                             CategoryId = 1,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4032),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8552),
                             Description = "America's pastime - bat, pitch, and field in this strategic team sport.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 2,
                             PhysicalActivityLevel = 1,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Baseball",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4033)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8552)
                         },
                         new
                         {
                             Id = 5,
                             CategoryId = 1,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4036),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8553),
                             Description = "A high-intensity contact sport requiring strength, speed, and teamwork.",
                             EntryLevel = 1,
                             EquipmentLevel = 1,
                             LocationType = 2,
                             PhysicalActivityLevel = 2,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Rugby",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4036)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8554)
                         },
                         new
                         {
                             Id = 6,
                             CategoryId = 1,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4067),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8557),
                             Description = "Fast-paced indoor sport combining elements of basketball and soccer.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 1,
                             PhysicalActivityLevel = 2,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Handball",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4069)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8558)
                         },
                         new
                         {
                             Id = 7,
                             CategoryId = 1,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4072),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8559),
                             Description = "Throw, dodge, and catch in this exciting and energetic team game.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 1,
                             PhysicalActivityLevel = 1,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Dodgeball",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4073)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8560)
                         },
                         new
                         {
                             Id = 8,
                             CategoryId = 1,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4076),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8561),
                             Description = "Tackle football with strategic plays and intense physicality.",
                             EntryLevel = 1,
                             EquipmentLevel = 3,
                             LocationType = 2,
                             PhysicalActivityLevel = 2,
                             Sociability = 1,
-                            Status = 1,
                             Title = "American Football",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4076)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8561)
                         },
                         new
                         {
                             Id = 9,
                             CategoryId = 1,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4080),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8563),
                             Description = "A fun, accessible game similar to baseball but played with a large rubber ball.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 2,
                             PhysicalActivityLevel = 1,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Kickball",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4080)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8563)
                         },
                         new
                         {
                             Id = 10,
                             CategoryId = 1,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4084),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8565),
                             Description = "Roll strikes and spares at your local bowling alley. Great social activity for all ages.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Bowling",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4084)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8566)
                         },
                         new
                         {
                             Id = 11,
                             CategoryId = 1,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4088),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8581),
                             Description = "A classic racket sport that can be played in singles or doubles. Great for improving reflexes and cardiovascular fitness.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 2,
                             PhysicalActivityLevel = 2,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Tennis",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4088)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8582)
                         },
                         new
                         {
                             Id = 12,
                             CategoryId = 1,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4091),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8583),
                             Description = "A fast-paced racket sport that can be played casually or competitively. Great for reflexes and agility.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Badminton",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4092)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8584)
                         },
                         new
                         {
                             Id = 13,
                             CategoryId = 1,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4110),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8585),
                             Description = "Fast-paced indoor sport requiring quick reflexes. Can be played competitively or just for fun.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 1,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Table Tennis (Ping Pong)",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4111)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8585)
                         },
                         new
                         {
                             Id = 14,
                             CategoryId = 1,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4114),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8588),
                             Description = "Intense racket sport played in a four-walled court. Excellent cardio workout.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 2,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Squash",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4115)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8588)
                         },
                         new
                         {
                             Id = 15,
                             CategoryId = 1,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4118),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8591),
                             Description = "A paddle sport combining elements of tennis, badminton, and table tennis. Easy to learn and very social.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Pickleball",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4118)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8591)
                         },
                         new
                         {
                             Id = 16,
                             CategoryId = 1,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4121),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8593),
                             Description = "High-energy racket sport played in an enclosed court with a hollow rubber ball.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 2,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Racquetball",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4122)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8593)
                         },
                         new
                         {
                             Id = 17,
                             CategoryId = 4,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4125),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8595),
                             Description = "Take a simple walk around your neighborhood or local park. Perfect for clearing your mind and getting light exercise.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 2,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Go for a Walk",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4126)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8595)
                         },
                         new
                         {
                             Id = 18,
                             CategoryId = 4,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4129),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8597),
                             Description = "Explore nature trails and mountain paths. From easy trails to challenging climbs, there's a hike for everyone.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 2,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Hiking",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4130)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8597)
                         },
                         new
                         {
                             Id = 19,
                             CategoryId = 2,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4133),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8609),
                             Description = "Whether you're training for a marathon or just want to stay fit, running is an accessible and effective exercise.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 2,
                             PhysicalActivityLevel = 2,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Running/Jogging",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4134)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8609)
                         },
                         new
                         {
                             Id = 20,
                             CategoryId = 2,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4137),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8611),
                             Description = "Ride a bicycle for leisure or exercise. Great for exploring your city or countryside while getting a good workout.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 2,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Cycling",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4137)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8611)
                         },
                         new
                         {
                             Id = 21,
                             CategoryId = 4,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4140),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8620),
                             Description = "Observe and identify birds in their natural habitat. A peaceful outdoor activity that connects you with nature.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 2,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Bird Watching",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4141)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8620)
                         },
                         new
                         {
                             Id = 22,
                             CategoryId = 7,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4158),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8622),
                             Description = "Enjoy outdoor meals in parks or scenic locations. Great for relaxation and socializing.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 2,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Picnicking",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4159)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8622)
                         },
                         new
                         {
                             Id = 23,
                             CategoryId = 9,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4162),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8624),
                             Description = "Observe the night sky, constellations, and celestial events. A peaceful and awe-inspiring activity.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 2,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Stargazing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4163)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8624)
                         },
                         new
                         {
                             Id = 24,
                             CategoryId = 1,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4166),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8626),
                             Description = "Throw a frisbee in the park. Can be casual tossing or competitive ultimate frisbee.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 2,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Frisbee",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4166)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8626)
                         },
                         new
                         {
                             Id = 25,
                             CategoryId = 2,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4170),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8628),
                             Description = "Practice yoga for flexibility, strength, and mental clarity. Suitable for all levels and can be done at home or in a studio.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Yoga",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4170)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8628)
                         },
                         new
                         {
                             Id = 26,
                             CategoryId = 2,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4173),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8630),
                             Description = "Build strength and muscle through resistance training. Can be done at the gym or at home with appropriate equipment.",
                             EntryLevel = 1,
                             EquipmentLevel = 3,
                             LocationType = 1,
                             PhysicalActivityLevel = 2,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Weight Training",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4174)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8630)
                         },
                         new
                         {
                             Id = 27,
                             CategoryId = 2,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4177),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8632),
                             Description = "Low-impact exercise focusing on core strength, flexibility, and body awareness. Great for all fitness levels.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Pilates",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4177)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8632)
                         },
                         new
                         {
                             Id = 28,
                             CategoryId = 2,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4181),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8634),
                             Description = "High-intensity functional fitness program combining weightlifting, cardio, and gymnastics.",
                             EntryLevel = 1,
                             EquipmentLevel = 3,
                             LocationType = 1,
                             PhysicalActivityLevel = 2,
                             Sociability = 1,
-                            Status = 1,
                             Title = "CrossFit",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4181)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8634)
                         },
                         new
                         {
                             Id = 29,
                             CategoryId = 2,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4184),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8635),
                             Description = "Dance-based fitness class with energetic Latin and international music.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 1,
                             PhysicalActivityLevel = 2,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Zumba",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4185)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8636)
                         },
                         new
                         {
                             Id = 30,
                             CategoryId = 2,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4188),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8637),
                             Description = "High-energy stationary bike workout often done in group classes.",
                             EntryLevel = 0,
                             EquipmentLevel = 3,
                             LocationType = 1,
                             PhysicalActivityLevel = 2,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Spinning/Indoor Cycling",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4188)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8638)
                         },
                         new
                         {
                             Id = 31,
                             CategoryId = 2,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4192),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8647),
                             Description = "Cardiovascular exercise routine performed to music, often in a group setting.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 1,
                             PhysicalActivityLevel = 2,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Aerobics",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4192)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8648)
                         },
                         new
                         {
                             Id = 32,
                             CategoryId = 2,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4209),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8649),
                             Description = "Ballet-inspired workout focusing on low-impact, high-intensity movements.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 1,
                             PhysicalActivityLevel = 1,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Barre",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4210)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8649)
                         },
                         new
                         {
                             Id = 33,
                             CategoryId = 2,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4213),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8651),
                             Description = "Improve flexibility and reduce muscle tension through dedicated stretching routines.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Stretching",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4214)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8651)
                         },
                         new
                         {
                             Id = 34,
                             CategoryId = 2,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4218),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8654),
                             Description = "Bodyweight exercises like push-ups, pull-ups, and squats. No equipment needed.",
                             EntryLevel = 1,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 2,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Calisthenics",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4219)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8654)
                         },
                         new
                         {
                             Id = 35,
                             CategoryId = 10,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4223),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8656),
                             Description = "Swim for fitness, recreation, or competition. Excellent full-body workout that's easy on the joints.",
                             EntryLevel = 1,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Swimming",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4223)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8656)
                         },
                         new
                         {
                             Id = 36,
                             CategoryId = 10,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4226),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8657),
                             Description = "Ride ocean waves on a surfboard. An exciting water sport that builds strength and balance.",
                             EntryLevel = 2,
                             EquipmentLevel = 3,
                             LocationType = 2,
                             PhysicalActivityLevel = 2,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Surfing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4227)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8658)
                         },
                         new
                         {
                             Id = 37,
                             CategoryId = 10,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4230),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8659),
                             Description = "Paddle through calm waters or tackle rapids in a kayak. Great for exploring waterways and building upper body strength.",
                             EntryLevel = 1,
                             EquipmentLevel = 3,
                             LocationType = 2,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Kayaking",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4230)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8660)
                         },
                         new
                         {
                             Id = 38,
                             CategoryId = 10,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4234),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8661),
                             Description = "Stand-up paddleboarding on calm waters. Great core workout and peaceful way to explore.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 2,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Paddleboarding (SUP)",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4234)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8661)
                         },
                         new
                         {
                             Id = 39,
                             CategoryId = 10,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4237),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8663),
                             Description = "Intense team water sport combining swimming, ball handling, and strategy.",
                             EntryLevel = 1,
                             EquipmentLevel = 1,
                             LocationType = 1,
                             PhysicalActivityLevel = 2,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Water Polo",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4238)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8663)
                         },
                         new
                         {
                             Id = 40,
                             CategoryId = 10,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4241),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8665),
                             Description = "Explore underwater worlds with scuba equipment. Requires certification but offers unique experiences.",
                             EntryLevel = 2,
                             EquipmentLevel = 3,
                             LocationType = 2,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Scuba Diving",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4241)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8665)
                         },
                         new
                         {
                             Id = 41,
                             CategoryId = 10,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4257),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8674),
                             Description = "Swim on the water surface while viewing underwater attractions through a snorkel mask.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 2,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Snorkeling",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4258)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8674)
                         },
                         new
                         {
                             Id = 42,
                             CategoryId = 10,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4261),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8676),
                             Description = "Paddle a canoe through rivers, lakes, or calm seas. Great for nature exploration.",
                             EntryLevel = 0,
                             EquipmentLevel = 3,
                             LocationType = 2,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Canoeing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4261)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8676)
                         },
                         new
                         {
                             Id = 43,
                             CategoryId = 10,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4278),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8678),
                             Description = "High-speed water sport on a personal watercraft. Thrilling and adrenaline-pumping.",
                             EntryLevel = 0,
                             EquipmentLevel = 3,
                             LocationType = 2,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Jet Skiing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4279)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8678)
                         },
                         new
                         {
                             Id = 44,
                             CategoryId = 10,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4286),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8680),
                             Description = "Navigate waters using wind power in a sailboat. Combines skill, strategy, and nature.",
                             EntryLevel = 2,
                             EquipmentLevel = 3,
                             LocationType = 2,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Sailing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4287)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8680)
                         },
                         new
                         {
                             Id = 45,
                             CategoryId = 3,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4296),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8682),
                             Description = "Express yourself through painting with watercolors, acrylics, or oils. Perfect for relaxation and creativity.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Painting",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4296)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8682)
                         },
                         new
                         {
                             Id = 46,
                             CategoryId = 3,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4299),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8684),
                             Description = "Sketch and draw with pencils, charcoal, or digital tools. A portable and accessible creative outlet.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Drawing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4300)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8684)
                         },
                         new
                         {
                             Id = 47,
                             CategoryId = 3,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4303),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8686),
                             Description = "Capture moments and express your artistic vision through photography. Can be done with a phone or professional camera.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Photography",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4304)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8686)
                         },
                         new
                         {
                             Id = 48,
                             CategoryId = 3,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4307),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8687),
                             Description = "Create three-dimensional art with clay, stone, metal, or other materials.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Sculpting",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4307)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8688)
                         },
                         new
                         {
                             Id = 49,
                             CategoryId = 3,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4310),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8689),
                             Description = "Create functional or decorative ceramic pieces. A hands-on art form that's both creative and meditative.",
                             EntryLevel = 1,
                             EquipmentLevel = 3,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Pottery",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4311)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8690)
                         },
                         new
                         {
                             Id = 50,
                             CategoryId = 3,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4327),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8691),
                             Description = "Create art using digital tools like tablets and software. Modern artistic expression.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Digital Art",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4328)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8691)
                         },
                         new
                         {
                             Id = 51,
                             CategoryId = 3,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4331),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8700),
                             Description = "The art of beautiful handwriting. Practice various lettering styles with pens and brushes.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Calligraphy",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4331)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8700)
                         },
                         new
                         {
                             Id = 52,
                             CategoryId = 3,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4335),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8702),
                             Description = "Japanese paper folding art. Create intricate designs from simple paper squares.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Origami",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4335)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8702)
                         },
                         new
                         {
                             Id = 53,
                             CategoryId = 3,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4338),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8704),
                             Description = "Create visual content for digital and print media. Combine art and communication.",
                             EntryLevel = 1,
                             EquipmentLevel = 1,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Graphic Design",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4339)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8704)
                         },
                         new
                         {
                             Id = 54,
                             CategoryId = 3,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4342),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8706),
                             Description = "Bring drawings and characters to life through frame-by-frame or digital animation.",
                             EntryLevel = 2,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Animation",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4342)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8706)
                         },
                         new
                         {
                             Id = 55,
                             CategoryId = 13,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4346),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8708),
                             Description = "Design and create jewelry pieces using various materials and techniques.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Jewelry Making",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4346)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8708)
                         },
                         new
                         {
                             Id = 56,
                             CategoryId = 13,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4349),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8710),
                             Description = "Create custom candles with different scents, colors, and designs.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Candle Making",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4350)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8710)
                         },
                         new
                         {
                             Id = 57,
                             CategoryId = 13,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4353),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8711),
                             Description = "Craft handmade soaps with natural ingredients and custom fragrances.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Soap Making",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4353)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8712)
                         },
                         new
                         {
                             Id = 58,
                             CategoryId = 13,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4357),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8713),
                             Description = "Build furniture, decorations, or art pieces from wood. Satisfying hands-on craft.",
                             EntryLevel = 1,
                             EquipmentLevel = 3,
                             LocationType = 1,
                             PhysicalActivityLevel = 1,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Woodworking",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4357)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8714)
                         },
                         new
                         {
                             Id = 59,
                             CategoryId = 13,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4360),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8715),
                             Description = "Craft items from leather including wallets, bags, and belts.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Leatherworking",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4361)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8716)
                         },
                         new
                         {
                             Id = 60,
                             CategoryId = 5,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4376),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8717),
                             Description = "Learn to play acoustic or electric guitar. Great for self-expression and can be enjoyed solo or in a band.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Playing Guitar",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4376)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8717)
                         },
                         new
                         {
                             Id = 61,
                             CategoryId = 5,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4380),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8726),
                             Description = "Learn classical pieces or contemporary songs on the piano. A versatile instrument suitable for all ages.",
                             EntryLevel = 1,
                             EquipmentLevel = 3,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Playing Piano",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4380)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8726)
                         },
                         new
                         {
                             Id = 62,
                             CategoryId = 5,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4383),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8728),
                             Description = "Practice singing alone or join a choir. Express yourself through music and improve your vocal skills.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Singing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4384)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8728)
                         },
                         new
                         {
                             Id = 63,
                             CategoryId = 5,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4387),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8729),
                             Description = "Learn rhythm and coordination through drumming. Great stress relief and physical workout.",
                             EntryLevel = 1,
                             EquipmentLevel = 3,
                             LocationType = 1,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Playing Drums",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4387)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8730)
                         },
                         new
                         {
                             Id = 64,
                             CategoryId = 5,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4390),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8731),
                             Description = "Master this elegant string instrument. Requires dedication but offers beautiful musical expression.",
                             EntryLevel = 2,
                             EquipmentLevel = 2,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Playing Violin",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4391)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8732)
                         },
                         new
                         {
                             Id = 65,
                             CategoryId = 5,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4394),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8733),
                             Description = "Mix and create music using turntables or digital equipment. Perfect for music enthusiasts.",
                             EntryLevel = 1,
                             EquipmentLevel = 3,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "DJing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4395)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8733)
                         },
                         new
                         {
                             Id = 66,
                             CategoryId = 5,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4399),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8741),
                             Description = "Create original music using digital audio workstations and software.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Music Production",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4399)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8741)
                         },
                         new
                         {
                             Id = 67,
                             CategoryId = 5,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4402),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8743),
                             Description = "Provide the rhythmic foundation in bands or practice solo. Essential in many music genres.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Playing Bass Guitar",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4403)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8743)
                         },
                         new
                         {
                             Id = 68,
                             CategoryId = 5,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4406),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8745),
                             Description = "Learn this expressive wind instrument popular in jazz, classical, and contemporary music.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Playing Saxophone",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4407)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8745)
                         },
                         new
                         {
                             Id = 69,
                             CategoryId = 5,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4421),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8747),
                             Description = "Create percussion sounds and music with your mouth. No equipment needed, just practice.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Beatboxing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4421)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8747)
                         },
                         new
                         {
                             Id = 70,
                             CategoryId = 6,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4425),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8757),
                             Description = "Play the classic strategy game of chess. Improve your tactical thinking and problem-solving skills.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Chess",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4425)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8758)
                         },
                         new
                         {
                             Id = 71,
                             CategoryId = 6,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4428),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8759),
                             Description = "Gather friends and family for board game nights. From strategy games to party games, there's something for everyone.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Board Games",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4429)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8760)
                         },
                         new
                         {
                             Id = 72,
                             CategoryId = 6,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4432),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8761),
                             Description = "Play video games on console, PC, or mobile. From casual puzzle games to competitive esports.",
                             EntryLevel = 0,
                             EquipmentLevel = 3,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Video Gaming",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4433)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8762)
                         },
                         new
                         {
                             Id = 73,
                             CategoryId = 6,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4436),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8763),
                             Description = "Play poker, bridge, magic the gathering, or casual card games with friends.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Card Games",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4436)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8764)
                         },
                         new
                         {
                             Id = 74,
                             CategoryId = 6,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4439),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8765),
                             Description = "Work on jigsaw puzzles, crosswords, sudoku, or other brain teasers.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Puzzle Solving",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4440)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8766)
                         },
                         new
                         {
                             Id = 75,
                             CategoryId = 6,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4443),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8767),
                             Description = "Master the classic 3D combination puzzle. Great for developing spatial reasoning.",
                             EntryLevel = 1,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Rubik's Cube",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4444)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8768)
                         },
                         new
                         {
                             Id = 76,
                             CategoryId = 6,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4447),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8769),
                             Description = "Throw darts at a target board. Fun pub game that improves focus and precision.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Darts",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4447)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8770)
                         },
                         new
                         {
                             Id = 77,
                             CategoryId = 6,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4450),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8771),
                             Description = "Play pool, snooker, or other cue sports at a table. Strategic and social activity.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Pool/Billiards",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4451)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8772)
                         },
                         new
                         {
                             Id = 78,
                             CategoryId = 6,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4454),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8773),
                             Description = "Test your knowledge in trivia nights or quiz games. Great for groups and learning.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Trivia/Quiz Games",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4454)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8774)
                         },
                         new
                         {
                             Id = 79,
                             CategoryId = 6,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4470),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8775),
                             Description = "Solve puzzles and riddles to 'escape' from a themed room within a time limit.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Escape Rooms",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4471)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8776)
                         },
                         new
                         {
                             Id = 80,
                             CategoryId = 14,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4474),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8785),
                             Description = "Experiment in the kitchen with new recipes. Cook meals for yourself or loved ones.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Cooking",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4475)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8785)
                         },
                         new
                         {
                             Id = 81,
                             CategoryId = 14,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4485),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8787),
                             Description = "Bake bread, cakes, cookies, and pastries. A precise and rewarding culinary art.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Baking",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4486)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8787)
                         },
                         new
                         {
                             Id = 82,
                             CategoryId = 14,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4489),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8789),
                             Description = "Explore different coffee beans, roasts, and brewing methods. Develop your palate.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Coffee Tasting",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4489)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8789)
                         },
                         new
                         {
                             Id = 83,
                             CategoryId = 14,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4492),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8791),
                             Description = "Sample and appreciate different wines. Learn about varieties, regions, and pairing.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Wine Tasting",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4493)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8791)
                         },
                         new
                         {
                             Id = 84,
                             CategoryId = 14,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4496),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8792),
                             Description = "Brew your own beer, cider, or kombucha. A fascinating blend of science and art.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Homebrewing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4497)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8793)
                         },
                         new
                         {
                             Id = 85,
                             CategoryId = 7,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4500),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8794),
                             Description = "Learn various dance styles from salsa to hip-hop. Great exercise and a fun social activity.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 2,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Dancing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4500)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8795)
                         },
                         new
                         {
                             Id = 86,
                             CategoryId = 7,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4503),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8796),
                             Description = "Give back to your community through volunteer work. A rewarding way to make a positive impact.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Volunteering",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4504)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8796)
                         },
                         new
                         {
                             Id = 87,
                             CategoryId = 7,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4507),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8798),
                             Description = "Join a group to read and discuss books. Combine reading with social interaction.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Book Club",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4508)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8798)
                         },
                         new
                         {
                             Id = 88,
                             CategoryId = 8,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4524),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8800),
                             Description = "Dive into books, whether fiction, non-fiction, or poetry. Expand your knowledge and imagination.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Reading",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4524)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8800)
                         },
                         new
                         {
                             Id = 89,
                             CategoryId = 8,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4527),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8802),
                             Description = "Study a new language through apps, courses, or tutors. Expand your communication skills and cultural understanding.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Learning a Language",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4528)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8802)
                         },
                         new
                         {
                             Id = 90,
                             CategoryId = 8,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4531),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8810),
                             Description = "Learn to code in various programming languages. Build apps, websites, or automate tasks.",
                             EntryLevel = 1,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Coding/Programming",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4531)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8810)
                         },
                         new
                         {
                             Id = 91,
                             CategoryId = 8,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4534),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8812),
                             Description = "Creative writing, journaling, or blogging. Express thoughts and develop storytelling skills.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Writing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4535)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8812)
                         },
                         new
                         {
                             Id = 92,
                             CategoryId = 8,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4538),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8814),
                             Description = "Create and share audio content on topics you're passionate about. Express ideas and connect with audiences.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Podcasting",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4539)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8814)
                         },
                         new
                         {
                             Id = 93,
                             CategoryId = 8,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4542),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8816),
                             Description = "Share your thoughts, experiences, or expertise through written or video blogs.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Blogging/Vlogging",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4542)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8816)
                         },
                         new
                         {
                             Id = 94,
                             CategoryId = 8,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4545),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8818),
                             Description = "Take structured online courses on platforms like Coursera, Udemy, or edX. Learn anything from anywhere.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 3,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Online Courses",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4546)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8818)
                         },
                         new
                         {
                             Id = 95,
                             CategoryId = 8,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4549),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8820),
                             Description = "Study celestial objects and phenomena. Combine observation with scientific learning.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 2,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Astronomy",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4550)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8820)
                         },
                         new
                         {
                             Id = 96,
                             CategoryId = 8,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4553),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8822),
                             Description = "Explore philosophical texts and ideas. Develop critical thinking and question fundamental concepts.",
                             EntryLevel = 1,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Philosophy",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4553)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8822)
                         },
                         new
                         {
                             Id = 97,
                             CategoryId = 8,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4556),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8824),
                             Description = "Deep dive into historical periods, events, or figures. Understand the past to inform the present.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "History Research",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4557)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8824)
                         },
                         new
                         {
                             Id = 98,
                             CategoryId = 15,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4573),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8825),
                             Description = "Practice mindfulness and meditation to reduce stress and improve mental clarity. Can be done anywhere.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Meditation",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4573)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8826)
                         },
                         new
                         {
                             Id = 99,
                             CategoryId = 9,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4576),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8827),
                             Description = "Grow plants, flowers, or vegetables. A relaxing hobby that connects you with nature.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 2,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Gardening",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4577)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8828)
                         },
                         new
                         {
                             Id = 100,
                             CategoryId = 15,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4580),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8835),
                             Description = "Practice this gentle martial art focused on slow, flowing movements and breath control.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Tai Chi",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4581)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8835)
                         },
                         new
                         {
                             Id = 101,
                             CategoryId = 15,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4584),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8837),
                             Description = "Learn massage techniques or receive professional massages for relaxation and muscle relief.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Massage Therapy",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4584)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8837)
                         },
                         new
                         {
                             Id = 102,
                             CategoryId = 15,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4587),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8839),
                             Description = "Use essential oils for therapeutic benefits. Promote relaxation and well-being.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Aromatherapy",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4588)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8839)
                         },
                         new
                         {
                             Id = 103,
                             CategoryId = 9,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4591),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8841),
                             Description = "Write daily thoughts, gratitude, or reflections. Great for mental health and self-awareness.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Journaling",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4592)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8841)
                         },
                         new
                         {
                             Id = 104,
                             CategoryId = 9,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4595),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8842),
                             Description = "Immerse yourself in nature to reduce stress and improve well-being. Simply be present in natural settings.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 2,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Nature Bathing (Shinrin-Yoku)",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4595)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8843)
                         },
                         new
                         {
                             Id = 105,
                             CategoryId = 15,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4598),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8844),
                             Description = "Practice controlled breathing techniques to reduce stress and improve focus.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Breathing Exercises",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4599)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8845)
                         },
                         new
                         {
                             Id = 106,
                             CategoryId = 15,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4602),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8846),
                             Description = "Relax in hot water or steam rooms. Great for muscle recovery and stress relief.",
                             EntryLevel = 0,
                             EquipmentLevel = 3,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Hot Tub/Sauna",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4603)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8846)
                         },
                         new
                         {
                             Id = 107,
                             CategoryId = 9,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4619),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8848),
                             Description = "Enjoy music for relaxation, motivation, or pure pleasure. Create playlists or explore new genres.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Listening to Music",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4619)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8848)
                         },
                         new
                         {
                             Id = 108,
                             CategoryId = 1,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4622),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8850),
                             Description = "Traditional Japanese martial art focusing on striking techniques and kata forms.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 1,
                             PhysicalActivityLevel = 2,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Karate",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4623)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8850)
                         },
                         new
                         {
                             Id = 109,
                             CategoryId = 1,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4626),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8852),
                             Description = "Train in the sweet science. Great cardio workout and learn self-defense.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 2,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Boxing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4626)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8852)
                         },
                         new
                         {
                             Id = 110,
                             CategoryId = 1,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4630),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8862),
                             Description = "Japanese martial art focused on throws and grappling techniques.",
                             EntryLevel = 1,
                             EquipmentLevel = 1,
                             LocationType = 1,
                             PhysicalActivityLevel = 2,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Judo",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4630)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8862)
                         },
                         new
                         {
                             Id = 111,
                             CategoryId = 1,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4633),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8864),
                             Description = "Korean martial art known for dynamic kicking techniques and discipline.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 1,
                             PhysicalActivityLevel = 2,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Taekwondo",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4634)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8864)
                         },
                         new
                         {
                             Id = 112,
                             CategoryId = 1,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4637),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8866),
                             Description = "Ground-fighting martial art focused on submissions and positional control.",
                             EntryLevel = 1,
                             EquipmentLevel = 1,
                             LocationType = 1,
                             PhysicalActivityLevel = 2,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Brazilian Jiu-Jitsu",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4637)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8866)
                         },
                         new
                         {
                             Id = 113,
                             CategoryId = 11,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4641),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8868),
                             Description = "Downhill or cross-country skiing in winter. An exhilarating sport for snow enthusiasts.",
                             EntryLevel = 1,
                             EquipmentLevel = 3,
                             LocationType = 2,
                             PhysicalActivityLevel = 2,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Skiing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4641)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8868)
                         },
                         new
                         {
                             Id = 114,
                             CategoryId = 11,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4644),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8870),
                             Description = "Ride down snowy slopes on a snowboard. Dynamic and exciting winter sport.",
                             EntryLevel = 1,
                             EquipmentLevel = 3,
                             LocationType = 2,
                             PhysicalActivityLevel = 2,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Snowboarding",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4645)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8870)
                         },
                         new
                         {
                             Id = 115,
                             CategoryId = 11,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4648),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8871),
                             Description = "Glide on ice at a rink. Fun winter activity that builds balance and leg strength.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 1,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Ice Skating",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4648)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8872)
                         },
                         new
                         {
                             Id = 116,
                             CategoryId = 11,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4664),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8873),
                             Description = "Fast-paced team sport played on ice. Requires skating ability and competitive spirit.",
                             EntryLevel = 2,
                             EquipmentLevel = 3,
                             LocationType = 1,
                             PhysicalActivityLevel = 2,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Ice Hockey",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4665)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8874)
                         },
                         new
                         {
                             Id = 117,
                             CategoryId = 11,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4668),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8880),
                             Description = "Slide down snowy hills on sleds. Simple, fun winter activity for all ages.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 2,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Sledding/Tobogganing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4668)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8880)
                         },
                         new
                         {
                             Id = 118,
                             CategoryId = 12,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4672),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8881),
                             Description = "Perform in plays or take acting classes. Express emotions and stories through performance.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 1,
                             PhysicalActivityLevel = 1,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Acting/Theater",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4672)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8882)
                         },
                         new
                         {
                             Id = 119,
                             CategoryId = 12,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4675),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8883),
                             Description = "Write and perform comedy routines. Make people laugh while expressing your unique voice.",
                             EntryLevel = 1,
                             EquipmentLevel = 0,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Stand-up Comedy",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4676)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8884)
                         },
                         new
                         {
                             Id = 120,
                             CategoryId = 12,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4679),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8893),
                             Description = "Perform unscripted comedy based on audience suggestions. Develops quick thinking and creativity.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 1,
                             PhysicalActivityLevel = 1,
                             Sociability = 1,
-                            Status = 1,
                             Title = "Improv Comedy",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4679)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8893)
                         },
                         new
                         {
                             Id = 121,
                             CategoryId = 12,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4683),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8895),
                             Description = "Learn and perform magic illusions. Entertain others with sleight of hand and misdirection.",
                             EntryLevel = 1,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Magic Tricks",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4683)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8895)
                         },
                         new
                         {
                             Id = 122,
                             CategoryId = 12,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4686),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8897),
                             Description = "Learn to juggle balls, clubs, or other objects. Impressive skill that improves coordination.",
                             EntryLevel = 1,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Juggling",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4687)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8897)
                         },
                         new
                         {
                             Id = 123,
                             CategoryId = 12,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4702),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8899),
                             Description = "The art of silent acting through exaggerated gestures and expressions.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Mime",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4703)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8899)
                         },
                         new
                         {
                             Id = 124,
                             CategoryId = 13,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4706),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8901),
                             Description = "Create garments and accessories with knitting needles and yarn. Relaxing and productive.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Knitting",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4706)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8901)
                         },
                         new
                         {
                             Id = 125,
                             CategoryId = 13,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4710),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8902),
                             Description = "Create items using a crochet hook and yarn. Similar to knitting but with different techniques.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Crocheting",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4710)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8903)
                         },
                         new
                         {
                             Id = 126,
                             CategoryId = 13,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4726),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8904),
                             Description = "Make or repair clothing and fabric items. Practical skill that allows for creative expression.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Sewing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4726)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8905)
                         },
                         new
                         {
                             Id = 127,
                             CategoryId = 13,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4730),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8906),
                             Description = "Decorate fabric with needle and thread designs. Detailed handwork that creates beautiful patterns.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Embroidery",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4730)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8906)
                         },
                         new
                         {
                             Id = 128,
                             CategoryId = 13,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4733),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8908),
                             Description = "Sew layers of fabric together to create quilts. Combines artistry with practical warmth.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Quilting",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4734)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8908)
                         },
                         new
                         {
                             Id = 129,
                             CategoryId = 13,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4737),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8910),
                             Description = "Create fabric by interlacing threads on a loom. Ancient craft with modern applications.",
                             EntryLevel = 1,
                             EquipmentLevel = 3,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Weaving",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4737)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8910)
                         },
                         new
                         {
                             Id = 130,
                             CategoryId = 1,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4742),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8920),
                             Description = "Indoor or outdoor climbing that builds strength, problem-solving skills, and confidence.",
                             EntryLevel = 1,
                             EquipmentLevel = 3,
                             LocationType = 0,
                             PhysicalActivityLevel = 2,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Rock Climbing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4743)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8921)
                         },
                         new
                         {
                             Id = 131,
                             CategoryId = 1,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4746),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8922),
                             Description = "Climb shorter walls without ropes, using crash pads. Great intro to climbing.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 0,
                             PhysicalActivityLevel = 2,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Bouldering",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4747)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8923)
                         },
                         new
                         {
                             Id = 132,
                             CategoryId = 1,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4750),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8924),
                             Description = "Ride and perform tricks on a skateboard. A creative sport that builds balance and coordination.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 2,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Skateboarding",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4750)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8924)
                         },
                         new
                         {
                             Id = 133,
                             CategoryId = 1,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4753),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8926),
                             Description = "Navigate urban environments efficiently using running, jumping, and climbing. Develops athleticism and creativity.",
                             EntryLevel = 1,
                             EquipmentLevel = 0,
                             LocationType = 2,
                             PhysicalActivityLevel = 2,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Parkour",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4754)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8926)
                         },
                         new
                         {
                             Id = 134,
                             CategoryId = 1,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4757),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8928),
                             Description = "Perform tricks and stunts on BMX bicycles. Combines cycling with extreme sports.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 2,
                             PhysicalActivityLevel = 2,
                             Sociability = 2,
-                            Status = 1,
                             Title = "BMX Biking",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4757)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8928)
                         },
                         new
                         {
                             Id = 135,
                             CategoryId = 4,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4774),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8930),
                             Description = "Ride bicycles off-road on rugged terrain. Adventurous and challenging.",
                             EntryLevel = 1,
                             EquipmentLevel = 3,
                             LocationType = 2,
                             PhysicalActivityLevel = 2,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Mountain Biking",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4775)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8930)
                         },
                         new
                         {
                             Id = 136,
                             CategoryId = 1,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4778),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8932),
                             Description = "Jump from heights while connected to an elastic cord. Ultimate adrenaline rush.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 2,
                             PhysicalActivityLevel = 1,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Bungee Jumping",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4778)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8932)
                         },
                         new
                         {
                             Id = 137,
                             CategoryId = 1,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4786),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8934),
                             Description = "Jump from aircraft and freefall before deploying a parachute. Unforgettable experience.",
                             EntryLevel = 1,
                             EquipmentLevel = 0,
                             LocationType = 2,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Skydiving",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4787)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8934)
                         },
                         new
                         {
                             Id = 138,
                             CategoryId = 4,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4790),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8935),
                             Description = "Spend nights outdoors in a tent or RV. Experience nature and disconnect from daily routines.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 2,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Camping",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4791)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8936)
                         },
                         new
                         {
                             Id = 139,
                             CategoryId = 4,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4794),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8937),
                             Description = "Cast a line in rivers, lakes, or the ocean. A relaxing pastime that can be social or solitary.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 2,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Fishing",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4794)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8938)
                         },
                         new
                         {
                             Id = 140,
                             CategoryId = 4,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4797),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8946),
                             Description = "Use GPS to find hidden containers (geocaches) placed by others. Modern treasure hunting.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 2,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Geocaching",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4798)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8946)
                         },
                         new
                         {
                             Id = 141,
                             CategoryId = 4,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4801),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8948),
                             Description = "Ride horses on trails or in arenas. Connect with animals while enjoying outdoor exercise.",
                             EntryLevel = 1,
                             EquipmentLevel = 0,
                             LocationType = 2,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Horseback Riding",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4801)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8948)
                         },
                         new
                         {
                             Id = 142,
                             CategoryId = 1,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4805),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8950),
                             Description = "Shoot arrows at targets with a bow. Ancient skill requiring focus and precision.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Archery",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4805)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8950)
                         },
                         new
                         {
                             Id = 143,
                             CategoryId = 1,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4808),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8952),
                             Description = "Play golf at a course or practice at a driving range. A social sport that combines skill and strategy.",
                             EntryLevel = 1,
                             EquipmentLevel = 3,
                             LocationType = 2,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Golf",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4809)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8952)
                         },
                         new
                         {
                             Id = 144,
                             CategoryId = 1,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4825),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8953),
                             Description = "Like golf but with frisbees. Throw discs into baskets across a course. Low cost and accessible.",
                             EntryLevel = 0,
                             EquipmentLevel = 1,
                             LocationType = 2,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Disc Golf",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4826)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8954)
                         },
                         new
                         {
                             Id = 145,
                             CategoryId = 4,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4829),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8955),
                             Description = "Identify and collect wild edible plants, mushrooms, and berries. Connects you with nature's bounty.",
                             EntryLevel = 1,
                             EquipmentLevel = 1,
                             LocationType = 2,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Foraging",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4829)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8956)
                         },
                         new
                         {
                             Id = 146,
                             CategoryId = 4,
                             CostLevel = 0,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4832),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8957),
                             Description = "Navigate through terrain using a map and compass. Combines hiking with navigational challenges.",
                             EntryLevel = 1,
                             EquipmentLevel = 1,
                             LocationType = 2,
                             PhysicalActivityLevel = 1,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Orienteering",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4833)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8957)
                         },
                         new
                         {
                             Id = 147,
                             CategoryId = 4,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4836),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8959),
                             Description = "Search for buried metals and artifacts. Treasure hunting hobby that gets you outdoors.",
                             EntryLevel = 0,
                             EquipmentLevel = 2,
                             LocationType = 2,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Metal Detecting",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4837)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8959)
                         },
                         new
                         {
                             Id = 148,
                             CategoryId = 13,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4840),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8961),
                             Description = "Build scale models of vehicles, buildings, or figures. Detail-oriented hobby requiring patience.",
                             EntryLevel = 1,
                             EquipmentLevel = 2,
                             LocationType = 1,
                             PhysicalActivityLevel = 0,
                             Sociability = 0,
-                            Status = 1,
                             Title = "Model Building",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4840)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8961)
                         },
                         new
                         {
                             Id = 149,
                             CategoryId = 9,
                             CostLevel = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4844),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8970),
                             Description = "Collect stamps, coins, cards, or other items. Combines research with the thrill of the hunt.",
                             EntryLevel = 0,
                             EquipmentLevel = 0,
                             LocationType = 0,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Collecting",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4844)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8970)
                         },
                         new
                         {
                             Id = 150,
                             CategoryId = 3,
                             CostLevel = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4847),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8972),
                             Description = "Fly drones and capture aerial footage. Modern hobby combining technology with creativity.",
                             EntryLevel = 1,
                             EquipmentLevel = 3,
                             LocationType = 2,
                             PhysicalActivityLevel = 0,
                             Sociability = 2,
-                            Status = 1,
                             Title = "Drone Flying",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(4848)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(8972)
                         });
                 });
 
@@ -5704,108 +5542,226 @@ namespace Backend.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(1882),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(1743),
                             Name = "Sports",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(1888)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(1749)
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2402),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2012),
                             Name = "Fitness",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2402)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2012)
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2404),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2013),
                             Name = "Creative",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2404)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2013)
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2405),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2014),
                             Name = "Outdoor",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2406)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2014)
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2407),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2040),
                             Name = "Music",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2407)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2041)
                         },
                         new
                         {
                             Id = 6,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2409),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2043),
                             Name = "Games",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2409)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2043)
                         },
                         new
                         {
                             Id = 7,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2410),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2044),
                             Name = "Social",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2411)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2044)
                         },
                         new
                         {
                             Id = 8,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2412),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2044),
                             Name = "Learning",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2412)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2045)
                         },
                         new
                         {
                             Id = 9,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2413),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2045),
                             Name = "Relaxation",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2414)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2045)
                         },
                         new
                         {
                             Id = 10,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2415),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2057),
                             Name = "Water Sports",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2415)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2057)
                         },
                         new
                         {
                             Id = 11,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2416),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2058),
                             Name = "Winter Sports",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2417)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2058)
                         },
                         new
                         {
                             Id = 12,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2418),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2059),
                             Name = "Performing Arts",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2418)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2059)
                         },
                         new
                         {
                             Id = 13,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2419),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2059),
                             Name = "Crafts",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2420)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2060)
                         },
                         new
                         {
                             Id = 14,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2421),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2060),
                             Name = "Food & Drink",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2422)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2061)
                         },
                         new
                         {
                             Id = 15,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2423),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2061),
                             Name = "Wellness",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(2423)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(2061)
                         });
+                });
+
+            modelBuilder.Entity("Backend.Models.Post", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ActivityId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CommentCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("Cost")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CurrencyCode")
+                        .HasMaxLength(3)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("DurationMinutes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("LocationName")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("REAL");
+
+                    b.PrimitiveCollection<string>("PhotoUrls")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PlaceId")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Rating")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActivityId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("Score");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Posts");
+                });
+
+            modelBuilder.Entity("Backend.Models.PostVote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PostId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Value")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("UserId", "PostId")
+                        .IsUnique();
+
+                    b.ToTable("PostVotes");
                 });
 
             modelBuilder.Entity("Backend.Models.Tag", b =>
@@ -5836,177 +5792,177 @@ namespace Backend.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(9918),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6642),
                             Name = "Team",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 325, DateTimeKind.Utc).AddTicks(9919)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6643)
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(224),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6776),
                             Name = "Individual",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(224)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6776)
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(225),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6777),
                             Name = "Competitive",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(226)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6777)
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(227),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6778),
                             Name = "Casual",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(227)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6778)
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(229),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6778),
                             Name = "Cardio",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(229)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6779)
                         },
                         new
                         {
                             Id = 6,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(230),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6779),
                             Name = "Strength",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(231)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6779)
                         },
                         new
                         {
                             Id = 7,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(232),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6780),
                             Name = "Flexibility",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(233)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6780)
                         },
                         new
                         {
                             Id = 8,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(234),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6781),
                             Name = "Artistic",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(234)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6781)
                         },
                         new
                         {
                             Id = 9,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(235),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6782),
                             Name = "Mindful",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(236)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6782)
                         },
                         new
                         {
                             Id = 10,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(237),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6783),
                             Name = "Adventure",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(237)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6783)
                         },
                         new
                         {
                             Id = 11,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(238),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6783),
                             Name = "Nature",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(239)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6784)
                         },
                         new
                         {
                             Id = 12,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(240),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6784),
                             Name = "Indoor",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(240)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6784)
                         },
                         new
                         {
                             Id = 13,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(242),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6785),
                             Name = "Outdoor",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(242)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6785)
                         },
                         new
                         {
                             Id = 14,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(243),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6786),
                             Name = "Family-Friendly",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(244)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6786)
                         },
                         new
                         {
                             Id = 15,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(245),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6787),
                             Name = "Beginner-Friendly",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(245)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6787)
                         },
                         new
                         {
                             Id = 16,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(246),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6788),
                             Name = "Water",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(247)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6788)
                         },
                         new
                         {
                             Id = 17,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(248),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6788),
                             Name = "Ball Sports",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(248)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6789)
                         },
                         new
                         {
                             Id = 18,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(249),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6789),
                             Name = "Racket Sports",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(250)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6789)
                         },
                         new
                         {
                             Id = 19,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(251),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6790),
                             Name = "Winter",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(251)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6790)
                         },
                         new
                         {
                             Id = 20,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(252),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6791),
                             Name = "Summer",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(253)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6791)
                         },
                         new
                         {
                             Id = 21,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(254),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6792),
                             Name = "Creative",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(254)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6792)
                         },
                         new
                         {
                             Id = 22,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(255),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6793),
                             Name = "Technical",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(256)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6793)
                         },
                         new
                         {
                             Id = 23,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(257),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6793),
                             Name = "Social",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(257)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6794)
                         },
                         new
                         {
                             Id = 24,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(259),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6794),
                             Name = "Extreme",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(259)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6795)
                         },
                         new
                         {
                             Id = 25,
-                            CreatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(260),
+                            CreatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6795),
                             Name = "Educational",
-                            UpdatedAt = new DateTime(2026, 1, 30, 16, 21, 4, 326, DateTimeKind.Utc).AddTicks(261)
+                            UpdatedAt = new DateTime(2026, 2, 7, 11, 4, 59, 738, DateTimeKind.Utc).AddTicks(6795)
                         });
                 });
 
@@ -6016,9 +5972,6 @@ namespace Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Age")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
@@ -6026,9 +5979,6 @@ namespace Backend.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("Gender")
-                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("INTEGER");
@@ -6053,6 +6003,49 @@ namespace Backend.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Backend.Models.UserActivity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ActivityId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("CompletedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("PlannedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActivityId");
+
+                    b.HasIndex("PlannedDate")
+                        .HasDatabaseName("IX_ActivitySchedules_PlannedDate");
+
+                    b.HasIndex("UserId", "Status")
+                        .HasDatabaseName("IX_ActivitySchedules_UserId_Status");
+
+                    b.ToTable("ActivitySchedules", (string)null);
+                });
+
             modelBuilder.Entity("ActivityTag", b =>
                 {
                     b.HasOne("Backend.Models.Activity", null)
@@ -6070,32 +6063,80 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("Backend.Models.Activity", b =>
                 {
-                    b.HasOne("Backend.Models.User", "ApprovedBy")
-                        .WithMany()
-                        .HasForeignKey("ApprovedByUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("Backend.Models.Category", "Category")
                         .WithMany("Activities")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Backend.Models.User", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("ApprovedBy");
-
                     b.Navigation("Category");
+                });
 
-                    b.Navigation("CreatedBy");
+            modelBuilder.Entity("Backend.Models.Post", b =>
+                {
+                    b.HasOne("Backend.Models.Activity", "Activity")
+                        .WithMany()
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Activity");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Backend.Models.PostVote", b =>
+                {
+                    b.HasOne("Backend.Models.Post", "Post")
+                        .WithMany("Votes")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Backend.Models.UserActivity", b =>
+                {
+                    b.HasOne("Backend.Models.Activity", "Activity")
+                        .WithMany()
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Activity");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Backend.Models.Category", b =>
                 {
                     b.Navigation("Activities");
+                });
+
+            modelBuilder.Entity("Backend.Models.Post", b =>
+                {
+                    b.Navigation("Votes");
                 });
 #pragma warning restore 612, 618
         }

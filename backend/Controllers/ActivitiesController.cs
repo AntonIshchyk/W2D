@@ -1,14 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using Backend.Models;
 using Backend.DTOs;
 using Backend.Services;
+using Backend.Constants;
 
 namespace Backend.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
+[EnableRateLimiting("fixed")]
 public class ActivitiesController : ControllerBase
 {
     private readonly IActivityService _activityService;
@@ -46,13 +49,13 @@ public class ActivitiesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<ScrollResult<Activity>>> GetActivities(
         [FromQuery] int? cursor = null,
-        [FromQuery] int limit = 20,
+        [FromQuery] int limit = PaginationConstants.DefaultPageSize,
         [FromQuery] int? categoryId = null,
         [FromQuery] List<int>? tagIds = null)
     {
-        if (limit < 1 || limit > 100)
+        if (limit < PaginationConstants.MinPageSize || limit > PaginationConstants.MaxPageSize)
         {
-            return BadRequest(new { message = "Invalid limit parameter. Limit must be between 1 and 100." });
+            return BadRequest(new { message = $"Invalid limit parameter. Limit must be between {PaginationConstants.MinPageSize} and {PaginationConstants.MaxPageSize}." });
         }
 
         ScrollResult<Activity> result = await _activityService.GetActivitiesAsync(cursor, limit, categoryId, tagIds);

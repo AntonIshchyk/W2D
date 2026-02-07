@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Backend.Data;
 using Backend.Models;
 using Backend.DTOs;
+using Backend.Constants;
 
 namespace Backend.Services;
 
@@ -24,7 +25,7 @@ public class ActivityService : IActivityService
             .ToListAsync();
     }
 
-    public async Task<ScrollResult<Activity>> GetActivitiesAsync(int? cursor = null, int limit = 20, int? categoryId = null, List<int>? tagIds = null)
+    public async Task<ScrollResult<Activity>> GetActivitiesAsync(int? cursor = null, int limit = PaginationConstants.DefaultPageSize, int? categoryId = null, List<int>? tagIds = null)
     {
         IQueryable<Activity> query = _context.Activities
             .AsNoTracking()
@@ -44,13 +45,14 @@ public class ActivityService : IActivityService
             query = query.Where(a => a.Tags.Count(t => tagIds.Contains(t.Id)) == tagIds.Count);
         }
 
+        // Get total count AFTER applying filters but BEFORE cursor
+        int totalCount = await query.CountAsync();
+
         // Apply cursor if provided
         if (cursor.HasValue)
         {
             query = query.Where(a => a.Id < cursor.Value);
         }
-
-        int totalCount = await _context.Activities.CountAsync();
 
         // Fetch one extra item to determine if there are more results
         List<Activity> items = await query

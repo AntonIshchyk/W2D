@@ -22,6 +22,8 @@ public class AppDbContext : DbContext
     public DbSet<Category> Categories { get; set; }
     public DbSet<Tag> Tags { get; set; }
     public DbSet<UserActivity> UserActivities { get; set; }
+    public DbSet<Post> Posts { get; set; }
+    public DbSet<PostVote> PostVotes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -85,6 +87,56 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Activity>()
             .HasIndex(a => a.CategoryId)
             .HasDatabaseName("IX_Activities_CategoryId");
+
+        // Post - User relationship
+        modelBuilder.Entity<Post>()
+            .HasOne(p => p.User)
+            .WithMany()
+            .HasForeignKey(p => p.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Post - Activity relationship
+        modelBuilder.Entity<Post>()
+            .HasOne(p => p.Activity)
+            .WithMany()
+            .HasForeignKey(p => p.ActivityId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Post indexes for performance
+        modelBuilder.Entity<Post>()
+            .HasIndex(p => p.ActivityId);
+
+        modelBuilder.Entity<Post>()
+            .HasIndex(p => p.UserId);
+
+        modelBuilder.Entity<Post>()
+            .HasIndex(p => p.CreatedAt);
+
+        modelBuilder.Entity<Post>()
+            .HasIndex(p => p.Score);
+
+        // PostVote - User relationship
+        modelBuilder.Entity<PostVote>()
+            .HasOne(v => v.User)
+            .WithMany()
+            .HasForeignKey(v => v.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // PostVote - Post relationship
+        modelBuilder.Entity<PostVote>()
+            .HasOne(v => v.Post)
+            .WithMany(p => p.Votes)
+            .HasForeignKey(v => v.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // PostVote unique constraint - one vote per user per post
+        modelBuilder.Entity<PostVote>()
+            .HasIndex(v => new { v.UserId, v.PostId })
+            .IsUnique();
+
+        // PostVote index for querying by post
+        modelBuilder.Entity<PostVote>()
+            .HasIndex(v => v.PostId);
 
         // Seed database with activities, categories, and tags
         DatabaseSeeder.SeedData(modelBuilder);

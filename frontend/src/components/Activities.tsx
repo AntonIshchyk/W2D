@@ -5,6 +5,7 @@ import { Navbar } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { fetchCurrentUser } from '../lib/auth'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
+import { PAGINATION } from '../config/constants'
 
 interface Tag {
   id: number
@@ -42,7 +43,7 @@ interface ScrollResult {
 
 async function fetchActivities(cursor: number | null, categoryId?: number, tagIds?: number[]): Promise<ScrollResult> {
   const params = new URLSearchParams({
-    limit: '20'
+    limit: PAGINATION.DEFAULT_PAGE_SIZE.toString()
   })
 
   if (cursor !== null) {

@@ -29,6 +29,12 @@ export function Navbar() {
                 Activities
               </Link>
               <Link 
+                to="/posts" 
+                className={`font-medium ${isActive('/posts') || location.pathname.startsWith('/posts/') ? 'text-blue-600' : 'text-gray-700 hover:text-gray-900'}`}
+              >
+                Posts
+              </Link>
+              <Link 
                 to="/profile" 
                 className={`font-medium ${isActive('/profile') ? 'text-blue-600' : 'text-gray-700 hover:text-gray-900'}`}
               >

@@ -29,6 +29,11 @@ export const API_ENDPOINTS = {
     complete: (id: number) => `${API_BASE_URL}/api/useractivities/${id}/complete`,
     cancel: (id: number) => `${API_BASE_URL}/api/useractivities/${id}/cancel`,
   },
+  posts: {
+    base: `${API_BASE_URL}/api/posts`,
+    byId: (id: number) => `${API_BASE_URL}/api/posts/${id}`,
+    vote: (id: number) => `${API_BASE_URL}/api/posts/${id}/vote`,
+  },
 } as const;
 
 export function getAuthHeaders(): HeadersInit {

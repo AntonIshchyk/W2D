@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using Backend.Models;
 using Backend.DTOs;
 using Backend.Services;
@@ -10,6 +11,7 @@ namespace Backend.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
+[EnableRateLimiting("fixed")]
 public class UserActivitiesController : ControllerBase
 {
     private readonly IUserActivityService _userActivityService;
