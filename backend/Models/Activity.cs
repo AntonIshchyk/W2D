@@ -9,6 +9,7 @@ public class Activity : BaseModel
     public string Title { get; set; } = null!;
 
     [Required]
+    [MaxLength(5000)]
     public string Description { get; set; } = null!;
 
     [Required]

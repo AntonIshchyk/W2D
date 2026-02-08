@@ -88,13 +88,17 @@ builder.Services.AddCors(options =>
                     .AllowAnyHeader()
                     .AllowCredentials();
             }
-            else
+            else if (builder.Environment.IsDevelopment())
             {
-                // Fallback for development
+                // Fallback for development only
                 corsBuilder
                     .AllowAnyOrigin()
                     .AllowAnyMethod()
                     .AllowAnyHeader();
+            }
+            else
+            {
+                throw new InvalidOperationException("AllowedOrigins must be configured in production.");
             }
         });
 });

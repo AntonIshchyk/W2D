@@ -29,6 +29,11 @@ public class GlobalExceptionHandlerMiddleware
 
     private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
+        if (context.Response.HasStarted)
+        {
+            return;
+        }
+
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 

@@ -5,6 +5,7 @@ using System.Security.Claims;
 using Backend.DTOs;
 using Backend.Models;
 using Backend.Services;
+using Backend.Extensions;
 using Google.Apis.Auth;
 
 namespace Backend.Controllers;
@@ -38,7 +39,7 @@ public class UsersController : ControllerBase
 
         return Ok(new
         {
-            userId = int.Parse(userIdClaim.Value),
+            userId = User.GetUserId(),
             email = emailClaim.Value,
             name = nameClaim.Value
         });
@@ -100,7 +101,7 @@ public class UsersController : ControllerBase
             if (existingUser != null)
             {
                 // User exists, just login
-                LoginResponse loginResponse = _userService.GenerateTokenForUserAsync(existingUser);
+                LoginResponse loginResponse = _userService.GenerateTokenForUser(existingUser);
                 return Ok(loginResponse);
             }
 

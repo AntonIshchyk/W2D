@@ -1,4 +1,5 @@
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
+import { clearAuthToken } from '../hooks/useAuthSync'
 
 export interface UserInfo {
   userId: number
@@ -17,7 +18,9 @@ export class ApiError extends Error {
 
 export function isTokenExpired(token: string): boolean {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]))
+    const base64Url = token.split('.')[1]
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+    const payload = JSON.parse(atob(base64))
     return payload.exp * 1000 < Date.now()
   } catch {
     return true
@@ -32,7 +35,7 @@ export async function fetchCurrentUser(): Promise<UserInfo> {
   }
 
   if (isTokenExpired(token)) {
-    localStorage.removeItem('token')
+    clearAuthToken()
     throw new ApiError('Token expired', 401)
   }
 
@@ -44,5 +47,5 @@ export async function fetchCurrentUser(): Promise<UserInfo> {
     throw new ApiError('Unauthorized', response.status)
   }
 
-  return response.json()
+  return await response.json() as UserInfo
 }

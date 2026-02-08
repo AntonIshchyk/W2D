@@ -81,11 +81,11 @@ public class PostService : IPostService
         // Get total count AFTER applying filters
         int totalCount = await query.CountAsync();
 
+        string sortMode = sortBy?.ToLower() ?? "new";
+
         // Apply cursor based on sort mode
         if (cursor.HasValue)
         {
-            string sortMode = sortBy?.ToLower() ?? "new";
-
             if (sortMode == "hot" || sortMode == "top")
             {
                 // For score-based sorting, get the cursor post's score and apply composite cursor
@@ -109,7 +109,7 @@ public class PostService : IPostService
         }
 
         // Sort based on sortBy parameter
-        query = sortBy?.ToLower() switch
+        query = sortMode switch
         {
             "hot" => query.OrderByDescending(p => p.Score).ThenByDescending(p => p.Id),
             "top" => query.OrderByDescending(p => p.Score).ThenByDescending(p => p.Id),

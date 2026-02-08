@@ -95,13 +95,6 @@ public class ActivitiesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Activity>> UpdateActivity(int id, Activity activity)
     {
-        Activity? existingActivity = await _activityService.GetActivityByIdAsync(id);
-
-        if (existingActivity == null)
-        {
-            return NotFound(new { message = "Activity not found" });
-        }
-
         ActionResult<Activity>? validationError = await ValidateAndSetTags(activity);
         if (validationError != null)
         {
@@ -109,6 +102,11 @@ public class ActivitiesController : ControllerBase
         }
 
         Activity? updatedActivity = await _activityService.UpdateActivityAsync(id, activity);
+
+        if (updatedActivity == null)
+        {
+            return NotFound(new { message = "Activity not found" });
+        }
 
         return Ok(updatedActivity);
     }

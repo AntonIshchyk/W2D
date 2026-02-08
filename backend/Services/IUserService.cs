@@ -10,5 +10,5 @@ public interface IUserService
     Task<User?> GetUserByEmailAsync(string email);
     Task<LoginResponse?> RegisterUserAsync(string email, string password, string name);
     Task<LoginResponse?> LoginUserAsync(string email, string password);
-    LoginResponse GenerateTokenForUserAsync(User user);
+    LoginResponse GenerateTokenForUser(User user);
 }

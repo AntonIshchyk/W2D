@@ -194,13 +194,6 @@ public class ActivitiesControllerTests
     {
         // Arrange
         SetupControllerUser(userId: 1, isAdmin: true);
-        Activity existingActivity = new Activity
-        {
-            Id = 1,
-            Title = "Original",
-            Description = "Description",
-            CategoryId = 1
-        };
         Activity updatedActivity = new Activity
         {
             Id = 1,
@@ -208,8 +201,6 @@ public class ActivitiesControllerTests
             Description = "Updated Description",
             CategoryId = 1
         };
-        _mockActivityService.Setup(x => x.GetActivityByIdAsync(1))
-            .ReturnsAsync(existingActivity);
         _mockActivityService.Setup(x => x.CategoryExistsAsync(1))
             .ReturnsAsync(true);
         _mockActivityService.Setup(x => x.UpdateActivityAsync(1, It.IsAny<Activity>()))
@@ -229,11 +220,14 @@ public class ActivitiesControllerTests
     {
         // Arrange
         SetupControllerUser(userId: 1);
-        _mockActivityService.Setup(x => x.GetActivityByIdAsync(999))
+        Activity activity = new Activity { CategoryId = 1 };
+        _mockActivityService.Setup(x => x.CategoryExistsAsync(1))
+            .ReturnsAsync(true);
+        _mockActivityService.Setup(x => x.UpdateActivityAsync(999, It.IsAny<Activity>()))
             .ReturnsAsync((Activity?)null);
 
         // Act
-        ActionResult<Activity> result = await _controller.UpdateActivity(999, new Activity());
+        ActionResult<Activity> result = await _controller.UpdateActivity(999, activity);
 
         // Assert
         result.Result.Should().BeOfType<NotFoundObjectResult>();

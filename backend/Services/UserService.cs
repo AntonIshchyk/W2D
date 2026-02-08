@@ -31,7 +31,7 @@ public class UserService : IUserService
         return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
     }
 
-    public LoginResponse GenerateTokenForUserAsync(User user)
+    public LoginResponse GenerateTokenForUser(User user)
     {
         string token = _tokenService.GenerateToken(user);
 
@@ -67,7 +67,7 @@ public class UserService : IUserService
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        return GenerateTokenForUserAsync(user);
+        return GenerateTokenForUser(user);
     }
 
     public async Task<LoginResponse?> LoginUserAsync(string email, string password)
@@ -86,6 +86,6 @@ public class UserService : IUserService
             return null;
         }
 
-        return GenerateTokenForUserAsync(user);
+        return GenerateTokenForUser(user);
     }
 }
