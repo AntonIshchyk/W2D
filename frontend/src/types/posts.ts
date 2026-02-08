@@ -74,3 +74,15 @@ export interface ScrollResult<T> {
   hasMore: boolean
   totalCount: number
 }
+
+export interface Comment {
+  id: number
+  content: string
+  userId: number
+  userName?: string
+  postId: number
+  score: number
+  createdAt: string
+  updatedAt: string
+  currentUserVote?: number
+}

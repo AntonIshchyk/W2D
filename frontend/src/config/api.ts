@@ -33,6 +33,9 @@ export const API_ENDPOINTS = {
     base: `${API_BASE_URL}/api/posts`,
     byId: (id: number) => `${API_BASE_URL}/api/posts/${id}`,
     vote: (id: number) => `${API_BASE_URL}/api/posts/${id}/vote`,
+    comments: (postId: number) => `${API_BASE_URL}/api/posts/${postId}/comments`,
+    commentById: (postId: number, commentId: number) => `${API_BASE_URL}/api/posts/${postId}/comments/${commentId}`,
+    commentVote: (postId: number, commentId: number) => `${API_BASE_URL}/api/posts/${postId}/comments/${commentId}/vote`,
   },
 } as const;
 

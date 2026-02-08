@@ -24,6 +24,8 @@ public class AppDbContext : DbContext
     public DbSet<UserActivity> UserActivities { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<PostVote> PostVotes { get; set; }
+    public DbSet<Comment> Comments { get; set; }
+    public DbSet<CommentVote> CommentVotes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -137,6 +139,48 @@ public class AppDbContext : DbContext
         // PostVote index for querying by post
         modelBuilder.Entity<PostVote>()
             .HasIndex(v => v.PostId);
+
+        // Comment - User relationship
+        modelBuilder.Entity<Comment>()
+            .HasOne(c => c.User)
+            .WithMany()
+            .HasForeignKey(c => c.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Comment - Post relationship
+        modelBuilder.Entity<Comment>()
+            .HasOne(c => c.Post)
+            .WithMany(p => p.Comments)
+            .HasForeignKey(c => c.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Comment>()
+            .HasIndex(c => c.PostId);
+
+        modelBuilder.Entity<Comment>()
+            .HasIndex(c => c.UserId);
+
+        // CommentVote - User relationship
+        modelBuilder.Entity<CommentVote>()
+            .HasOne(v => v.User)
+            .WithMany()
+            .HasForeignKey(v => v.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // CommentVote - Comment relationship
+        modelBuilder.Entity<CommentVote>()
+            .HasOne(v => v.Comment)
+            .WithMany(c => c.Votes)
+            .HasForeignKey(v => v.CommentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // One vote per user per comment
+        modelBuilder.Entity<CommentVote>()
+            .HasIndex(v => new { v.UserId, v.CommentId })
+            .IsUnique();
+
+        modelBuilder.Entity<CommentVote>()
+            .HasIndex(v => v.CommentId);
 
         // Seed database with activities, categories, and tags
         DatabaseSeeder.SeedData(modelBuilder);

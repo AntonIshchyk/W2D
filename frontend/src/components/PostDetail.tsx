@@ -6,6 +6,7 @@ import { PostType } from '../types/posts'
 import type { Post } from '../types/posts'
 import { fetchCurrentUser } from '../lib/auth'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
+import { Comments } from './Comments'
 
 async function fetchPost(id: number): Promise<Post> {
   const response = await fetch(API_ENDPOINTS.posts.byId(id), {
@@ -309,6 +310,9 @@ export function PostDetail() {
                   )}
                 </div>
               )}
+
+              {/* Comments section */}
+              <Comments postId={post.id} currentUserId={currentUser?.userId} />
             </div>
           </div>
         </div>

@@ -48,4 +48,5 @@ public class Post : BaseModel
     public int CommentCount { get; set; }
 
     public ICollection<PostVote> Votes { get; set; } = new List<PostVote>();
+    public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 }
