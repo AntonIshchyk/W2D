@@ -1,8 +1,14 @@
 import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'sonner'
+import { ArrowBigUp, ArrowBigDown, MessageSquare, Star, TrendingUp, Clock, Plus } from 'lucide-react'
 import { Button } from './ui/button'
+import { Card, CardContent } from './ui/card'
+import { Badge } from './ui/badge'
+import { Tabs, TabsList, TabsTrigger } from './ui/tabs'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
+import { Skeleton } from './ui/skeleton'
 import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { fetchCurrentUser } from '../lib/auth'
@@ -10,6 +16,9 @@ import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { PostType } from '../types/posts'
 import type { Post, ScrollResult } from '../types/posts'
 import { PAGINATION } from '../config/constants'
+import { formatRelativeTime } from '../lib/utils/date'
+import { EmptyState } from './ui/empty-state'
+import { LoadingSpinner } from './ui/loading-spinner'
 
 interface Activity {
   id: number
@@ -92,13 +101,13 @@ const POST_TYPE_LABELS: Record<PostType, string> = {
   [PostType.Challenge]: 'Challenge'
 }
 
-const POST_TYPE_COLORS: Record<PostType, string> = {
-  [PostType.ExperienceShare]: 'bg-blue-100 text-blue-800',
-  [PostType.Guide]: 'bg-green-100 text-green-800',
-  [PostType.Question]: 'bg-yellow-100 text-yellow-800',
-  [PostType.Recommendation]: 'bg-purple-100 text-purple-800',
-  [PostType.Achievement]: 'bg-orange-100 text-orange-800',
-  [PostType.Challenge]: 'bg-red-100 text-red-800'
+const POST_TYPE_VARIANTS: Record<PostType, 'default' | 'secondary' | 'outline' | 'destructive'> = {
+  [PostType.ExperienceShare]: 'default',
+  [PostType.Guide]: 'secondary',
+  [PostType.Question]: 'outline',
+  [PostType.Recommendation]: 'default',
+  [PostType.Achievement]: 'secondary',
+  [PostType.Challenge]: 'destructive'
 }
 
 export function Posts() {
@@ -171,28 +180,14 @@ export function Posts() {
     }
   }, [handleObserver])
 
-  // Flatten all posts from all pages
-  const allPosts = data?.pages.flatMap(page => page.items) ?? []
+  const allPosts = useMemo(
+    () => data?.pages.flatMap(page => page.items) ?? [],
+    [data?.pages]
+  )
 
   const handleVote = (postId: number, currentVote: number | undefined, newValue: number) => {
-    // If clicking the same vote, remove it (set to 0)
     const value = currentVote === newValue ? 0 : newValue
     voteMutation.mutate({ postId, value })
-  }
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    const diffHours = Math.floor(diffMs / 3600000)
-    const diffDays = Math.floor(diffMs / 86400000)
-
-    if (diffMins < 1) return 'just now'
-    if (diffMins < 60) return `${diffMins}m ago`
-    if (diffHours < 24) return `${diffHours}h ago`
-    if (diffDays < 7) return `${diffDays}d ago`
-    return date.toLocaleDateString()
   }
 
   if (isError) {
@@ -201,190 +196,240 @@ export function Posts() {
 
   return (
     <PageLayout>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Posts</h1>
-        {currentUser && (
-          <Button onClick={() => navigate('/posts/create')} className="text-sm">
-            New Post
-          </Button>
-        )}
+      {/* Improved header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-4xl font-bold bg-linear-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+              Community Feed
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Share experiences, ask questions, and learn from others
+            </p>
+          </div>
+          {currentUser && (
+            <Button onClick={() => navigate('/posts/create')} size="lg" className="gap-2">
+              <Plus className="h-5 w-5" />
+              New Post
+            </Button>
+          )}
+        </div>
       </div>
 
-      {/* Filters — compact inline bar */}
-      <div className="flex items-center gap-4 flex-wrap mb-6 pb-5 border-b border-gray-200">
-        {/* Sort tabs */}
-        <div className="flex bg-gray-100 rounded-lg p-0.5">
-          {[
-            { value: 'new', label: 'New' },
-            { value: 'hot', label: 'Hot' },
-            { value: 'top', label: 'Top' }
-          ].map((s) => (
-            <button
-              key={s.value}
-              onClick={() => setSortBy(s.value)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                sortBy === s.value
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
+      {/* Improved filters */}
+      <div className="mb-8 space-y-4">
+        {/* Sort tabs with icons */}
+        <Tabs value={sortBy} onValueChange={setSortBy} className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-3">
+            <TabsTrigger value="new" className="gap-1.5">
+              <Clock className="h-4 w-4" />
+              New
+            </TabsTrigger>
+            <TabsTrigger value="hot" className="gap-1.5">
+              <TrendingUp className="h-4 w-4" />
+              Hot
+            </TabsTrigger>
+            <TabsTrigger value="top" className="gap-1.5">
+              <Star className="h-4 w-4" />
+              Top
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
-        {/* Activity filter */}
-        <select
-          value={selectedActivity ?? ''}
-          onChange={(e) => setSelectedActivity(e.target.value ? Number(e.target.value) : undefined)}
-          className="text-xs text-gray-600 bg-transparent border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-gray-400"
-        >
-          <option value="">All activities</option>
-          {activities?.map((activity) => (
-            <option key={activity.id} value={activity.id}>
-              {activity.title}
-            </option>
-          ))}
-        </select>
+        {/* Activity and Type filters */}
+        <div className="flex items-center gap-3 flex-wrap pb-4 border-b">
+          <Select 
+            value={selectedActivity?.toString() ?? 'all'} 
+            onValueChange={(value) => setSelectedActivity(value === 'all' ? undefined : Number(value))}
+          >
+            <SelectTrigger className="w-50 h-9">
+              <SelectValue placeholder="All activities" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All activities</SelectItem>
+              {activities?.map((activity) => (
+                <SelectItem key={activity.id} value={activity.id.toString()}>
+                  {activity.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        {/* Type pills */}
-        <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="h-4 w-px bg-border" />
+
+          {/* Type badges in a cleaner layout */}
           {Object.entries(POST_TYPE_LABELS).map(([value, label]) => (
-            <button
+            <Badge
               key={value}
+              variant={selectedType === Number(value) ? 'default' : 'outline'}
+              className="cursor-pointer hover:bg-primary/90 transition-colors"
               onClick={() => setSelectedType(selectedType === Number(value) ? undefined : Number(value))}
-              className={`px-2.5 py-1 rounded-md text-xs transition-all ${
-                selectedType === Number(value)
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-400'
-              }`}
             >
               {label}
-            </button>
+            </Badge>
           ))}
-        </div>
 
-        {(selectedActivity || selectedType || sortBy !== 'new') && (
-          <button
-            onClick={() => { setSelectedActivity(undefined); setSelectedType(undefined); setSortBy('new') }}
-            className="text-xs text-gray-400 hover:text-gray-600 underline"
-          >
-            clear
-          </button>
-        )}
+          {(selectedActivity || selectedType) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { 
+                setSelectedActivity(undefined)
+                setSelectedType(undefined)
+              }}
+              className="h-9 ml-auto"
+            >
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
 
-      {/* Post list — compact density */}
-      <div className="max-w-4xl">
+      {/* Post list */}
+      <div className="max-w-4xl space-y-4">
         {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <p className="text-sm text-gray-400 tracking-wide uppercase">Loading...</p>
-          </div>
+          <>
+            {[...Array(5)].map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-4 flex gap-4">
+                  <div className="flex flex-col items-center gap-2">
+                    <Skeleton className="h-4 w-4" />
+                    <Skeleton className="h-4 w-6" />
+                    <Skeleton className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-5 w-3/4" />
+                    <Skeleton className="h-3 w-full" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </>
         ) : (
           <>
-            <div className="divide-y divide-gray-100">
-              {allPosts.map((post) => (
-                <div key={post.id} className="group py-4 flex gap-4">
-                  {/* Compact vote */}
-                  <div className="flex flex-col items-center gap-0.5 pt-0.5">
-                    <button
+            {allPosts.map((post) => (
+              <Card 
+                key={post.id} 
+                className="group hover:shadow-lg transition-all duration-200 overflow-hidden border-2 hover:border-primary/20"
+              >
+                {/* Colorful accent bar */}
+                <div className="h-1 bg-linear-to-r from-primary via-primary/60 to-transparent" />
+                
+                <CardContent className="p-5 flex gap-5">
+                  {/* Voting column with better design */}
+                  <div className="flex flex-col items-center gap-1.5 pt-1">
+                    <Button
+                      variant={post.currentUserVote === 1 ? "default" : "ghost"}
+                      size="icon"
+                      className={`h-8 w-8 rounded-full ${
+                        post.currentUserVote === 1 
+                          ? 'bg-orange-500 hover:bg-orange-600 text-white' 
+                          : 'hover:bg-orange-50 hover:text-orange-500'
+                      }`}
                       onClick={() => handleVote(post.id, post.currentUserVote, 1)}
                       disabled={!currentUser}
-                      aria-label="Upvote"
-                      className={`p-0.5 rounded transition-colors ${
-                        post.currentUserVote === 1 ? 'text-orange-500' : 'text-gray-300 hover:text-gray-500'
-                      } ${!currentUser ? 'cursor-not-allowed' : ''}`}
                     >
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" />
-                      </svg>
-                    </button>
-                    <span className={`text-xs font-semibold tabular-nums ${
-                      post.score > 0 ? 'text-orange-500' : post.score < 0 ? 'text-blue-500' : 'text-gray-400'
+                      <ArrowBigUp className="h-5 w-5" fill={post.currentUserVote === 1 ? "currentColor" : "none"} />
+                    </Button>
+                    <span className={`text-base font-bold tabular-nums ${
+                      post.score > 0 ? 'text-orange-500' : post.score < 0 ? 'text-blue-500' : 'text-muted-foreground'
                     }`}>
                       {post.score}
                     </span>
-                    <button
+                    <Button
+                      variant={post.currentUserVote === -1 ? "default" : "ghost"}
+                      size="icon"
+                      className={`h-8 w-8 rounded-full ${
+                        post.currentUserVote === -1 
+                          ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                          : 'hover:bg-blue-50 hover:text-blue-500'
+                      }`}
                       onClick={() => handleVote(post.id, post.currentUserVote, -1)}
                       disabled={!currentUser}
-                      aria-label="Downvote"
-                      className={`p-0.5 rounded transition-colors ${
-                        post.currentUserVote === -1 ? 'text-blue-500' : 'text-gray-300 hover:text-gray-500'
-                      } ${!currentUser ? 'cursor-not-allowed' : ''}`}
                     >
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" />
-                      </svg>
-                    </button>
+                      <ArrowBigDown className="h-5 w-5" fill={post.currentUserVote === -1 ? "currentColor" : "none"} />
+                    </Button>
                   </div>
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    {/* Meta line */}
-                    <div className="flex items-center gap-2 mb-1 text-xs text-gray-400">
-                      <span className={`font-medium px-1.5 py-0.5 rounded text-[11px] ${
-                        POST_TYPE_COLORS[post.type as PostType] ?? 'bg-gray-100 text-gray-800'
-                      }`}>
+                  {/* Content column with better hierarchy */}
+                  <div className="flex-1 min-w-0 space-y-3">
+                    {/* Meta info with better styling */}
+                    <div className="flex items-center gap-2 text-xs flex-wrap">
+                      <Badge variant={POST_TYPE_VARIANTS[post.type as PostType] ?? 'outline'} className="font-medium">
                         {POST_TYPE_LABELS[post.type as PostType] ?? 'Other'}
-                      </span>
-                      <span>{post.userName || 'Anon'}</span>
-                      <span className="text-gray-300">&middot;</span>
-                      <span>{formatDate(post.createdAt)}</span>
+                      </Badge>
+                      <span className="text-muted-foreground">•</span>
+                      <span className="font-medium text-foreground">{post.userName || 'Anonymous'}</span>
+                      <span className="text-muted-foreground">•</span>
+                      <span className="text-muted-foreground">{formatRelativeTime(post.createdAt)}</span>
                       {post.activityTitle && (
                         <>
-                          <span className="text-gray-300">&middot;</span>
-                          <span className="text-gray-500">{post.activityTitle}</span>
+                          <span className="text-muted-foreground">•</span>
+                          <span className="text-primary font-medium">{post.activityTitle}</span>
                         </>
                       )}
                     </div>
 
-                    {/* Title */}
+                    {/* Title with better typography */}
                     <Link 
                       to={`/posts/${post.id}`}
-                      className="text-sm font-semibold text-gray-900 mb-1 block hover:text-blue-600 transition-colors"
+                      className="block"
                     >
-                      {post.title}
+                      <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                        {post.title}
+                      </h3>
                     </Link>
                     
-                    {/* Preview text */}
-                    <p className="text-sm text-gray-500 line-clamp-1">{post.content}</p>
+                    {/* Preview with better readability */}
+                    <p className="text-muted-foreground leading-relaxed line-clamp-2">
+                      {post.content}
+                    </p>
 
-                    {/* Footer */}
-                    <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400">
+                    {/* Footer with icons */}
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2">
                       {post.rating != null && post.rating > 0 && (
-                        <span className="flex items-center gap-0.5">
+                        <div className="flex items-center gap-1">
                           {[...Array(post.rating)].map((_, i) => (
-                            <svg key={i} className="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
+                            <Star key={i} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
                           ))}
-                        </span>
+                        </div>
                       )}
                       {post.commentCount > 0 && (
-                        <span>{post.commentCount} comments</span>
+                        <Link 
+                          to={`/posts/${post.id}`}
+                          className="flex items-center gap-1.5 hover:text-foreground transition-colors"
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                          <span className="font-medium">{post.commentCount}</span>
+                          <span>comments</span>
+                        </Link>
                       )}
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                </CardContent>
+              </Card>
+            ))}
 
             {allPosts.length === 0 && (
-              <div className="text-center py-20">
-                <p className="text-gray-400">
-                  {selectedActivity || selectedType
-                    ? 'Nothing matches those filters' 
-                    : 'No posts yet'}
-                </p>
-              </div>
+              <EmptyState
+                icon={MessageSquare}
+                title="No posts yet"
+                description={
+                  selectedActivity || selectedType
+                    ? 'Try adjusting your filters'
+                    : 'Be the first to share something!'
+                }
+                action={currentUser && !selectedActivity && !selectedType ? {
+                  label: 'Create Post',
+                  onClick: () => navigate('/posts/create')
+                } : undefined}
+              />
             )}
 
             {/* Infinite scroll target */}
             <div ref={observerTarget} className="h-10 flex items-center justify-center">
-              {isFetchingNextPage && (
-                <p className="text-xs text-gray-400">Loading more...</p>
-              )}
+              {isFetchingNextPage && <LoadingSpinner text="Loading more..." />}
             </div>
           </>
         )}

@@ -321,14 +321,6 @@ export function CreatePost() {
                 {createMutation.isPending ? 'Creating...' : 'Create Post'}
               </Button>
             </div>
-
-            {createMutation.isError && (
-              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-sm text-red-800">
-                  {createMutation.error?.message || 'Failed to create post. Please try again.'}
-                </p>
-              </div>
-            )}
           </form>
         </div>
     </PageLayout>

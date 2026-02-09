@@ -197,7 +197,7 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
                   <span className="text-sm font-medium text-gray-900">{comment.userName || 'Anonymous'}</span>
                   <span className="text-xs text-gray-400">{timeAgo(comment.createdAt)}</span>
                 </div>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">{comment.content}</p>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap wrap-break-word">{comment.content}</p>
                 {currentUserId === comment.userId && (
                   <button
                     onClick={() => deleteMutation.mutate(comment.id)}

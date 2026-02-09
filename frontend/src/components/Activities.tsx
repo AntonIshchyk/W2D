@@ -1,12 +1,23 @@
 import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
+import { Search, Calendar, MapPin, DollarSign, Activity as ActivityIcon, X } from 'lucide-react'
 import { Button } from './ui/button'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
+import { Badge } from './ui/badge'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
+import { Textarea } from './ui/textarea'
+import { Skeleton } from './ui/skeleton'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { fetchCurrentUser } from '../lib/auth'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { PAGINATION } from '../config/constants'
+import { EmptyState } from './ui/empty-state'
+import { LoadingSpinner } from './ui/loading-spinner'
 
 interface Tag {
   id: number
@@ -42,7 +53,7 @@ interface ScrollResult {
   totalCount: number
 }
 
-async function fetchActivities(cursor: number | null, categoryId?: number, tagIds?: number[]): Promise<ScrollResult> {
+async function fetchActivities(cursor: number | null, categoryId?: number, tagIds?: number[], search?: string): Promise<ScrollResult> {
   const params = new URLSearchParams({
     limit: PAGINATION.DEFAULT_PAGE_SIZE.toString()
   })
@@ -57,6 +68,10 @@ async function fetchActivities(cursor: number | null, categoryId?: number, tagId
 
   if (tagIds && tagIds.length > 0) {
     tagIds.forEach(id => params.append('tagIds', id.toString()))
+  }
+
+  if (search) {
+    params.append('search', search)
   }
 
   const response = await fetch(`${API_ENDPOINTS.activities.base}?${params}`, {
@@ -90,12 +105,57 @@ async function fetchTags(): Promise<Tag[]> {
   return response.json()
 }
 
+interface ScheduleData {
+  activityId: number
+  plannedDate: string
+  notes?: string
+}
+
+async function scheduleActivity(data: ScheduleData): Promise<void> {
+  const response = await fetch(API_ENDPOINTS.schedules.base, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data)
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to schedule activity')
+  }
+}
+
+const locationLabels: Record<string, { label: string; icon: typeof MapPin }> = {
+  'Indoor': { label: 'Indoor', icon: MapPin },
+  'Outdoor': { label: 'Outdoor', icon: MapPin },
+  'Online': { label: 'Online', icon: MapPin },
+  'Any': { label: 'Any Location', icon: MapPin }
+}
+
+const costLabels: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
+  'Low': { label: '$', variant: 'secondary' },
+  'Medium': { label: '$$', variant: 'secondary' },
+  'High': { label: '$$$', variant: 'secondary' }
+}
+
+const physicalLabels: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
+  'Low': { label: 'Chill', variant: 'outline' },
+  'Medium': { label: 'Moderate', variant: 'outline' },
+  'High': { label: 'Intense', variant: 'outline' }
+}
+
 export function Activities() {
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>(undefined)
   const [selectedTags, setSelectedTags] = useState<number[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false)
+  const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null)
+  const [plannedDate, setPlannedDate] = useState('')
+  const [notes, setNotes] = useState('')
   const observerTarget = useRef<HTMLDivElement>(null)
   
-  const { isError, error: userError } = useQuery({
+  const queryClient = useQueryClient()
+
+  const { data: currentUser, isError, error: userError } = useQuery({
     queryKey: ['currentUser'],
     queryFn: fetchCurrentUser,
     retry: false
@@ -103,16 +163,12 @@ export function Activities() {
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
-    queryFn: fetchCategories,
-    staleTime: Infinity,
-    gcTime: Infinity
+    queryFn: fetchCategories
   })
 
   const { data: tags } = useQuery({
     queryKey: ['tags'],
-    queryFn: fetchTags,
-    staleTime: Infinity,
-    gcTime: Infinity
+    queryFn: fetchTags
   })
 
   const {
@@ -122,11 +178,26 @@ export function Activities() {
     isFetchingNextPage,
     isLoading
   } = useInfiniteQuery({
-    queryKey: ['activities', selectedCategory, selectedTags],
-    queryFn: ({ pageParam }) => fetchActivities(pageParam, selectedCategory, selectedTags),
+    queryKey: ['activities', selectedCategory, selectedTags, searchQuery],
+    queryFn: ({ pageParam }) => fetchActivities(pageParam, selectedCategory, selectedTags, searchQuery || undefined),
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
     initialPageParam: null as number | null,
     retry: false
+  })
+
+  const scheduleMutation = useMutation({
+    mutationFn: scheduleActivity,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schedules'] })
+      setScheduleDialogOpen(false)
+      setSelectedActivityId(null)
+      setPlannedDate('')
+      setNotes('')
+      toast.success('Activity scheduled successfully!')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+    }
   })
 
   useAuthErrorHandler(isError, userError)
@@ -151,48 +222,21 @@ export function Activities() {
     }
   }, [handleObserver])
 
-  const queryClient = useQueryClient()
-  const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false)
-  const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null)
-  const [plannedDate, setPlannedDate] = useState('')
-  const [notes, setNotes] = useState('')
+  const allActivities = useMemo(
+    () => data?.pages.flatMap(page => page.items) ?? [],
+    [data?.pages]
+  )
 
-  // Flatten all activities from all pages
-  const allActivities = data?.pages.flatMap(page => page.items) ?? []
-  const totalCount = data?.pages[0]?.totalCount ?? 0
-
-  const scheduleMutation = useMutation({
-    mutationFn: async (data: { activityId: number; plannedDate: string; notes?: string }) => {
-      const response = await fetch(API_ENDPOINTS.schedules.base, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          activityId: data.activityId,
-          plannedDate: data.plannedDate,
-          notes: data.notes
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to schedule activity')
-      }
-
-      return response.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schedules'] })
-      setScheduleDialogOpen(false)
-      setSelectedActivityId(null)
-      setPlannedDate('')
-      setNotes('')
-      toast.success('Activity scheduled successfully!')
-    },
-    onError: (error: Error) => {
-      toast.error(error.message)
-    }
-  })
+  const totalCount = useMemo(
+    () => data?.pages[0]?.totalCount ?? 0,
+    [data?.pages]
+  )
 
   const handleScheduleClick = (activityId: number) => {
+    if (!currentUser) {
+      toast.error('Please login to schedule activities')
+      return
+    }
     setSelectedActivityId(activityId)
     setScheduleDialogOpen(true)
   }
@@ -200,9 +244,8 @@ export function Activities() {
   const handleScheduleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (selectedActivityId && plannedDate) {
-      // Convert date to ISO string format for API
       const dateObj = new Date(plannedDate)
-      dateObj.setHours(12, 0, 0, 0) // Set to noon to avoid timezone issues
+      dateObj.setHours(12, 0, 0, 0)
       
       scheduleMutation.mutate({
         activityId: selectedActivityId,
@@ -224,254 +267,298 @@ export function Activities() {
     return null
   }
 
-  const locationLabels: Record<string, string> = { 'Any': 'Any Location', 'Indoor': 'Indoor', 'Outdoor': 'Outdoor', 'Online': 'Online' }
-  const costLabels: Record<string, string> = { 'Low': '$', 'Medium': '$$', 'High': '$$$' }
-  const physicalLabels: Record<string, string> = { 'Low': 'Chill', 'Medium': 'Moderate', 'High': 'Intense' }
+  const selectedActivity = allActivities.find(a => a.id === selectedActivityId)
 
   return (
     <PageLayout>
-      {/* Header row */}
-      <div className="flex items-end justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Activities</h1>
-          {totalCount > 0 && (
-            <p className="text-sm text-gray-400 mt-1">{totalCount} total</p>
-          )}
+      {/* Improved header with integrated search */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+              Discover Activities
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              {totalCount > 0 ? `${totalCount} activities to explore` : 'Browse activities'}
+            </p>
+          </div>
+        </div>
+        
+        {/* Prominent search bar */}
+        <div className="relative max-w-2xl">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            placeholder="Search for activities, locations, or experiences..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-12 h-12 text-base shadow-sm"
+          />
         </div>
       </div>
 
-      {/* Inline filters */}
-      <div className="mb-8 space-y-3">
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* Category as pills */}
-          <button
-            onClick={() => setSelectedCategory(undefined)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-              !selectedCategory
-                ? 'bg-gray-900 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            All
-          </button>
-          {categories?.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setSelectedCategory(selectedCategory === category.id ? undefined : category.id)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                selectedCategory === category.id
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {category.name}
-            </button>
-          ))}
-        </div>
-
-        {/* Tags as smaller toggles */}
-        {tags && tags.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-gray-400 mr-1">Tags</span>
-            {tags.map((tag) => (
-              <button
-                key={tag.id}
-                onClick={() => handleTagToggle(tag.id)}
-                className={`px-2.5 py-1 rounded-md text-xs transition-all ${
-                  selectedTags.includes(tag.id)
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-400'
-                }`}
-              >
-                {tag.name}
-              </button>
+      {/* Compact filter chips */}
+      <div className="mb-6 flex items-center gap-3 flex-wrap pb-4 border-b">
+        {/* Category filter */}
+        <Select 
+          value={selectedCategory?.toString() ?? 'all'} 
+          onValueChange={(value) => setSelectedCategory(value === 'all' ? undefined : Number(value))}
+        >
+          <SelectTrigger className="w-[180px] h-9">
+            <SelectValue placeholder="All Categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {categories?.map((cat) => (
+              <SelectItem key={cat.id} value={cat.id.toString()}>
+                {cat.name}
+              </SelectItem>
             ))}
-            {(selectedCategory || selectedTags.length > 0) && (
-              <button
-                onClick={() => { setSelectedCategory(undefined); setSelectedTags([]) }}
-                className="text-xs text-gray-400 hover:text-gray-600 ml-2 underline"
-              >
-                clear
-              </button>
-            )}
-          </div>
+          </SelectContent>
+        </Select>
+
+        {/* Selected tags as badges */}
+        {selectedTags.length > 0 && (
+          <>
+            <div className="h-4 w-px bg-border" />
+            {selectedTags.map((tagId) => {
+              const tag = tags?.find(t => t.id === tagId)
+              return tag ? (
+                <Badge
+                  key={tagId}
+                  variant="secondary"
+                  className="cursor-pointer gap-1"
+                  onClick={() => handleTagToggle(tagId)}
+                >
+                  #{tag.name}
+                  <X className="h-3 w-3" />
+                </Badge>
+              ) : null
+            })}
+          </>
+        )}
+
+        {/* Tag picker button */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setSearchOpen(!searchOpen)}
+          className="h-9"
+        >
+          Add tags
+        </Button>
+
+        {(selectedCategory || selectedTags.length > 0) && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => { 
+              setSelectedCategory(undefined)
+              setSelectedTags([])
+            }}
+            className="h-9"
+          >
+            Clear all
+          </Button>
         )}
       </div>
 
-      {/* Activity grid */}
+      {/* Tag selector dialog */}
+      {searchOpen && tags && (
+        <Card className="mb-6 border-2">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm">Select Tags</CardTitle>
+          </CardHeader>
+          <CardContent className="flex gap-2 flex-wrap max-h-40 overflow-y-auto">
+            {tags.map((tag) => (
+              <Badge
+                key={tag.id}
+                variant={selectedTags.includes(tag.id) ? 'default' : 'outline'}
+                className="cursor-pointer"
+                onClick={() => handleTagToggle(tag.id)}
+              >
+                #{tag.name}
+              </Badge>
+            ))}
+          </CardContent>
+          <CardFooter>
+            <Button variant="ghost" size="sm" onClick={() => setSearchOpen(false)} className="w-full">
+              Done
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
+
+      {/* Improved activity grid with better visual hierarchy */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <p className="text-sm text-gray-400 tracking-wide uppercase">Loading...</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[...Array(6)].map((_, i) => (
+            <Card key={i} className="overflow-hidden">
+              <div className="h-2 bg-gradient-to-r from-primary/20 to-primary/5" />
+              <CardHeader>
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-4 w-1/4 mt-2" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6 mt-2" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {allActivities.map((activity) => (
-              <div
-                key={activity.id}
-                className="group bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-400 hover:shadow-sm transition-all duration-200 flex flex-col"
+              <Card 
+                key={activity.id} 
+                className="group hover:shadow-lg hover:scale-[1.02] transition-all duration-200 overflow-hidden cursor-pointer border-2 hover:border-primary/20"
+                onClick={() => handleScheduleClick(activity.id)}
               >
-                {/* Top: category badge */}
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-base font-semibold text-gray-900 leading-snug pr-2">
-                    {activity.title}
-                  </h3>
-                  {activity.category && (
-                    <span className="shrink-0 text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                      {activity.category.name}
-                    </span>
-                  )}
-                </div>
-
-                {/* Description */}
-                <p className="text-sm text-gray-500 line-clamp-2 mb-4 flex-1">
-                  {activity.description}
-                </p>
-
-                {/* Meta chips */}
-                <div className="flex items-center gap-2 flex-wrap mb-4 text-[11px]">
-                  {activity.locationType !== undefined && locationLabels[activity.locationType] && (
-                    <span className="bg-gray-50 text-gray-500 px-2 py-0.5 rounded">
-                      {locationLabels[activity.locationType]}
-                    </span>
-                  )}
-                  {activity.costLevel !== undefined && costLabels[activity.costLevel] && (
-                    <span className="bg-gray-50 text-gray-500 px-2 py-0.5 rounded">
-                      {costLabels[activity.costLevel]}
-                    </span>
-                  )}
-                  {activity.physicalActivityLevel !== undefined && physicalLabels[activity.physicalActivityLevel] && (
-                    <span className="bg-gray-50 text-gray-500 px-2 py-0.5 rounded">
-                      {physicalLabels[activity.physicalActivityLevel]}
-                    </span>
-                  )}
-                </div>
-
-                {/* Tags + action */}
-                <div className="flex items-end justify-between gap-3 pt-3 border-t border-gray-100">
-                  <div className="flex gap-1.5 flex-wrap min-w-0">
-                    {activity.tags.slice(0, 3).map((tag) => (
-                      <span key={tag.id} className="text-[11px] text-gray-400">
-                        #{tag.name}
-                      </span>
-                    ))}
-                    {activity.tags.length > 3 && (
-                      <span className="text-[11px] text-gray-300">+{activity.tags.length - 3}</span>
+                {/* Colored top accent */}
+                <div className="h-1.5 bg-gradient-to-r from-primary via-primary/70 to-primary/40" />
+                
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <CardTitle className="text-lg leading-snug group-hover:text-primary transition-colors">
+                      {activity.title}
+                    </CardTitle>
+                    {activity.category && (
+                      <Badge className="shrink-0">
+                        {activity.category.name}
+                      </Badge>
                     )}
                   </div>
-                  <button
-                    onClick={() => handleScheduleClick(activity.id)}
-                    className="shrink-0 text-xs font-medium text-gray-400 hover:text-gray-900 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 transition-all"
+                  <CardDescription className="line-clamp-2 text-sm">
+                    {activity.description}
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent className="space-y-4">
+                  {/* Visual meta info grid */}
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    {activity.locationType && locationLabels[activity.locationType] && (
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <MapPin className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{locationLabels[activity.locationType].label}</span>
+                      </div>
+                    )}
+                    {activity.costLevel && (
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <DollarSign className="h-4 w-4 shrink-0" />
+                        <span>{costLabels[activity.costLevel]?.label || activity.costLevel}</span>
+                      </div>
+                    )}
+                    {activity.physicalActivityLevel && (
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <ActivityIcon className="h-4 w-4 shrink-0" />
+                        <span>{physicalLabels[activity.physicalActivityLevel]?.label || activity.physicalActivityLevel}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Tags with better styling */}
+                  {activity.tags.length > 0 && (
+                    <div className="flex gap-1.5 flex-wrap pt-2 border-t">
+                      {activity.tags.slice(0, 4).map((tag) => (
+                        <Badge key={tag.id} variant="secondary" className="text-xs font-normal">
+                          #{tag.name}
+                        </Badge>
+                      ))}
+                      {activity.tags.length > 4 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{activity.tags.length - 4}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+
+                <CardFooter className="pt-0">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="w-full gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleScheduleClick(activity.id)
+                    }}
                   >
-                    + Plan
-                  </button>
-                </div>
-              </div>
+                    <Calendar className="h-4 w-4" />
+                    Schedule Activity
+                  </Button>
+                </CardFooter>
+              </Card>
             ))}
           </div>
 
           {allActivities.length === 0 && (
-            <div className="text-center py-20">
-              <p className="text-gray-400">
-                {selectedCategory || selectedTags.length > 0 
-                  ? 'Nothing matches those filters' 
-                  : 'No activities yet'}
-              </p>
-            </div>
+            <EmptyState
+              icon={ActivityIcon}
+              title={searchQuery ? 'No matching activities' : 'No activities found'}
+              description={
+                selectedCategory || selectedTags.length > 0 || searchQuery
+                  ? 'Try adjusting your filters'
+                  : 'Activities will appear here'
+              }
+            />
           )}
 
           {/* Infinite scroll target */}
-          <div ref={observerTarget} className="h-10 flex items-center justify-center mt-6">
-            {isFetchingNextPage && (
-              <p className="text-xs text-gray-400">Loading more...</p>
-            )}
+          <div ref={observerTarget} className="h-10 flex items-center justify-center mt-8">
+            {isFetchingNextPage && <LoadingSpinner text="Loading more..." />}
           </div>
         </>
       )}
 
       {/* Schedule Dialog */}
-      {scheduleDialogOpen && (
-        <div 
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="schedule-dialog-title"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setScheduleDialogOpen(false)
-              setSelectedActivityId(null)
-              setPlannedDate('')
-              setNotes('')
-            }
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') {
-              setScheduleDialogOpen(false)
-              setSelectedActivityId(null)
-              setPlannedDate('')
-              setNotes('')
-            }
-          }}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl p-7 max-w-sm w-full relative" onClick={(e) => e.stopPropagation()}>
-            <h2 id="schedule-dialog-title" className="text-lg font-semibold text-gray-900 mb-5">Plan Activity</h2>
-            <form onSubmit={handleScheduleSubmit}>
-              <div className="mb-4">
-                <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  value={plannedDate}
-                  onChange={(e) => setPlannedDate(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                  required
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 text-sm"
-                />
-              </div>
-              <div className="mb-5">
-                <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">
-                  Notes
-                </label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 text-sm"
-                  placeholder="Optional notes..."
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setScheduleDialogOpen(false)
-                    setSelectedActivityId(null)
-                    setPlannedDate('')
-                    setNotes('')
-                  }}
-                  className="text-sm"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={scheduleMutation.isPending}
-                  className="text-sm"
-                >
-                  {scheduleMutation.isPending ? 'Saving...' : 'Schedule'}
-                </Button>
-              </div>
-              {scheduleMutation.isError && (
-                <p className="text-xs text-red-500 mt-3">
-                  {scheduleMutation.error?.message || 'Failed to schedule activity'}
-                </p>
-              )}
-            </form>
-          </div>
-        </div>
-      )}
+      <Dialog open={scheduleDialogOpen} onOpenChange={setScheduleDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Schedule Activity</DialogTitle>
+            <DialogDescription>
+              {selectedActivity?.title}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleScheduleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="planned-date">Planned Date</Label>
+              <Input
+                id="planned-date"
+                type="date"
+                value={plannedDate}
+                onChange={(e) => setPlannedDate(e.target.value)}
+                required
+                min={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes (Optional)</Label>
+              <Textarea
+                id="notes"
+                placeholder="Add any notes..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setScheduleDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={scheduleMutation.isPending}>
+                {scheduleMutation.isPending ? 'Scheduling...' : 'Schedule'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </PageLayout>
   )
 }
