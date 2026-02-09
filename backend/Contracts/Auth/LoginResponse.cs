@@ -1,4 +1,4 @@
-namespace Backend.DTOs;
+namespace Backend.Contracts.Auth;
 
 public class LoginResponse
 {

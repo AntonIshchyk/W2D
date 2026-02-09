@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
-using Backend.DTOs;
+using Backend.Contracts.Comments;
 using Backend.Services;
 using Backend.Extensions;
 

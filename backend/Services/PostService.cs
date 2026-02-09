@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 using Backend.Data;
 using Backend.Models;
-using Backend.DTOs;
+using Backend.Contracts.Posts;
+using Backend.Contracts.Common;
 using Backend.Constants;
 
 namespace Backend.Services;
@@ -9,40 +11,12 @@ namespace Backend.Services;
 public class PostService : IPostService
 {
     private readonly AppDbContext _context;
+    private readonly IMapper _mapper;
 
-    public PostService(AppDbContext context)
+    public PostService(AppDbContext context, IMapper mapper)
     {
         _context = context;
-    }
-
-    private PostResponse MapToPostResponse(Post post, int? currentUserVote = null)
-    {
-        return new PostResponse
-        {
-            Id = post.Id,
-            Title = post.Title,
-            Content = post.Content,
-            Type = (int)post.Type,
-            UserId = post.UserId,
-            UserName = post.User?.Name,
-            ActivityId = post.ActivityId,
-            ActivityTitle = post.Activity?.Title,
-            Score = post.Score,
-            LocationName = post.LocationName,
-            Latitude = post.Latitude,
-            Longitude = post.Longitude,
-            PlaceId = post.PlaceId,
-            Rating = post.Rating,
-            DurationMinutes = post.DurationMinutes,
-            Cost = post.Cost,
-            CurrencyCode = post.CurrencyCode,
-            CompletedAt = post.CompletedAt,
-            PhotoUrls = post.PhotoUrls,
-            CommentCount = post.CommentCount,
-            CreatedAt = post.CreatedAt,
-            UpdatedAt = post.UpdatedAt,
-            CurrentUserVote = currentUserVote
-        };
+        _mapper = mapper;
     }
 
     public async Task<ScrollResult<PostResponse>> GetPostsAsync(
@@ -146,7 +120,9 @@ public class PostService : IPostService
             int? vote = currentUserId.HasValue
                 ? (userVotes.TryGetValue(p.Id, out int voteValue) ? voteValue : 0)
                 : null;
-            return MapToPostResponse(p, vote);
+            PostResponse response = _mapper.Map<PostResponse>(p);
+            response.CurrentUserVote = vote;
+            return response;
         }).ToList();
 
         return new ScrollResult<PostResponse>
@@ -181,7 +157,9 @@ public class PostService : IPostService
             currentUserVote = vote?.Value ?? 0;
         }
 
-        return MapToPostResponse(post, currentUserVote);
+        PostResponse response = _mapper.Map<PostResponse>(post);
+        response.CurrentUserVote = currentUserVote;
+        return response;
     }
 
     private void ValidateLocationPairing(double? latitude, double? longitude)
@@ -233,26 +211,10 @@ public class PostService : IPostService
             throw new InvalidOperationException("Invalid ActivityId. Activity does not exist.");
         }
 
-        Post post = new()
-        {
-            Title = request.Title,
-            Content = request.Content,
-            Type = (PostType)request.Type,
-            UserId = userId,
-            ActivityId = request.ActivityId,
-            LocationName = request.LocationName,
-            Latitude = request.Latitude,
-            Longitude = request.Longitude,
-            PlaceId = request.PlaceId,
-            Rating = request.Rating,
-            DurationMinutes = request.DurationMinutes,
-            Cost = request.Cost,
-            CurrencyCode = request.CurrencyCode,
-            CompletedAt = request.CompletedAt,
-            PhotoUrls = request.PhotoUrls,
-            Score = 0,
-            CommentCount = 0
-        };
+        Post post = _mapper.Map<Post>(request);
+        post.UserId = userId;
+        post.Score = 0;
+        post.CommentCount = 0;
 
         _context.Posts.Add(post);
         await _context.SaveChangesAsync();
@@ -281,72 +243,8 @@ public class PostService : IPostService
 
         ValidatePhotoUrls(request.PhotoUrls);
 
-        // Update only provided fields
-        if (request.Title != null)
-        {
-            existingPost.Title = request.Title;
-        }
-
-        if (request.Content != null)
-        {
-            existingPost.Content = request.Content;
-        }
-
-        if (request.Type.HasValue)
-        {
-            existingPost.Type = (PostType)request.Type.Value;
-        }
-
-        if (request.LocationName != null)
-        {
-            existingPost.LocationName = request.LocationName;
-        }
-
-        if (request.Latitude.HasValue)
-        {
-            existingPost.Latitude = request.Latitude;
-        }
-
-        if (request.Longitude.HasValue)
-        {
-            existingPost.Longitude = request.Longitude;
-        }
-
-        if (request.PlaceId != null)
-        {
-            existingPost.PlaceId = request.PlaceId;
-        }
-
-        if (request.Rating.HasValue)
-        {
-            existingPost.Rating = request.Rating;
-        }
-
-        if (request.DurationMinutes.HasValue)
-        {
-            existingPost.DurationMinutes = request.DurationMinutes;
-        }
-
-        if (request.Cost.HasValue)
-        {
-            existingPost.Cost = request.Cost;
-        }
-
-        if (request.CurrencyCode != null)
-        {
-            existingPost.CurrencyCode = request.CurrencyCode;
-        }
-
-        if (request.CompletedAt.HasValue)
-        {
-            existingPost.CompletedAt = request.CompletedAt;
-        }
-
-        if (request.PhotoUrls != null)
-        {
-            existingPost.PhotoUrls = request.PhotoUrls;
-        }
-
+        // Map only non-null properties from request to existing post
+        _mapper.Map(request, existingPost);
         existingPost.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();

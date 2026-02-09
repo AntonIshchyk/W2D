@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Backend.Models;
-using Backend.DTOs;
+using Backend.Contracts.Common;
 using Backend.Services;
 using Backend.Constants;
 

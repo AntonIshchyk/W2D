@@ -33,6 +33,9 @@ builder.Services.AddScoped<IUserActivityService, UserActivityService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 
+// Configure AutoMapper
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
+
 // Configure JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

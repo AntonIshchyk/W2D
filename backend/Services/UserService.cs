@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 using Backend.Data;
 using Backend.Models;
-using Backend.DTOs;
+using Backend.Contracts.Auth;
 
 namespace Backend.Services;
 
@@ -9,11 +10,13 @@ public class UserService : IUserService
 {
     private readonly AppDbContext _context;
     private readonly ITokenService _tokenService;
+    private readonly IMapper _mapper;
 
-    public UserService(AppDbContext context, ITokenService tokenService)
+    public UserService(AppDbContext context, ITokenService tokenService, IMapper mapper)
     {
         _context = context;
         _tokenService = tokenService;
+        _mapper = mapper;
     }
 
     public async Task<IEnumerable<User>> GetAllUsersAsync()
@@ -34,15 +37,9 @@ public class UserService : IUserService
     public LoginResponse GenerateTokenForUser(User user)
     {
         string token = _tokenService.GenerateToken(user);
-
-        return new LoginResponse
-        {
-            UserId = user.Id,
-            Email = user.Email,
-            Name = user.Name,
-            IsAdmin = user.IsAdmin,
-            Token = token
-        };
+        LoginResponse response = _mapper.Map<LoginResponse>(user);
+        response.Token = token;
+        return response;
     }
 
     public async Task<LoginResponse?> RegisterUserAsync(string email, string password, string name)

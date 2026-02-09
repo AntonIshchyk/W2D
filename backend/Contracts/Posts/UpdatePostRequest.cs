@@ -1,23 +1,17 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Backend.DTOs;
+namespace Backend.Contracts.Posts;
 
-public class CreatePostRequest
+public class UpdatePostRequest
 {
-    [Required]
     [StringLength(200, MinimumLength = 3)]
-    public string Title { get; set; } = string.Empty;
+    public string? Title { get; set; }
 
-    [Required]
     [StringLength(2000, MinimumLength = 10)]
-    public string Content { get; set; } = string.Empty;
+    public string? Content { get; set; }
 
-    [Required]
     [Range(1, 6)]
-    public int Type { get; set; }
-
-    [Required]
-    public int ActivityId { get; set; }
+    public int? Type { get; set; }
 
     [StringLength(500)]
     public string? LocationName { get; set; }
@@ -46,5 +40,5 @@ public class CreatePostRequest
 
     public DateTime? CompletedAt { get; set; }
 
-    public List<string> PhotoUrls { get; set; } = new();
+    public List<string>? PhotoUrls { get; set; }
 }

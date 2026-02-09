@@ -1,17 +1,20 @@
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 using Backend.Data;
 using Backend.Models;
-using Backend.DTOs;
+using Backend.Contracts.Comments;
 
 namespace Backend.Services;
 
 public class CommentService : ICommentService
 {
     private readonly AppDbContext _context;
+    private readonly IMapper _mapper;
 
-    public CommentService(AppDbContext context)
+    public CommentService(AppDbContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     public async Task<List<CommentResponse>> GetCommentsAsync(int postId, int? currentUserId = null)
@@ -34,19 +37,13 @@ public class CommentService : ICommentService
                 .ToDictionaryAsync(v => v.CommentId, v => v.Value);
         }
 
-        return comments.Select(c => new CommentResponse
+        return comments.Select(c =>
         {
-            Id = c.Id,
-            Content = c.Content,
-            UserId = c.UserId,
-            UserName = c.User?.Name,
-            PostId = c.PostId,
-            Score = c.Score,
-            CreatedAt = c.CreatedAt,
-            UpdatedAt = c.UpdatedAt,
-            CurrentUserVote = currentUserId.HasValue
+            CommentResponse response = _mapper.Map<CommentResponse>(c);
+            response.CurrentUserVote = currentUserId.HasValue
                 ? (userVotes.TryGetValue(c.Id, out int v) ? v : 0)
-                : null
+                : null;
+            return response;
         }).ToList();
     }
 
@@ -56,12 +53,9 @@ public class CommentService : ICommentService
         if (!postExists)
             return null;
 
-        Comment comment = new()
-        {
-            Content = request.Content,
-            UserId = userId,
-            PostId = postId
-        };
+        Comment comment = _mapper.Map<Comment>(request);
+        comment.UserId = userId;
+        comment.PostId = postId;
 
         _context.Comments.Add(comment);
 
@@ -74,18 +68,9 @@ public class CommentService : ICommentService
         // Load user for response
         await _context.Entry(comment).Reference(c => c.User).LoadAsync();
 
-        return new CommentResponse
-        {
-            Id = comment.Id,
-            Content = comment.Content,
-            UserId = comment.UserId,
-            UserName = comment.User?.Name,
-            PostId = comment.PostId,
-            Score = comment.Score,
-            CreatedAt = comment.CreatedAt,
-            UpdatedAt = comment.UpdatedAt,
-            CurrentUserVote = 0
-        };
+        CommentResponse response = _mapper.Map<CommentResponse>(comment);
+        response.CurrentUserVote = 0;
+        return response;
     }
 
     public async Task<bool> DeleteCommentAsync(int commentId, int userId)

@@ -1,4 +1,4 @@
-using Backend.DTOs;
+using Backend.Contracts.Comments;
 
 namespace Backend.Services;
 

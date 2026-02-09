@@ -1,5 +1,6 @@
 using Backend.Models;
-using Backend.DTOs;
+using Backend.Contracts.Posts;
+using Backend.Contracts.Common;
 using Backend.Constants;
 
 namespace Backend.Services;

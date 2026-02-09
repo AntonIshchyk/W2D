@@ -1,4 +1,4 @@
-namespace Backend.DTOs;
+namespace Backend.Contracts.Comments;
 
 public class CommentResponse
 {

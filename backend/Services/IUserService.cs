@@ -1,5 +1,5 @@
 using Backend.Models;
-using Backend.DTOs;
+using Backend.Contracts.Auth;
 
 namespace Backend.Services;
 
