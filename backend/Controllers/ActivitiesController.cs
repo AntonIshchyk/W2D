@@ -51,14 +51,15 @@ public class ActivitiesController : ControllerBase
         [FromQuery] int? cursor = null,
         [FromQuery] int limit = PaginationConstants.DefaultPageSize,
         [FromQuery] int? categoryId = null,
-        [FromQuery] List<int>? tagIds = null)
+        [FromQuery] List<int>? tagIds = null,
+        [FromQuery] string? search = null)
     {
         if (limit < PaginationConstants.MinPageSize || limit > PaginationConstants.MaxPageSize)
         {
             return BadRequest(new { message = $"Invalid limit parameter. Limit must be between {PaginationConstants.MinPageSize} and {PaginationConstants.MaxPageSize}." });
         }
 
-        ScrollResult<Activity> result = await _activityService.GetActivitiesAsync(cursor, limit, categoryId, tagIds);
+        ScrollResult<Activity> result = await _activityService.GetActivitiesAsync(cursor, limit, categoryId, tagIds, search);
 
         return Ok(result);
     }

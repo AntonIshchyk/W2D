@@ -25,7 +25,7 @@ public class ActivityService : IActivityService
             .ToListAsync();
     }
 
-    public async Task<ScrollResult<Activity>> GetActivitiesAsync(int? cursor = null, int limit = PaginationConstants.DefaultPageSize, int? categoryId = null, List<int>? tagIds = null)
+    public async Task<ScrollResult<Activity>> GetActivitiesAsync(int? cursor = null, int limit = PaginationConstants.DefaultPageSize, int? categoryId = null, List<int>? tagIds = null, string? search = null)
     {
         IQueryable<Activity> query = _context.Activities
             .AsNoTracking()
@@ -43,6 +43,13 @@ public class ActivityService : IActivityService
         if (tagIds != null && tagIds.Count != 0)
         {
             query = query.Where(a => a.Tags.Count(t => tagIds.Contains(t.Id)) == tagIds.Count);
+        }
+
+        // Filter by search query (title or description)
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            string searchLower = search.ToLower();
+            query = query.Where(a => a.Title.ToLower().Contains(searchLower) || a.Description.ToLower().Contains(searchLower));
         }
 
         // Get total count AFTER applying filters but BEFORE cursor

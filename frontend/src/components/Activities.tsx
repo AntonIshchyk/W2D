@@ -146,6 +146,7 @@ export function Activities() {
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>(undefined)
   const [selectedTags, setSelectedTags] = useState<number[]>([])
   const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false)
   const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null)
@@ -154,6 +155,15 @@ export function Activities() {
   const observerTarget = useRef<HTMLDivElement>(null)
   
   const queryClient = useQueryClient()
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
   const { data: currentUser, isError, error: userError } = useQuery({
     queryKey: ['currentUser'],
@@ -178,8 +188,8 @@ export function Activities() {
     isFetchingNextPage,
     isLoading
   } = useInfiniteQuery({
-    queryKey: ['activities', selectedCategory, selectedTags, searchQuery],
-    queryFn: ({ pageParam }) => fetchActivities(pageParam, selectedCategory, selectedTags, searchQuery || undefined),
+    queryKey: ['activities', selectedCategory, selectedTags, debouncedSearch],
+    queryFn: ({ pageParam }) => fetchActivities(pageParam, selectedCategory, selectedTags, debouncedSearch || undefined),
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
     initialPageParam: null as number | null,
     retry: false
@@ -275,7 +285,7 @@ export function Activities() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold bg-linear-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
               Discover Activities
             </h1>
             <p className="text-muted-foreground mt-2">
@@ -303,7 +313,7 @@ export function Activities() {
           value={selectedCategory?.toString() ?? 'all'} 
           onValueChange={(value) => setSelectedCategory(value === 'all' ? undefined : Number(value))}
         >
-          <SelectTrigger className="w-[180px] h-9">
+          <SelectTrigger className="w-45 h-9">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
@@ -393,7 +403,7 @@ export function Activities() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {[...Array(6)].map((_, i) => (
             <Card key={i} className="overflow-hidden">
-              <div className="h-2 bg-gradient-to-r from-primary/20 to-primary/5" />
+              <div className="h-2 bg-linear-to-r from-primary/20 to-primary/5" />
               <CardHeader>
                 <Skeleton className="h-5 w-3/4" />
                 <Skeleton className="h-4 w-1/4 mt-2" />
@@ -415,7 +425,7 @@ export function Activities() {
                 onClick={() => handleScheduleClick(activity.id)}
               >
                 {/* Colored top accent */}
-                <div className="h-1.5 bg-gradient-to-r from-primary via-primary/70 to-primary/40" />
+                <div className="h-1.5 bg-linear-to-r from-primary via-primary/70 to-primary/40" />
                 
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-3 mb-2">
