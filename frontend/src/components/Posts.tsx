@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { toast } from 'sonner'
 import { Button } from './ui/button'
 import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
@@ -142,6 +143,9 @@ export function Posts() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['posts'] })
       queryClient.invalidateQueries({ queryKey: ['post', variables.postId.toString()] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
     }
   })
 

@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
+import { toast } from 'sonner'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
@@ -45,7 +46,11 @@ export function Login() {
     mutationFn: loginUser,
     onSuccess: (data) => {
       setAuthToken(data.token)
+      toast.success('Welcome back!')
       navigate('/')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
     }
   })
 
@@ -67,7 +72,11 @@ export function Login() {
     },
     onSuccess: (data) => {
       setAuthToken(data.token)
+      toast.success('Signed in with Google!')
       navigate('/')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
     }
   })
 
@@ -125,10 +134,6 @@ export function Login() {
           >
             {mutation.isPending ? 'Loading...' : 'Login'}
           </Button>
-
-          {mutation.isError && (
-            <p className="text-red-600 text-sm">{mutation.error.message}</p>
-          )}
         </form>
 
         <div className="relative my-6">
@@ -153,10 +158,6 @@ export function Login() {
             useOneTap
           />
         </div>
-
-        {googleMutation.isError && (
-          <p className="text-red-600 text-sm text-center mt-2">{googleMutation.error.message}</p>
-        )}
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-400">

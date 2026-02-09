@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { PostType } from '../types/posts'
@@ -84,6 +85,9 @@ export function PostDetail() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['post', id] })
       queryClient.invalidateQueries({ queryKey: ['posts'] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
     }
   })
 
@@ -91,7 +95,11 @@ export function PostDetail() {
     mutationFn: deletePost,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] })
+      toast.success('Post deleted successfully')
       navigate('/posts')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
     }
   })
 

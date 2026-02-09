@@ -1,5 +1,6 @@
 import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { toast } from 'sonner'
 import { Button } from './ui/button'
 import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
@@ -184,6 +185,10 @@ export function Activities() {
       setSelectedActivityId(null)
       setPlannedDate('')
       setNotes('')
+      toast.success('Activity scheduled successfully!')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
     }
   })
 

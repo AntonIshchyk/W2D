@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { toast } from 'sonner'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
@@ -45,7 +46,11 @@ export function SignUp() {
     mutationFn: signUpUser,
     onSuccess: (data) => {
       setAuthToken(data.token)
+      toast.success('Account created successfully!')
       navigate('/')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
     }
   })
 
@@ -120,14 +125,6 @@ export function SignUp() {
           >
             {mutation.isPending ? 'Loading...' : 'Sign up'}
           </Button>
-
-          {mutation.isSuccess && (
-            <p className="text-green-600 text-sm">Sign up successful!</p>
-          )}
-          
-          {mutation.isError && (
-            <p className="text-red-600 text-sm">{mutation.error.message}</p>
-          )}
         </form>
 
         <div className="mt-6 text-center">

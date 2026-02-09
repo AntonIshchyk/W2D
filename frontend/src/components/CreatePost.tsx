@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { Button } from './ui/button'
 import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
@@ -80,7 +81,11 @@ export function CreatePost() {
     onSuccess: () => {
       // Invalidate posts queries to refetch with new post
       queryClient.invalidateQueries({ queryKey: ['posts'] })
+      toast.success('Post created successfully!')
       navigate('/posts')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
     }
   })
 

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import type { Comment } from '../types/posts'
 
@@ -71,6 +72,10 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
       queryClient.invalidateQueries({ queryKey: ['comments', postId] })
       queryClient.invalidateQueries({ queryKey: ['post', String(postId)] })
       queryClient.invalidateQueries({ queryKey: ['posts'] })
+      toast.success('Comment posted!')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
     }
   })
 
@@ -80,6 +85,10 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
       queryClient.invalidateQueries({ queryKey: ['comments', postId] })
       queryClient.invalidateQueries({ queryKey: ['post', String(postId)] })
       queryClient.invalidateQueries({ queryKey: ['posts'] })
+      toast.success('Comment deleted')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
     }
   })
 
@@ -88,6 +97,9 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
       voteComment(postId, commentId, value),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['comments', postId] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
     }
   })
 

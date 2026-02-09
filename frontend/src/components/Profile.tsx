@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { fetchCurrentUser } from '../lib/auth'
@@ -98,6 +99,10 @@ export function Profile() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schedules'] })
+      toast.success('Activity marked as completed!')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
     }
   })
 
@@ -116,6 +121,10 @@ export function Profile() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schedules'] })
+      toast.success('Activity cancelled')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
     }
   })
 
@@ -153,6 +162,10 @@ export function Profile() {
       setNewPassword('')
       setConfirmPassword('')
       queryClient.invalidateQueries({ queryKey: ['currentUser'] })
+      toast.success('Password updated successfully!')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
     }
   })
 
@@ -268,14 +281,6 @@ export function Profile() {
                       minLength={6}
                     />
                   </div>
-
-                  {passwordMutation.isError && (
-                    <p className="text-red-600 text-xs">{passwordMutation.error.message}</p>
-                  )}
-
-                  {passwordMutation.isSuccess && (
-                    <p className="text-green-600 text-xs">Password updated!</p>
-                  )}
 
                   <div className="flex gap-2">
                     <Button
