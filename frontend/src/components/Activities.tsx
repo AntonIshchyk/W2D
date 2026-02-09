@@ -285,23 +285,23 @@ export function Activities() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-4xl font-bold bg-linear-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-              Discover Activities
+            <h1 className="text-3xl font-bold">
+              Activities
             </h1>
-            <p className="text-muted-foreground mt-2">
-              {totalCount > 0 ? `${totalCount} activities to explore` : 'Browse activities'}
+            <p className="text-muted-foreground mt-1">
+              {totalCount > 0 ? `${totalCount} activities` : 'Browse activities'}
             </p>
           </div>
         </div>
         
-        {/* Prominent search bar */}
-        <div className="relative max-w-2xl">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        {/* Search bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search for activities, locations, or experiences..."
+            placeholder="Search activities..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 h-12 text-base shadow-sm"
+            className="pl-10"
           />
         </div>
       </div>
@@ -400,10 +400,9 @@ export function Activities() {
 
       {/* Improved activity grid with better visual hierarchy */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => (
-            <Card key={i} className="overflow-hidden">
-              <div className="h-2 bg-linear-to-r from-primary/20 to-primary/5" />
+            <Card key={i}>
               <CardHeader>
                 <Skeleton className="h-5 w-3/4" />
                 <Skeleton className="h-4 w-1/4 mt-2" />
@@ -417,19 +416,16 @@ export function Activities() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {allActivities.map((activity) => (
               <Card 
                 key={activity.id} 
-                className="group hover:shadow-lg hover:scale-[1.02] transition-all duration-200 overflow-hidden cursor-pointer border-2 hover:border-primary/20"
+                className="cursor-pointer hover:shadow-md transition-shadow"
                 onClick={() => handleScheduleClick(activity.id)}
               >
-                {/* Colored top accent */}
-                <div className="h-1.5 bg-linear-to-r from-primary via-primary/70 to-primary/40" />
-                
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-3 mb-2">
-                    <CardTitle className="text-lg leading-snug group-hover:text-primary transition-colors">
+                    <CardTitle className="text-base">
                       {activity.title}
                     </CardTitle>
                     {activity.category && (

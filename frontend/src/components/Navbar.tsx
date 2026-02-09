@@ -107,7 +107,9 @@ export function PageLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-gray-50 pl-18">
       <Navbar />
       <div className="p-6 lg:p-10">
-        {children}
+        <div className="max-w-6xl mx-auto">
+          {children}
+        </div>
       </div>
     </div>
   )

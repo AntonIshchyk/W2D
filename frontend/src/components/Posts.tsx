@@ -200,37 +200,34 @@ export function Posts() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-4xl font-bold bg-linear-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-              Community Feed
+            <h1 className="text-3xl font-bold">
+              Posts
             </h1>
-            <p className="text-muted-foreground mt-2">
-              Share experiences, ask questions, and learn from others
+            <p className="text-muted-foreground mt-1">
+              Share experiences and discuss activities
             </p>
           </div>
           {currentUser && (
-            <Button onClick={() => navigate('/posts/create')} size="lg" className="gap-2">
-              <Plus className="h-5 w-5" />
+            <Button onClick={() => navigate('/posts/create')} className="gap-2">
+              <Plus className="h-4 w-4" />
               New Post
             </Button>
           )}
         </div>
       </div>
 
-      {/* Improved filters */}
-      <div className="mb-8 space-y-4">
-        {/* Sort tabs with icons */}
+      {/* Filters */}
+      <div className="mb-6 space-y-4">
+        {/* Sort tabs */}
         <Tabs value={sortBy} onValueChange={setSortBy} className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
-            <TabsTrigger value="new" className="gap-1.5">
-              <Clock className="h-4 w-4" />
+          <TabsList className="grid w-full max-w-sm grid-cols-3">
+            <TabsTrigger value="new">
               New
             </TabsTrigger>
-            <TabsTrigger value="hot" className="gap-1.5">
-              <TrendingUp className="h-4 w-4" />
+            <TabsTrigger value="hot">
               Hot
             </TabsTrigger>
-            <TabsTrigger value="top" className="gap-1.5">
-              <Star className="h-4 w-4" />
+            <TabsTrigger value="top">
               Top
             </TabsTrigger>
           </TabsList>
@@ -242,7 +239,7 @@ export function Posts() {
             value={selectedActivity?.toString() ?? 'all'} 
             onValueChange={(value) => setSelectedActivity(value === 'all' ? undefined : Number(value))}
           >
-            <SelectTrigger className="w-50 h-9">
+            <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="All activities" />
             </SelectTrigger>
             <SelectContent>
@@ -311,22 +308,15 @@ export function Posts() {
             {allPosts.map((post) => (
               <Card 
                 key={post.id} 
-                className="group hover:shadow-lg transition-all duration-200 overflow-hidden border-2 hover:border-primary/20"
+                className="hover:shadow-md transition-shadow"
               >
-                {/* Colorful accent bar */}
-                <div className="h-1 bg-linear-to-r from-primary via-primary/60 to-transparent" />
-                
                 <CardContent className="p-5 flex gap-5">
                   {/* Voting column with better design */}
                   <div className="flex flex-col items-center gap-1.5 pt-1">
                     <Button
                       variant={post.currentUserVote === 1 ? "default" : "ghost"}
                       size="icon"
-                      className={`h-8 w-8 rounded-full ${
-                        post.currentUserVote === 1 
-                          ? 'bg-orange-500 hover:bg-orange-600 text-white' 
-                          : 'hover:bg-orange-50 hover:text-orange-500'
-                      }`}
+                      className="h-8 w-8"
                       onClick={() => handleVote(post.id, post.currentUserVote, 1)}
                       disabled={!currentUser}
                     >
@@ -340,11 +330,7 @@ export function Posts() {
                     <Button
                       variant={post.currentUserVote === -1 ? "default" : "ghost"}
                       size="icon"
-                      className={`h-8 w-8 rounded-full ${
-                        post.currentUserVote === -1 
-                          ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                          : 'hover:bg-blue-50 hover:text-blue-500'
-                      }`}
+                      className="h-8 w-8"
                       onClick={() => handleVote(post.id, post.currentUserVote, -1)}
                       disabled={!currentUser}
                     >
@@ -352,9 +338,9 @@ export function Posts() {
                     </Button>
                   </div>
 
-                  {/* Content column with better hierarchy */}
+                  {/* Content column */}
                   <div className="flex-1 min-w-0 space-y-3">
-                    {/* Meta info with better styling */}
+                    {/* Meta info */}
                     <div className="flex items-center gap-2 text-xs flex-wrap">
                       <Badge variant={POST_TYPE_VARIANTS[post.type as PostType] ?? 'outline'} className="font-medium">
                         {POST_TYPE_LABELS[post.type as PostType] ?? 'Other'}
@@ -366,7 +352,7 @@ export function Posts() {
                       {post.activityTitle && (
                         <>
                           <span className="text-muted-foreground">•</span>
-                          <span className="text-primary font-medium">{post.activityTitle}</span>
+                          <span className="font-medium">{post.activityTitle}</span>
                         </>
                       )}
                     </div>
