@@ -2,7 +2,7 @@ import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tansta
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ArrowBigUp, ArrowBigDown, MessageSquare, Star, Plus } from 'lucide-react'
+import { ArrowBigUp, ArrowBigDown, MessageSquare, Star, Plus, Check, ChevronsUpDown } from 'lucide-react'
 import { Button } from './ui/button'
 import { Card, CardContent } from './ui/card'
 import { Badge } from './ui/badge'
@@ -19,6 +19,9 @@ import { PAGINATION } from '../config/constants'
 import { formatRelativeTime } from '../lib/utils/date'
 import { EmptyState } from './ui/empty-state'
 import { LoadingSpinner } from './ui/loading-spinner'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
+import { cn } from '../lib/utils'
 
 interface Activity {
   id: number
@@ -115,6 +118,7 @@ export function Posts() {
   const [selectedActivity, setSelectedActivity] = useState<number | undefined>(undefined)
   const [selectedType, setSelectedType] = useState<number | undefined>(undefined)
   const [sortBy, setSortBy] = useState<string>('new')
+  const [activityOpen, setActivityOpen] = useState(false)
   const observerTarget = useRef<HTMLDivElement>(null)
   
   const { data: currentUser, isError, error: userError } = useQuery({
@@ -235,36 +239,81 @@ export function Posts() {
 
         {/* Activity and Type filters */}
         <div className="flex items-center gap-3 flex-wrap pb-4 border-b">
+          <Popover open={activityOpen} onOpenChange={setActivityOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={activityOpen}
+                className="w-62.5 justify-between"
+              >
+                {selectedActivity
+                  ? activities?.find((activity) => activity.id === selectedActivity)?.title
+                  : "All activities"}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-62.5 p-0" align="start">
+              <Command>
+                <CommandInput placeholder="Search activities..." />
+                <CommandList>
+                  <CommandEmpty>No activity found.</CommandEmpty>
+                  <CommandGroup>
+                    <CommandItem
+                      value="all"
+                      onSelect={() => {
+                        setSelectedActivity(undefined)
+                        setActivityOpen(false)
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          !selectedActivity ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      All activities
+                    </CommandItem>
+                    {activities?.map((activity) => (
+                      <CommandItem
+                        key={activity.id}
+                        value={activity.title}
+                        onSelect={() => {
+                          setSelectedActivity(activity.id)
+                          setActivityOpen(false)
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedActivity === activity.id ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {activity.title}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+
           <Select 
-            value={selectedActivity?.toString() ?? 'all'} 
-            onValueChange={(value) => setSelectedActivity(value === 'all' ? undefined : Number(value))}
+            value={selectedType?.toString() ?? 'all'} 
+            onValueChange={(value) => setSelectedType(value === 'all' ? undefined : Number(value))}
           >
             <SelectTrigger className="w-50">
-              <SelectValue placeholder="All activities" />
+              <SelectValue placeholder="All types" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All activities</SelectItem>
-              {activities?.map((activity) => (
-                <SelectItem key={activity.id} value={activity.id.toString()}>
-                  {activity.title}
+              <SelectItem value="all">All types</SelectItem>
+              {Object.entries(POST_TYPE_LABELS).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-
-          <div className="h-4 w-px bg-border" />
-
-          {/* Type badges in a cleaner layout */}
-          {Object.entries(POST_TYPE_LABELS).map(([value, label]) => (
-            <Badge
-              key={value}
-              variant={selectedType === Number(value) ? 'default' : 'outline'}
-              className="cursor-pointer hover:bg-primary/90 transition-colors"
-              onClick={() => setSelectedType(selectedType === Number(value) ? undefined : Number(value))}
-            >
-              {label}
-            </Badge>
-          ))}
 
           {(selectedActivity || selectedType) && (
             <Button

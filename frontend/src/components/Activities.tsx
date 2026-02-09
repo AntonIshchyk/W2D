@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
-import { Search, Calendar, MapPin, DollarSign, Activity as ActivityIcon, X } from 'lucide-react'
+import { Search, Calendar, MapPin, DollarSign, Activity as ActivityIcon, X, Check, ChevronsUpDown } from 'lucide-react'
 import { Button } from './ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { Badge } from './ui/badge'
@@ -10,7 +10,8 @@ import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Textarea } from './ui/textarea'
 import { Skeleton } from './ui/skeleton'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { fetchCurrentUser } from '../lib/auth'
@@ -18,6 +19,7 @@ import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { PAGINATION } from '../config/constants'
 import { EmptyState } from './ui/empty-state'
 import { LoadingSpinner } from './ui/loading-spinner'
+import { cn } from '../lib/utils'
 
 interface Tag {
   id: number
@@ -147,7 +149,8 @@ export function Activities() {
   const [selectedTags, setSelectedTags] = useState<number[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [searchOpen, setSearchOpen] = useState(false)
+  const [categoryOpen, setCategoryOpen] = useState(false)
+  const [tagsOpen, setTagsOpen] = useState(false)
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false)
   const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null)
   const [plannedDate, setPlannedDate] = useState('')
@@ -309,22 +312,106 @@ export function Activities() {
       {/* Compact filter chips */}
       <div className="mb-6 flex items-center gap-3 flex-wrap pb-4 border-b">
         {/* Category filter */}
-        <Select 
-          value={selectedCategory?.toString() ?? 'all'} 
-          onValueChange={(value) => setSelectedCategory(value === 'all' ? undefined : Number(value))}
-        >
-          <SelectTrigger className="w-45 h-9">
-            <SelectValue placeholder="All Categories" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {categories?.map((cat) => (
-              <SelectItem key={cat.id} value={cat.id.toString()}>
-                {cat.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Popover open={categoryOpen} onOpenChange={setCategoryOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={categoryOpen}
+              className="w-50 justify-between h-9"
+            >
+              {selectedCategory
+                ? categories?.find((cat) => cat.id === selectedCategory)?.name
+                : "All Categories"}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-50 p-0" align="start">
+            <Command>
+              <CommandInput placeholder="Search categories..." />
+              <CommandList>
+                <CommandEmpty>No category found.</CommandEmpty>
+                <CommandGroup>
+                  <CommandItem
+                    value="all"
+                    onSelect={() => {
+                      setSelectedCategory(undefined)
+                      setCategoryOpen(false)
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        !selectedCategory ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    All Categories
+                  </CommandItem>
+                  {categories?.map((cat) => (
+                    <CommandItem
+                      key={cat.id}
+                      value={cat.name}
+                      onSelect={() => {
+                        setSelectedCategory(cat.id)
+                        setCategoryOpen(false)
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          selectedCategory === cat.id ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {cat.name}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+
+        {/* Tags filter */}
+        <Popover open={tagsOpen} onOpenChange={setTagsOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={tagsOpen}
+              className="w-50 justify-between h-9"
+            >
+              {selectedTags.length > 0
+                ? `${selectedTags.length} tag${selectedTags.length > 1 ? 's' : ''} selected`
+                : "Select tags"}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-62.5 p-0" align="start">
+            <Command>
+              <CommandInput placeholder="Search tags..." />
+              <CommandList>
+                <CommandEmpty>No tag found.</CommandEmpty>
+                <CommandGroup>
+                  {tags?.map((tag) => (
+                    <CommandItem
+                      key={tag.id}
+                      value={tag.name}
+                      onSelect={() => handleTagToggle(tag.id)}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          selectedTags.includes(tag.id) ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {tag.name}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
 
         {/* Selected tags as badges */}
         {selectedTags.length > 0 && (
@@ -339,23 +426,13 @@ export function Activities() {
                   className="cursor-pointer gap-1"
                   onClick={() => handleTagToggle(tagId)}
                 >
-                  #{tag.name}
+                  {tag.name}
                   <X className="h-3 w-3" />
                 </Badge>
               ) : null
             })}
           </>
         )}
-
-        {/* Tag picker button */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setSearchOpen(!searchOpen)}
-          className="h-9"
-        >
-          Add tags
-        </Button>
 
         {(selectedCategory || selectedTags.length > 0) && (
           <Button
@@ -365,38 +442,12 @@ export function Activities() {
               setSelectedCategory(undefined)
               setSelectedTags([])
             }}
-            className="h-9"
+            className="h-9 ml-auto"
           >
             Clear all
           </Button>
         )}
       </div>
-
-      {/* Tag selector dialog */}
-      {searchOpen && tags && (
-        <Card className="mb-6 border-2">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Select Tags</CardTitle>
-          </CardHeader>
-          <CardContent className="flex gap-2 flex-wrap max-h-40 overflow-y-auto">
-            {tags.map((tag) => (
-              <Badge
-                key={tag.id}
-                variant={selectedTags.includes(tag.id) ? 'default' : 'outline'}
-                className="cursor-pointer"
-                onClick={() => handleTagToggle(tag.id)}
-              >
-                #{tag.name}
-              </Badge>
-            ))}
-          </CardContent>
-          <CardFooter>
-            <Button variant="ghost" size="sm" onClick={() => setSearchOpen(false)} className="w-full">
-              Done
-            </Button>
-          </CardFooter>
-        </Card>
-      )}
 
       {/* Improved activity grid with better visual hierarchy */}
       {isLoading ? (
@@ -467,7 +518,7 @@ export function Activities() {
                     <div className="flex gap-1.5 flex-wrap pt-2 border-t">
                       {activity.tags.slice(0, 4).map((tag) => (
                         <Badge key={tag.id} variant="secondary" className="text-xs font-normal">
-                          #{tag.name}
+                          {tag.name}
                         </Badge>
                       ))}
                       {activity.tags.length > 4 && (

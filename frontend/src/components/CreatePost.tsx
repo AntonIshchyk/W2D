@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { Check, ChevronsUpDown } from 'lucide-react'
 import { Button } from './ui/button'
 import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
@@ -10,6 +11,10 @@ import type { CreatePostRequest } from '../types/posts'
 import { fetchCurrentUser } from '../lib/auth'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { PAGINATION } from '../config/constants'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
+import { cn } from '../lib/utils'
 
 interface Activity {
   id: number
@@ -59,6 +64,7 @@ export function CreatePost() {
   const [content, setContent] = useState('')
   const [type, setType] = useState<number>(PostType.ExperienceShare)
   const [activityId, setActivityId] = useState<number | ''>('')
+  const [activityOpen, setActivityOpen] = useState(false)
   const [locationName, setLocationName] = useState('')
   const [rating, setRating] = useState<number | ''>('')
   const [durationMinutes, setDurationMinutes] = useState<number | ''>('')
@@ -144,29 +150,21 @@ export function CreatePost() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Post Type *
               </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {POST_TYPE_OPTIONS.map((option) => (
-                  <label
-                    key={option.value}
-                    className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                      type === option.value
-                        ? 'border-blue-600 bg-blue-50'
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="type"
-                      value={option.value}
-                      checked={type === option.value}
-                      onChange={(e) => setType(Number(e.target.value))}
-                      className="sr-only"
-                    />
-                    <div className="font-semibold text-gray-900 mb-1">{option.label}</div>
-                    <div className="text-sm text-gray-600">{option.description}</div>
-                  </label>
-                ))}
-              </div>
+              <Select value={type.toString()} onValueChange={(value) => setType(Number(value))}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select post type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {POST_TYPE_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value.toString()}>
+                      <div>
+                        <div className="font-medium">{option.label}</div>
+                        <div className="text-xs text-muted-foreground">{option.description}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Activity */}
@@ -174,19 +172,49 @@ export function CreatePost() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Activity *
               </label>
-              <select
-                value={activityId}
-                onChange={(e) => setActivityId(e.target.value ? Number(e.target.value) : '')}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select an activity</option>
-                {activities?.map((activity) => (
-                  <option key={activity.id} value={activity.id}>
-                    {activity.title}
-                  </option>
-                ))}
-              </select>
+              <Popover open={activityOpen} onOpenChange={setActivityOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={activityOpen}
+                    className="w-full justify-between"
+                  >
+                    {activityId
+                      ? activities?.find((activity) => activity.id === activityId)?.title
+                      : "Select an activity..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Search activities..." />
+                    <CommandList>
+                      <CommandEmpty>No activity found.</CommandEmpty>
+                      <CommandGroup>
+                        {activities?.map((activity) => (
+                          <CommandItem
+                            key={activity.id}
+                            value={activity.title}
+                            onSelect={() => {
+                              setActivityId(activity.id)
+                              setActivityOpen(false)
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                activityId === activity.id ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {activity.title}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Title */}

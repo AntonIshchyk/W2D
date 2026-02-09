@@ -441,7 +441,7 @@ export function Profile() {
                         <div className="flex items-center gap-1.5 flex-wrap pt-2 border-t">
                           {schedule.activity.tags.map((tag) => (
                             <Badge key={tag.id} variant="secondary" className="text-xs">
-                              #{tag.name}
+                              {tag.name}
                             </Badge>
                           ))}
                         </div>
