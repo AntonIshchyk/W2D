@@ -2,7 +2,7 @@ import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tansta
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ArrowBigUp, ArrowBigDown, MessageSquare, Star, TrendingUp, Clock, Plus } from 'lucide-react'
+import { ArrowBigUp, ArrowBigDown, MessageSquare, Star, Plus } from 'lucide-react'
 import { Button } from './ui/button'
 import { Card, CardContent } from './ui/card'
 import { Badge } from './ui/badge'
@@ -239,7 +239,7 @@ export function Posts() {
             value={selectedActivity?.toString() ?? 'all'} 
             onValueChange={(value) => setSelectedActivity(value === 'all' ? undefined : Number(value))}
           >
-            <SelectTrigger className="w-[200px]">
+            <SelectTrigger className="w-50">
               <SelectValue placeholder="All activities" />
             </SelectTrigger>
             <SelectContent>
