@@ -4,6 +4,9 @@ import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { fetchCurrentUser } from '../lib/auth'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
 
 interface ActivitySchedule {
   id: number
@@ -54,6 +57,10 @@ async function fetchHistoryActivities(): Promise<ActivitySchedule[]> {
 export function Profile() {
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<'planned' | 'completed'>('planned')
+  const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   
   const { data: user, isLoading, isError, error: userError } = useQuery({
     queryKey: ['currentUser'],
@@ -112,6 +119,43 @@ export function Profile() {
     }
   })
 
+  const passwordMutation = useMutation({
+    mutationFn: async () => {
+      if (newPassword !== confirmPassword) {
+        throw new Error('Passwords do not match')
+      }
+      if (newPassword.length < 6) {
+        throw new Error('Password must be at least 6 characters')
+      }
+
+      const isSetPassword = !user?.hasPassword
+      const url = isSetPassword ? API_ENDPOINTS.users.setPassword : API_ENDPOINTS.users.changePassword
+      const body = isSetPassword
+        ? { newPassword }
+        : { currentPassword, newPassword }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(body),
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.message || 'Failed to update password')
+      }
+
+      return response.json()
+    },
+    onSuccess: () => {
+      setShowPasswordForm(false)
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] })
+    }
+  })
+
   useAuthErrorHandler(isError, userError)
 
   if (isLoading) {
@@ -157,6 +201,107 @@ export function Profile() {
                 </div>
                 <div className="text-[11px] text-gray-400 uppercase tracking-wide">Done</div>
               </div>
+            </div>
+
+            {/* Password Management */}
+            <div className="mt-5 pt-5 border-t border-gray-100">
+              {!showPasswordForm ? (
+                <button
+                  onClick={() => setShowPasswordForm(true)}
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  {user.hasPassword ? 'Change password' : 'Set password'}
+                </button>
+              ) : (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    passwordMutation.mutate()
+                  }}
+                  className="space-y-3"
+                >
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    {user.hasPassword ? 'Change password' : 'Set a password'}
+                  </h3>
+                  {!user.hasPassword && (
+                    <p className="text-xs text-gray-400">
+                      Set a password so you can also sign in with email.
+                    </p>
+                  )}
+
+                  {user.hasPassword && (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="currentPassword" className="text-xs">Current password</Label>
+                      <Input
+                        id="currentPassword"
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        placeholder="••••••••"
+                        required
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="newPassword" className="text-xs">New password</Label>
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Min. 6 characters"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="confirmPassword" className="text-xs">Confirm password</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+
+                  {passwordMutation.isError && (
+                    <p className="text-red-600 text-xs">{passwordMutation.error.message}</p>
+                  )}
+
+                  {passwordMutation.isSuccess && (
+                    <p className="text-green-600 text-xs">Password updated!</p>
+                  )}
+
+                  <div className="flex gap-2">
+                    <Button
+                      type="submit"
+                      disabled={passwordMutation.isPending}
+                      className="flex-1 text-xs h-8"
+                    >
+                      {passwordMutation.isPending ? 'Saving...' : 'Save'}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setShowPasswordForm(false)
+                        setCurrentPassword('')
+                        setNewPassword('')
+                        setConfirmPassword('')
+                        passwordMutation.reset()
+                      }}
+                      className="text-xs h-8"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         </div>

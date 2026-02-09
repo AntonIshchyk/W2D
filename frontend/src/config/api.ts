@@ -7,6 +7,8 @@ export const API_ENDPOINTS = {
     login: `${API_BASE_URL}/api/users/login`,
     googleLogin: `${API_BASE_URL}/api/users/google-login`,
     me: `${API_BASE_URL}/api/users/me`,
+    setPassword: `${API_BASE_URL}/api/users/set-password`,
+    changePassword: `${API_BASE_URL}/api/users/change-password`,
   },
   activities: {
     base: `${API_BASE_URL}/api/activities`,

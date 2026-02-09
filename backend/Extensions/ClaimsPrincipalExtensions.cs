@@ -30,4 +30,14 @@ public static class ClaimsPrincipalExtensions
 
         return user.FindFirst(ClaimTypes.Role)?.Value == "Admin";
     }
+
+    public static bool GetHasPassword(this ClaimsPrincipal? user)
+    {
+        if (user == null)
+        {
+            return false;
+        }
+
+        return user.FindFirst("hasPassword")?.Value == "true";
+    }
 }

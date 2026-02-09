@@ -19,4 +19,6 @@ public class User : BaseModel
     [Required]
     [JsonIgnore]
     public string Password { get; set; } = null!;
+
+    public bool HasPassword { get; set; } = true;
 }

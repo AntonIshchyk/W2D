@@ -42,7 +42,7 @@ public class UserService : IUserService
         return response;
     }
 
-    public async Task<LoginResponse?> RegisterUserAsync(string email, string password, string name)
+    public async Task<LoginResponse?> RegisterUserAsync(string email, string password, string name, bool hasPassword = true)
     {
         // Check if user already exists
         if (await _context.Users.AnyAsync(u => u.Email == email))
@@ -58,7 +58,8 @@ public class UserService : IUserService
         {
             Email = email,
             Password = hashedPassword,
-            Name = name
+            Name = name,
+            HasPassword = hasPassword
         };
 
         _context.Users.Add(user);
@@ -84,5 +85,35 @@ public class UserService : IUserService
         }
 
         return GenerateTokenForUser(user);
+    }
+
+    public async Task<bool> SetPasswordAsync(int userId, string newPassword)
+    {
+        User? user = await _context.Users.FindAsync(userId);
+        if (user == null) return false;
+
+        // Only allow setting password if user doesn't have one (Google user)
+        if (user.HasPassword) return false;
+
+        user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        user.HasPassword = true;
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
+    {
+        User? user = await _context.Users.FindAsync(userId);
+        if (user == null) return false;
+
+        // Verify current password
+        if (!BCrypt.Net.BCrypt.Verify(currentPassword, user.Password))
+        {
+            return false;
+        }
+
+        user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        await _context.SaveChangesAsync();
+        return true;
     }
 }

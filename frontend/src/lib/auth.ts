@@ -5,6 +5,7 @@ export interface UserInfo {
   userId: number
   email: string
   name: string
+  hasPassword: boolean
 }
 
 export class ApiError extends Error {
