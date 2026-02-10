@@ -49,12 +49,12 @@ async function createPost(data: CreatePostRequest): Promise<void> {
 }
 
 const POST_TYPE_OPTIONS = [
-  { value: PostType.ExperienceShare, label: 'Experience Share', description: 'Share your experience with an activity' },
-  { value: PostType.Guide, label: 'Guide', description: 'Create a how-to guide for others' },
+  { value: PostType.ExperienceShare, label: 'Experience Share', description: 'Share your experience with others' },
+  { value: PostType.Guide, label: 'Guide', description: 'Create a tutorial for others' },
   { value: PostType.Question, label: 'Question', description: 'Ask the community for advice' },
   { value: PostType.Recommendation, label: 'Recommendation', description: 'Recommend an activity or location' },
   { value: PostType.Achievement, label: 'Achievement', description: 'Celebrate your accomplishments' },
-  { value: PostType.Challenge, label: 'Challenge', description: 'Challenge others to try something' }
+  { value: PostType.Challenge, label: 'Challenge', description: 'Challenge yourself or others to try something' }
 ]
 
 export function CreatePost() {
@@ -69,7 +69,7 @@ export function CreatePost() {
   const [rating, setRating] = useState<number | ''>('')
   const [durationMinutes, setDurationMinutes] = useState<number | ''>('')
   const [cost, setCost] = useState<number | ''>('')
-  const [currencyCode, setCurrencyCode] = useState('USD')
+  const [currencyCode, setCurrencyCode] = useState('EUR')
 
   const { data: currentUser, isError, error: userError } = useQuery({
     queryKey: ['currentUser'],
@@ -306,7 +306,7 @@ export function CreatePost() {
             {/* Cost */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Cost (Optional)
+                Cost per person (Optional)
               </label>
               <div className="flex gap-2">
                 <input
@@ -323,12 +323,9 @@ export function CreatePost() {
                   onChange={(e) => setCurrencyCode(e.target.value)}
                   className="w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="USD">USD</option>
                   <option value="EUR">EUR</option>
+                  <option value="USD">USD</option>
                   <option value="GBP">GBP</option>
-                  <option value="JPY">JPY</option>
-                  <option value="CAD">CAD</option>
-                  <option value="AUD">AUD</option>
                 </select>
               </div>
             </div>
