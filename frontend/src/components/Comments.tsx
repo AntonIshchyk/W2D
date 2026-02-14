@@ -202,7 +202,7 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
                   <button
                     onClick={() => deleteMutation.mutate(comment.id)}
                     disabled={deleteMutation.isPending}
-                    className="text-xs text-gray-300 hover:text-red-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="text-xs text-gray-400 hover:text-red-500 mt-1 transition-colors"
                   >
                     delete
                   </button>

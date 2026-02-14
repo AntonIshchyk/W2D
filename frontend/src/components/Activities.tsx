@@ -471,7 +471,7 @@ export function Activities() {
             {allActivities.map((activity) => (
               <Card 
                 key={activity.id} 
-                className="cursor-pointer hover:shadow-md transition-shadow"
+                className="cursor-pointer hover:shadow-md transition-shadow group"
                 onClick={() => handleScheduleClick(activity.id)}
               >
                 <CardHeader className="pb-3">
@@ -494,20 +494,20 @@ export function Activities() {
                   {/* Visual meta info grid */}
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     {activity.locationType && locationLabels[activity.locationType] && (
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <MapPin className="h-4 w-4 shrink-0" />
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="h-4 w-4 shrink-0 text-blue-500" />
                         <span className="truncate">{locationLabels[activity.locationType].label}</span>
                       </div>
                     )}
                     {activity.costLevel && (
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <DollarSign className="h-4 w-4 shrink-0" />
+                      <div className="flex items-center gap-1.5">
+                        <DollarSign className="h-4 w-4 shrink-0 text-green-500" />
                         <span>{costLabels[activity.costLevel]?.label || activity.costLevel}</span>
                       </div>
                     )}
                     {activity.physicalActivityLevel && (
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <ActivityIcon className="h-4 w-4 shrink-0" />
+                      <div className="flex items-center gap-1.5">
+                        <ActivityIcon className="h-4 w-4 shrink-0 text-orange-500" />
                         <span>{physicalLabels[activity.physicalActivityLevel]?.label || activity.physicalActivityLevel}</span>
                       </div>
                     )}
@@ -532,16 +532,15 @@ export function Activities() {
 
                 <CardFooter className="pt-0">
                   <Button
-                    variant="default"
+                    variant="outline"
                     size="sm"
-                    className="w-full gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="w-full gap-2"
                     onClick={(e) => {
                       e.stopPropagation()
                       handleScheduleClick(activity.id)
                     }}
                   >
                     <Calendar className="h-4 w-4" />
-                    Schedule Activity
                   </Button>
                 </CardFooter>
               </Card>
