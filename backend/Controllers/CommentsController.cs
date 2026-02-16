@@ -21,10 +21,10 @@ public class CommentsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<CommentResponse>>> GetComments(int postId)
+    public async Task<ActionResult<List<CommentResponse>>> GetComments(int postId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
         int? currentUserId = User.GetUserId();
-        List<CommentResponse> comments = await _commentService.GetCommentsAsync(postId, currentUserId);
+        List<CommentResponse> comments = await _commentService.GetCommentsAsync(postId, page, pageSize, currentUserId);
         return Ok(comments);
     }
 
@@ -63,4 +63,13 @@ public class CommentsController : ControllerBase
 
         return Ok(new { message = "Vote recorded successfully" });
     }
+
+    [HttpGet("{parentCommentId}/replies")]
+    public async Task<ActionResult<List<CommentResponse>>> GetReplies(int postId, int parentCommentId, [FromQuery] int page = 1, [FromQuery] int pageSize = 5)
+    {
+        int? currentUserId = User.GetUserId();
+        var replies = await _commentService.GetRepliesAsync(parentCommentId, page, pageSize, currentUserId);
+        return Ok(replies);
+    }
+
 }

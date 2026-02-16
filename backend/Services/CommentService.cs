@@ -8,6 +8,26 @@ namespace Backend.Services;
 
 public class CommentService : ICommentService
 {
+    private static CommentResponse ProjectComment(Comment c, int? currentUserId)
+    {
+        return new CommentResponse
+        {
+            Id = c.Id,
+            Content = c.IsDeleted ? "[deleted]" : c.Content,
+            UserId = c.UserId,
+            UserName = c.User.Name,
+            PostId = c.PostId,
+            Score = c.Score,
+            CurrentUserVote = currentUserId.HasValue ?
+                c.Votes.Where(v => v.UserId == currentUserId.Value).Select(v => (int?)v.Value).FirstOrDefault()
+                : null,
+            IsDeleted = c.IsDeleted,
+            ParentCommentId = c.ParentCommentId,
+            Replies = new List<CommentResponse>(),
+            CreatedAt = c.CreatedAt,
+            UpdatedAt = c.UpdatedAt
+        };
+    }
     private readonly AppDbContext _context;
     private readonly IMapper _mapper;
 
@@ -17,45 +37,43 @@ public class CommentService : ICommentService
         _mapper = mapper;
     }
 
-    public async Task<List<CommentResponse>> GetCommentsAsync(int postId, int? currentUserId = null)
+    public async Task<List<CommentResponse>> GetCommentsAsync(int postId, int page = 1, int pageSize = 20, int? currentUserId = null)
     {
-        var comments = await _context.Comments
+        var rootQuery = _context.Comments
             .AsNoTracking()
-            .Include(c => c.User)
-            .Where(c => c.PostId == postId)
+            .Where(c => c.PostId == postId && c.ParentCommentId == null);
+
+        var rootsProjected = await rootQuery
+            .OrderByDescending(c => c.Score)
+            .ThenByDescending(c => c.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(c => ProjectComment(c, currentUserId))
             .ToListAsync();
 
-        Dictionary<int, int> userVotes = new();
-        if (currentUserId.HasValue)
-        {
-            userVotes = await _context.CommentVotes
-                .AsNoTracking()
-                .Where(v => v.UserId == currentUserId.Value && v.Comment.PostId == postId)
-                .ToDictionaryAsync(v => v.CommentId, v => v.Value);
-        }
+        if (!rootsProjected.Any())
+            return new List<CommentResponse>();
 
-        var responseDict = comments.ToDictionary(
-            c => c.Id,
-            c =>
-            {
-                var resp = _mapper.Map<CommentResponse>(c);
-                resp.Content = c.IsDeleted ? "[deleted]" : c.Content;
-                resp.IsDeleted = c.IsDeleted;
-                resp.CurrentUserVote = currentUserId.HasValue ? (userVotes.TryGetValue(c.Id, out int v) ? v : 0) : null;
-                resp.Replies = new List<CommentResponse>();
-                return resp;
-            });
+        var rootIds = rootsProjected.Select(r => r.Id).ToList();
 
-        List<CommentResponse> roots = new();
-        foreach (var c in comments)
+        const int RepliesPerRoot = 5;
+        var replies = await _context.Comments
+            .AsNoTracking()
+            .Where(c => c.PostId == postId && c.ParentCommentId != null && rootIds.Contains(c.ParentCommentId.Value))
+            .OrderByDescending(c => c.Score)
+            .ThenByDescending(c => c.CreatedAt)
+            .Select(c => ProjectComment(c, currentUserId))
+            .ToListAsync();
+
+        var rootsDict = rootsProjected.ToDictionary(r => r.Id);
+        var grouped = replies.GroupBy(r => r.ParentCommentId).ToDictionary(g => g.Key!.Value, g => g.Take(RepliesPerRoot).ToList());
+        foreach (var kv in grouped)
         {
-            if (c.ParentCommentId.HasValue)
+            var parentId = kv.Key;
+            if (!rootsDict.TryGetValue(parentId, out var parent)) continue;
+            foreach (var child in kv.Value)
             {
-                responseDict[c.ParentCommentId.Value].Replies.Add(responseDict[c.Id]);
-            }
-            else
-            {
-                roots.Add(responseDict[c.Id]);
+                parent.Replies.Add(child);
             }
         }
 
@@ -70,7 +88,7 @@ public class CommentService : ICommentService
                 SortTree(child);
         }
 
-        foreach (var root in roots)
+        foreach (var root in rootsProjected)
             SortTree(root);
 
         CommentResponse? Prune(CommentResponse node)
@@ -84,12 +102,12 @@ public class CommentService : ICommentService
             return node.Replies.Count > 0 ? node : null;
         }
 
-        roots = roots
+        var finalRoots = rootsProjected
             .Select(Prune)
             .OfType<CommentResponse>()
             .ToList();
 
-        return roots;
+        return finalRoots;
     }
 
     public async Task<CommentResponse?> CreateCommentAsync(int postId, CreateCommentRequest request, int userId)
@@ -112,7 +130,6 @@ public class CommentService : ICommentService
                 c => c.Id == request.ParentCommentId.Value && c.PostId == postId && !c.IsDeleted);
             if (parent == null)
             {
-                await tx.RollbackAsync();
                 return null;
             }
         }
@@ -126,19 +143,39 @@ public class CommentService : ICommentService
 
         if (updated == 0)
         {
-            await tx.RollbackAsync();
             return null;
         }
 
         await tx.CommitAsync();
 
-        await _context.Entry(comment).Reference(c => c.User).LoadAsync();
+        var response = await _context.Comments
+            .AsNoTracking()
+            .Where(c => c.Id == comment.Id)
+            .Select(c => ProjectComment(c, userId))
+            .FirstOrDefaultAsync();
 
-        CommentResponse response = _mapper.Map<CommentResponse>(comment);
-        response.Content = comment.IsDeleted ? "[deleted]" : comment.Content;
-        response.IsDeleted = comment.IsDeleted;
+        if (response == null)
+            return null;
+
         response.CurrentUserVote = 0;
         return response;
+    }
+
+    public async Task<List<CommentResponse>> GetRepliesAsync(int parentCommentId, int page = 1, int pageSize = 5, int? currentUserId = null)
+    {
+        var query = _context.Comments
+            .AsNoTracking()
+            .Where(c => c.ParentCommentId == parentCommentId);
+
+        var replies = await query
+            .OrderByDescending(c => c.Score)
+            .ThenByDescending(c => c.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(c => ProjectComment(c, currentUserId))
+            .ToListAsync();
+
+        return replies;
     }
 
     public async Task<bool> DeleteCommentAsync(int commentId, int userId)
