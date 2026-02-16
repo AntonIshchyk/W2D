@@ -8,7 +8,15 @@ public class CommentResponse
     public string? UserName { get; set; }
     public int PostId { get; set; }
     public int Score { get; set; }
+
+    public int? CurrentUserVote { get; set; }
+
+    public bool IsDeleted { get; set; }
+
+    public int? ParentCommentId { get; set; }
+
+    public List<CommentResponse> Replies { get; set; } = new();
+
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-    public int? CurrentUserVote { get; set; }
 }

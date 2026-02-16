@@ -15,8 +15,13 @@ public class Comment : BaseModel
     [Required]
     public int PostId { get; set; }
     public Post Post { get; set; } = null!;
-
     public int Score { get; set; }
+    public bool IsDeleted { get; set; } = false;
 
+    [ConcurrencyCheck]
+    public uint Version { get; set; }
+    public int? ParentCommentId { get; set; }
+    public Comment? ParentComment { get; set; }
+    public ICollection<Comment> Replies { get; set; } = new List<Comment>();
     public ICollection<CommentVote> Votes { get; set; } = new List<CommentVote>();
 }

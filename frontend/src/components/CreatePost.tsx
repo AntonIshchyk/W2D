@@ -109,7 +109,7 @@ export function CreatePost() {
     e.preventDefault()
 
     if (!activityId) {
-      alert('Please select an activity')
+      toast.error('Please select an activity')
       return
     }
 
