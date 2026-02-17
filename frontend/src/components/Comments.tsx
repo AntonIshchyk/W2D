@@ -2,10 +2,12 @@ import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
+import { PAGINATION } from '../config/constants'
 import type { Comment } from '../types/posts'
 
-async function fetchComments(postId: number): Promise<Comment[]> {
-  const response = await fetch(API_ENDPOINTS.posts.comments(postId), {
+async function fetchComments(postId: number, page = 1, pageSize = PAGINATION.DEFAULT_PAGE_SIZE): Promise<Comment[]> {
+  const url = `${API_ENDPOINTS.posts.comments(postId)}?page=${page}&pageSize=${pageSize}`
+  const response = await fetch(url, {
     headers: getAuthHeaders()
   })
   if (!response.ok) throw new Error('Failed to fetch comments')
