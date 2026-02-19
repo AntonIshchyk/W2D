@@ -1,9 +1,22 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Check, ChevronsUpDown } from 'lucide-react'
+import {
+  Check,
+  ChevronsUpDown,
+  FileText,
+  MapPin,
+  Star,
+  Clock,
+  Euro,
+  ArrowLeft
+} from 'lucide-react'
+
 import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Textarea } from './ui/textarea'
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { PostType } from '../types/posts'
@@ -22,14 +35,12 @@ interface Activity {
 }
 
 async function fetchActivities(): Promise<Activity[]> {
-  const response = await fetch(`${API_ENDPOINTS.activities.base}?limit=${PAGINATION.ACTIVITIES_FETCH_SIZE}`, {
-    headers: getAuthHeaders()
-  })
+  const response = await fetch(
+    `${API_ENDPOINTS.activities.base}?limit=${PAGINATION.ACTIVITIES_FETCH_SIZE}`,
+    { headers: getAuthHeaders() }
+  )
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch activities')
-  }
-
+  if (!response.ok) throw new Error('Failed to fetch activities')
   const data = await response.json()
   return data.items || []
 }
@@ -42,28 +53,45 @@ async function createPost(data: CreatePostRequest): Promise<void> {
   })
 
   if (!response.ok) {
-    let errorMsg = 'Failed to create post'
-    try { const body = await response.json(); errorMsg = body.message || errorMsg } catch {}
-    throw new Error(errorMsg)
+    let msg = 'Failed to create post'
+    try { msg = (await response.json()).message || msg } catch {}
+    throw new Error(msg)
   }
 }
 
-const POST_TYPE_OPTIONS = [
-  { value: PostType.ExperienceShare, label: 'Experience Share', description: 'Share your experience with others' },
-  { value: PostType.Guide, label: 'Guide', description: 'Create a tutorial for others' },
-  { value: PostType.Question, label: 'Question', description: 'Ask the community for advice' },
-  { value: PostType.Recommendation, label: 'Recommendation', description: 'Recommend an activity or location' },
-  { value: PostType.Achievement, label: 'Achievement', description: 'Celebrate your accomplishments' },
-  { value: PostType.Challenge, label: 'Challenge', description: 'Challenge yourself or others to try something' }
-]
+/* ---------- Field wrapper ---------- */
+
+function Field({
+  label,
+  icon,
+  children
+}: {
+  label: string
+  icon?: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <div className="space-y-2">
+      <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+        {icon}
+        {label}
+      </label>
+      {children}
+    </div>
+  )
+}
+
+/* ---------- Component ---------- */
 
 export function CreatePost() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [type, setType] = useState<number>(PostType.ExperienceShare)
   const [activityId, setActivityId] = useState<number | ''>('')
+
   const [activityOpen, setActivityOpen] = useState(false)
   const [locationName, setLocationName] = useState('')
   const [rating, setRating] = useState<number | ''>('')
@@ -77,277 +105,231 @@ export function CreatePost() {
     retry: false
   })
 
-  const { data: activities } = useQuery({
+  const { data: activities, isLoading: activitiesLoading } = useQuery({
     queryKey: ['activities'],
     queryFn: fetchActivities
   })
 
+  useAuthErrorHandler(isError, userError)
+
+  const selectedActivity = useMemo(
+    () => activities?.find(a => a.id === activityId),
+    [activities, activityId]
+  )
+
   const createMutation = useMutation({
     mutationFn: createPost,
     onSuccess: () => {
-      // Invalidate posts queries to refetch with new post
       queryClient.invalidateQueries({ queryKey: ['posts'] })
       toast.success('Post created successfully!')
       navigate('/posts')
     },
-    onError: (error: Error) => {
-      toast.error(error.message)
-    }
+    onError: (e: Error) => toast.error(e.message)
   })
 
-  useAuthErrorHandler(isError, userError)
+  if (isError) return null
+  if (!currentUser) return <Navigate to="/login" replace />
 
-  if (isError) {
-    return null
-  }
-
-  if (!currentUser) {
-    return <Navigate to="/login" replace />
-  }
+  const parse = (v: number | '' | undefined) =>
+    v === '' || v === undefined ? undefined : Number(v)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!activityId) {
-      alert('Please select an activity')
+      toast.error('Select an activity')
       return
     }
 
-    const postData: CreatePostRequest = {
+    const post: CreatePostRequest = {
       title,
       content,
       type,
       activityId: Number(activityId),
       locationName: locationName || undefined,
-      rating: rating ? Number(rating) : undefined,
-      durationMinutes: durationMinutes ? Number(durationMinutes) : undefined,
-      cost: cost ? Number(cost) : undefined,
+      rating: parse(rating),
+      durationMinutes: parse(durationMinutes),
+      cost: parse(cost),
       currencyCode: cost ? currencyCode : undefined
     }
 
-    createMutation.mutate(postData)
+    createMutation.mutate(post)
   }
+
+  const isValid =
+    title.length >= 3 &&
+    content.length >= 10 &&
+    activityId !== ''
 
   return (
     <PageLayout>
-      <div className="max-w-2xl">
-        {/* Back link */}
-        <button
+      <div className="max-w-2xl mx-auto space-y-6">
+
+        <Button
+          variant="ghost"
+          className="w-fit"
           onClick={() => navigate('/posts')}
-          className="text-xs text-gray-400 hover:text-gray-600 mb-6 flex items-center gap-1 transition-colors"
         >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Posts
-        </button>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to posts
+        </Button>
 
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">New Post</h1>
-          
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Post Type */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Post Type *
-              </label>
-              <Select value={type.toString()} onValueChange={(value) => setType(Number(value))}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select post type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {POST_TYPE_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value.toString()}>
-                      <div>
-                        <div className="font-medium">{option.label}</div>
-                        <div className="text-xs text-muted-foreground">{option.description}</div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>New Post</CardTitle>
+          </CardHeader>
 
-            {/* Activity */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Activity *
-              </label>
-              <Popover open={activityOpen} onOpenChange={setActivityOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={activityOpen}
-                    className="w-full justify-between"
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-8">
+
+              <section className="space-y-6">
+
+                <Field label="Post Type">
+                  <Select value={type.toString()} onValueChange={v => setType(Number(v))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.values(PostType)
+                        .filter(v => typeof v === 'number')
+                        .map(v => {
+                          const label = Object.keys(PostType).find(
+                            key => (PostType as any)[key] === v
+                          )
+                          return (
+                            <SelectItem key={v} value={String(v)}>
+                              {label}
+                            </SelectItem>
+                          )
+                        })}
+                    </SelectContent>
+                  </Select>
+                </Field>
+
+                <Field label="Activity">
+                  <Popover open={activityOpen} onOpenChange={setActivityOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="justify-between w-full">
+                        {selectedActivity?.title ||
+                          (activitiesLoading ? 'Loading...' : 'Select activity')}
+                        <ChevronsUpDown className="w-4 h-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+
+                    <PopoverContent className="p-0">
+                      <Command>
+                        <CommandInput placeholder="Search..." />
+                        <CommandList>
+                          <CommandEmpty>No results</CommandEmpty>
+                          <CommandGroup>
+                            {activities?.map(a => (
+                              <CommandItem
+                                key={a.id}
+                                value={a.title}
+                                onSelect={() => {
+                                  setActivityId(a.id)
+                                  setActivityOpen(false)
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    activityId === a.id ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                {a.title}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </Field>
+
+                <Field label="Title" icon={<FileText className="w-4 h-4" />}>
+                  <Input value={title} onChange={e => setTitle(e.target.value)} maxLength={200} />
+                </Field>
+
+                <Field label="Content">
+                  <Textarea
+                    value={content}
+                    onChange={e => setContent(e.target.value)}
+                    rows={6}
+                    maxLength={2000}
+                  />
+                </Field>
+              </section>
+
+              <section className="space-y-6">
+
+                <Field label="Location" icon={<MapPin className="w-4 h-4" />}>
+                  <Input value={locationName} onChange={e => setLocationName(e.target.value)} />
+                </Field>
+
+                <Field label="Rating" icon={<Star className="w-4 h-4" />}>
+                  <Select
+                    value={rating === '' ? '' : String(rating)}
+                    onValueChange={v => setRating(v ? Number(v) : '')}
                   >
-                    {activityId
-                      ? activities?.find((activity) => activity.id === activityId)?.title
-                      : "Select an activity..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
-                  <Command>
-                    <CommandInput placeholder="Search activities..." />
-                    <CommandList>
-                      <CommandEmpty>No activity found.</CommandEmpty>
-                      <CommandGroup>
-                        {activities?.map((activity) => (
-                          <CommandItem
-                            key={activity.id}
-                            value={activity.title}
-                            onSelect={() => {
-                              setActivityId(activity.id)
-                              setActivityOpen(false)
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                activityId === activity.id ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            {activity.title}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
+                    <SelectTrigger>
+                      <SelectValue placeholder="No rating" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[5,4,3,2,1].map(r => (
+                        <SelectItem key={r} value={String(r)}>
+                          {'⭐'.repeat(r)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
 
-            {/* Title */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Title *
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                minLength={3}
-                maxLength={200}
-                placeholder="Give your post a descriptive title"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <p className="mt-1 text-sm text-gray-500">{title.length}/200 characters</p>
-            </div>
+                <Field label="Duration (min)" icon={<Clock className="w-4 h-4" />}>
+                  <Input
+                    type="number"
+                    value={durationMinutes}
+                    onChange={e =>
+                      setDurationMinutes(e.target.value ? Number(e.target.value) : '')
+                    }
+                  />
+                </Field>
 
-            {/* Content */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Content *
-              </label>
-              <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                required
-                minLength={10}
-                maxLength={2000}
-                rows={8}
-                placeholder="Share your thoughts, experiences, or questions..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <p className="mt-1 text-sm text-gray-500">{content.length}/2000 characters</p>
-            </div>
+                <Field label="Cost" icon={<Euro className="w-4 h-4" />}>
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      value={cost}
+                      onChange={e => setCost(e.target.value ? Number(e.target.value) : '')}
+                    />
+                    <Select value={currencyCode} onValueChange={setCurrencyCode}>
+                      <SelectTrigger className="w-28">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="EUR">EUR</SelectItem>
+                        <SelectItem value="USD">USD</SelectItem>
+                        <SelectItem value="GBP">GBP</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </Field>
 
-            {/* Location */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Location (Optional)
-              </label>
-              <input
-                type="text"
-                value={locationName}
-                onChange={(e) => setLocationName(e.target.value)}
-                maxLength={500}
-                placeholder="Where did this activity take place?"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+              </section>
 
-            {/* Rating */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Rating (Optional)
-              </label>
-              <select
-                value={rating}
-                onChange={(e) => setRating(e.target.value ? Number(e.target.value) : '')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">No rating</option>
-                <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
-                <option value="4">⭐⭐⭐⭐ Good</option>
-                <option value="3">⭐⭐⭐ Average</option>
-                <option value="2">⭐⭐ Below Average</option>
-                <option value="1">⭐ Poor</option>
-              </select>
-            </div>
-
-            {/* Duration */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Duration in Minutes (Optional)
-              </label>
-              <input
-                type="number"
-                value={durationMinutes}
-                onChange={(e) => setDurationMinutes(e.target.value ? Number(e.target.value) : '')}
-                min={1}
-                max={10000}
-                placeholder="How long did it take?"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Cost */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Cost per person (Optional)
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  value={cost}
-                  onChange={(e) => setCost(e.target.value ? Number(e.target.value) : '')}
-                  min={0}
-                  step="0.01"
-                  placeholder="Amount"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <select
-                  value={currencyCode}
-                  onChange={(e) => setCurrencyCode(e.target.value)}
-                  className="w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="EUR">EUR</option>
-                  <option value="USD">USD</option>
-                  <option value="GBP">GBP</option>
-                </select>
+              <div className="flex justify-end gap-3 pt-6 border-t">
+                <Button variant="outline" onClick={() => navigate('/posts')}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={!isValid || createMutation.isPending}>
+                  {createMutation.isPending ? 'Creating…' : 'Create Post'}
+                </Button>
               </div>
-            </div>
 
-            {/* Buttons */}
-            <div className="flex justify-end gap-3 pt-6 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate('/posts')}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={createMutation.isPending}
-              >
-                {createMutation.isPending ? 'Creating...' : 'Create Post'}
-              </Button>
-            </div>
-          </form>
-        </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </PageLayout>
   )
 }

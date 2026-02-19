@@ -3,11 +3,36 @@ using AutoMapper;
 using Backend.Data;
 using Backend.Models;
 using Backend.Contracts.Comments;
+using System.Linq.Expressions;
 
 namespace Backend.Services;
 
 public class CommentService : ICommentService
 {
+    private static Expression<Func<Comment, CommentResponse>> ProjectComment(int? currentUserId)
+    {
+        return c => new CommentResponse
+        {
+            Id = c.Id,
+            Content = c.IsDeleted ? "[deleted]" : c.Content,
+            UserId = c.UserId,
+            UserName = c.User.Name,
+            PostId = c.PostId,
+            Score = c.Score,
+            CurrentUserVote = currentUserId.HasValue
+                ? c.Votes
+                    .Where(v => v.UserId == currentUserId.Value)
+                    .Select(v => (int?)v.Value)
+                    .FirstOrDefault()
+                : null,
+            IsDeleted = c.IsDeleted,
+            ParentCommentId = c.ParentCommentId,
+            Replies = new List<CommentResponse>(),
+            CreatedAt = c.CreatedAt,
+            UpdatedAt = c.UpdatedAt
+        };
+    }
+
     private readonly AppDbContext _context;
     private readonly IMapper _mapper;
 
@@ -19,72 +44,105 @@ public class CommentService : ICommentService
 
     public async Task<List<CommentResponse>> GetCommentsAsync(int postId, int? currentUserId = null)
     {
-        List<Comment> comments = await _context.Comments
+        var allComments = await _context.Comments
             .AsNoTracking()
-            .Include(c => c.User)
             .Where(c => c.PostId == postId)
             .OrderByDescending(c => c.Score)
             .ThenByDescending(c => c.CreatedAt)
+            .Select(ProjectComment(currentUserId))
             .ToListAsync();
 
-        Dictionary<int, int> userVotes = new();
-        if (currentUserId.HasValue)
+        if (!allComments.Any())
+            return new List<CommentResponse>();
+
+        var lookup = allComments.ToLookup(c => c.ParentCommentId);
+
+        List<CommentResponse> BuildTree(int? parentId)
         {
-            List<int> commentIds = comments.Select(c => c.Id).ToList();
-            userVotes = await _context.CommentVotes
-                .AsNoTracking()
-                .Where(v => v.UserId == currentUserId.Value && commentIds.Contains(v.CommentId))
-                .ToDictionaryAsync(v => v.CommentId, v => v.Value);
+            return lookup[parentId]
+                .Select(c =>
+                {
+                    c.Replies = BuildTree(c.Id)
+                        .OrderByDescending(r => r.Score)
+                        .ThenByDescending(r => r.CreatedAt)
+                        .ToList();
+                    return c;
+                })
+                .ToList();
         }
 
-        return comments.Select(c =>
+        var roots = BuildTree(null);
+
+        CommentResponse? Prune(CommentResponse node)
         {
-            CommentResponse response = _mapper.Map<CommentResponse>(c);
-            response.CurrentUserVote = currentUserId.HasValue
-                ? (userVotes.TryGetValue(c.Id, out int v) ? v : 0)
-                : null;
-            return response;
-        }).ToList();
+            node.Replies = node.Replies
+                .Select(Prune)
+                .OfType<CommentResponse>()
+                .ToList();
+
+            if (!node.IsDeleted) return node;
+            return node.Replies.Count > 0 ? node : null;
+        }
+
+        return roots.Select(Prune).OfType<CommentResponse>().ToList();
     }
 
     public async Task<CommentResponse?> CreateCommentAsync(int postId, CreateCommentRequest request, int userId)
     {
-        bool postExists = await _context.Posts.AnyAsync(p => p.Id == postId);
-        if (!postExists)
-            return null;
-
         Comment comment = _mapper.Map<Comment>(request);
         comment.UserId = userId;
         comment.PostId = postId;
 
+        using var tx = await _context.Database.BeginTransactionAsync();
+
+        var postExists = await _context.Posts.AnyAsync(p => p.Id == postId);
+        if (!postExists) return null;
+
+        if (request.ParentCommentId.HasValue)
+        {
+            var parent = await _context.Comments.FirstOrDefaultAsync(
+                c => c.Id == request.ParentCommentId.Value &&
+                     c.PostId == postId &&
+                     !c.IsDeleted);
+
+            if (parent == null) return null;
+        }
+
         _context.Comments.Add(comment);
-
-        // Increment post comment count
-        Post post = await _context.Posts.FindAsync(postId) ?? throw new InvalidOperationException();
-        post.CommentCount++;
-
         await _context.SaveChangesAsync();
 
-        // Load user for response
-        await _context.Entry(comment).Reference(c => c.User).LoadAsync();
+        await _context.Posts
+            .Where(p => p.Id == postId)
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.CommentCount, p => p.CommentCount + 1));
 
-        CommentResponse response = _mapper.Map<CommentResponse>(comment);
+        await tx.CommitAsync();
+
+        var response = await _context.Comments
+            .AsNoTracking()
+            .Where(c => c.Id == comment.Id)
+            .Select(ProjectComment(userId))
+            .FirstOrDefaultAsync();
+
+        if (response == null) return null;
+
         response.CurrentUserVote = 0;
         return response;
     }
 
     public async Task<bool> DeleteCommentAsync(int commentId, int userId)
     {
-        Comment? comment = await _context.Comments.FindAsync(commentId);
-        if (comment == null || comment.UserId != userId)
+        var comment = await _context.Comments.FindAsync(commentId);
+
+        if (comment == null || comment.UserId != userId || comment.IsDeleted)
             return false;
 
-        _context.Comments.Remove(comment);
+        comment.IsDeleted = true;
+        comment.UpdatedAt = DateTime.UtcNow;
 
-        // Decrement post comment count
-        Post? post = await _context.Posts.FindAsync(comment.PostId);
-        if (post != null && post.CommentCount > 0)
-            post.CommentCount--;
+        // Decrement CommentCount on the related post
+        await _context.Posts
+            .Where(p => p.Id == comment.PostId)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.CommentCount, x => x.CommentCount - 1));
 
         await _context.SaveChangesAsync();
         return true;
@@ -92,42 +150,60 @@ public class CommentService : ICommentService
 
     public async Task<bool> VoteCommentAsync(int commentId, int userId, int value)
     {
-        Comment? comment = await _context.Comments.FindAsync(commentId);
-        if (comment == null)
-            return false;
+        if (value < -1 || value > 1) return false;
 
-        CommentVote? existingVote = await _context.CommentVotes
+        var comment = await _context.Comments
+            .FirstOrDefaultAsync(c => c.Id == commentId && !c.IsDeleted);
+
+        if (comment == null) return false;
+
+        var existingVote = await _context.CommentVotes
             .FirstOrDefaultAsync(v => v.UserId == userId && v.CommentId == commentId);
 
-        if (value == 0)
-        {
-            // Remove vote
-            if (existingVote != null)
-            {
-                comment.Score -= existingVote.Value;
-                _context.CommentVotes.Remove(existingVote);
-            }
-        }
+        int oldValue = existingVote?.Value ?? 0;
+        int delta = value - oldValue;
+
+        if (delta == 0) return true;
+
+        if (value == 0 && existingVote != null)
+            _context.CommentVotes.Remove(existingVote);
         else if (existingVote != null)
         {
-            // Update existing vote
-            comment.Score += value - existingVote.Value;
             existingVote.Value = value;
             existingVote.UpdatedAt = DateTime.UtcNow;
         }
         else
         {
-            // New vote
             _context.CommentVotes.Add(new CommentVote
             {
                 UserId = userId,
                 CommentId = commentId,
                 Value = value
             });
-            comment.Score += value;
         }
 
-        await _context.SaveChangesAsync();
-        return true;
+        comment.Score += delta;
+        comment.UpdatedAt = DateTime.UtcNow;
+
+        const int maxRetries = 3;
+
+        for (int attempt = 0; attempt < maxRetries; attempt++)
+        {
+            try
+            {
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (attempt == maxRetries - 1) throw;
+
+                await _context.Entry(comment).ReloadAsync();
+                comment.Score += delta;
+                comment.UpdatedAt = DateTime.UtcNow;
+            }
+        }
+
+        return false;
     }
 }

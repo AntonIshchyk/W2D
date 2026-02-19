@@ -24,7 +24,7 @@ public class CommentsController : ControllerBase
     public async Task<ActionResult<List<CommentResponse>>> GetComments(int postId)
     {
         int? currentUserId = User.GetUserId();
-        List<CommentResponse> comments = await _commentService.GetCommentsAsync(postId, currentUserId);
+        var comments = await _commentService.GetCommentsAsync(postId, currentUserId);
         return Ok(comments);
     }
 
@@ -32,10 +32,10 @@ public class CommentsController : ControllerBase
     public async Task<ActionResult<CommentResponse>> CreateComment(int postId, CreateCommentRequest request)
     {
         int userId = User.GetUserId()!.Value;
-        CommentResponse? comment = await _commentService.CreateCommentAsync(postId, request, userId);
+        var comment = await _commentService.CreateCommentAsync(postId, request, userId);
 
         if (comment == null)
-            return NotFound(new { message = "Post not found" });
+            return NotFound(new { message = "Post or parent comment not found" });
 
         return Created($"api/posts/{postId}/comments/{comment.Id}", comment);
     }

@@ -140,6 +140,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<PostVote>()
             .HasIndex(v => v.PostId);
 
+
         // Comment - User relationship
         modelBuilder.Entity<Comment>()
             .HasOne(c => c.User)
@@ -154,11 +155,34 @@ public class AppDbContext : DbContext
             .HasForeignKey(c => c.PostId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Comment - Parent/Replies self-referencing relationship
+        modelBuilder.Entity<Comment>()
+            .HasOne(c => c.ParentComment)
+            .WithMany(c => c.Replies)
+            .HasForeignKey(c => c.ParentCommentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<Comment>()
             .HasIndex(c => c.PostId);
 
         modelBuilder.Entity<Comment>()
             .HasIndex(c => c.UserId);
+
+        modelBuilder.Entity<Comment>()
+            .HasIndex(c => c.ParentCommentId);
+
+        // Composite index for efficient tree queries by post and parent
+        modelBuilder.Entity<Comment>()
+            .HasIndex(c => new { c.PostId, c.ParentCommentId })
+            .HasDatabaseName("IX_Comments_PostId_ParentCommentId");
+
+        // Ensure Version is configured as a concurrency token
+        modelBuilder.Entity<Comment>()
+            .Property(c => c.Version)
+            .IsConcurrencyToken();
+
+        // Soft delete global query filter (optional, for queries)
+        // modelBuilder.Entity<Comment>().HasQueryFilter(c => !c.IsDeleted);
 
         // CommentVote - User relationship
         modelBuilder.Entity<CommentVote>()

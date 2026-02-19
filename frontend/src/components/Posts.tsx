@@ -153,12 +153,56 @@ export function Posts() {
   const voteMutation = useMutation({
     mutationFn: ({ postId, value }: { postId: number; value: number }) => 
       votePost(postId, value),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] })
-      queryClient.invalidateQueries({ queryKey: ['post', variables.postId.toString()] })
+    onMutate: async ({ postId, value }: { postId: number; value: number }) => {
+      // Optimistic update for posts list and post detail
+      const key = ['posts', selectedActivity, selectedType, sortBy]
+      await queryClient.cancelQueries({ queryKey: key })
+      const previous = queryClient.getQueryData<any>(key)
+
+      queryClient.setQueryData(key, (data: any) => {
+        if (!data) return data
+        return {
+          ...data,
+          pages: data.pages.map((page: any) => ({
+            ...page,
+            items: page.items.map((p: Post) => {
+              if (p.id !== postId) return p
+              const newVote = p.currentUserVote === value ? 0 : value
+              const old = p.currentUserVote ?? 0
+              const delta = newVote - old
+              return { ...p, currentUserVote: newVote, score: p.score + delta }
+            })
+          }))
+        }
+      })
+
+      // update single post cache if present
+      const postKey = ['post', postId.toString()]
+      const prevPost = queryClient.getQueryData(postKey)
+      if (prevPost) {
+        queryClient.setQueryData(postKey, (p: any) => {
+          const newVote = p.currentUserVote === value ? 0 : value
+          const old = p.currentUserVote ?? 0
+          const delta = newVote - old
+          return { ...p, currentUserVote: newVote, score: p.score + delta }
+        })
+      }
+
+      return { previous }
     },
-    onError: (error: Error) => {
-      toast.error(error.message)
+    onError: (err, vars, context: any) => {
+      const key = ['posts', selectedActivity, selectedType, sortBy]
+      if (context?.previous) {
+        queryClient.setQueryData(key, context.previous)
+      }
+      if (vars?.postId) {
+        queryClient.invalidateQueries({ queryKey: ['post', vars.postId.toString()] })
+      }
+      toast.error((err as Error).message)
+    },
+    onSettled: (_data, _error, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['posts', selectedActivity, selectedType, sortBy] })
+      if (variables) queryClient.invalidateQueries({ queryKey: ['post', variables.postId.toString()] })
     }
   })
 
@@ -181,6 +225,7 @@ export function Posts() {
     
     return () => {
       if (element) observer.unobserve(element)
+      observer.disconnect()
     }
   }, [handleObserver])
 
@@ -241,11 +286,11 @@ export function Posts() {
         <div className="flex items-center gap-3 flex-wrap pb-4 border-b">
           <Popover open={activityOpen} onOpenChange={setActivityOpen}>
             <PopoverTrigger asChild>
-              <Button
+                <Button
                 variant="outline"
                 role="combobox"
                 aria-expanded={activityOpen}
-                className="w-62.5 justify-between"
+                className="w-64 justify-between"
               >
                 {selectedActivity
                   ? activities?.find((activity) => activity.id === selectedActivity)?.title
@@ -302,7 +347,7 @@ export function Posts() {
             value={selectedType?.toString() ?? 'all'} 
             onValueChange={(value) => setSelectedType(value === 'all' ? undefined : Number(value))}
           >
-            <SelectTrigger className="w-50">
+            <SelectTrigger className="w-48">
               <SelectValue placeholder="All types" />
             </SelectTrigger>
             <SelectContent>

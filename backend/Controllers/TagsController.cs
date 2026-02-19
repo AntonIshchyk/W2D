@@ -10,6 +10,7 @@ namespace Backend.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [EnableRateLimiting("fixed")]
+[Authorize]
 public class TagsController : ControllerBase
 {
     private readonly AppDbContext _context;

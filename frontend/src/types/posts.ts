@@ -85,4 +85,7 @@ export interface Comment {
   createdAt: string
   updatedAt: string
   currentUserVote?: number
+  isDeleted?: boolean
+  parentCommentId?: number | null
+  replies?: Comment[]
 }
