@@ -21,10 +21,10 @@ public class CommentsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<CommentResponse>>> GetComments(int postId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    public async Task<ActionResult<List<CommentResponse>>> GetComments(int postId)
     {
         int? currentUserId = User.GetUserId();
-        List<CommentResponse> comments = await _commentService.GetCommentsAsync(postId, page, pageSize, currentUserId);
+        var comments = await _commentService.GetCommentsAsync(postId, currentUserId);
         return Ok(comments);
     }
 
@@ -32,10 +32,10 @@ public class CommentsController : ControllerBase
     public async Task<ActionResult<CommentResponse>> CreateComment(int postId, CreateCommentRequest request)
     {
         int userId = User.GetUserId()!.Value;
-        CommentResponse? comment = await _commentService.CreateCommentAsync(postId, request, userId);
+        var comment = await _commentService.CreateCommentAsync(postId, request, userId);
 
         if (comment == null)
-            return NotFound(new { message = "Post not found" });
+            return NotFound(new { message = "Post or parent comment not found" });
 
         return Created($"api/posts/{postId}/comments/{comment.Id}", comment);
     }
@@ -63,13 +63,4 @@ public class CommentsController : ControllerBase
 
         return Ok(new { message = "Vote recorded successfully" });
     }
-
-    [HttpGet("{parentCommentId}/replies")]
-    public async Task<ActionResult<List<CommentResponse>>> GetReplies(int postId, int parentCommentId, [FromQuery] int page = 1, [FromQuery] int pageSize = 5)
-    {
-        int? currentUserId = User.GetUserId();
-        var replies = await _commentService.GetRepliesAsync(parentCommentId, page, pageSize, currentUserId);
-        return Ok(replies);
-    }
-
 }

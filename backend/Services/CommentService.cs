@@ -42,62 +42,36 @@ public class CommentService : ICommentService
         _mapper = mapper;
     }
 
-    public async Task<List<CommentResponse>> GetCommentsAsync(int postId, int page = 1, int pageSize = 20, int? currentUserId = null)
+    public async Task<List<CommentResponse>> GetCommentsAsync(int postId, int? currentUserId = null)
     {
-        var rootQuery = _context.Comments
+        var allComments = await _context.Comments
             .AsNoTracking()
-            .Where(c => c.PostId == postId && c.ParentCommentId == null);
-
-        var rootsProjected = await rootQuery
+            .Where(c => c.PostId == postId)
             .OrderByDescending(c => c.Score)
             .ThenByDescending(c => c.CreatedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
             .Select(ProjectComment(currentUserId))
             .ToListAsync();
 
-        if (!rootsProjected.Any())
+        if (!allComments.Any())
             return new List<CommentResponse>();
 
-        var rootIds = rootsProjected.Select(r => r.Id).ToList();
+        var lookup = allComments.ToLookup(c => c.ParentCommentId);
 
-        const int RepliesPerRoot = 5;
-
-        var replies = await _context.Comments
-            .AsNoTracking()
-            .Where(c => c.PostId == postId &&
-                        c.ParentCommentId != null &&
-                        rootIds.Contains(c.ParentCommentId.Value))
-            .OrderByDescending(c => c.Score)
-            .ThenByDescending(c => c.CreatedAt)
-            .Select(ProjectComment(currentUserId))
-            .ToListAsync();
-
-        var rootsDict = rootsProjected.ToDictionary(r => r.Id);
-
-        var grouped = replies
-            .GroupBy(r => r.ParentCommentId)
-            .ToDictionary(g => g.Key!.Value, g => g.Take(RepliesPerRoot).ToList());
-
-        foreach (var kv in grouped)
+        List<CommentResponse> BuildTree(int? parentId)
         {
-            if (!rootsDict.TryGetValue(kv.Key, out var parent)) continue;
-            parent.Replies.AddRange(kv.Value);
-        }
-
-        void SortTree(CommentResponse node)
-        {
-            node.Replies = node.Replies
-                .OrderByDescending(x => x.Score)
-                .ThenByDescending(x => x.CreatedAt)
+            return lookup[parentId]
+                .Select(c =>
+                {
+                    c.Replies = BuildTree(c.Id)
+                        .OrderByDescending(r => r.Score)
+                        .ThenByDescending(r => r.CreatedAt)
+                        .ToList();
+                    return c;
+                })
                 .ToList();
-
-            foreach (var child in node.Replies)
-                SortTree(child);
         }
 
-        foreach (var root in rootsProjected)
-            SortTree(root);
+        var roots = BuildTree(null);
 
         CommentResponse? Prune(CommentResponse node)
         {
@@ -110,10 +84,7 @@ public class CommentService : ICommentService
             return node.Replies.Count > 0 ? node : null;
         }
 
-        return rootsProjected
-            .Select(Prune)
-            .OfType<CommentResponse>()
-            .ToList();
+        return roots.Select(Prune).OfType<CommentResponse>().ToList();
     }
 
     public async Task<CommentResponse?> CreateCommentAsync(int postId, CreateCommentRequest request, int userId)
@@ -140,12 +111,9 @@ public class CommentService : ICommentService
         _context.Comments.Add(comment);
         await _context.SaveChangesAsync();
 
-        var updated = await _context.Posts
+        await _context.Posts
             .Where(p => p.Id == postId)
-            .ExecuteUpdateAsync(s =>
-                s.SetProperty(p => p.CommentCount, p => p.CommentCount + 1));
-
-        if (updated == 0) return null;
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.CommentCount, p => p.CommentCount + 1));
 
         await tx.CommitAsync();
 
@@ -161,19 +129,6 @@ public class CommentService : ICommentService
         return response;
     }
 
-    public async Task<List<CommentResponse>> GetRepliesAsync(int parentCommentId, int page = 1, int pageSize = 5, int? currentUserId = null)
-    {
-        return await _context.Comments
-            .AsNoTracking()
-            .Where(c => c.ParentCommentId == parentCommentId)
-            .OrderByDescending(c => c.Score)
-            .ThenByDescending(c => c.CreatedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(ProjectComment(currentUserId))
-            .ToListAsync();
-    }
-
     public async Task<bool> DeleteCommentAsync(int commentId, int userId)
     {
         var comment = await _context.Comments.FindAsync(commentId);
@@ -183,6 +138,11 @@ public class CommentService : ICommentService
 
         comment.IsDeleted = true;
         comment.UpdatedAt = DateTime.UtcNow;
+
+        // Decrement CommentCount on the related post
+        await _context.Posts
+            .Where(p => p.Id == comment.PostId)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.CommentCount, x => x.CommentCount - 1));
 
         await _context.SaveChangesAsync();
         return true;
