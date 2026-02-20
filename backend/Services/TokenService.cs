@@ -32,15 +32,14 @@ public class TokenService : ITokenService
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Name, user.Name),
-            new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User"),
-            new Claim("hasPassword", user.HasPassword.ToString().ToLower())
+            new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User")
         };
 
         JwtSecurityToken token = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"],
             audience: _configuration["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(24),
+            expires: DateTime.UtcNow.AddHours(5),
             signingCredentials: credentials
         );
 

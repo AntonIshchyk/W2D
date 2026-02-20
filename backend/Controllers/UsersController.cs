@@ -32,35 +32,10 @@ public class UsersController : ControllerBase
             userId = User.GetUserId()!.Value,
             email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)!.Value,
             name = User.FindFirst(System.Security.Claims.ClaimTypes.Name)!.Value,
-            hasPassword = User.GetHasPassword()
         });
     }
 
-    [HttpPost("register")]
-    public async Task<ActionResult<LoginResponse>> Register(RegisterRequest request)
-    {
-        LoginResponse? result = await _userService.RegisterUserAsync(request.Email, request.Password, request.Name);
 
-        if (result == null)
-        {
-            return BadRequest(new { message = "User with this email already exists" });
-        }
-
-        return Ok(result);
-    }
-
-    [HttpPost("login")]
-    public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
-    {
-        LoginResponse? result = await _userService.LoginUserAsync(request.Email, request.Password);
-
-        if (result == null)
-        {
-            return Unauthorized(new { message = "Invalid email or password" });
-        }
-
-        return Ok(result);
-    }
 
     [HttpPost("google-login")]
     public async Task<ActionResult<LoginResponse>> GoogleLogin([FromBody] GoogleLoginRequest request)
@@ -96,12 +71,10 @@ public class UsersController : ControllerBase
                 return Ok(loginResponse);
             }
 
-            // New user, create account with no usable password
+            // New user, create account
             LoginResponse? result = await _userService.RegisterUserAsync(
                 payload.Email,
-                Guid.NewGuid().ToString(),
-                payload.Name ?? payload.Email.Split('@')[0],
-                hasPassword: false
+                payload.Name ?? payload.Email.Split('@')[0]
             );
 
             if (result == null)
@@ -115,35 +88,5 @@ public class UsersController : ControllerBase
         {
             return Unauthorized(new { message = "Google authentication failed" });
         }
-    }
-
-    [HttpPost("set-password")]
-    [Authorize]
-    public async Task<ActionResult> SetPassword(SetPasswordRequest request)
-    {
-        int userId = User.GetUserId()!.Value;
-        bool result = await _userService.SetPasswordAsync(userId, request.NewPassword);
-
-        if (!result)
-        {
-            return BadRequest(new { message = "Password is already set. Use change-password instead." });
-        }
-
-        return Ok(new { message = "Password set successfully" });
-    }
-
-    [HttpPost("change-password")]
-    [Authorize]
-    public async Task<ActionResult> ChangePassword(ChangePasswordRequest request)
-    {
-        int userId = User.GetUserId()!.Value;
-        bool result = await _userService.ChangePasswordAsync(userId, request.CurrentPassword, request.NewPassword);
-
-        if (!result)
-        {
-            return BadRequest(new { message = "Current password is incorrect" });
-        }
-
-        return Ok(new { message = "Password changed successfully" });
     }
 }

@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
-import { SignUp } from './components/SignUp'
 import { Login } from './components/Login'
 import { Home } from './components/Home'
 import { Profile } from './components/Profile'
@@ -25,7 +24,6 @@ function App() {
         <Route path="/posts/create" element={<CreatePost />} />
         <Route path="/posts/:id" element={<PostDetail />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
