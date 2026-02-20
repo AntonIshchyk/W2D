@@ -88,7 +88,9 @@ async function fetchActivities(cursor: number | null, categoryId?: number, tagId
 }
 
 async function fetchCategories(): Promise<Category[]> {
-  const response = await fetch(API_ENDPOINTS.categories.base)
+  const response = await fetch(API_ENDPOINTS.categories.base, {
+    headers: getAuthHeaders()
+  })
 
   if (!response.ok) {
     throw new Error('Failed to fetch categories')
@@ -98,7 +100,9 @@ async function fetchCategories(): Promise<Category[]> {
 }
 
 async function fetchTags(): Promise<Tag[]> {
-  const response = await fetch(API_ENDPOINTS.tags.base)
+  const response = await fetch(API_ENDPOINTS.tags.base, {
+    headers: getAuthHeaders()
+  })
 
   if (!response.ok) {
     throw new Error('Failed to fetch tags')
