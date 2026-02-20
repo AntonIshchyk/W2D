@@ -1,0 +1,51 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
+using Backend.Services;
+
+namespace Backend.Controllers;
+
+public class PresignRequest
+{
+    public string FileName { get; set; } = null!;
+    public string ContentType { get; set; } = null!;
+}
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+[EnableRateLimiting("fixed")]
+public class UploadsController : ControllerBase
+{
+    private readonly IR2UploadService _uploadService;
+
+    private static readonly HashSet<string> AllowedTypes = new()
+    {
+        "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"
+    };
+
+    public UploadsController(IR2UploadService uploadService)
+    {
+        _uploadService = uploadService;
+    }
+
+    // POST /api/uploads/presign
+    // Browser asks for a presigned URL, then PUTs the file directly to R2
+    [HttpPost("presign")]
+    public async Task<IActionResult> Presign([FromBody] PresignRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.FileName) || string.IsNullOrWhiteSpace(request.ContentType))
+            return BadRequest(new { message = "FileName and ContentType are required" });
+
+        if (!AllowedTypes.Contains(request.ContentType.ToLower()))
+            return BadRequest(new { message = "Only JPEG, PNG, WebP and GIF images are allowed" });
+
+        var result = await _uploadService.GetPresignedUploadUrlAsync(request.FileName, request.ContentType);
+
+        return Ok(new
+        {
+            uploadUrl = result.UploadUrl,
+            publicUrl = result.PublicUrl,
+        });
+    }
+}

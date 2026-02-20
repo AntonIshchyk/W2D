@@ -466,6 +466,19 @@ export function Posts() {
                       {post.content}
                     </p>
 
+                    {post.photoUrls && post.photoUrls.length > 0 && (
+                      <div className="grid grid-cols-3 gap-2 mt-2">
+                        {post.photoUrls.slice(0, 3).map((url, i) => (
+                          <img
+                            key={i}
+                            src={url}
+                            alt=""
+                            className="w-full h-20 object-cover rounded-md"
+                          />
+                        ))}
+                      </div>
+                    )}
+
                     {/* Footer with icons */}
                     <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2">
                       {post.rating != null && post.rating > 0 && (

@@ -8,6 +8,8 @@ using System.Threading.RateLimiting;
 using Backend.Data;
 using Backend.Services;
 using Backend.Middleware;
+using Amazon.S3;
+using Amazon.Runtime;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -32,9 +34,26 @@ builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddScoped<IUserActivityService, UserActivityService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IR2UploadService, R2UploadService>();
 
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
+
+// R2 is S3-compatible — point the SDK at Cloudflare's endpoint
+builder.Services.AddSingleton<IAmazonS3>(_ =>
+{
+    var config = builder.Configuration;
+    var credentials = new BasicAWSCredentials(
+        config["R2:AccessKeyId"],
+        config["R2:SecretAccessKey"]
+    );
+    var s3Config = new AmazonS3Config
+    {
+        ServiceURL = $"https://{config["R2:AccountId"]}.r2.cloudflarestorage.com",
+        ForcePathStyle = true,  // required for R2
+    };
+    return new AmazonS3Client(credentials, s3Config);
+});
 
 // Configure JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

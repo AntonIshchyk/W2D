@@ -18,6 +18,7 @@ import { Input } from './ui/input'
 import { Textarea } from './ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { PageLayout } from './Navbar'
+import { Label } from '@/components/ui/label'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { PostType } from '../types/posts'
 import type { CreatePostRequest } from '../types/posts'
@@ -28,6 +29,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { cn } from '../lib/utils'
+import { PhotoUpload } from './PhotoUpload'
 
 interface Activity {
   id: number
@@ -98,6 +100,7 @@ export function CreatePost() {
   const [durationMinutes, setDurationMinutes] = useState<number | ''>('')
   const [cost, setCost] = useState<number | ''>('')
   const [currencyCode, setCurrencyCode] = useState('EUR')
+  const [photoUrls, setPhotoUrls] = useState<string[]>([])
 
   const { data: currentUser, isError, error: userError } = useQuery({
     queryKey: ['currentUser'],
@@ -150,7 +153,8 @@ export function CreatePost() {
       rating: parse(rating),
       durationMinutes: parse(durationMinutes),
       cost: parse(cost),
-      currencyCode: cost ? currencyCode : undefined
+      currencyCode: cost ? currencyCode : undefined,
+      photoUrls
     }
 
     createMutation.mutate(post)
@@ -316,6 +320,17 @@ export function CreatePost() {
                 </Field>
 
               </section>
+
+              <div className="space-y-1.5">
+                <Label>
+                  Photos <span className="text-muted-foreground font-normal">(optional)</span>
+                </Label>
+                <PhotoUpload
+                  value={photoUrls}
+                  onChange={setPhotoUrls}
+                  maxPhotos={4}
+                />
+              </div>
 
               <div className="flex justify-end gap-3 pt-6 border-t">
                 <Button variant="outline" onClick={() => navigate('/posts')}>

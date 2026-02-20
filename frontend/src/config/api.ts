@@ -39,6 +39,9 @@ export const API_ENDPOINTS = {
     commentById: (postId: number, commentId: number) => `${API_BASE_URL}/api/posts/${postId}/comments/${commentId}`,
     commentVote: (postId: number, commentId: number) => `${API_BASE_URL}/api/posts/${postId}/comments/${commentId}/vote`,
   },
+  uploads: {
+      presign: `${API_BASE_URL}/api/uploads/presign`,
+    },
 } as const;
 
 export function getAuthHeaders(): HeadersInit {
