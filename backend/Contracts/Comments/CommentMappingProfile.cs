@@ -10,7 +10,9 @@ public class CommentMappingProfile : Profile
         // Comment -> CommentResponse
         CreateMap<Comment, CommentResponse>()
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.Name : null))
-            .ForMember(dest => dest.CurrentUserVote, opt => opt.Ignore()); // Set manually in service
+            .ForMember(dest => dest.CurrentUserVote, opt => opt.Ignore())
+            .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => src.PhotoUrl));
+        // Set manually in service
 
         // CreateCommentRequest -> Comment
         CreateMap<CreateCommentRequest, Comment>()
@@ -25,6 +27,7 @@ public class CommentMappingProfile : Profile
             .ForMember(dest => dest.ParentComment, opt => opt.Ignore())
             .ForMember(dest => dest.Replies, opt => opt.Ignore())
             .ForMember(dest => dest.Votes, opt => opt.Ignore())
+            .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => src.PhotoUrl))
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
     }

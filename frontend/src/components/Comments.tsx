@@ -1,17 +1,15 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { ImagePlus, X, Loader2 } from 'lucide-react'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { PAGINATION } from '../config/constants'
 import type { Comment } from '../types/posts'
 
-// ─── All headers include Content-Type so the backend can parse JSON bodies ───
+// ── API helpers ───────────────────────────────────────────────────────────────
 
 function jsonHeaders() {
-  return {
-    ...getAuthHeaders(),
-    'Content-Type': 'application/json',
-  }
+  return { ...getAuthHeaders(), 'Content-Type': 'application/json' }
 }
 
 async function fetchComments(postId: number, page = 1, pageSize = PAGINATION.DEFAULT_PAGE_SIZE): Promise<Comment[]> {
@@ -21,9 +19,12 @@ async function fetchComments(postId: number, page = 1, pageSize = PAGINATION.DEF
   return response.json()
 }
 
-async function createComment(postId: number, content: string, parentCommentId?: number): Promise<Comment> {
-  const body: Record<string, unknown> = { content }
+async function createComment(postId: number, content: string, photoUrl?: string, parentCommentId?: number): Promise<Comment> {
+  const body: Record<string, unknown> = {}
+  if (content.trim()) body.content = content.trim()
+  if (photoUrl) body.photoUrl = photoUrl
   if (parentCommentId !== undefined) body.parentCommentId = parentCommentId
+
   const response = await fetch(API_ENDPOINTS.posts.comments(postId), {
     method: 'POST',
     headers: jsonHeaders(),
@@ -35,8 +36,7 @@ async function createComment(postId: number, content: string, parentCommentId?: 
 
 async function deleteComment(postId: number, commentId: number): Promise<void> {
   const response = await fetch(API_ENDPOINTS.posts.commentById(postId, commentId), {
-    method: 'DELETE',
-    headers: getAuthHeaders(),
+    method: 'DELETE', headers: getAuthHeaders(),
   })
   if (!response.ok) throw new Error('Failed to delete comment')
 }
@@ -44,11 +44,119 @@ async function deleteComment(postId: number, commentId: number): Promise<void> {
 async function voteComment(postId: number, commentId: number, value: number): Promise<void> {
   const response = await fetch(API_ENDPOINTS.posts.commentVote(postId, commentId), {
     method: 'POST',
-    headers: jsonHeaders(),          // ← was missing Content-Type; backend got value=0
+    headers: jsonHeaders(),
     body: JSON.stringify({ value }),
   })
   if (!response.ok) throw new Error('Failed to vote on comment')
 }
+
+// ── Photo upload for comments ─────────────────────────────────────────────────
+
+const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
+const MAX_SIZE = 10 * 1024 * 1024
+
+async function uploadCommentPhoto(file: File): Promise<string> {
+  if (!ALLOWED_TYPES.includes(file.type)) throw new Error('Only images allowed')
+  if (file.size > MAX_SIZE) throw new Error('Max file size is 10MB')
+
+  const presignRes = await fetch(API_ENDPOINTS.uploads.presign, {
+    method: 'POST',
+    headers: jsonHeaders(),
+    body: JSON.stringify({ fileName: file.name, contentType: file.type }),
+  })
+  if (!presignRes.ok) throw new Error('Failed to get upload URL')
+  const { uploadUrl, publicUrl } = await presignRes.json()
+
+  const uploadRes = await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': file.type },
+    body: file,
+  })
+  if (!uploadRes.ok) throw new Error('Upload failed')
+
+  return publicUrl
+}
+
+// ── Inline photo picker ───────────────────────────────────────────────────────
+
+function PhotoPicker({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: string | null
+  onChange: (url: string | null) => void
+  disabled?: boolean
+}) {
+  const [uploading, setUploading] = useState(false)
+  const [preview, setPreview] = useState<string | null>(null)
+  const inputRef = React.useRef<HTMLInputElement>(null)
+
+  const handleFile = async (file: File) => {
+    const localPreview = URL.createObjectURL(file)
+    setPreview(localPreview)
+    setUploading(true)
+    try {
+      const url = await uploadCommentPhoto(file)
+      onChange(url)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Upload failed')
+      setPreview(null)
+      onChange(null)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const clear = () => {
+    setPreview(null)
+    onChange(null)
+    if (inputRef.current) inputRef.current.value = ''
+  }
+
+  if (value || preview) {
+    return (
+      <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200">
+        <img src={preview ?? value ?? ''} alt="" className="w-full h-full object-cover" />
+        {uploading && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+            <Loader2 className="h-4 w-4 text-white animate-spin" />
+          </div>
+        )}
+        {!uploading && (
+          <button
+            type="button"
+            onClick={clear}
+            className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80"
+          >
+            <X className="h-3 w-3" />
+          </button>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      disabled={disabled || uploading}
+      onClick={() => inputRef.current?.click()}
+      className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-40"
+      title="Attach a photo"
+    >
+      <ImagePlus className="h-4 w-4" />
+      <input
+        ref={inputRef}
+        type="file"
+        accept={ALLOWED_TYPES.join(',')}
+        className="hidden"
+        onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])}
+      />
+    </button>
+  )
+}
+
+// ── Time helper ───────────────────────────────────────────────────────────────
 
 function timeAgo(dateString: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000)
@@ -62,7 +170,7 @@ function timeAgo(dateString: string): string {
   return new Date(dateString).toLocaleDateString()
 }
 
-// ─── CommentNode ─────────────────────────────────────────────────────────────
+// ── CommentNode ───────────────────────────────────────────────────────────────
 
 interface CommentNodeProps {
   comment: Comment
@@ -73,7 +181,9 @@ interface CommentNodeProps {
   onReplyToggle: (id: number | null) => void
   activeReplyId: number | null
   replyDrafts: Record<number, string>
+  replyPhotos: Record<number, string | null>
   setReplyDraft: (id: number, value: string) => void
+  setReplyPhoto: (id: number, url: string | null) => void
   submitReply: (id: number) => void
   createPending: boolean
   createError: boolean
@@ -82,52 +192,39 @@ interface CommentNodeProps {
 
 const CommentNode: React.FC<CommentNodeProps> = React.memo(({
   comment, depth = 0, currentUserId, onVote, onDelete,
-  onReplyToggle, activeReplyId, replyDrafts, setReplyDraft,
-  submitReply, createPending, createError, deletePending,
+  onReplyToggle, activeReplyId, replyDrafts, replyPhotos,
+  setReplyDraft, setReplyPhoto, submitReply,
+  createPending, createError, deletePending,
 }) => {
   const [showReplies, setShowReplies] = useState(true)
   const isOwner = currentUserId === comment.userId
+  const isPhotoOnly = !comment.content || comment.content === '[deleted]' ? false : !comment.content.trim() && !!comment.photoUrl
 
   return (
     <div className={`flex gap-3 ${depth > 0 ? 'pl-5 border-l border-gray-100' : ''}`}>
-
       {/* Vote column */}
       <div className="flex flex-col items-center gap-0.5 pt-0.5 shrink-0">
-        <button
-          type="button"
-          onClick={() => onVote(comment, 1)}
+        <button type="button" onClick={() => onVote(comment, 1)}
           disabled={!currentUserId || !!comment.isDeleted}
           aria-label="Upvote comment"
           className={`p-1 rounded transition-colors ${
-            comment.currentUserVote === 1
-              ? 'text-orange-500'
-              : 'text-gray-300 hover:text-orange-400 hover:bg-orange-50'
-          } disabled:cursor-not-allowed disabled:opacity-40`}
-        >
+            comment.currentUserVote === 1 ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400 hover:bg-orange-50'
+          } disabled:cursor-not-allowed disabled:opacity-40`}>
           <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
             <path d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" />
           </svg>
         </button>
 
         <span className={`text-xs font-medium tabular-nums ${
-          comment.score > 0 ? 'text-orange-500' :
-          comment.score < 0 ? 'text-blue-500' :
-          'text-gray-400'
-        }`}>
-          {comment.score}
-        </span>
+          comment.score > 0 ? 'text-orange-500' : comment.score < 0 ? 'text-blue-500' : 'text-gray-400'
+        }`}>{comment.score}</span>
 
-        <button
-          type="button"
-          onClick={() => onVote(comment, -1)}
+        <button type="button" onClick={() => onVote(comment, -1)}
           disabled={!currentUserId || !!comment.isDeleted}
           aria-label="Downvote comment"
           className={`p-1 rounded transition-colors ${
-            comment.currentUserVote === -1
-              ? 'text-blue-500'
-              : 'text-gray-300 hover:text-blue-400 hover:bg-blue-50'
-          } disabled:cursor-not-allowed disabled:opacity-40`}
-        >
+            comment.currentUserVote === -1 ? 'text-blue-500' : 'text-gray-300 hover:text-blue-400 hover:bg-blue-50'
+          } disabled:cursor-not-allowed disabled:opacity-40`}>
           <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
             <path d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" />
           </svg>
@@ -144,39 +241,40 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
           )}
         </div>
 
-        <p className={`text-sm leading-relaxed wrap-break-word ${
-          comment.isDeleted ? 'text-gray-400 italic' : 'text-gray-700'
-        }`}>
-          {comment.content}
-        </p>
+        {/* Comment body — text and/or photo */}
+        {comment.isDeleted ? (
+          <p className="text-sm text-gray-400 italic">{comment.content}</p>
+        ) : (
+          <div className="space-y-2">
+            {comment.content && (
+              <p className="text-sm leading-relaxed wrap-break-word text-gray-700">{comment.content}</p>
+            )}
+            {comment.photoUrl && (
+              <div className="rounded-lg overflow-hidden max-w-xs cursor-pointer"
+                onClick={() => window.open(comment.photoUrl!, '_blank')}>
+                <img src={comment.photoUrl} alt="" className="w-full object-cover max-h-64" />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Action row */}
         <div className="mt-1.5 flex items-center gap-3 text-xs">
           {currentUserId && !comment.isDeleted && (
-            <button
-              type="button"
-              onClick={() => onReplyToggle(comment.id)}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
+            <button type="button" onClick={() => onReplyToggle(comment.id)}
+              className="text-gray-400 hover:text-gray-600 transition-colors">
               {activeReplyId === comment.id ? 'cancel' : 'reply'}
             </button>
           )}
           {isOwner && !comment.isDeleted && (
-            <button
-              type="button"
-              onClick={() => onDelete(comment.id)}
-              disabled={deletePending}
-              className="text-gray-400 hover:text-red-500 transition-colors disabled:opacity-40"
-            >
+            <button type="button" onClick={() => onDelete(comment.id)} disabled={deletePending}
+              className="text-gray-400 hover:text-red-500 transition-colors disabled:opacity-40">
               delete
             </button>
           )}
           {comment.replies && comment.replies.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setShowReplies(p => !p)}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
+            <button type="button" onClick={() => setShowReplies(p => !p)}
+              className="text-gray-400 hover:text-gray-600 transition-colors">
               {showReplies ? 'hide replies' : `show ${comment.replies.length} ${comment.replies.length === 1 ? 'reply' : 'replies'}`}
             </button>
           )}
@@ -185,6 +283,16 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
         {/* Reply box */}
         {activeReplyId === comment.id && currentUserId && (
           <div className="mt-3">
+            {/* Show photo preview if attached */}
+            {replyPhotos[comment.id] && (
+              <div className="mb-2 relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
+                <img src={replyPhotos[comment.id]!} alt="" className="w-full h-full object-cover" />
+                <button type="button" onClick={() => setReplyPhoto(comment.id, null)}
+                  className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
             <textarea
               value={replyDrafts[comment.id] || ''}
               onChange={e => setReplyDraft(comment.id, e.target.value)}
@@ -193,26 +301,25 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
               maxLength={1000}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
             />
-            <div className="flex justify-end items-center gap-2 mt-1.5">
-              <button
-                type="button"
-                onClick={() => onReplyToggle(null)}
-                className="px-3 py-1 text-xs text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => submitReply(comment.id)}
-                disabled={!replyDrafts[comment.id]?.trim() || createPending}
-                className="px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                {createPending ? 'Posting…' : 'Reply'}
-              </button>
+            <div className="flex justify-between items-center mt-1.5">
+              <PhotoPicker
+                value={replyPhotos[comment.id] ?? null}
+                onChange={url => setReplyPhoto(comment.id, url)}
+                disabled={createPending}
+              />
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => onReplyToggle(null)}
+                  className="px-3 py-1 text-xs text-gray-500 hover:text-gray-700 transition-colors">
+                  Cancel
+                </button>
+                <button type="button" onClick={() => submitReply(comment.id)}
+                  disabled={(!replyDrafts[comment.id]?.trim() && !replyPhotos[comment.id]) || createPending}
+                  className="px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                  {createPending ? 'Posting…' : 'Reply'}
+                </button>
+              </div>
             </div>
-            {createError && (
-              <p className="text-xs text-red-500 mt-1">Failed to post. Try again.</p>
-            )}
+            {createError && <p className="text-xs text-red-500 mt-1">Failed to post. Try again.</p>}
           </div>
         )}
 
@@ -230,7 +337,9 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
                 onReplyToggle={onReplyToggle}
                 activeReplyId={activeReplyId}
                 replyDrafts={replyDrafts}
+                replyPhotos={replyPhotos}
                 setReplyDraft={setReplyDraft}
+                setReplyPhoto={setReplyPhoto}
                 submitReply={submitReply}
                 createPending={createPending}
                 createError={createError}
@@ -246,7 +355,7 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
 
 CommentNode.displayName = 'CommentNode'
 
-// ─── Comments root ────────────────────────────────────────────────────────────
+// ── Comments root ─────────────────────────────────────────────────────────────
 
 interface CommentsProps {
   postId: number
@@ -255,9 +364,11 @@ interface CommentsProps {
 
 export function Comments({ postId, currentUserId }: CommentsProps) {
   const queryClient = useQueryClient()
-  const [newComment, setNewComment] = useState('')
+  const [newComment, setNewComment]       = useState('')
+  const [newPhoto, setNewPhoto]           = useState<string | null>(null)
   const [activeReplyId, setActiveReplyId] = useState<number | null>(null)
-  const [replyDrafts, setReplyDrafts] = useState<Record<number, string>>({})
+  const [replyDrafts, setReplyDrafts]     = useState<Record<number, string>>({})
+  const [replyPhotos, setReplyPhotos]     = useState<Record<number, string | null>>({})
 
   const { data: comments = [], isLoading } = useQuery({
     queryKey: ['comments', postId],
@@ -265,11 +376,14 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
   })
 
   const createMutation = useMutation({
-    mutationFn: ({ content, parentCommentId }: { content: string; parentCommentId?: number }) =>
-      createComment(postId, content, parentCommentId),
+    mutationFn: ({ content, photoUrl, parentCommentId }: {
+      content: string; photoUrl?: string; parentCommentId?: number
+    }) => createComment(postId, content, photoUrl, parentCommentId),
     onSuccess: () => {
       setNewComment('')
+      setNewPhoto(null)
       setReplyDrafts({})
+      setReplyPhotos({})
       setActiveReplyId(null)
       queryClient.invalidateQueries({ queryKey: ['comments', postId] })
       toast.success('Comment posted!')
@@ -289,9 +403,7 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
   const voteMutation = useMutation({
     mutationFn: ({ commentId, value }: { commentId: number; value: number }) =>
       voteComment(postId, commentId, value),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['comments', postId] })
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['comments', postId] }),
     onError: (err: Error) => toast.error(err.message),
   })
 
@@ -302,28 +414,33 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
   }
 
   const toggleReply = (commentId: number | null) =>
-    setActiveReplyId(prev => (prev === commentId ? null : commentId))
+    setActiveReplyId(prev => prev === commentId ? null : commentId)
 
   const handleReplyChange = (commentId: number, value: string) =>
     setReplyDrafts(prev => ({ ...prev, [commentId]: value }))
 
+  const handleReplyPhoto = (commentId: number, url: string | null) =>
+    setReplyPhotos(prev => ({ ...prev, [commentId]: url }))
+
   const submitReply = (commentId: number) => {
     const text = (replyDrafts[commentId] || '').trim()
-    if (!text) return
-    createMutation.mutate({ content: text, parentCommentId: commentId })
+    const photo = replyPhotos[commentId] ?? undefined
+    if (!text && !photo) return
+    createMutation.mutate({ content: text, photoUrl: photo, parentCommentId: commentId })
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const trimmed = newComment.trim()
-    if (!trimmed) return
-    createMutation.mutate({ content: trimmed })
+    if (!trimmed && !newPhoto) return
+    createMutation.mutate({ content: trimmed, photoUrl: newPhoto ?? undefined })
   }
 
   const countAll = (list: Comment[]): number =>
     list.reduce((sum, c) => sum + 1 + countAll(c.replies || []), 0)
 
   const total = countAll(comments)
+  const canSubmit = (newComment.trim().length > 0 || !!newPhoto) && !createMutation.isPending
 
   return (
     <div className="mt-8 pt-6 border-t border-gray-100">
@@ -336,22 +453,40 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
         )}
       </h3>
 
-      {/* New comment form */}
       {currentUserId ? (
         <form onSubmit={handleSubmit} className="mb-7">
+          {/* Photo preview above textarea */}
+          {newPhoto && (
+            <div className="mb-2 relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200">
+              <img src={newPhoto} alt="" className="w-full h-full object-cover" />
+              <button type="button" onClick={() => setNewPhoto(null)}
+                className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center">
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+
           <textarea
             value={newComment}
             onChange={e => setNewComment(e.target.value)}
-            placeholder="Write a comment…"
+            placeholder={newPhoto ? 'Add a caption (optional)…' : 'Write a comment…'}
             rows={3}
             maxLength={1000}
             className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-shadow"
           />
-          <div className="flex justify-between items-center mt-2">
-            <span className="text-xs text-gray-400 tabular-nums">{newComment.length}/1000</span>
+
+          <div className="flex items-center justify-between mt-2">
+            <div className="flex items-center gap-2">
+              <PhotoPicker
+                value={newPhoto}
+                onChange={setNewPhoto}
+                disabled={createMutation.isPending}
+              />
+              <span className="text-xs text-gray-400 tabular-nums">{newComment.length}/1000</span>
+            </div>
             <button
               type="submit"
-              disabled={!newComment.trim() || createMutation.isPending}
+              disabled={!canSubmit}
               className="px-4 py-1.5 bg-gray-900 text-white text-xs rounded-lg hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               {createMutation.isPending ? 'Posting…' : 'Post comment'}
@@ -365,7 +500,6 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
         <p className="text-xs text-gray-400 mb-7">Sign in to leave a comment.</p>
       )}
 
-      {/* Comment list */}
       {isLoading ? (
         <p className="text-xs text-gray-400">Loading comments…</p>
       ) : comments.length === 0 ? (
@@ -383,7 +517,9 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
               onReplyToggle={toggleReply}
               activeReplyId={activeReplyId}
               replyDrafts={replyDrafts}
+              replyPhotos={replyPhotos}
               setReplyDraft={handleReplyChange}
+              setReplyPhoto={handleReplyPhoto}
               submitReply={submitReply}
               createPending={createMutation.isPending}
               createError={createMutation.isError}

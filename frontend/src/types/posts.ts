@@ -47,6 +47,7 @@ export interface CreatePostRequest {
   rating?: number
   durationMinutes?: number
   cost?: number
+  photoUrl?: string
   currencyCode?: string
   completedAt?: string
   photoUrls?: string[]
@@ -63,6 +64,7 @@ export interface UpdatePostRequest {
   rating?: number
   durationMinutes?: number
   cost?: number
+  photoUrl?: string
   currencyCode?: string
   completedAt?: string
   photoUrls?: string[]
@@ -82,6 +84,7 @@ export interface Comment {
   userName?: string
   postId: number
   score: number
+  photoUrl?: string
   createdAt: string
   updatedAt: string
   currentUserVote?: number

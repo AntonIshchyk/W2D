@@ -13,6 +13,8 @@ public class CommentResponse
 
     public bool IsDeleted { get; set; }
 
+    public string? PhotoUrl { get; set; }
+
     public int? ParentCommentId { get; set; }
 
     public List<CommentResponse> Replies { get; set; } = new();

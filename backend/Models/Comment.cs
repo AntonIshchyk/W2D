@@ -18,6 +18,8 @@ public class Comment : BaseModel
     public int Score { get; set; }
     public bool IsDeleted { get; set; } = false;
 
+    public string? PhotoUrl { get; set; }
+
     [ConcurrencyCheck]
     public uint Version { get; set; }
     public int? ParentCommentId { get; set; }

@@ -10,4 +10,6 @@ public class CreateCommentRequest
 
     // Optional: for replies
     public int? ParentCommentId { get; set; }
+
+    public string? PhotoUrl { get; set; }
 }
