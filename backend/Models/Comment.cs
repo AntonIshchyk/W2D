@@ -4,9 +4,8 @@ namespace Backend.Models;
 
 public class Comment : BaseModel
 {
-    [Required]
     [StringLength(1000)]
-    public string Content { get; set; } = string.Empty;
+    public string? Content { get; set; }
 
     [Required]
     public int UserId { get; set; }

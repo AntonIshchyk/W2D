@@ -4,11 +4,9 @@ namespace Backend.Contracts.Comments;
 
 public class CreateCommentRequest
 {
-    [Required]
-    [StringLength(1000, MinimumLength = 1)]
-    public string Content { get; set; } = string.Empty;
+    [StringLength(1000)]
+    public string? Content { get; set; }
 
-    // Optional: for replies
     public int? ParentCommentId { get; set; }
 
     public string? PhotoUrl { get; set; }

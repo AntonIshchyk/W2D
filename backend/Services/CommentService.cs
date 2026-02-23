@@ -14,11 +14,12 @@ public class CommentService : ICommentService
         return c => new CommentResponse
         {
             Id = c.Id,
-            Content = c.IsDeleted ? "[deleted]" : c.Content,
+            Content = c.IsDeleted ? "[deleted]" : (c.Content ?? string.Empty),
             UserId = c.UserId,
             UserName = c.User.Name,
             PostId = c.PostId,
             Score = c.Score,
+            PhotoUrl = c.PhotoUrl,
             CurrentUserVote = currentUserId.HasValue
                 ? c.Votes
                     .Where(v => v.UserId == currentUserId.Value)

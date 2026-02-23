@@ -39,7 +39,7 @@ async function uploadToR2(uploadUrl: string, file: File): Promise<void> {
   if (!res.ok) throw new Error('Upload to storage failed')
 }
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
 
 export function PhotoUpload({
@@ -51,6 +51,12 @@ export function PhotoUpload({
   const [uploading, setUploading] = useState<UploadingFile[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // A ref that always holds the latest confirmed URLs.
+  // This prevents concurrent uploads from reading a stale `value` closure
+  // and overwriting each other — each upload appends to the ref, not to `value`.
+  const confirmedRef = useRef<string[]>(value)
+  confirmedRef.current = value
 
   const canAddMore = value.length + uploading.filter(u => u.progress === 'uploading').length < maxPhotos
 
@@ -73,8 +79,11 @@ export function PhotoUpload({
       const { uploadUrl, publicUrl } = await getPresignedUrl(file)
       await uploadToR2(uploadUrl, file)
 
-      // Success — add real URL, remove from uploading
-      onChange([...value, publicUrl])
+      // Append via the ref so sibling concurrent uploads each see the
+      // accumulated list rather than the same stale snapshot of `value`.
+      confirmedRef.current = [...confirmedRef.current, publicUrl]
+      onChange(confirmedRef.current)
+
       setUploading(prev => prev.filter(u => u.id !== tempId))
       URL.revokeObjectURL(previewUrl)
     } catch (err) {
@@ -83,7 +92,7 @@ export function PhotoUpload({
       )
       toast.error(`Failed to upload ${file.name}`)
     }
-  }, [value, onChange])
+  }, [onChange])
 
   const handleFiles = useCallback((files: FileList | null) => {
     if (!files) return
@@ -98,7 +107,9 @@ export function PhotoUpload({
   }, [disabled, canAddMore, handleFiles])
 
   const removePhoto = (url: string) => {
-    onChange(value.filter(u => u !== url))
+    const next = value.filter(u => u !== url)
+    confirmedRef.current = next
+    onChange(next)
   }
 
   const removeUploading = (id: string) => {
@@ -116,29 +127,24 @@ export function PhotoUpload({
 
   return (
     <div className="space-y-2">
-      {/* Preview grid */}
       {allPreviews.length > 0 && (
         <div className="grid grid-cols-4 gap-2">
           {allPreviews.map((item, i) => (
             <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-muted">
-              <img
-                src={item.url}
-                alt=""
-                className="w-full h-full object-cover"
-              />
-              {/* Uploading overlay */}
+              <img src={item.url} alt="" className="w-full h-full object-cover" />
+
               {item.type === 'uploading' && (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                   <Loader2 className="h-5 w-5 text-white animate-spin" />
                 </div>
               )}
-              {/* Error overlay */}
+
               {item.type === 'error' && (
                 <div className="absolute inset-0 bg-red-500/40 flex items-center justify-center">
                   <span className="text-white text-xs font-medium">Failed</span>
                 </div>
               )}
-              {/* Remove button */}
+
               <button
                 type="button"
                 onClick={() => item.type === 'done'
@@ -154,7 +160,6 @@ export function PhotoUpload({
         </div>
       )}
 
-      {/* Drop zone — only show if can add more */}
       {canAddMore && !disabled && (
         <div
           onDragOver={e => { e.preventDefault(); setIsDragging(true) }}
@@ -162,7 +167,7 @@ export function PhotoUpload({
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
           className={`
-            flex flex-col items-center justify-center gap-1.5 
+            flex flex-col items-center justify-center gap-1.5
             border-2 border-dashed rounded-lg p-4 cursor-pointer
             transition-colors text-center
             ${isDragging

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Backend.Models;
+using System.Text.Json;
 
 namespace Backend.Data;
 
@@ -116,6 +117,14 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Post>()
             .HasIndex(p => p.Score);
+
+        modelBuilder.Entity<Post>()
+            .Property(p => p.PhotoUrls)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>()
+            )
+            .HasColumnType("TEXT"); // use "jsonb" for Postgres
 
         // PostVote - User relationship
         modelBuilder.Entity<PostVote>()

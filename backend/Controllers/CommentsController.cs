@@ -31,6 +31,10 @@ public class CommentsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<CommentResponse>> CreateComment(int postId, CreateCommentRequest request)
     {
+        // Require either non-empty content or a photo URL
+        if (string.IsNullOrWhiteSpace(request.Content) && string.IsNullOrWhiteSpace(request.PhotoUrl))
+            return BadRequest(new { message = "Content or PhotoUrl is required" });
+
         int userId = User.GetUserId()!.Value;
         var comment = await _commentService.CreateCommentAsync(postId, request, userId);
 
