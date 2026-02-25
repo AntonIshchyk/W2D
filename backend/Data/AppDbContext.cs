@@ -79,14 +79,17 @@ public class AppDbContext : DbContext
             .ToTable("ActivitySchedules");
 
         // Performance indexes
+        // Index for fast lookup of user activities by user and status
         modelBuilder.Entity<UserActivity>()
             .HasIndex(s => new { s.UserId, s.Status })
             .HasDatabaseName("IX_ActivitySchedules_UserId_Status");
 
+        // Index for fast lookup of activities by planned date
         modelBuilder.Entity<UserActivity>()
             .HasIndex(s => s.PlannedDate)
             .HasDatabaseName("IX_ActivitySchedules_PlannedDate");
 
+        // Index for fast lookup of activities by category
         modelBuilder.Entity<Activity>()
             .HasIndex(a => a.CategoryId)
             .HasDatabaseName("IX_Activities_CategoryId");

@@ -27,11 +27,18 @@ public class UsersController : ControllerBase
     [Authorize]
     public ActionResult GetCurrentUser()
     {
+        var userId = User.GetUserId();
+        var emailClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        var nameClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+        if (userId == null || string.IsNullOrEmpty(emailClaim) || string.IsNullOrEmpty(nameClaim))
+        {
+            return BadRequest("User claims missing or invalid.");
+        }
         return Ok(new
         {
-            userId = User.GetUserId()!.Value,
-            email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)!.Value,
-            name = User.FindFirst(System.Security.Claims.ClaimTypes.Name)!.Value,
+            userId = userId.Value,
+            email = emailClaim,
+            name = nameClaim,
         });
     }
 
