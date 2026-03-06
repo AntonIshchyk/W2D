@@ -1,24 +1,18 @@
-import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { toast } from 'sonner'
 import {
-  Search, Calendar, MapPin, DollarSign, Activity as ActivityIcon,
+  Search, MapPin, DollarSign, Activity as ActivityIcon,
   X, Check, ChevronsUpDown, Zap, Users, Wrench, GraduationCap, Wifi
 } from 'lucide-react'
-import { Button } from './ui/button'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from './ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card'
 import { Badge } from './ui/badge'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog'
+import { Button } from './ui/button'
 import { Input } from './ui/input'
-import { Label } from './ui/label'
-import { Textarea } from './ui/textarea'
 import { Skeleton } from './ui/skeleton'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
-import { fetchCurrentUser } from '../lib/auth'
-import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { PAGINATION } from '../config/constants'
 import { EmptyState } from './ui/empty-state'
 import { LoadingSpinner } from './ui/loading-spinner'
@@ -89,21 +83,6 @@ async function fetchTags(): Promise<Tag[]> {
   return response.json()
 }
 
-interface ScheduleData {
-  activityId: number
-  plannedDate: string
-  notes?: string
-}
-
-async function scheduleActivity(data: ScheduleData): Promise<void> {
-  const response = await fetch(API_ENDPOINTS.schedules.base, {
-    method: 'POST',
-    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  })
-  if (!response.ok) throw new Error('Failed to schedule activity')
-}
-
 // ── Label maps ────────────────────────────────────────────────────────────────
 
 const locationConfig: Record<string, { label: string; icon: React.ReactNode }> = {
@@ -149,10 +128,8 @@ const entryConfig: Record<string, { label: string }> = {
 
 function ActivityCard({
   activity,
-  onSchedule,
 }: {
   activity: Activity
-  onSchedule: (id: number) => void
 }) {
   const loc     = activity.locationType ? locationConfig[activity.locationType] : null
   const cost    = activity.costLevel ? costConfig[activity.costLevel] : null
@@ -245,19 +222,6 @@ function ActivityCard({
         )}
       </CardContent>
 
-      {/* Footer — only the button is clickable, not the whole card */}
-      <CardFooter className="pt-0">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="w-full gap-2 text-xs"
-          onClick={() => onSchedule(activity.id)}
-        >
-          <Calendar className="h-3.5 w-3.5" />
-          Schedule
-        </Button>
-      </CardFooter>
     </Card>
   )
 }
@@ -271,23 +235,12 @@ export function Activities() {
   const [debouncedSearch, setDebouncedSearch]   = useState('')
   const [categoryOpen, setCategoryOpen]         = useState(false)
   const [tagsOpen, setTagsOpen]                 = useState(false)
-  const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false)
-  const [selectedActivityId, setSelectedActivityId] = useState<number | null>(null)
-  const [plannedDate, setPlannedDate]           = useState('')
-  const [notes, setNotes]                       = useState('')
   const observerTarget = useRef<HTMLDivElement>(null)
-  const queryClient = useQueryClient()
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchQuery), 300)
     return () => clearTimeout(t)
   }, [searchQuery])
-
-  const { data: currentUser, isError, error: userError } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: fetchCurrentUser,
-    retry: false,
-  })
 
   const { data: categories } = useQuery({ queryKey: ['categories'], queryFn: fetchCategories })
   const { data: tags }       = useQuery({ queryKey: ['tags'],       queryFn: fetchTags })
@@ -300,21 +253,6 @@ export function Activities() {
     initialPageParam: null as number | null,
     retry: false,
   })
-
-  const scheduleMutation = useMutation({
-    mutationFn: scheduleActivity,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schedules'] })
-      setScheduleDialogOpen(false)
-      setSelectedActivityId(null)
-      setPlannedDate('')
-      setNotes('')
-      toast.success('Activity scheduled!')
-    },
-    onError: (error: Error) => toast.error(error.message),
-  })
-
-  useAuthErrorHandler(isError, userError)
 
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
     const [target] = entries
@@ -334,36 +272,13 @@ export function Activities() {
   )
   const totalCount = data?.pages[0]?.totalCount ?? 0
 
-  const handleScheduleClick = (activityId: number) => {
-    if (!currentUser) {
-      toast.error('Please log in to schedule activities')
-      return
-    }
-    setSelectedActivityId(activityId)
-    setScheduleDialogOpen(true)
-  }
-
-  const handleScheduleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!selectedActivityId || !plannedDate) return
-    const dateObj = new Date(plannedDate)
-    dateObj.setHours(12, 0, 0, 0)
-    scheduleMutation.mutate({
-      activityId: selectedActivityId,
-      plannedDate: dateObj.toISOString(),
-      notes: notes || undefined,
-    })
-  }
-
   const handleTagToggle = (tagId: number) =>
     setSelectedTags(prev =>
       prev.includes(tagId) ? prev.filter(id => id !== tagId) : [...prev, tagId]
     )
 
   const hasFilters = !!(selectedCategory || selectedTags.length > 0)
-  const selectedActivity = allActivities.find(a => a.id === selectedActivityId)
 
-  if (isError) return null
 
   return (
     <PageLayout>
@@ -520,7 +435,6 @@ export function Activities() {
               <ActivityCard
                 key={activity.id}
                 activity={activity}
-                onSchedule={handleScheduleClick}
               />
             ))}
           </div>
@@ -531,51 +445,6 @@ export function Activities() {
         </>
       )}
 
-      {/* Schedule dialog */}
-      <Dialog open={scheduleDialogOpen} onOpenChange={setScheduleDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Schedule activity</DialogTitle>
-            {selectedActivity && (
-              <DialogDescription>{selectedActivity.title}</DialogDescription>
-            )}
-          </DialogHeader>
-
-          <form onSubmit={handleScheduleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="planned-date">Date</Label>
-              <Input
-                id="planned-date"
-                type="date"
-                value={plannedDate}
-                onChange={e => setPlannedDate(e.target.value)}
-                required
-                min={new Date().toISOString().split('T')[0]}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="notes">Notes <span className="text-muted-foreground font-normal">(optional)</span></Label>
-              <Textarea
-                id="notes"
-                placeholder="Any notes…"
-                value={notes}
-                onChange={e => setNotes(e.target.value)}
-                rows={3}
-              />
-            </div>
-
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setScheduleDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={!plannedDate || scheduleMutation.isPending}>
-                {scheduleMutation.isPending ? 'Scheduling…' : 'Schedule'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
     </PageLayout>
   )
 }

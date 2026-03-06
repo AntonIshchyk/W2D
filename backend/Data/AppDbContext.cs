@@ -22,7 +22,6 @@ public class AppDbContext : DbContext
     public DbSet<Activity> Activities { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<Tag> Tags { get; set; }
-    public DbSet<UserActivity> UserActivities { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<PostVote> PostVotes { get; set; }
     public DbSet<Comment> Comments { get; set; }
@@ -59,35 +58,6 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
-
-        // UserActivity - User relationship
-        modelBuilder.Entity<UserActivity>()
-            .HasOne(s => s.User)
-            .WithMany()
-            .HasForeignKey(s => s.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        // UserActivity - Activity relationship
-        modelBuilder.Entity<UserActivity>()
-            .HasOne(s => s.Activity)
-            .WithMany()
-            .HasForeignKey(s => s.ActivityId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        // Map UserActivity to the existing ActivitySchedules table
-        modelBuilder.Entity<UserActivity>()
-            .ToTable("ActivitySchedules");
-
-        // Performance indexes
-        // Index for fast lookup of user activities by user and status
-        modelBuilder.Entity<UserActivity>()
-            .HasIndex(s => new { s.UserId, s.Status })
-            .HasDatabaseName("IX_ActivitySchedules_UserId_Status");
-
-        // Index for fast lookup of activities by planned date
-        modelBuilder.Entity<UserActivity>()
-            .HasIndex(s => s.PlannedDate)
-            .HasDatabaseName("IX_ActivitySchedules_PlannedDate");
 
         // Index for fast lookup of activities by category
         modelBuilder.Entity<Activity>()
