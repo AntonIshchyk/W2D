@@ -26,6 +26,8 @@ public class AppDbContext : DbContext
     public DbSet<PostVote> PostVotes { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<CommentVote> CommentVotes { get; set; }
+    public DbSet<Event> Events { get; set; }
+    public DbSet<EventAttendee> EventAttendees { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -95,7 +97,12 @@ public class AppDbContext : DbContext
             .Property(p => p.PhotoUrls)
             .HasConversion(
                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>()
+                v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>(),
+                new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<List<string>>(
+                    (a, b) => a != null && b != null && a.SequenceEqual(b),
+                    v => v.Aggregate(0, (h, s) => HashCode.Combine(h, s.GetHashCode())),
+                    v => v.ToList()
+                )
             )
             .HasColumnType("TEXT"); // use "jsonb" for Postgres
 
@@ -187,6 +194,66 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<CommentVote>()
             .HasIndex(v => v.CommentId);
+
+        // Event - Organizer relationship
+        modelBuilder.Entity<Event>()
+            .HasOne(e => e.Organizer)
+            .WithMany()
+            .HasForeignKey(e => e.OrganizerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Event - Activity relationship (optional)
+        modelBuilder.Entity<Event>()
+            .HasOne(e => e.Activity)
+            .WithMany()
+            .HasForeignKey(e => e.ActivityId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Event - Tag many-to-many
+        modelBuilder.Entity<Event>()
+            .HasMany(e => e.Tags)
+            .WithMany(t => t.Events)
+            .UsingEntity(j => j.ToTable("EventTags"));
+
+        // EventAttendee - Event relationship
+        modelBuilder.Entity<EventAttendee>()
+            .HasOne(a => a.Event)
+            .WithMany(e => e.Attendees)
+            .HasForeignKey(a => a.EventId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // EventAttendee - User relationship
+        modelBuilder.Entity<EventAttendee>()
+            .HasOne(a => a.User)
+            .WithMany()
+            .HasForeignKey(a => a.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // One RSVP per user per event
+        modelBuilder.Entity<EventAttendee>()
+            .HasIndex(a => new { a.EventId, a.UserId })
+            .IsUnique();
+
+        // Event performance indexes
+        modelBuilder.Entity<Event>()
+            .HasIndex(e => e.ScheduledAt)
+            .HasDatabaseName("IX_Events_ScheduledAt");
+
+        modelBuilder.Entity<Event>()
+            .HasIndex(e => e.OrganizerId)
+            .HasDatabaseName("IX_Events_OrganizerId");
+
+        modelBuilder.Entity<Event>()
+            .HasIndex(e => e.ActivityId)
+            .HasDatabaseName("IX_Events_ActivityId");
+
+        modelBuilder.Entity<Event>()
+            .HasIndex(e => e.Status)
+            .HasDatabaseName("IX_Events_Status");
+
+        modelBuilder.Entity<EventAttendee>()
+            .HasIndex(a => a.UserId)
+            .HasDatabaseName("IX_EventAttendees_UserId");
 
         // Seed database with activities, categories, and tags
         DatabaseSeeder.SeedData(modelBuilder);

@@ -4,6 +4,8 @@ import { Login } from './components/Login'
 import { Home } from './components/Home'
 import { Profile } from './components/Profile'
 import { Activities } from './components/Activities'
+import { Events } from './components/Events'
+import { EventDetail } from './components/EventDetail'
 import { Posts } from './components/Posts'
 import { CreatePost } from './components/CreatePost'
 import { PostDetail } from './components/PostDetail'
@@ -20,6 +22,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/activities" element={<Activities />} />
+        <Route path="/events" element={<Events />} />
+        <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/posts" element={<Posts />} />
         <Route path="/posts/create" element={<CreatePost />} />
         <Route path="/posts/:id" element={<PostDetail />} />

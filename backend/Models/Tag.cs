@@ -9,4 +9,6 @@ public class Tag : BaseModel
     public string Name { get; set; } = null!;
 
     public List<Activity> Activities { get; set; } = new List<Activity>();
+
+    public List<Event> Events { get; set; } = new List<Event>();
 }
