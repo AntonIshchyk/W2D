@@ -10,6 +10,7 @@ import { Posts } from './components/Posts'
 import { CreatePost } from './components/CreatePost'
 import { PostDetail } from './components/PostDetail'
 import { useAuthSync } from './hooks/useAuthSync'
+import { ProtectedRoute } from './components/ProtectedRoute'
 
 function App() {
   // Automatically clear cache when auth token changes
@@ -19,15 +20,15 @@ function App() {
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Toaster position="top-center" richColors />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/activities" element={<Activities />} />
-        <Route path="/events" element={<Events />} />
-        <Route path="/events/:id" element={<EventDetail />} />
-        <Route path="/posts" element={<Posts />} />
-        <Route path="/posts/create" element={<CreatePost />} />
-        <Route path="/posts/:id" element={<PostDetail />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/activities" element={<ProtectedRoute><Activities /></ProtectedRoute>} />
+        <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
+        <Route path="/events/:id" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} />
+        <Route path="/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
+        <Route path="/posts/create" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
+        <Route path="/posts/:id" element={<ProtectedRoute><PostDetail /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
