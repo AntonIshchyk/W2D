@@ -7,7 +7,6 @@ import {
   Plus, Check, ChevronsUpDown, ImageIcon
 } from 'lucide-react'
 import { Button } from './ui/button'
-import { Badge } from './ui/badge'
 import { Tabs, TabsList, TabsTrigger } from './ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Skeleton } from './ui/skeleton'
@@ -347,7 +346,7 @@ export function Posts() {
       })
       return { previous }
     },
-    onError: (_err, vars, context: any) => {
+    onError: (_err, context: any) => {
       if (context?.previous) {
         queryClient.setQueryData(['posts', selectedActivity, selectedType, sortBy], context.previous)
       }
