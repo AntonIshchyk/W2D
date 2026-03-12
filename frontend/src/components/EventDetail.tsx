@@ -160,11 +160,14 @@ function EditEventDialog({ event, onClose }: { event: Event; onClose: () => void
       toast.error('Title, description, and date are required')
       return
     }
+    const parsedMaxAttendees = maxAttendees ? parseInt(maxAttendees, 10) : null
+    const safeMaxAttendees = parsedMaxAttendees && parsedMaxAttendees > 0 ? parsedMaxAttendees : null
+
     mutation.mutate({
       title: title.trim(),
       description: description.trim(),
       scheduledAt: new Date(scheduledAt).toISOString(),
-      maxAttendees: maxAttendees ? parseInt(maxAttendees, 10) : null,
+      maxAttendees: safeMaxAttendees,
       status,
     })
   }

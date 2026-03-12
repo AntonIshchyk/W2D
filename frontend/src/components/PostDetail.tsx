@@ -9,11 +9,8 @@ import { PostType } from '../types/posts'
 import type { Post } from '../types/posts'
 import { fetchCurrentUser } from '../lib/auth'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
+import { formatDate } from '../lib/utils/date'
 import { Comments } from './Comments'
-
-function jsonHeaders() {
-  return { ...getAuthHeaders(), 'Content-Type': 'application/json' }
-}
 
 async function fetchPost(id: number): Promise<Post> {
   const response = await fetch(API_ENDPOINTS.posts.byId(id), { headers: getAuthHeaders() })
@@ -23,7 +20,7 @@ async function fetchPost(id: number): Promise<Post> {
 
 async function votePost(postId: number, value: number): Promise<void> {
   const response = await fetch(API_ENDPOINTS.posts.vote(postId), {
-    method: 'POST', headers: jsonHeaders(), body: JSON.stringify({ value }),
+    method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ value }),
   })
   if (!response.ok) throw new Error('Failed to vote on post')
 }
@@ -51,16 +48,6 @@ const POST_TYPE_COLORS: Record<PostType, { bg: string; text: string }> = {
   [PostType.Recommendation]:  { bg: '#f3e8ff', text: '#6b21a8' },
   [PostType.Achievement]:     { bg: '#ffedd5', text: '#9a3412' },
   [PostType.Challenge]:       { bg: '#fee2e2', text: '#991b1b' },
-}
-
-function formatDate(dateString: string) {
-  const date = new Date(dateString)
-  const diff = Math.floor((Date.now() - date.getTime()) / 1000)
-  if (diff < 60) return 'just now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
-  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
 function formatDuration(minutes: number) {

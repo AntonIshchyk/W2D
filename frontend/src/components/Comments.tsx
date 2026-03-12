@@ -3,18 +3,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { ImagePlus, X, Loader2 } from 'lucide-react'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
-import { PAGINATION } from '../config/constants'
+import { formatRelativeTime } from '../lib/utils/date'
 import type { Comment } from '../types/posts'
 
 // ── API helpers ───────────────────────────────────────────────────────────────
 
-function jsonHeaders() {
-  return { ...getAuthHeaders(), 'Content-Type': 'application/json' }
-}
-
-async function fetchComments(postId: number, page = 1, pageSize = PAGINATION.DEFAULT_PAGE_SIZE): Promise<Comment[]> {
-  const url = `${API_ENDPOINTS.posts.comments(postId)}?page=${page}&pageSize=${pageSize}`
-  const response = await fetch(url, { headers: getAuthHeaders() })
+async function fetchComments(postId: number): Promise<Comment[]> {
+  const response = await fetch(API_ENDPOINTS.posts.comments(postId), { headers: getAuthHeaders() })
   if (!response.ok) throw new Error('Failed to fetch comments')
   return response.json()
 }
@@ -27,7 +22,7 @@ async function createComment(postId: number, content: string, photoUrl?: string,
 
   const response = await fetch(API_ENDPOINTS.posts.comments(postId), {
     method: 'POST',
-    headers: jsonHeaders(),
+    headers: getAuthHeaders(),
     body: JSON.stringify(body),
   })
   if (!response.ok) throw new Error('Failed to create comment')
@@ -44,7 +39,7 @@ async function deleteComment(postId: number, commentId: number): Promise<void> {
 async function voteComment(postId: number, commentId: number, value: number): Promise<void> {
   const response = await fetch(API_ENDPOINTS.posts.commentVote(postId, commentId), {
     method: 'POST',
-    headers: jsonHeaders(),
+    headers: getAuthHeaders(),
     body: JSON.stringify({ value }),
   })
   if (!response.ok) throw new Error('Failed to vote on comment')
@@ -61,7 +56,7 @@ async function uploadCommentPhoto(file: File): Promise<string> {
 
   const presignRes = await fetch(API_ENDPOINTS.uploads.presign, {
     method: 'POST',
-    headers: jsonHeaders(),
+    headers: getAuthHeaders(),
     body: JSON.stringify({ fileName: file.name, contentType: file.type }),
   })
   if (!presignRes.ok) throw new Error('Failed to get upload URL')
@@ -156,20 +151,6 @@ function PhotoPicker({
   )
 }
 
-// ── Time helper ───────────────────────────────────────────────────────────────
-
-function timeAgo(dateString: string): string {
-  const seconds = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000)
-  if (seconds < 60) return 'just now'
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  if (days < 30) return `${days}d ago`
-  return new Date(dateString).toLocaleDateString()
-}
-
 // ── CommentNode ───────────────────────────────────────────────────────────────
 
 interface CommentNodeProps {
@@ -198,14 +179,13 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
 }) => {
   const [showReplies, setShowReplies] = useState(true)
   const isOwner = currentUserId === comment.userId
-  const isPhotoOnly = !comment.content || comment.content === '[deleted]' ? false : !comment.content.trim() && !!comment.photoUrl
 
   return (
     <div className={`flex gap-3 ${depth > 0 ? 'pl-5 border-l border-gray-100' : ''}`}>
       {/* Vote column */}
       <div className="flex flex-col items-center gap-0.5 pt-0.5 shrink-0">
         <button type="button" onClick={() => onVote(comment, 1)}
-          disabled={!currentUserId || !!comment.isDeleted}
+          disabled={!currentUserId || comment.isDeleted}
           aria-label="Upvote comment"
           className={`p-1 rounded transition-colors ${
             comment.currentUserVote === 1 ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400 hover:bg-orange-50'
@@ -220,7 +200,7 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
         }`}>{comment.score}</span>
 
         <button type="button" onClick={() => onVote(comment, -1)}
-          disabled={!currentUserId || !!comment.isDeleted}
+          disabled={!currentUserId || comment.isDeleted}
           aria-label="Downvote comment"
           className={`p-1 rounded transition-colors ${
             comment.currentUserVote === -1 ? 'text-blue-500' : 'text-gray-300 hover:text-blue-400 hover:bg-blue-50'
@@ -235,7 +215,7 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
       <div className="flex-1 min-w-0 pb-4">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xs font-semibold text-gray-800">{comment.userName || 'Anonymous'}</span>
-          <span className="text-xs text-gray-400">{timeAgo(comment.createdAt)}</span>
+          <span className="text-xs text-gray-400">{formatRelativeTime(comment.createdAt)}</span>
           {isOwner && !comment.isDeleted && (
             <span className="text-xs text-gray-300 bg-gray-100 rounded px-1.5 py-0.5 leading-none">you</span>
           )}
@@ -251,7 +231,7 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
             )}
             {comment.photoUrl && (
               <div className="rounded-lg overflow-hidden max-w-xs cursor-pointer"
-                onClick={() => window.open(comment.photoUrl!, '_blank')}>
+                onClick={() => window.open(comment.photoUrl, '_blank')}>
                 <img src={comment.photoUrl} alt="" className="w-full object-cover max-h-64" />
               </div>
             )}

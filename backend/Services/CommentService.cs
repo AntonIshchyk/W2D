@@ -130,9 +130,10 @@ public class CommentService : ICommentService
         return response;
     }
 
-    public async Task<bool> DeleteCommentAsync(int commentId, int userId)
+    public async Task<bool> DeleteCommentAsync(int postId, int commentId, int userId)
     {
-        var comment = await _context.Comments.FindAsync(commentId);
+        var comment = await _context.Comments
+            .FirstOrDefaultAsync(c => c.Id == commentId && c.PostId == postId);
 
         if (comment == null || comment.UserId != userId || comment.IsDeleted)
             return false;
@@ -149,12 +150,12 @@ public class CommentService : ICommentService
         return true;
     }
 
-    public async Task<bool> VoteCommentAsync(int commentId, int userId, int value)
+    public async Task<bool> VoteCommentAsync(int postId, int commentId, int userId, int value)
     {
         if (value < -1 || value > 1) return false;
 
         var comment = await _context.Comments
-            .FirstOrDefaultAsync(c => c.Id == commentId && !c.IsDeleted);
+            .FirstOrDefaultAsync(c => c.Id == commentId && c.PostId == postId && !c.IsDeleted);
 
         if (comment == null) return false;
 

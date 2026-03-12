@@ -48,7 +48,7 @@ public class CommentsController : ControllerBase
     public async Task<ActionResult> DeleteComment(int postId, int commentId)
     {
         int userId = User.GetUserId()!.Value;
-        bool deleted = await _commentService.DeleteCommentAsync(commentId, userId);
+        bool deleted = await _commentService.DeleteCommentAsync(postId, commentId, userId);
 
         if (!deleted)
             return NotFound(new { message = "Comment not found or unauthorized" });
@@ -60,7 +60,7 @@ public class CommentsController : ControllerBase
     public async Task<ActionResult> VoteComment(int postId, int commentId, VoteCommentRequest request)
     {
         int userId = User.GetUserId()!.Value;
-        bool success = await _commentService.VoteCommentAsync(commentId, userId, request.Value);
+        bool success = await _commentService.VoteCommentAsync(postId, commentId, userId, request.Value);
 
         if (!success)
             return NotFound(new { message = "Comment not found" });

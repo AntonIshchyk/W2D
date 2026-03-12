@@ -8,7 +8,7 @@ public interface ICommentService
 
     Task<CommentResponse?> CreateCommentAsync(int postId, CreateCommentRequest request, int userId);
 
-    Task<bool> DeleteCommentAsync(int commentId, int userId);
+    Task<bool> DeleteCommentAsync(int postId, int commentId, int userId);
 
-    Task<bool> VoteCommentAsync(int commentId, int userId, int value);
+    Task<bool> VoteCommentAsync(int postId, int commentId, int userId, int value);
 }
