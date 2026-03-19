@@ -206,7 +206,7 @@ public class PostService : IPostService
         ValidatePhotoUrls(request.PhotoUrls);
 
         // Validate TopicId exists
-        if (!await ActivityExistsAsync(request.TopicId))
+        if (!await CommunityExistsAsync(request.TopicId))
         {
             throw new InvalidOperationException("Invalid TopicId. Community does not exist.");
         }
@@ -347,7 +347,7 @@ public class PostService : IPostService
         }
     }
 
-    public async Task<bool> ActivityExistsAsync(int topicId)
+    public async Task<bool> CommunityExistsAsync(int topicId)
     {
         return await _context.Communities.AnyAsync(a => a.Id == topicId);
     }

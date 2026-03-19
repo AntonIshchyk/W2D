@@ -39,7 +39,7 @@ public class EventService : IEventService
             OrganizerId = e.OrganizerId,
             OrganizerName = e.Organizer?.Name,
             SpaceId = e.SpaceId,
-            ActivityTitle = e.Community?.Name,
+            CommunityName = e.Community?.Name,
             Tags = e.Tags.Select(t => new TagDto { Id = t.Id, Name = t.Name }).ToList(),
             ScheduledAt = e.ScheduledAt,
             MaxAttendees = e.MaxAttendees,

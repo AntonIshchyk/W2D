@@ -21,5 +21,5 @@ public interface IPostService
     Task<Post?> UpdatePostAsync(int id, UpdatePostRequest request, int userId);
     Task<bool> DeletePostAsync(int id, int userId);
     Task<bool> VotePostAsync(int postId, int userId, int value);
-    Task<bool> ActivityExistsAsync(int topicId);
+    Task<bool> CommunityExistsAsync(int topicId);
 }

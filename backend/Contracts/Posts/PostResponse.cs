@@ -9,7 +9,7 @@ public class PostResponse
     public int UserId { get; set; }
     public string? UserName { get; set; }
     public int TopicId { get; set; }
-    public string? ActivityTitle { get; set; }
+    public string? CommunityName { get; set; }
     public int Score { get; set; }
     public string? LocationName { get; set; }
     public double? Latitude { get; set; }

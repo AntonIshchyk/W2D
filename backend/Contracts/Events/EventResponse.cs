@@ -8,7 +8,7 @@ public class EventResponse
     public int OrganizerId { get; set; }
     public string? OrganizerName { get; set; }
     public int? SpaceId { get; set; }
-    public string? ActivityTitle { get; set; }
+    public string? CommunityName { get; set; }
     public List<TagDto> Tags { get; set; } = new();
     public DateTime ScheduledAt { get; set; }
     public int? MaxAttendees { get; set; }
