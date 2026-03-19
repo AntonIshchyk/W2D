@@ -10,7 +10,7 @@ public interface IPostService
     Task<ScrollResult<PostResponse>> GetPostsAsync(
         int? cursor = null,
         int limit = PaginationConstants.DefaultPageSize,
-        int? activityId = null,
+        int? topicId = null,
         int? userId = null,
         int? type = null,
         string? sortBy = null,
@@ -21,5 +21,5 @@ public interface IPostService
     Task<Post?> UpdatePostAsync(int id, UpdatePostRequest request, int userId);
     Task<bool> DeletePostAsync(int id, int userId);
     Task<bool> VotePostAsync(int postId, int userId, int value);
-    Task<bool> ActivityExistsAsync(int activityId);
+    Task<bool> ActivityExistsAsync(int topicId);
 }

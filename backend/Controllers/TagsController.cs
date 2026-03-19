@@ -34,7 +34,7 @@ public class TagsController : ControllerBase
     public async Task<ActionResult<Tag>> GetTag(int id)
     {
         Tag? tag = await _context.Tags
-            .Include(t => t.Activities)
+            .Include(t => t.Communities)
             .FirstOrDefaultAsync(t => t.Id == id);
 
         if (tag == null)
@@ -91,7 +91,7 @@ public class TagsController : ControllerBase
     public async Task<ActionResult> DeleteTag(int id)
     {
         Tag? tag = await _context.Tags
-            .Include(t => t.Activities)
+            .Include(t => t.Communities)
             .FirstOrDefaultAsync(t => t.Id == id);
 
         if (tag == null)
@@ -99,10 +99,10 @@ public class TagsController : ControllerBase
             return NotFound(new { message = "Tag not found" });
         }
 
-        // Prevent deletion if activities are using this tag
-        if (tag.Activities.Any())
+        // Prevent deletion if communities are using this tag
+        if (tag.Communities.Any())
         {
-            return BadRequest(new { message = "Cannot delete tag that is used by activities. Remove tag from activities first." });
+            return BadRequest(new { message = "Cannot delete tag that is used by communities. Remove tag from communities first." });
         }
 
         _context.Tags.Remove(tag);

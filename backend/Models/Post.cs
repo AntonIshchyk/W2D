@@ -20,8 +20,8 @@ public class Post : BaseModel
     public User User { get; set; } = null!;
 
     [Required]
-    public int ActivityId { get; set; }
-    public Activity Activity { get; set; } = null!;
+    public int SpaceId { get; set; }
+    public Community Community { get; set; } = null!;
 
     public int Score { get; set; }
 

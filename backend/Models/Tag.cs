@@ -8,7 +8,6 @@ public class Tag : BaseModel
     [MaxLength(50)]
     public string Name { get; set; } = null!;
 
-    public List<Activity> Activities { get; set; } = new List<Activity>();
 
     public List<Event> Events { get; set; } = new List<Event>();
 }

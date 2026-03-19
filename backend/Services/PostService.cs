@@ -22,7 +22,7 @@ public class PostService : IPostService
     public async Task<ScrollResult<PostResponse>> GetPostsAsync(
         int? cursor = null,
         int limit = PaginationConstants.DefaultPageSize,
-        int? activityId = null,
+        int? topicId = null,
         int? userId = null,
         int? type = null,
         string? sortBy = null,
@@ -31,13 +31,13 @@ public class PostService : IPostService
         IQueryable<Post> query = _context.Posts
             .AsNoTracking()
             .Include(p => p.User)
-            .Include(p => p.Activity)
+            .Include(p => p.Community)
             .AsQueryable();
 
-        // Filter by activity if provided
-        if (activityId.HasValue)
+        // Filter by community if provided
+        if (topicId.HasValue)
         {
-            query = query.Where(p => p.ActivityId == activityId.Value);
+            query = query.Where(p => p.TopicId == topicId.Value);
         }
 
         // Filter by user if provided
@@ -139,7 +139,7 @@ public class PostService : IPostService
         Post? post = await _context.Posts
             .AsNoTracking()
             .Include(p => p.User)
-            .Include(p => p.Activity)
+            .Include(p => p.Community)
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (post == null)
@@ -205,10 +205,10 @@ public class PostService : IPostService
         ValidateCostCurrencyPairing(request.Cost, request.CurrencyCode);
         ValidatePhotoUrls(request.PhotoUrls);
 
-        // Validate ActivityId exists
-        if (!await ActivityExistsAsync(request.ActivityId))
+        // Validate TopicId exists
+        if (!await ActivityExistsAsync(request.TopicId))
         {
-            throw new InvalidOperationException("Invalid ActivityId. Activity does not exist.");
+            throw new InvalidOperationException("Invalid TopicId. Community does not exist.");
         }
 
         Post post = _mapper.Map<Post>(request);
@@ -347,8 +347,8 @@ public class PostService : IPostService
         }
     }
 
-    public async Task<bool> ActivityExistsAsync(int activityId)
+    public async Task<bool> ActivityExistsAsync(int topicId)
     {
-        return await _context.Activities.AnyAsync(a => a.Id == activityId);
+        return await _context.Communities.AnyAsync(a => a.Id == topicId);
     }
 }

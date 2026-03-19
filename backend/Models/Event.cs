@@ -19,8 +19,8 @@ public class Event : BaseModel
     [JsonIgnore]
     public User? Organizer { get; set; }
 
-    public int? ActivityId { get; set; }
-    public Activity? Activity { get; set; }
+    public int? SpaceId { get; set; }
+    public Community? Community { get; set; }
 
     public List<Tag> Tags { get; set; } = new();
 

@@ -27,7 +27,7 @@ public class EventsController : ControllerBase
     public async Task<ActionResult<ScrollResult<EventResponse>>> GetEvents(
         [FromQuery] int? cursor = null,
         [FromQuery] int limit = PaginationConstants.DefaultPageSize,
-        [FromQuery] int? activityId = null,
+        [FromQuery] int? topicId = null,
         [FromQuery] EventStatus? status = null,
         [FromQuery] bool upcomingOnly = true)
     {
@@ -35,7 +35,7 @@ public class EventsController : ControllerBase
             return BadRequest(new { message = $"Limit must be between {PaginationConstants.MinPageSize} and {PaginationConstants.MaxPageSize}." });
 
         int? currentUserId = User.GetUserId();
-        ScrollResult<EventResponse> result = await _eventService.GetEventsAsync(cursor, limit, activityId, status, upcomingOnly, currentUserId);
+        ScrollResult<EventResponse> result = await _eventService.GetEventsAsync(cursor, limit, topicId, status, upcomingOnly, currentUserId);
         return Ok(result);
     }
 

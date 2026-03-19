@@ -17,7 +17,7 @@ public class CreatePostRequest
     public int Type { get; set; }
 
     [Required]
-    public int ActivityId { get; set; }
+    public int TopicId { get; set; }
 
     [StringLength(500)]
     public string? LocationName { get; set; }

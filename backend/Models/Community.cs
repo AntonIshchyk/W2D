@@ -2,11 +2,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Models;
 
-public class Category : BaseModel
+public class Community : BaseModel
 {
     [Required]
     [MaxLength(50)]
     public string Name { get; set; } = null!;
 
-    public List<Activity> Activities { get; set; } = new List<Activity>();
+    public string? Description { get; set; }
+
+    public ICollection<Post> Posts { get; set; } = new List<Post>();
 }

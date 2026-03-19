@@ -8,7 +8,7 @@ public class PostResponse
     public int Type { get; set; }
     public int UserId { get; set; }
     public string? UserName { get; set; }
-    public int ActivityId { get; set; }
+    public int TopicId { get; set; }
     public string? ActivityTitle { get; set; }
     public int Score { get; set; }
     public string? LocationName { get; set; }
