@@ -57,7 +57,7 @@ export function Login() {
               Find your people,<br />make plans.
             </h2>
             <p className="text-sm text-gray-500 leading-relaxed">
-              Join communities around activities you love and organise events with others.
+              Join communities you love and organise events with others.
             </p>
           </div>
 

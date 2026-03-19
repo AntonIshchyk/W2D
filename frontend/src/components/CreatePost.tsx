@@ -24,27 +24,22 @@ import { PostType } from '../types/posts'
 import type { CreatePostRequest } from '../types/posts'
 import { fetchCurrentUser } from '../lib/auth'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
-import { PAGINATION } from '../config/constants'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { cn } from '../lib/utils'
 import { PhotoUpload } from './PhotoUpload'
 
-interface Activity {
+interface Community {
   id: number
-  title: string
+  name: string
 }
 
-async function fetchActivities(): Promise<Activity[]> {
-  const response = await fetch(
-    `${API_ENDPOINTS.activities.base}?limit=${PAGINATION.ACTIVITIES_FETCH_SIZE}`,
-    { headers: getAuthHeaders() }
-  )
+async function fetchCommunities(): Promise<Community[]> {
+  const response = await fetch(API_ENDPOINTS.communities.base, { headers: getAuthHeaders() })
 
-  if (!response.ok) throw new Error('Failed to fetch activities')
-  const data = await response.json()
-  return data.items || []
+  if (!response.ok) throw new Error('Failed to fetch communities')
+  return response.json()
 }
 
 async function createPost(data: CreatePostRequest): Promise<void> {
@@ -92,9 +87,9 @@ export function CreatePost() {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [type, setType] = useState<number>(PostType.ExperienceShare)
-  const [activityId, setActivityId] = useState<number | ''>('')
+  const [topicId, setCommunityId] = useState<number | ''>('')
 
-  const [activityOpen, setActivityOpen] = useState(false)
+  const [communityOpen, setCommunityOpen] = useState(false)
   const [locationName, setLocationName] = useState('')
   const [rating, setRating] = useState<number | ''>('')
   const [durationMinutes, setDurationMinutes] = useState<number | ''>('')
@@ -108,16 +103,16 @@ export function CreatePost() {
     retry: false
   })
 
-  const { data: activities, isLoading: activitiesLoading } = useQuery({
-    queryKey: ['activities'],
-    queryFn: fetchActivities
+  const { data: communities, isLoading: communitiesLoading } = useQuery({
+    queryKey: ['communities'],
+    queryFn: fetchCommunities
   })
 
   useAuthErrorHandler(isError, userError)
 
-  const selectedActivity = useMemo(
-    () => activities?.find(a => a.id === activityId),
-    [activities, activityId]
+  const selectedCommunity = useMemo(
+    () => communities?.find(a => a.id === topicId),
+    [communities, topicId]
   )
 
   const createMutation = useMutation({
@@ -139,8 +134,8 @@ export function CreatePost() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!activityId) {
-      toast.error('Select an activity')
+    if (!topicId) {
+      toast.error('Select a community')
       return
     }
 
@@ -148,7 +143,7 @@ export function CreatePost() {
       title,
       content,
       type,
-      activityId: Number(activityId),
+      topicId: Number(topicId),
       locationName: locationName || undefined,
       rating: parse(rating),
       durationMinutes: parse(durationMinutes),
@@ -163,7 +158,7 @@ export function CreatePost() {
   const isValid =
     title.length >= 3 &&
     content.length >= 10 &&
-    activityId !== ''
+    topicId !== ''
 
   return (
     <PageLayout>
@@ -210,12 +205,12 @@ export function CreatePost() {
                   </Select>
                 </Field>
 
-                <Field label="Activity">
-                  <Popover open={activityOpen} onOpenChange={setActivityOpen}>
+                <Field label="Community">
+                  <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="justify-between w-full">
-                        {selectedActivity?.title ||
-                          (activitiesLoading ? 'Loading...' : 'Select activity')}
+                        {selectedCommunity?.name ||
+                          (communitiesLoading ? 'Loading...' : 'Select community')}
                         <ChevronsUpDown className="w-4 h-4 opacity-50" />
                       </Button>
                     </PopoverTrigger>
@@ -226,22 +221,22 @@ export function CreatePost() {
                         <CommandList>
                           <CommandEmpty>No results</CommandEmpty>
                           <CommandGroup>
-                            {activities?.map(a => (
+                            {communities?.map(c => (
                               <CommandItem
-                                key={a.id}
-                                value={a.title}
+                                key={c.id}
+                                value={c.name}
                                 onSelect={() => {
-                                  setActivityId(a.id)
-                                  setActivityOpen(false)
+                                  setCommunityId(c.id)
+                                  setCommunityOpen(false)
                                 }}
                               >
                                 <Check
                                   className={cn(
                                     "mr-2 h-4 w-4",
-                                    activityId === a.id ? "opacity-100" : "opacity-0"
+                                    topicId === c.id ? "opacity-100" : "opacity-0"
                                   )}
                                 />
-                                {a.title}
+                                {c.name}
                               </CommandItem>
                             ))}
                           </CommandGroup>
@@ -348,3 +343,4 @@ export function CreatePost() {
     </PageLayout>
   )
 }
+

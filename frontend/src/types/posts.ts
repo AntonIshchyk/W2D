@@ -16,8 +16,8 @@ export interface Post {
   type: PostType
   userId: number
   userName?: string
-  activityId: number
-  activityTitle?: string
+  topicId: number
+  communityName?: string
   score: number
   locationName?: string
   latitude?: number
@@ -39,7 +39,7 @@ export interface CreatePostRequest {
   title: string
   content: string
   type: number
-  activityId: number
+  topicId: number
   locationName?: string
   latitude?: number
   longitude?: number

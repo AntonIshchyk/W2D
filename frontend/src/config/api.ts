@@ -6,11 +6,8 @@ export const API_ENDPOINTS = {
     googleLogin: `${API_BASE_URL}/api/users/google-login`,
     me: `${API_BASE_URL}/api/users/me`,
   },
-  activities: {
-    base: `${API_BASE_URL}/api/activities`,
-  },
-  categories: {
-    base: `${API_BASE_URL}/api/categories`,
+  communities: {
+    base: `${API_BASE_URL}/api/communities`,
   },
   tags: {
     base: `${API_BASE_URL}/api/tags`,

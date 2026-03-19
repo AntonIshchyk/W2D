@@ -11,24 +11,24 @@ namespace Backend.Controllers;
 [Route("api/[controller]")]
 [EnableRateLimiting("fixed")]
 [Authorize]
-public class SpacesController : ControllerBase
+public class CommunitiesController : ControllerBase
 {
     private readonly AppDbContext _context;
 
-    public SpacesController(AppDbContext context)
+    public CommunitiesController(AppDbContext context)
     {
         _context = context;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Community>>> GetSpaces()
+    public async Task<ActionResult<IEnumerable<Community>>> GetCommunities()
     {
         var communities = await _context.Communities.OrderBy(s => s.Name).ToListAsync();
         return Ok(communities);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Community>> GetSpace(int id)
+    public async Task<ActionResult<Community>> GetCommunity(int id)
     {
         var community = await _context.Communities.FirstOrDefaultAsync(s => s.Id == id);
         if (community == null) return NotFound(new { message = "Community not found" });

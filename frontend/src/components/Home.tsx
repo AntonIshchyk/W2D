@@ -38,7 +38,7 @@ export function Home() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 auto-rows-fr">
         {/* Big CTA - takes 2 cols */}
         <Link 
-          to="/activities" 
+          to="/communities" 
           className="lg:col-span-2 group relative bg-gray-900 rounded-2xl p-10 flex flex-col justify-between overflow-hidden transition-transform hover:scale-[1.01] duration-300"
         >
           <div className="relative z-10">
@@ -51,7 +51,7 @@ export function Home() {
           </div>
           <div className="relative z-10 mt-8">
             <span className="inline-flex items-center gap-2 text-sm font-medium text-gray-400 group-hover:text-white transition-colors">
-              Explore activities
+              Explore communities
               <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>

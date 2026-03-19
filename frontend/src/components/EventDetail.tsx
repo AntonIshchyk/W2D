@@ -37,8 +37,8 @@ interface Event {
   description: string
   organizerId: number
   organizerName: string
-  activityId: number | null
-  activityTitle: string | null
+  topicId: number | null
+  communityName: string | null
   tags: Tag[]
   scheduledAt: string
   maxAttendees: number | null
@@ -389,11 +389,11 @@ export function EventDetail() {
           </div>
         </div>
 
-        {/* Activity link */}
-        {event.activityTitle && (
+        {/* Community link */}
+        {event.communityName && (
           <div className="mb-4">
-            <Link to="/activities" className="text-sm text-primary hover:underline">
-              {event.activityTitle}
+            <Link to="/communities" className="text-sm text-primary hover:underline">
+              {event.communityName}
             </Link>
           </div>
         )}
@@ -530,3 +530,4 @@ export function EventDetail() {
     </PageLayout>
   )
 }
+
