@@ -37,7 +37,7 @@ public class PostService : IPostService
         // Filter by community if provided
         if (topicId.HasValue)
         {
-            query = query.Where(p => p.TopicId == topicId.Value);
+            query = query.Where(p => p.SpaceId == topicId.Value);
         }
 
         // Filter by user if provided

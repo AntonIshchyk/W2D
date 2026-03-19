@@ -38,8 +38,8 @@ public class EventService : IEventService
             Description = e.Description,
             OrganizerId = e.OrganizerId,
             OrganizerName = e.Organizer?.Name,
-            TopicId = e.TopicId,
-            ActivityTitle = e.Community?.Title,
+            SpaceId = e.SpaceId,
+            ActivityTitle = e.Community?.Name,
             Tags = e.Tags.Select(t => new TagDto { Id = t.Id, Name = t.Name }).ToList(),
             ScheduledAt = e.ScheduledAt,
             MaxAttendees = e.MaxAttendees,
@@ -62,7 +62,7 @@ public class EventService : IEventService
         IQueryable<Event> query = IncludeDetails(_context.Events.AsNoTracking());
 
         if (topicId.HasValue)
-            query = query.Where(e => e.TopicId == topicId.Value);
+            query = query.Where(e => e.SpaceId == topicId.Value);
 
         if (status.HasValue)
             query = query.Where(e => e.Status == status.Value);
@@ -118,7 +118,7 @@ public class EventService : IEventService
             Title = request.Title,
             Description = request.Description,
             OrganizerId = organizerId,
-            TopicId = request.TopicId,
+            SpaceId = request.TopicId,
             ScheduledAt = request.ScheduledAt,
             MaxAttendees = request.MaxAttendees,
             Status = EventStatus.Open,
@@ -152,7 +152,7 @@ public class EventService : IEventService
 
         if (request.Title != null) eventEntity.Title = request.Title;
         if (request.Description != null) eventEntity.Description = request.Description;
-        if (request.TopicId.HasValue) eventEntity.TopicId = request.TopicId;
+        if (request.TopicId.HasValue) eventEntity.SpaceId = request.TopicId;
         if (request.ScheduledAt.HasValue) eventEntity.ScheduledAt = request.ScheduledAt.Value;
         if (request.MaxAttendees.HasValue) eventEntity.MaxAttendees = request.MaxAttendees;
         if (request.Status.HasValue) eventEntity.Status = request.Status.Value;
