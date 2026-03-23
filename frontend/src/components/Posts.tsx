@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
-  ArrowBigUp, ArrowBigDown, MessageSquare, Star,
+  ArrowBigUp, ArrowBigDown, MessageSquare,
   Plus, Check, ChevronsUpDown, ImageIcon
 } from 'lucide-react'
 import { Button } from './ui/button'
@@ -246,10 +246,10 @@ function PostCard({
             by {post.userName || 'Anonymous'}
           </p>
 
-          {/* Content preview — skip if photo-dominant */}
+          {/* Description preview — skip if photo-dominant */}
           {(!hasPhotos || post.photoUrls.length > 1) && (
             <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed mb-2">
-              {post.content}
+              {post.description}
             </p>
           )}
 
@@ -262,13 +262,6 @@ function PostCard({
 
           {/* Footer */}
           <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
-            {post.rating != null && post.rating > 0 && (
-              <div className="flex items-center gap-0.5">
-                {[...Array(post.rating)].map((_, i) => (
-                  <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
-                ))}
-              </div>
-            )}
             {hasPhotos && post.photoUrls.length === 1 && (
               <span className="flex items-center gap-1">
                 <ImageIcon className="h-3 w-3" />

@@ -7,9 +7,6 @@ import {
   ChevronsUpDown,
   FileText,
   MapPin,
-  Star,
-  Clock,
-  Euro,
   ArrowLeft
 } from 'lucide-react'
 
@@ -85,16 +82,12 @@ export function CreatePost() {
   const queryClient = useQueryClient()
 
   const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
+  const [description, setDescription] = useState('')
   const [type, setType] = useState<number>(PostType.ExperienceShare)
   const [topicId, setCommunityId] = useState<number | ''>('')
 
   const [communityOpen, setCommunityOpen] = useState(false)
   const [locationName, setLocationName] = useState('')
-  const [rating, setRating] = useState<number | ''>('')
-  const [durationMinutes, setDurationMinutes] = useState<number | ''>('')
-  const [cost, setCost] = useState<number | ''>('')
-  const [currencyCode, setCurrencyCode] = useState('EUR')
   const [photoUrls, setPhotoUrls] = useState<string[]>([])
 
   const { data: currentUser, isError, error: userError } = useQuery({
@@ -128,9 +121,6 @@ export function CreatePost() {
   if (isError) return null
   if (!currentUser) return <Navigate to="/login" replace />
 
-  const parse = (v: number | '' | undefined) =>
-    v === '' || v === undefined ? undefined : Number(v)
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -141,14 +131,10 @@ export function CreatePost() {
 
     const post: CreatePostRequest = {
       title,
-      content,
+      description,
       type,
       topicId: Number(topicId),
       locationName: locationName || undefined,
-      rating: parse(rating),
-      durationMinutes: parse(durationMinutes),
-      cost: parse(cost),
-      currencyCode: cost ? currencyCode : undefined,
       photoUrls
     }
 
@@ -157,7 +143,7 @@ export function CreatePost() {
 
   const isValid =
     title.length >= 3 &&
-    content.length >= 10 &&
+    description.length >= 10 &&
     topicId !== ''
 
   return (
@@ -250,12 +236,12 @@ export function CreatePost() {
                   <Input value={title} onChange={e => setTitle(e.target.value)} maxLength={200} />
                 </Field>
 
-                <Field label="Content">
+                <Field label="Description">
                   <Textarea
-                    value={content}
-                    onChange={e => setContent(e.target.value)}
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
                     rows={6}
-                    maxLength={2000}
+                    maxLength={1000}
                   />
                 </Field>
               </section>
@@ -264,54 +250,6 @@ export function CreatePost() {
 
                 <Field label="Location" icon={<MapPin className="w-4 h-4" />}>
                   <Input value={locationName} onChange={e => setLocationName(e.target.value)} />
-                </Field>
-
-                <Field label="Rating" icon={<Star className="w-4 h-4" />}>
-                  <Select
-                    value={rating === '' ? '' : String(rating)}
-                    onValueChange={v => setRating(v ? Number(v) : '')}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="No rating" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[5,4,3,2,1].map(r => (
-                        <SelectItem key={r} value={String(r)}>
-                          {'⭐'.repeat(r)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
-
-                <Field label="Duration (min)" icon={<Clock className="w-4 h-4" />}>
-                  <Input
-                    type="number"
-                    value={durationMinutes}
-                    onChange={e =>
-                      setDurationMinutes(e.target.value ? Number(e.target.value) : '')
-                    }
-                  />
-                </Field>
-
-                <Field label="Cost" icon={<Euro className="w-4 h-4" />}>
-                  <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      value={cost}
-                      onChange={e => setCost(e.target.value ? Number(e.target.value) : '')}
-                    />
-                    <Select value={currencyCode} onValueChange={setCurrencyCode}>
-                      <SelectTrigger className="w-28">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="EUR">EUR</SelectItem>
-                        <SelectItem value="USD">USD</SelectItem>
-                        <SelectItem value="GBP">GBP</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </Field>
 
               </section>

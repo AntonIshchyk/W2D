@@ -170,19 +170,6 @@ public class PostService : IPostService
         }
     }
 
-    private void ValidateCostCurrencyPairing(decimal? cost, string? currencyCode)
-    {
-        if (cost.HasValue && string.IsNullOrWhiteSpace(currencyCode))
-        {
-            throw new InvalidOperationException("Currency code is required when cost is provided.");
-        }
-
-        if (!cost.HasValue && !string.IsNullOrWhiteSpace(currencyCode))
-        {
-            throw new InvalidOperationException("Cost is required when currency code is provided.");
-        }
-    }
-
     private void ValidatePhotoUrls(List<string>? photoUrls)
     {
         if (photoUrls != null && photoUrls.Any())
@@ -202,7 +189,6 @@ public class PostService : IPostService
     {
         // Validate business rules
         ValidateLocationPairing(request.Latitude, request.Longitude);
-        ValidateCostCurrencyPairing(request.Cost, request.CurrencyCode);
         ValidatePhotoUrls(request.PhotoUrls);
 
         // Validate TopicId exists
@@ -236,10 +222,6 @@ public class PostService : IPostService
         double? finalLat = request.Latitude ?? existingPost.Latitude;
         double? finalLng = request.Longitude ?? existingPost.Longitude;
         ValidateLocationPairing(finalLat, finalLng);
-
-        decimal? finalCost = request.Cost ?? existingPost.Cost;
-        string? finalCurrency = request.CurrencyCode ?? existingPost.CurrencyCode;
-        ValidateCostCurrencyPairing(finalCost, finalCurrency);
 
         ValidatePhotoUrls(request.PhotoUrls);
 
