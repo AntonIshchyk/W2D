@@ -12,7 +12,7 @@ public class CreateEventRequest
     [MaxLength(1000)]
     public string Description { get; set; } = null!;
 
-    public int? ActivityId { get; set; }
+    public int? TopicId { get; set; }
 
     public List<int> TagIds { get; set; } = new();
 

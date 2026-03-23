@@ -33,9 +33,9 @@ interface Tag {
   name: string
 }
 
-interface Activity {
+interface Community {
   id: number
-  title: string
+  name: string
 }
 
 interface Event {
@@ -44,8 +44,8 @@ interface Event {
   description: string
   organizerId: number
   organizerName: string
-  activityId: number | null
-  activityTitle: string | null
+  topicId: number | null
+  communityName: string | null
   tags: Tag[]
   scheduledAt: string
   maxAttendees: number | null
@@ -67,7 +67,7 @@ interface CreateEventRequest {
   title: string
   description: string
   scheduledAt: string
-  activityId?: number | null
+  topicId?: number | null
   tagIds?: number[]
   maxAttendees?: number | null
 }
@@ -76,13 +76,13 @@ interface CreateEventRequest {
 
 async function fetchEvents(
   cursor: number | null,
-  activityId?: number,
+  topicId?: number,
   status?: string,
   upcomingOnly?: boolean
 ): Promise<ScrollResult> {
   const params = new URLSearchParams({ limit: PAGINATION.DEFAULT_PAGE_SIZE.toString() })
   if (cursor !== null) params.append('cursor', cursor.toString())
-  if (activityId) params.append('activityId', activityId.toString())
+  if (topicId) params.append('topicId', topicId.toString())
   if (status) params.append('status', status)
   if (upcomingOnly) params.append('upcomingOnly', 'true')
 
@@ -93,14 +93,13 @@ async function fetchEvents(
   return response.json()
 }
 
-async function fetchActivities(): Promise<Activity[]> {
+async function fetchCommunities(): Promise<Community[]> {
   const response = await fetch(
-    `${API_ENDPOINTS.activities.base}?limit=${PAGINATION.ACTIVITIES_FETCH_SIZE}`,
+    `${API_ENDPOINTS.communities.base}?limit=${PAGINATION.COMMUNITIES_FETCH_SIZE}`,
     { headers: getAuthHeaders() }
   )
-  if (!response.ok) throw new Error('Failed to fetch activities')
-  const data = await response.json()
-  return data.items || []
+  if (!response.ok) throw new Error('Failed to fetch communities')
+  return response.json()
 }
 
 async function fetchTags(): Promise<Tag[]> {
@@ -225,7 +224,7 @@ function EventCard({ event, currentUserId }: { event: Event; currentUserId?: num
           {isPast && <span className="text-muted-foreground/60">(past)</span>}
         </div>
 
-        {/* Attendees & activity */}
+        {/* Attendees & community */}
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <Users className="h-3.5 w-3.5" />
@@ -236,9 +235,9 @@ function EventCard({ event, currentUserId }: { event: Event; currentUserId?: num
               </span>
             )}
           </span>
-          {event.activityTitle && (
+          {event.communityName && (
             <span className="text-muted-foreground">
-              {event.activityTitle}
+              {event.communityName}
             </span>
           )}
         </div>
@@ -300,10 +299,10 @@ function EventCard({ event, currentUserId }: { event: Event; currentUserId?: num
 // ── CreateEventDialog ─────────────────────────────────────────────────────────
 
 function CreateEventDialog({
-  activities,
+  communities,
   tags,
 }: {
-  activities: Activity[]
+  communities: Community[]
   tags: Tag[]
 }) {
   const queryClient = useQueryClient()
@@ -312,8 +311,8 @@ function CreateEventDialog({
   const [description, setDescription] = useState('')
   const [scheduledAt, setScheduledAt] = useState('')
   const [maxAttendees, setMaxAttendees] = useState<string>('')
-  const [activityId, setActivityId] = useState<number | null>(null)
-  const [activityOpen, setActivityOpen] = useState(false)
+  const [topicId, setCommunityId] = useState<number | null>(null)
+  const [communityOpen, setCommunityOpen] = useState(false)
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([])
   const [tagsOpen, setTagsOpen] = useState(false)
 
@@ -333,7 +332,7 @@ function CreateEventDialog({
     setDescription('')
     setScheduledAt('')
     setMaxAttendees('')
-    setActivityId(null)
+    setCommunityId(null)
     setSelectedTagIds([])
   }
 
@@ -347,7 +346,7 @@ function CreateEventDialog({
       title: title.trim(),
       description: description.trim(),
       scheduledAt: new Date(scheduledAt).toISOString(),
-      activityId: activityId ?? null,
+      topicId: topicId ?? null,
       tagIds: selectedTagIds,
       maxAttendees: maxAttendees ? parseInt(maxAttendees, 10) : null,
     })
@@ -356,7 +355,7 @@ function CreateEventDialog({
   const toggleTag = (id: number) =>
     setSelectedTagIds(prev => prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id])
 
-  const selectedActivity = activities.find(a => a.id === activityId)
+  const selectedCommunity = communities.find(a => a.id === topicId)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -420,37 +419,37 @@ function CreateEventDialog({
             />
           </div>
 
-          {/* Activity (optional) */}
+          {/* Community (optional) */}
           <div className="space-y-1.5">
-            <Label>Activity (optional)</Label>
-            <Popover open={activityOpen} onOpenChange={setActivityOpen}>
+            <Label>Community (optional)</Label>
+            <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
               <PopoverTrigger asChild>
                 <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
-                  {selectedActivity ? selectedActivity.title : 'Select activity…'}
+                  {selectedCommunity ? selectedCommunity.name : 'Select community...'}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0">
                 <Command>
-                  <CommandInput placeholder="Search activities…" />
+                  <CommandInput placeholder="Search communities…" />
                   <CommandList>
-                    <CommandEmpty>No activities found.</CommandEmpty>
+                    <CommandEmpty>No communities found.</CommandEmpty>
                     <CommandGroup>
                       <CommandItem
                         value="__none__"
-                        onSelect={() => { setActivityId(null); setActivityOpen(false) }}
+                        onSelect={() => { setCommunityId(null); setCommunityOpen(false) }}
                       >
-                        <Check className={cn('mr-2 h-4 w-4', activityId === null ? 'opacity-100' : 'opacity-0')} />
+                        <Check className={cn('mr-2 h-4 w-4', topicId === null ? 'opacity-100' : 'opacity-0')} />
                         None
                       </CommandItem>
-                      {activities.map(a => (
+                      {communities.map(a => (
                         <CommandItem
                           key={a.id}
-                          value={a.title}
-                          onSelect={() => { setActivityId(a.id); setActivityOpen(false) }}
+                          value={a.name}
+                          onSelect={() => { setCommunityId(a.id); setCommunityOpen(false) }}
                         >
-                          <Check className={cn('mr-2 h-4 w-4', activityId === a.id ? 'opacity-100' : 'opacity-0')} />
-                          {a.title}
+                          <Check className={cn('mr-2 h-4 w-4', topicId === a.id ? 'opacity-100' : 'opacity-0')} />
+                          {a.name}
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -524,10 +523,10 @@ function CreateEventDialog({
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function Events() {
-  const [selectedActivity, setSelectedActivity] = useState<number | undefined>(undefined)
+  const [selectedCommunity, setSelectedCommunity] = useState<number | undefined>(undefined)
   const [statusFilter, setStatusFilter]         = useState<string>('')
   const [upcomingOnly, setUpcomingOnly]         = useState(true)
-  const [activityOpen, setActivityOpen]         = useState(false)
+  const [communityOpen, setCommunityOpen]         = useState(false)
   const observerTarget = useRef<HTMLDivElement>(null)
 
   const { data: currentUser } = useQuery({
@@ -537,13 +536,13 @@ export function Events() {
     staleTime: 5 * 60 * 1000,
   })
 
-  const { data: activities } = useQuery({ queryKey: ['activities-list'], queryFn: fetchActivities })
+  const { data: communities } = useQuery({ queryKey: ['communities-list'], queryFn: fetchCommunities })
   const { data: tags }       = useQuery({ queryKey: ['tags'], queryFn: fetchTags })
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
-    queryKey: ['events', selectedActivity, statusFilter, upcomingOnly],
+    queryKey: ['events', selectedCommunity, statusFilter, upcomingOnly],
     queryFn: ({ pageParam }) =>
-      fetchEvents(pageParam, selectedActivity, statusFilter || undefined, upcomingOnly),
+      fetchEvents(pageParam, selectedCommunity, statusFilter || undefined, upcomingOnly),
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
     initialPageParam: null as number | null,
     retry: false,
@@ -563,9 +562,9 @@ export function Events() {
 
   const allEvents  = useMemo(() => data?.pages.flatMap(p => p.items) ?? [], [data?.pages])
   const totalCount = data?.pages[0]?.totalCount ?? 0
-  const hasFilters = !!(selectedActivity || statusFilter || !upcomingOnly)
+  const hasFilters = !!(selectedCommunity || statusFilter || !upcomingOnly)
 
-  const selectedActivityName = activities?.find(a => a.id === selectedActivity)?.title
+  const selectedCommunityName = communities?.find(a => a.id === selectedCommunity)?.name
 
   return (
     <PageLayout>
@@ -580,7 +579,7 @@ export function Events() {
           </div>
           {currentUser && (
             <CreateEventDialog
-              activities={activities ?? []}
+              communities={communities ?? []}
               tags={tags ?? []}
             />
           )}
@@ -613,11 +612,11 @@ export function Events() {
             </SelectContent>
           </Select>
 
-          {/* Activity filter */}
-          <Popover open={activityOpen} onOpenChange={setActivityOpen}>
+          {/* Community filter */}
+          <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="h-8 text-xs gap-1">
-                {selectedActivityName ?? 'Activity'}
+                {selectedCommunityName ?? 'Community'}
                 <ChevronsUpDown className="h-3 w-3 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
@@ -625,23 +624,23 @@ export function Events() {
               <Command>
                 <CommandInput placeholder="Search…" />
                 <CommandList>
-                  <CommandEmpty>No activities.</CommandEmpty>
+                  <CommandEmpty>No communities.</CommandEmpty>
                   <CommandGroup>
                     <CommandItem
                       value="__all__"
-                      onSelect={() => { setSelectedActivity(undefined); setActivityOpen(false) }}
+                      onSelect={() => { setSelectedCommunity(undefined); setCommunityOpen(false) }}
                     >
-                      <Check className={cn('mr-2 h-4 w-4', !selectedActivity ? 'opacity-100' : 'opacity-0')} />
-                      All activities
+                      <Check className={cn('mr-2 h-4 w-4', !selectedCommunity ? 'opacity-100' : 'opacity-0')} />
+                      All communities
                     </CommandItem>
-                    {(activities ?? []).map(a => (
+                    {(communities ?? []).map(a => (
                       <CommandItem
                         key={a.id}
-                        value={a.title}
-                        onSelect={() => { setSelectedActivity(a.id); setActivityOpen(false) }}
+                        value={a.name}
+                        onSelect={() => { setSelectedCommunity(a.id); setCommunityOpen(false) }}
                       >
-                        <Check className={cn('mr-2 h-4 w-4', selectedActivity === a.id ? 'opacity-100' : 'opacity-0')} />
-                        {a.title}
+                        <Check className={cn('mr-2 h-4 w-4', selectedCommunity === a.id ? 'opacity-100' : 'opacity-0')} />
+                        {a.name}
                       </CommandItem>
                     ))}
                   </CommandGroup>
@@ -657,7 +656,7 @@ export function Events() {
               size="sm"
               className="h-8 text-xs"
               onClick={() => {
-                setSelectedActivity(undefined)
+                setSelectedCommunity(undefined)
                 setStatusFilter('')
                 setUpcomingOnly(true)
               }}
@@ -708,3 +707,4 @@ export function Events() {
     </PageLayout>
   )
 }
+

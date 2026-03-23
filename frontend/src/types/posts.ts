@@ -12,21 +12,17 @@ export type PostType = typeof PostType[keyof typeof PostType]
 export interface Post {
   id: number
   title: string
-  content: string
+  description: string
   type: PostType
   userId: number
   userName?: string
-  activityId: number
-  activityTitle?: string
+  topicId: number
+  communityName?: string
   score: number
   locationName?: string
   latitude?: number
   longitude?: number
   placeId?: string
-  rating?: number
-  durationMinutes?: number
-  cost?: number
-  currencyCode?: string
   completedAt?: string
   photoUrls: string[]
   commentCount: number
@@ -37,35 +33,27 @@ export interface Post {
 
 export interface CreatePostRequest {
   title: string
-  content: string
+  description: string
   type: number
-  activityId: number
+  topicId: number
   locationName?: string
   latitude?: number
   longitude?: number
   placeId?: string
-  rating?: number
-  durationMinutes?: number
-  cost?: number
   photoUrl?: string
-  currencyCode?: string
   completedAt?: string
   photoUrls?: string[]
 }
 
 export interface UpdatePostRequest {
   title?: string
-  content?: string
+  description?: string
   type?: number
   locationName?: string
   latitude?: number
   longitude?: number
   placeId?: string
-  rating?: number
-  durationMinutes?: number
-  cost?: number
   photoUrl?: string
-  currencyCode?: string
   completedAt?: string
   photoUrls?: string[]
 }

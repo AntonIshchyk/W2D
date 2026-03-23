@@ -50,13 +50,6 @@ const POST_TYPE_COLORS: Record<PostType, { bg: string; text: string }> = {
   [PostType.Challenge]:       { bg: '#fee2e2', text: '#991b1b' },
 }
 
-function formatDuration(minutes: number) {
-  if (minutes < 60) return `${minutes} min`
-  const h = Math.floor(minutes / 60)
-  const m = minutes % 60
-  return m > 0 ? `${h}h ${m}m` : `${h}h`
-}
-
 // ── Lightbox ──────────────────────────────────────────────────────────────────
 
 function Lightbox({ urls, initialIndex, onClose }: {
@@ -311,12 +304,12 @@ export function PostDetail() {
                       {POST_TYPE_LABELS[post.type as PostType] ?? 'Other'}
                     </span>
                   )}
-                  {post.activityTitle && (
+                  {post.communityName && (
                     <span className="flex items-center gap-1 text-xs text-gray-500">
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
                       </svg>
-                      {post.activityTitle}
+                      {post.communityName}
                     </span>
                   )}
                 </div>
@@ -351,10 +344,10 @@ export function PostDetail() {
               {photos.length > 0 && <PhotoGallery urls={photos} onOpen={setLightboxIndex} />}
 
               <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap mb-6">
-                {post.content}
+                {post.description}
               </div>
 
-              {(post.locationName || post.rating != null || post.durationMinutes != null || post.cost != null) && (
+              {post.locationName && (
                 <div className="border border-gray-100 rounded-xl p-4 mb-6 space-y-3 bg-gray-50/50">
                   <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Details</p>
                   {post.locationName && (
@@ -364,35 +357,6 @@ export function PostDetail() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
                       {post.locationName}
-                    </div>
-                  )}
-                  {post.rating != null && (
-                    <div className="flex items-center gap-0.5 gap-x-2">
-                      <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                      </svg>
-                      {[...Array(5)].map((_, i) => (
-                        <svg key={i} className={`w-3.5 h-3.5 ${i < post.rating! ? 'text-amber-400' : 'text-gray-200'}`} fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                      <span className="text-xs text-gray-500 ml-1">{post.rating}/5</span>
-                    </div>
-                  )}
-                  {post.durationMinutes != null && (
-                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {formatDuration(post.durationMinutes)}
-                    </div>
-                  )}
-                  {post.cost != null && (
-                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {post.currencyCode} {post.cost.toFixed(2)}
                     </div>
                   )}
                 </div>

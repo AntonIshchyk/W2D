@@ -19,8 +19,7 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<User> Users { get; set; }
-    public DbSet<Activity> Activities { get; set; }
-    public DbSet<Category> Categories { get; set; }
+    public DbSet<Community> Communities { get; set; }
     public DbSet<Tag> Tags { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<PostVote> PostVotes { get; set; }
@@ -33,26 +32,17 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Activity - Category relationship
-        modelBuilder.Entity<Activity>()
-            .HasOne(a => a.Category)
-            .WithMany(c => c.Activities)
-            .HasForeignKey(a => a.CategoryId)
-            .OnDelete(DeleteBehavior.Restrict);
+        
 
-        // Activity - Tag many-to-many relationship
-        modelBuilder.Entity<Activity>()
-            .HasMany(a => a.Tags)
-            .WithMany(t => t.Activities)
-            .UsingEntity(j => j.ToTable("ActivityTags"));
+        
 
         // Tag unique name constraint
         modelBuilder.Entity<Tag>()
             .HasIndex(t => t.Name)
             .IsUnique();
 
-        // Category unique name constraint
-        modelBuilder.Entity<Category>()
+        // Community unique name constraint
+        modelBuilder.Entity<Community>()
             .HasIndex(c => c.Name)
             .IsUnique();
 
@@ -61,10 +51,7 @@ public class AppDbContext : DbContext
             .HasIndex(u => u.Email)
             .IsUnique();
 
-        // Index for fast lookup of activities by category
-        modelBuilder.Entity<Activity>()
-            .HasIndex(a => a.CategoryId)
-            .HasDatabaseName("IX_Activities_CategoryId");
+        
 
         // Post - User relationship
         modelBuilder.Entity<Post>()
@@ -73,16 +60,16 @@ public class AppDbContext : DbContext
             .HasForeignKey(p => p.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Post - Activity relationship
+        // Post - Community relationship
         modelBuilder.Entity<Post>()
-            .HasOne(p => p.Activity)
+            .HasOne(p => p.Community)
             .WithMany()
-            .HasForeignKey(p => p.ActivityId)
+            .HasForeignKey(p => p.SpaceId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Post indexes for performance
         modelBuilder.Entity<Post>()
-            .HasIndex(p => p.ActivityId);
+            .HasIndex(p => p.SpaceId);
 
         modelBuilder.Entity<Post>()
             .HasIndex(p => p.UserId);
@@ -202,11 +189,11 @@ public class AppDbContext : DbContext
             .HasForeignKey(e => e.OrganizerId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Event - Activity relationship (optional)
+        // Event - Community relationship (optional)
         modelBuilder.Entity<Event>()
-            .HasOne(e => e.Activity)
+            .HasOne(e => e.Community)
             .WithMany()
-            .HasForeignKey(e => e.ActivityId)
+            .HasForeignKey(e => e.SpaceId)
             .OnDelete(DeleteBehavior.SetNull);
 
         // Event - Tag many-to-many
@@ -244,8 +231,8 @@ public class AppDbContext : DbContext
             .HasDatabaseName("IX_Events_OrganizerId");
 
         modelBuilder.Entity<Event>()
-            .HasIndex(e => e.ActivityId)
-            .HasDatabaseName("IX_Events_ActivityId");
+            .HasIndex(e => e.SpaceId)
+            .HasDatabaseName("IX_Events_SpaceId");
 
         modelBuilder.Entity<Event>()
             .HasIndex(e => e.Status)
@@ -255,7 +242,7 @@ public class AppDbContext : DbContext
             .HasIndex(a => a.UserId)
             .HasDatabaseName("IX_EventAttendees_UserId");
 
-        // Seed database with activities, categories, and tags
+        // Seed database with communities, communities, and tags
         DatabaseSeeder.SeedData(modelBuilder);
     }
 }

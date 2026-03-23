@@ -7,9 +7,6 @@ import {
   ChevronsUpDown,
   FileText,
   MapPin,
-  Star,
-  Clock,
-  Euro,
   ArrowLeft
 } from 'lucide-react'
 
@@ -24,27 +21,22 @@ import { PostType } from '../types/posts'
 import type { CreatePostRequest } from '../types/posts'
 import { fetchCurrentUser } from '../lib/auth'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
-import { PAGINATION } from '../config/constants'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { cn } from '../lib/utils'
 import { PhotoUpload } from './PhotoUpload'
 
-interface Activity {
+interface Community {
   id: number
-  title: string
+  name: string
 }
 
-async function fetchActivities(): Promise<Activity[]> {
-  const response = await fetch(
-    `${API_ENDPOINTS.activities.base}?limit=${PAGINATION.ACTIVITIES_FETCH_SIZE}`,
-    { headers: getAuthHeaders() }
-  )
+async function fetchCommunities(): Promise<Community[]> {
+  const response = await fetch(API_ENDPOINTS.communities.base, { headers: getAuthHeaders() })
 
-  if (!response.ok) throw new Error('Failed to fetch activities')
-  const data = await response.json()
-  return data.items || []
+  if (!response.ok) throw new Error('Failed to fetch communities')
+  return response.json()
 }
 
 async function createPost(data: CreatePostRequest): Promise<void> {
@@ -90,16 +82,12 @@ export function CreatePost() {
   const queryClient = useQueryClient()
 
   const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
+  const [description, setDescription] = useState('')
   const [type, setType] = useState<number>(PostType.ExperienceShare)
-  const [activityId, setActivityId] = useState<number | ''>('')
+  const [topicId, setCommunityId] = useState<number | ''>('')
 
-  const [activityOpen, setActivityOpen] = useState(false)
+  const [communityOpen, setCommunityOpen] = useState(false)
   const [locationName, setLocationName] = useState('')
-  const [rating, setRating] = useState<number | ''>('')
-  const [durationMinutes, setDurationMinutes] = useState<number | ''>('')
-  const [cost, setCost] = useState<number | ''>('')
-  const [currencyCode, setCurrencyCode] = useState('EUR')
   const [photoUrls, setPhotoUrls] = useState<string[]>([])
 
   const { data: currentUser, isError, error: userError } = useQuery({
@@ -108,16 +96,16 @@ export function CreatePost() {
     retry: false
   })
 
-  const { data: activities, isLoading: activitiesLoading } = useQuery({
-    queryKey: ['activities'],
-    queryFn: fetchActivities
+  const { data: communities, isLoading: communitiesLoading } = useQuery({
+    queryKey: ['communities'],
+    queryFn: fetchCommunities
   })
 
   useAuthErrorHandler(isError, userError)
 
-  const selectedActivity = useMemo(
-    () => activities?.find(a => a.id === activityId),
-    [activities, activityId]
+  const selectedCommunity = useMemo(
+    () => communities?.find(a => a.id === topicId),
+    [communities, topicId]
   )
 
   const createMutation = useMutation({
@@ -133,27 +121,20 @@ export function CreatePost() {
   if (isError) return null
   if (!currentUser) return <Navigate to="/login" replace />
 
-  const parse = (v: number | '' | undefined) =>
-    v === '' || v === undefined ? undefined : Number(v)
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!activityId) {
-      toast.error('Select an activity')
+    if (!topicId) {
+      toast.error('Select a community')
       return
     }
 
     const post: CreatePostRequest = {
       title,
-      content,
+      description,
       type,
-      activityId: Number(activityId),
+      topicId: Number(topicId),
       locationName: locationName || undefined,
-      rating: parse(rating),
-      durationMinutes: parse(durationMinutes),
-      cost: parse(cost),
-      currencyCode: cost ? currencyCode : undefined,
       photoUrls
     }
 
@@ -162,8 +143,8 @@ export function CreatePost() {
 
   const isValid =
     title.length >= 3 &&
-    content.length >= 10 &&
-    activityId !== ''
+    description.length >= 10 &&
+    topicId !== ''
 
   return (
     <PageLayout>
@@ -210,12 +191,12 @@ export function CreatePost() {
                   </Select>
                 </Field>
 
-                <Field label="Activity">
-                  <Popover open={activityOpen} onOpenChange={setActivityOpen}>
+                <Field label="Community">
+                  <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="justify-between w-full">
-                        {selectedActivity?.title ||
-                          (activitiesLoading ? 'Loading...' : 'Select activity')}
+                        {selectedCommunity?.name ||
+                          (communitiesLoading ? 'Loading...' : 'Select community')}
                         <ChevronsUpDown className="w-4 h-4 opacity-50" />
                       </Button>
                     </PopoverTrigger>
@@ -226,22 +207,22 @@ export function CreatePost() {
                         <CommandList>
                           <CommandEmpty>No results</CommandEmpty>
                           <CommandGroup>
-                            {activities?.map(a => (
+                            {communities?.map(c => (
                               <CommandItem
-                                key={a.id}
-                                value={a.title}
+                                key={c.id}
+                                value={c.name}
                                 onSelect={() => {
-                                  setActivityId(a.id)
-                                  setActivityOpen(false)
+                                  setCommunityId(c.id)
+                                  setCommunityOpen(false)
                                 }}
                               >
                                 <Check
                                   className={cn(
                                     "mr-2 h-4 w-4",
-                                    activityId === a.id ? "opacity-100" : "opacity-0"
+                                    topicId === c.id ? "opacity-100" : "opacity-0"
                                   )}
                                 />
-                                {a.title}
+                                {c.name}
                               </CommandItem>
                             ))}
                           </CommandGroup>
@@ -255,12 +236,12 @@ export function CreatePost() {
                   <Input value={title} onChange={e => setTitle(e.target.value)} maxLength={200} />
                 </Field>
 
-                <Field label="Content">
+                <Field label="Description">
                   <Textarea
-                    value={content}
-                    onChange={e => setContent(e.target.value)}
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
                     rows={6}
-                    maxLength={2000}
+                    maxLength={1000}
                   />
                 </Field>
               </section>
@@ -269,54 +250,6 @@ export function CreatePost() {
 
                 <Field label="Location" icon={<MapPin className="w-4 h-4" />}>
                   <Input value={locationName} onChange={e => setLocationName(e.target.value)} />
-                </Field>
-
-                <Field label="Rating" icon={<Star className="w-4 h-4" />}>
-                  <Select
-                    value={rating === '' ? '' : String(rating)}
-                    onValueChange={v => setRating(v ? Number(v) : '')}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="No rating" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[5,4,3,2,1].map(r => (
-                        <SelectItem key={r} value={String(r)}>
-                          {'⭐'.repeat(r)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
-
-                <Field label="Duration (min)" icon={<Clock className="w-4 h-4" />}>
-                  <Input
-                    type="number"
-                    value={durationMinutes}
-                    onChange={e =>
-                      setDurationMinutes(e.target.value ? Number(e.target.value) : '')
-                    }
-                  />
-                </Field>
-
-                <Field label="Cost" icon={<Euro className="w-4 h-4" />}>
-                  <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      value={cost}
-                      onChange={e => setCost(e.target.value ? Number(e.target.value) : '')}
-                    />
-                    <Select value={currencyCode} onValueChange={setCurrencyCode}>
-                      <SelectTrigger className="w-28">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="EUR">EUR</SelectItem>
-                        <SelectItem value="USD">USD</SelectItem>
-                        <SelectItem value="GBP">GBP</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </Field>
 
               </section>
@@ -348,3 +281,4 @@ export function CreatePost() {
     </PageLayout>
   )
 }
+

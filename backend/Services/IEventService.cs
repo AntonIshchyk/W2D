@@ -9,7 +9,7 @@ public interface IEventService
     Task<ScrollResult<EventResponse>> GetEventsAsync(
         int? cursor = null,
         int limit = 20,
-        int? activityId = null,
+        int? topicId = null,
         EventStatus? status = null,
         bool upcomingOnly = true,
         int? currentUserId = null);

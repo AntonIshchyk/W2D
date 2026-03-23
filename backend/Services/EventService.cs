@@ -20,7 +20,7 @@ public class EventService : IEventService
     {
         return query
             .Include(e => e.Organizer)
-            .Include(e => e.Activity)
+            .Include(e => e.Community)
             .Include(e => e.Tags)
             .Include(e => e.Attendees);
     }
@@ -38,8 +38,8 @@ public class EventService : IEventService
             Description = e.Description,
             OrganizerId = e.OrganizerId,
             OrganizerName = e.Organizer?.Name,
-            ActivityId = e.ActivityId,
-            ActivityTitle = e.Activity?.Title,
+            SpaceId = e.SpaceId,
+            CommunityName = e.Community?.Name,
             Tags = e.Tags.Select(t => new TagDto { Id = t.Id, Name = t.Name }).ToList(),
             ScheduledAt = e.ScheduledAt,
             MaxAttendees = e.MaxAttendees,
@@ -54,15 +54,15 @@ public class EventService : IEventService
     public async Task<ScrollResult<EventResponse>> GetEventsAsync(
         int? cursor = null,
         int limit = PaginationConstants.DefaultPageSize,
-        int? activityId = null,
+        int? topicId = null,
         EventStatus? status = null,
         bool upcomingOnly = true,
         int? currentUserId = null)
     {
         IQueryable<Event> query = IncludeDetails(_context.Events.AsNoTracking());
 
-        if (activityId.HasValue)
-            query = query.Where(e => e.ActivityId == activityId.Value);
+        if (topicId.HasValue)
+            query = query.Where(e => e.SpaceId == topicId.Value);
 
         if (status.HasValue)
             query = query.Where(e => e.Status == status.Value);
@@ -118,7 +118,7 @@ public class EventService : IEventService
             Title = request.Title,
             Description = request.Description,
             OrganizerId = organizerId,
-            ActivityId = request.ActivityId,
+            SpaceId = request.TopicId,
             ScheduledAt = request.ScheduledAt,
             MaxAttendees = request.MaxAttendees,
             Status = EventStatus.Open,
@@ -152,7 +152,7 @@ public class EventService : IEventService
 
         if (request.Title != null) eventEntity.Title = request.Title;
         if (request.Description != null) eventEntity.Description = request.Description;
-        if (request.ActivityId.HasValue) eventEntity.ActivityId = request.ActivityId;
+        if (request.TopicId.HasValue) eventEntity.SpaceId = request.TopicId;
         if (request.ScheduledAt.HasValue) eventEntity.ScheduledAt = request.ScheduledAt.Value;
         if (request.MaxAttendees.HasValue) eventEntity.MaxAttendees = request.MaxAttendees;
         if (request.Status.HasValue) eventEntity.Status = request.Status.Value;

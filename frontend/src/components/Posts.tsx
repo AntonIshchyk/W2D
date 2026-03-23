@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
-  ArrowBigUp, ArrowBigDown, MessageSquare, Star,
+  ArrowBigUp, ArrowBigDown, MessageSquare,
   Plus, Check, ChevronsUpDown, ImageIcon
 } from 'lucide-react'
 import { Button } from './ui/button'
@@ -24,21 +24,21 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { cn } from '../lib/utils'
 
-interface Activity {
+interface Community {
   id: number
-  title: string
+  name: string
 }
 
 async function fetchPosts(
   cursor: number | null,
-  activityId?: number,
+  topicId?: number,
   userId?: number,
   type?: number,
   sortBy?: string
 ): Promise<ScrollResult<Post>> {
   const params = new URLSearchParams({ limit: PAGINATION.DEFAULT_PAGE_SIZE.toString() })
   if (cursor !== null) params.append('cursor', cursor.toString())
-  if (activityId) params.append('activityId', activityId.toString())
+  if (topicId) params.append('topicId', topicId.toString())
   if (userId) params.append('userId', userId.toString())
   if (type) params.append('type', type.toString())
   if (sortBy) params.append('sortBy', sortBy)
@@ -47,11 +47,10 @@ async function fetchPosts(
   return response.json()
 }
 
-async function fetchActivities(): Promise<Activity[]> {
-  const response = await fetch(`${API_ENDPOINTS.activities.base}?limit=${PAGINATION.ACTIVITIES_FETCH_SIZE}`, { headers: getAuthHeaders() })
-  if (!response.ok) throw new Error('Failed to fetch activities')
-  const data = await response.json()
-  return data.items || []
+async function fetchCommunities(): Promise<Community[]> {
+  const response = await fetch(API_ENDPOINTS.communities.base, { headers: getAuthHeaders() })
+  if (!response.ok) throw new Error('Failed to fetch communities')
+  return response.json()
 }
 
 async function votePost(postId: number, value: number): Promise<void> {
@@ -225,9 +224,9 @@ function PostCard({
                 {POST_TYPE_LABELS[post.type as PostType]}
               </span>
             )}
-            {post.activityTitle && (
+            {post.communityName && (
               <span className="text-xs text-muted-foreground font-medium">
-                {post.activityTitle}
+                {post.communityName}
               </span>
             )}
             <span className="text-xs text-muted-foreground/50 ml-auto">
@@ -247,10 +246,10 @@ function PostCard({
             by {post.userName || 'Anonymous'}
           </p>
 
-          {/* Content preview — skip if photo-dominant */}
+          {/* Description preview — skip if photo-dominant */}
           {(!hasPhotos || post.photoUrls.length > 1) && (
             <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed mb-2">
-              {post.content}
+              {post.description}
             </p>
           )}
 
@@ -263,13 +262,6 @@ function PostCard({
 
           {/* Footer */}
           <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
-            {post.rating != null && post.rating > 0 && (
-              <div className="flex items-center gap-0.5">
-                {[...Array(post.rating)].map((_, i) => (
-                  <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
-                ))}
-              </div>
-            )}
             {hasPhotos && post.photoUrls.length === 1 && (
               <span className="flex items-center gap-1">
                 <ImageIcon className="h-3 w-3" />
@@ -294,10 +286,10 @@ function PostCard({
 
 export function Posts() {
   const navigate = useNavigate()
-  const [selectedActivity, setSelectedActivity] = useState<number | undefined>()
+  const [selectedCommunity, setSelectedCommunity] = useState<number | undefined>()
   const [selectedType, setSelectedType]         = useState<number | undefined>()
   const [sortBy, setSortBy]                     = useState('new')
-  const [activityOpen, setActivityOpen]         = useState(false)
+  const [communityOpen, setCommunityOpen]         = useState(false)
   const observerTarget = useRef<HTMLDivElement>(null)
 
   const { data: currentUser, isError, error: userError } = useQuery({
@@ -306,16 +298,16 @@ export function Posts() {
     retry: false,
   })
 
-  const { data: activities } = useQuery({
-    queryKey: ['activities'],
-    queryFn: fetchActivities,
+  const { data: communities } = useQuery({
+    queryKey: ['communities'],
+    queryFn: fetchCommunities,
     staleTime: Infinity,
     gcTime: Infinity,
   })
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
-    queryKey: ['posts', selectedActivity, selectedType, sortBy],
-    queryFn: ({ pageParam }) => fetchPosts(pageParam, selectedActivity, undefined, selectedType, sortBy),
+    queryKey: ['posts', selectedCommunity, selectedType, sortBy],
+    queryFn: ({ pageParam }) => fetchPosts(pageParam, selectedCommunity, undefined, selectedType, sortBy),
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
     initialPageParam: null as number | null,
     retry: false,
@@ -326,7 +318,7 @@ export function Posts() {
   const voteMutation = useMutation({
     mutationFn: ({ postId, value }: { postId: number; value: number }) => votePost(postId, value),
     onMutate: async ({ postId, value }) => {
-      const key = ['posts', selectedActivity, selectedType, sortBy]
+      const key = ['posts', selectedCommunity, selectedType, sortBy]
       await queryClient.cancelQueries({ queryKey: key })
       const previous = queryClient.getQueryData(key)
       queryClient.setQueryData(key, (data: any) => {
@@ -348,12 +340,12 @@ export function Posts() {
     },
     onError: (_err, context: any) => {
       if (context?.previous) {
-        queryClient.setQueryData(['posts', selectedActivity, selectedType, sortBy], context.previous)
+        queryClient.setQueryData(['posts', selectedCommunity, selectedType, sortBy], context.previous)
       }
       toast.error('Failed to vote')
     },
     onSettled: (_data, _error, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['posts', selectedActivity, selectedType, sortBy] })
+      queryClient.invalidateQueries({ queryKey: ['posts', selectedCommunity, selectedType, sortBy] })
       if (variables) queryClient.invalidateQueries({ queryKey: ['post', variables.postId.toString()] })
     }
   })
@@ -407,12 +399,12 @@ export function Posts() {
         </Tabs>
 
         <div className="flex items-center gap-2 flex-wrap pb-4 border-b">
-          <Popover open={activityOpen} onOpenChange={setActivityOpen}>
+          <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" role="combobox" className="h-8 text-xs gap-1.5">
-                {selectedActivity
-                  ? activities?.find(a => a.id === selectedActivity)?.title ?? 'Activity'
-                  : 'All activities'}
+                {selectedCommunity
+                  ? communities?.find(c => c.id === selectedCommunity)?.name ?? 'Community'
+                  : 'All communities'}
                 <ChevronsUpDown className="h-3.5 w-3.5 opacity-50" />
               </Button>
             </PopoverTrigger>
@@ -420,16 +412,16 @@ export function Posts() {
               <Command>
                 <CommandInput placeholder="Search…" />
                 <CommandList>
-                  <CommandEmpty>No activity found.</CommandEmpty>
+                  <CommandEmpty>No community found.</CommandEmpty>
                   <CommandGroup>
-                    <CommandItem value="all" onSelect={() => { setSelectedActivity(undefined); setActivityOpen(false) }}>
-                      <Check className={cn('mr-2 h-4 w-4', !selectedActivity ? 'opacity-100' : 'opacity-0')} />
-                      All activities
+                    <CommandItem value="all" onSelect={() => { setSelectedCommunity(undefined); setCommunityOpen(false) }}>
+                      <Check className={cn('mr-2 h-4 w-4', !selectedCommunity ? 'opacity-100' : 'opacity-0')} />
+                      All communities
                     </CommandItem>
-                    {activities?.map(a => (
-                      <CommandItem key={a.id} value={a.title} onSelect={() => { setSelectedActivity(a.id); setActivityOpen(false) }}>
-                        <Check className={cn('mr-2 h-4 w-4', selectedActivity === a.id ? 'opacity-100' : 'opacity-0')} />
-                        {a.title}
+                    {communities?.map(a => (
+                      <CommandItem key={a.id} value={a.name} onSelect={() => { setSelectedCommunity(a.id); setCommunityOpen(false) }}>
+                        <Check className={cn('mr-2 h-4 w-4', selectedCommunity === a.id ? 'opacity-100' : 'opacity-0')} />
+                        {a.name}
                       </CommandItem>
                     ))}
                   </CommandGroup>
@@ -453,9 +445,9 @@ export function Posts() {
             </SelectContent>
           </Select>
 
-          {(selectedActivity || selectedType) && (
+          {(selectedCommunity || selectedType) && (
             <Button type="button" variant="ghost" size="sm" className="h-8 text-xs ml-auto"
-              onClick={() => { setSelectedActivity(undefined); setSelectedType(undefined) }}>
+              onClick={() => { setSelectedCommunity(undefined); setSelectedType(undefined) }}>
               Clear
             </Button>
           )}
@@ -463,7 +455,7 @@ export function Posts() {
       </div>
 
       {/* Feed */}
-      <div className="max-w-2xl space-y-3">
+      <div className="max-w-2xl mx-auto space-y-3">
         {isLoading ? (
           [...Array(4)].map((_, i) => (
             <div key={i} className="border rounded-xl p-4 space-y-3">
@@ -473,15 +465,19 @@ export function Posts() {
             </div>
           ))
         ) : allPosts.length === 0 ? (
-          <EmptyState
-            icon={MessageSquare}
-            title="No posts yet"
-            description={selectedActivity || selectedType ? 'Try adjusting your filters' : 'Be the first to share something!'}
-            action={currentUser && !selectedActivity && !selectedType ? {
-              label: 'Create Post',
-              onClick: () => navigate('/posts/create')
-            } : undefined}
-          />
+          <div className="min-h-[55vh] flex items-center justify-center">
+            <div className="w-full">
+              <EmptyState
+                icon={MessageSquare}
+                title="No posts yet"
+                description={selectedCommunity || selectedType ? 'Try adjusting your filters' : 'Be the first to share something!'}
+                action={currentUser && !selectedCommunity && !selectedType ? {
+                  label: 'Create Post',
+                  onClick: () => navigate('/posts/create')
+                } : undefined}
+              />
+            </div>
+          </div>
         ) : (
           <>
             {allPosts.map(post => (
@@ -501,3 +497,4 @@ export function Posts() {
     </PageLayout>
   )
 }
+

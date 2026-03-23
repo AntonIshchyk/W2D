@@ -22,7 +22,7 @@ public class PostService : IPostService
     public async Task<ScrollResult<PostResponse>> GetPostsAsync(
         int? cursor = null,
         int limit = PaginationConstants.DefaultPageSize,
-        int? activityId = null,
+        int? topicId = null,
         int? userId = null,
         int? type = null,
         string? sortBy = null,
@@ -31,13 +31,13 @@ public class PostService : IPostService
         IQueryable<Post> query = _context.Posts
             .AsNoTracking()
             .Include(p => p.User)
-            .Include(p => p.Activity)
+            .Include(p => p.Community)
             .AsQueryable();
 
-        // Filter by activity if provided
-        if (activityId.HasValue)
+        // Filter by community if provided
+        if (topicId.HasValue)
         {
-            query = query.Where(p => p.ActivityId == activityId.Value);
+            query = query.Where(p => p.SpaceId == topicId.Value);
         }
 
         // Filter by user if provided
@@ -139,7 +139,7 @@ public class PostService : IPostService
         Post? post = await _context.Posts
             .AsNoTracking()
             .Include(p => p.User)
-            .Include(p => p.Activity)
+            .Include(p => p.Community)
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (post == null)
@@ -170,19 +170,6 @@ public class PostService : IPostService
         }
     }
 
-    private void ValidateCostCurrencyPairing(decimal? cost, string? currencyCode)
-    {
-        if (cost.HasValue && string.IsNullOrWhiteSpace(currencyCode))
-        {
-            throw new InvalidOperationException("Currency code is required when cost is provided.");
-        }
-
-        if (!cost.HasValue && !string.IsNullOrWhiteSpace(currencyCode))
-        {
-            throw new InvalidOperationException("Cost is required when currency code is provided.");
-        }
-    }
-
     private void ValidatePhotoUrls(List<string>? photoUrls)
     {
         if (photoUrls != null && photoUrls.Any())
@@ -202,13 +189,12 @@ public class PostService : IPostService
     {
         // Validate business rules
         ValidateLocationPairing(request.Latitude, request.Longitude);
-        ValidateCostCurrencyPairing(request.Cost, request.CurrencyCode);
         ValidatePhotoUrls(request.PhotoUrls);
 
-        // Validate ActivityId exists
-        if (!await ActivityExistsAsync(request.ActivityId))
+        // Validate TopicId exists
+        if (!await CommunityExistsAsync(request.TopicId))
         {
-            throw new InvalidOperationException("Invalid ActivityId. Activity does not exist.");
+            throw new InvalidOperationException("Invalid TopicId. Community does not exist.");
         }
 
         Post post = _mapper.Map<Post>(request);
@@ -236,10 +222,6 @@ public class PostService : IPostService
         double? finalLat = request.Latitude ?? existingPost.Latitude;
         double? finalLng = request.Longitude ?? existingPost.Longitude;
         ValidateLocationPairing(finalLat, finalLng);
-
-        decimal? finalCost = request.Cost ?? existingPost.Cost;
-        string? finalCurrency = request.CurrencyCode ?? existingPost.CurrencyCode;
-        ValidateCostCurrencyPairing(finalCost, finalCurrency);
 
         ValidatePhotoUrls(request.PhotoUrls);
 
@@ -347,8 +329,8 @@ public class PostService : IPostService
         }
     }
 
-    public async Task<bool> ActivityExistsAsync(int activityId)
+    public async Task<bool> CommunityExistsAsync(int topicId)
     {
-        return await _context.Activities.AnyAsync(a => a.Id == activityId);
+        return await _context.Communities.AnyAsync(a => a.Id == topicId);
     }
 }

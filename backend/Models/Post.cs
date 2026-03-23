@@ -9,8 +9,8 @@ public class Post : BaseModel
     public string Title { get; set; } = string.Empty;
 
     [Required]
-    [StringLength(2000)]
-    public string Content { get; set; } = string.Empty;
+    [StringLength(1000)]
+    public string Description { get; set; } = string.Empty;
 
     [Required]
     public PostType Type { get; set; }
@@ -20,8 +20,8 @@ public class Post : BaseModel
     public User User { get; set; } = null!;
 
     [Required]
-    public int ActivityId { get; set; }
-    public Activity Activity { get; set; } = null!;
+    public int SpaceId { get; set; }
+    public Community Community { get; set; } = null!;
 
     public int Score { get; set; }
 
@@ -33,13 +33,6 @@ public class Post : BaseModel
 
     [StringLength(200)]
     public string? PlaceId { get; set; }
-
-    public int? Rating { get; set; }
-    public int? DurationMinutes { get; set; }
-    public decimal? Cost { get; set; }
-
-    [StringLength(3)]
-    public string? CurrencyCode { get; set; }
 
     public DateTime? CompletedAt { get; set; }
 

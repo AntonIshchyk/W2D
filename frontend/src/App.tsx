@@ -3,7 +3,7 @@ import { Toaster } from 'sonner'
 import { Login } from './components/Login'
 import { Home } from './components/Home'
 import { Profile } from './components/Profile'
-import { Activities } from './components/Activities'
+import { Communities } from './components/Communities'
 import { Events } from './components/Events'
 import { EventDetail } from './components/EventDetail'
 import { Posts } from './components/Posts'
@@ -23,13 +23,13 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/activities" element={<ProtectedRoute><Activities /></ProtectedRoute>} />
+        <Route path="/communities" element={<ProtectedRoute><Communities /></ProtectedRoute>} />
         <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
         <Route path="/events/:id" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} />
         <Route path="/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
         <Route path="/posts/create" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
         <Route path="/posts/:id" element={<ProtectedRoute><PostDetail /></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   )

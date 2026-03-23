@@ -9,15 +9,15 @@ public class CreatePostRequest
     public string Title { get; set; } = string.Empty;
 
     [Required]
-    [StringLength(2000, MinimumLength = 10)]
-    public string Content { get; set; } = string.Empty;
+    [StringLength(1000, MinimumLength = 10)]
+    public string Description { get; set; } = string.Empty;
 
     [Required]
     [Range(1, 6)]
     public int Type { get; set; }
 
     [Required]
-    public int ActivityId { get; set; }
+    public int TopicId { get; set; }
 
     [StringLength(500)]
     public string? LocationName { get; set; }
@@ -30,19 +30,6 @@ public class CreatePostRequest
 
     [StringLength(200)]
     public string? PlaceId { get; set; }
-
-    [Range(1, 5)]
-    public int? Rating { get; set; }
-
-    [Range(1, 10000)]
-    public int? DurationMinutes { get; set; }
-
-    [Range(0, 1000000)]
-    public decimal? Cost { get; set; }
-
-    [StringLength(3)]
-    [RegularExpression("^[A-Z]{3}$", ErrorMessage = "Currency code must be a valid 3-letter ISO 4217 code (e.g., USD, EUR)")]
-    public string? CurrencyCode { get; set; }
 
     public DateTime? CompletedAt { get; set; }
 
