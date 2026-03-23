@@ -7,7 +7,7 @@ public static class DatabaseSeeder
 {
     public static void SeedData(ModelBuilder modelBuilder)
     {
-        
+
 
         // Seed Tags
         Tag[] tags = new[]
@@ -44,7 +44,7 @@ public static class DatabaseSeeder
         List<Community> communities = new List<Community>
         {
             // Ball Sports (10 communities)
-            new Community { Id = 1, Name = "Football (Soccer)", Description = "Play football with friends or join a local team. A great team sport that builds endurance, coordination, and teamwork skills." },
+            new Community { Id = 1, Name = "Football", Description = "Play football with friends or join a local team. A great team sport that builds endurance, coordination, and teamwork skills." },
             new Community { Id = 2, Name = "Basketball", Description = "Shoot hoops at your local court. Can be played solo for practice or in teams for competitive games." },
             new Community { Id = 3, Name = "Volleyball", Description = "Play beach or indoor volleyball. A fun team sport that doesn't require extensive equipment." },
             new Community { Id = 4, Name = "Baseball", Description = "America's pastime - bat, pitch, and field in this strategic team sport." },
@@ -64,7 +64,7 @@ public static class DatabaseSeeder
             new Community { Id = 16, Name = "Racquetball", Description = "High-energy racket sport played in an enclosed court with a hollow rubber ball." },
 
             // Simple Outdoor Communities (8 communities)
-            new Community { Id = 17, Name = "Go for a Walk", Description = "Take a simple walk around your neighborhood or local park. Perfect for clearing your mind and getting light exercise." },
+            new Community { Id = 17, Name = "Walking", Description = "Take a simple walk around your neighborhood or local park. Perfect for clearing your mind and getting light exercise." },
             new Community { Id = 18, Name = "Hiking", Description = "Explore nature trails and mountain paths. From easy trails to challenging climbs, there's a hike for everyone." },
             new Community { Id = 19, Name = "Running/Jogging", Description = "Whether you're training for a marathon or just want to stay fit, running is an accessible and effective exercise." },
             new Community { Id = 20, Name = "Cycling", Description = "Ride a bicycle for leisure or exercise. Great for exploring your city or countryside while getting a good workout." },
@@ -115,15 +115,15 @@ public static class DatabaseSeeder
             new Community { Id = 59, Name = "Leatherworking", Description = "Craft items from leather including wallets, bags, and belts." },
 
             // Music (10 communities)
-            new Community { Id = 60, Name = "Playing Guitar", Description = "Learn to play acoustic or electric guitar. Great for self-expression and can be enjoyed solo or in a band." },
-            new Community { Id = 61, Name = "Playing Piano", Description = "Learn classical pieces or contemporary songs on the piano. A versatile instrument suitable for all ages." },
+            new Community { Id = 60, Name = "Guitar", Description = "Learn to play acoustic or electric guitar. Great for self-expression and can be enjoyed solo or in a band." },
+            new Community { Id = 61, Name = "Piano", Description = "Learn classical pieces or contemporary songs on the piano. A versatile instrument suitable for all ages." },
             new Community { Id = 62, Name = "Singing", Description = "Practice singing alone or join a choir. Express yourself through music and improve your vocal skills." },
-            new Community { Id = 63, Name = "Playing Drums", Description = "Learn rhythm and coordination through drumming. Great stress relief and physical workout." },
-            new Community { Id = 64, Name = "Playing Violin", Description = "Master this elegant string instrument. Requires dedication but offers beautiful musical expression." },
+            new Community { Id = 63, Name = "Drums", Description = "Learn rhythm and coordination through drumming. Great stress relief and physical workout." },
+            new Community { Id = 64, Name = "Violin", Description = "Master this elegant string instrument. Requires dedication but offers beautiful musical expression." },
             new Community { Id = 65, Name = "DJing", Description = "Mix and create music using turntables or digital equipment. Perfect for music enthusiasts." },
             new Community { Id = 66, Name = "Music Production", Description = "Create original music using digital audio workstations and software." },
-            new Community { Id = 67, Name = "Playing Bass Guitar", Description = "Provide the rhythmic foundation in bands or practice solo. Essential in many music genres." },
-            new Community { Id = 68, Name = "Playing Saxophone", Description = "Learn this expressive wind instrument popular in jazz, classical, and contemporary music." },
+            new Community { Id = 67, Name = "Bass Guitar", Description = "Provide the rhythmic foundation in bands or practice solo. Essential in many music genres." },
+            new Community { Id = 68, Name = "Saxophone", Description = "Learn this expressive wind instrument popular in jazz, classical, and contemporary music." },
             new Community { Id = 69, Name = "Beatboxing", Description = "Create percussion sounds and music with your mouth. No equipment needed, just practice." },
 
             // Games (10 communities)
@@ -232,5 +232,5 @@ public static class DatabaseSeeder
 
         modelBuilder.Entity<Community>().HasData(communities);
 
-            }
+    }
 }
