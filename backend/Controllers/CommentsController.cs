@@ -23,7 +23,7 @@ public class CommentsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<CommentResponse>>> GetComments(int postId)
     {
-        int? currentUserId = User.GetUserId();
+        int currentUserId = User.GetUserId();
         var comments = await _commentService.GetCommentsAsync(postId, currentUserId);
         return Ok(comments);
     }
@@ -35,7 +35,7 @@ public class CommentsController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.Content) && string.IsNullOrWhiteSpace(request.PhotoUrl))
             return BadRequest(new { message = "Content or PhotoUrl is required" });
 
-        int userId = User.GetUserId()!.Value;
+        int userId = User.GetUserId();
         var comment = await _commentService.CreateCommentAsync(postId, request, userId);
 
         if (comment == null)
@@ -47,7 +47,7 @@ public class CommentsController : ControllerBase
     [HttpDelete("{commentId}")]
     public async Task<ActionResult> DeleteComment(int postId, int commentId)
     {
-        int userId = User.GetUserId()!.Value;
+        int userId = User.GetUserId();
         bool deleted = await _commentService.DeleteCommentAsync(postId, commentId, userId);
 
         if (!deleted)
@@ -59,7 +59,7 @@ public class CommentsController : ControllerBase
     [HttpPost("{commentId}/vote")]
     public async Task<ActionResult> VoteComment(int postId, int commentId, VoteCommentRequest request)
     {
-        int userId = User.GetUserId()!.Value;
+        int userId = User.GetUserId();
         bool success = await _commentService.VoteCommentAsync(postId, commentId, userId, request.Value);
 
         if (!success)

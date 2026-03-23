@@ -4,7 +4,10 @@ import { clearAuthToken } from '../hooks/useAuthSync'
 export interface UserInfo {
   userId: number
   email: string
-  name: string
+  username: string
+  bio?: string | null
+  profilePhotoUrl?: string | null
+  onboardingCompleted: boolean
 }
 
 export class ApiError extends Error {

@@ -37,7 +37,7 @@ public class PostsController : ControllerBase
             return BadRequest(new { message = $"Invalid limit parameter. Limit must be between {PaginationConstants.MinPageSize} and {PaginationConstants.MaxPageSize}." });
         }
 
-        int? currentUserId = User.GetUserId();
+        int currentUserId = User.GetUserId();
 
         ScrollResult<PostResponse> result = await _postService.GetPostsAsync(
             cursor,
@@ -54,7 +54,7 @@ public class PostsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<PostResponse>> GetPost(int id)
     {
-        int? currentUserId = User.GetUserId();
+        int currentUserId = User.GetUserId();
 
         PostResponse? post = await _postService.GetPostByIdAsync(id, currentUserId);
 
@@ -69,7 +69,7 @@ public class PostsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Post>> CreatePost(CreatePostRequest request)
     {
-        int userId = User.GetUserId()!.Value;
+        int userId = User.GetUserId();
 
         try
         {
@@ -85,7 +85,7 @@ public class PostsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<Post>> UpdatePost(int id, UpdatePostRequest request)
     {
-        int userId = User.GetUserId()!.Value;
+        int userId = User.GetUserId();
 
         try
         {
@@ -107,7 +107,7 @@ public class PostsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeletePost(int id)
     {
-        int userId = User.GetUserId()!.Value;
+        int userId = User.GetUserId();
 
         bool deleted = await _postService.DeletePostAsync(id, userId);
 
@@ -122,7 +122,7 @@ public class PostsController : ControllerBase
     [HttpPost("{id}/vote")]
     public async Task<ActionResult> VotePost(int id, VotePostRequest request)
     {
-        int userId = User.GetUserId()!.Value;
+        int userId = User.GetUserId();
 
         bool success = await _postService.VotePostAsync(id, userId, request.Value);
 

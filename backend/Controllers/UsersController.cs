@@ -5,6 +5,7 @@ using Backend.Contracts.Auth;
 using Backend.Models;
 using Backend.Services;
 using Backend.Extensions;
+using Backend.Contracts.Users;
 using Google.Apis.Auth;
 
 namespace Backend.Controllers;
@@ -25,24 +26,40 @@ public class UsersController : ControllerBase
 
     [HttpGet("me")]
     [Authorize]
-    public ActionResult GetCurrentUser()
+    public async Task<ActionResult> GetCurrentUser()
     {
-        var userId = User.GetUserId();
-        var emailClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-        var nameClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-        if (userId == null || string.IsNullOrEmpty(emailClaim) || string.IsNullOrEmpty(nameClaim))
-        {
-            return BadRequest("User claims missing or invalid.");
-        }
+        int userId = User.GetUserId();
+
+        User user = (await _userService.GetUserByIdAsync(userId))!;
+
         return Ok(new
         {
-            userId = userId.Value,
-            email = emailClaim,
-            name = nameClaim,
+            userId,
+            email = user.Email,
+            username = user.Username,
+            bio = user.Bio,
+            profilePhotoUrl = user.ProfilePhotoUrl,
+            onboardingCompleted = user.OnboardingCompleted,
         });
     }
 
+    [HttpPut("onboarding")]
+    [Authorize]
+    public async Task<ActionResult<LoginResponse>> CompleteOnboarding([FromBody] OnboardingUpdateRequest request)
+    {
+        int userId = User.GetUserId();
 
+        if (await _userService.IsUsernameTakenAsync(request.Username))
+        {
+            return Conflict(new { message = "Username is already taken" });
+        }
+
+        User updatedUser = await _userService.CompleteOnboardingAsync(userId, request);
+
+        LoginResponse response = _userService.GenerateTokenForUser(updatedUser);
+        response.IsNewUser = false;
+        return Ok(response);
+    }
 
     [HttpPost("google-login")]
     public async Task<ActionResult<LoginResponse>> GoogleLogin([FromBody] GoogleLoginRequest request)
@@ -75,6 +92,7 @@ public class UsersController : ControllerBase
             {
                 // User exists, just login
                 LoginResponse loginResponse = _userService.GenerateTokenForUser(existingUser);
+                loginResponse.IsNewUser = false;
                 return Ok(loginResponse);
             }
 
@@ -88,6 +106,8 @@ public class UsersController : ControllerBase
             {
                 return BadRequest(new { message = "Failed to create user" });
             }
+
+            result.IsNewUser = true;
 
             return Ok(result);
         }

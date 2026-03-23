@@ -37,7 +37,7 @@ public class EventService : IEventService
             Title = e.Title,
             Description = e.Description,
             OrganizerId = e.OrganizerId,
-            OrganizerName = e.Organizer?.Name,
+            OrganizerName = e.Organizer?.Username,
             SpaceId = e.SpaceId,
             CommunityName = e.Community?.Name,
             Tags = e.Tags.Select(t => new TagDto { Id = t.Id, Name = t.Name }).ToList(),
@@ -239,7 +239,7 @@ public class EventService : IEventService
         return (true, "RSVP successful", new EventAttendeeResponse
         {
             UserId = userId,
-            UserName = user?.Name,
+            UserName = user?.Username,
             Status = existing.Status.ToString(),
             JoinedAt = existing.CreatedAt
         });
@@ -291,7 +291,7 @@ public class EventService : IEventService
             .Select(a => new EventAttendeeResponse
             {
                 UserId = a.UserId,
-                UserName = a.User != null ? a.User.Name : null,
+                UserName = a.User != null ? a.User.Username : null,
                 Status = a.Status.ToString(),
                 JoinedAt = a.CreatedAt
             })

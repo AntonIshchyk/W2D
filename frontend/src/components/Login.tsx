@@ -5,15 +5,38 @@ import { toast } from 'sonner'
 import { API_ENDPOINTS } from '../config/api'
 import { setAuthToken } from '../hooks/useAuthSync'
 
+interface LoginResponse {
+  token: string
+  isOnboardingComplete: boolean
+}
+
+interface GoogleLoginInput {
+  credential: string
+  googleName?: string
+  googlePicture?: string
+}
+
+function parseJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const payloadPart = token.split('.')[1]
+    const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/')
+    const padded = normalized.padEnd(normalized.length + (4 - (normalized.length % 4 || 4)) % 4, '=')
+    const payloadJson = atob(padded)
+    return JSON.parse(payloadJson) as Record<string, unknown>
+  } catch {
+    return null
+  }
+}
+
 export function Login() {
   const navigate = useNavigate()
 
   const googleMutation = useMutation({
-    mutationFn: async (credential: string) => {
+    mutationFn: async (input: GoogleLoginInput) => {
       const response = await fetch(API_ENDPOINTS.users.googleLogin, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential }),
+        body: JSON.stringify({ credential: input.credential }),
       })
 
       if (!response.ok) {
@@ -22,10 +45,23 @@ export function Login() {
         throw new Error(errorMsg)
       }
 
-      return response.json()
+      return await response.json() as LoginResponse
     },
-    onSuccess: (data) => {
+    onSuccess: (data, input) => {
       setAuthToken(data.token)
+
+      if (!data.isOnboardingComplete) {
+        localStorage.setItem('onboarding_pending', '1')
+        sessionStorage.setItem('google_profile_defaults', JSON.stringify({
+          name: input.googleName ?? '',
+          picture: input.googlePicture ?? '',
+        }))
+        toast.success('Signed in. Let\'s finish your profile.')
+        navigate('/onboarding')
+        return
+      }
+
+      localStorage.removeItem('onboarding_pending')
       toast.success('Signed in with Google!')
       navigate('/')
     },
@@ -65,7 +101,19 @@ export function Login() {
             <div className="rounded-lg border border-gray-100 p-3 bg-gray-50 inline-block">
               <GoogleLogin
                 onSuccess={(cr) => {
-                  if (cr.credential) googleMutation.mutate(cr.credential)
+                  if (!cr.credential) {
+                    return
+                  }
+
+                  const payload = parseJwtPayload(cr.credential)
+                  const googleName = typeof payload?.name === 'string' ? payload.name : undefined
+                  const googlePicture = typeof payload?.picture === 'string' ? payload.picture : undefined
+
+                  googleMutation.mutate({
+                    credential: cr.credential,
+                    googleName,
+                    googlePicture,
+                  })
                 }}
                 onError={() => toast.error('Google login failed')}
                 useOneTap

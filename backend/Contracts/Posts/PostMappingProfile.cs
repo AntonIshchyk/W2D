@@ -11,7 +11,7 @@ public class PostMappingProfile : Profile
         CreateMap<Post, PostResponse>()
             .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (int)src.Type))
             .ForMember(dest => dest.TopicId, opt => opt.MapFrom(src => src.SpaceId))
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.Name : null))
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.Username : null))
             .ForMember(dest => dest.CommunityName, opt => opt.MapFrom(src => src.Community != null ? src.Community.Name : null))
             .ForMember(dest => dest.CurrentUserVote, opt => opt.Ignore()); // Set manually in service
 

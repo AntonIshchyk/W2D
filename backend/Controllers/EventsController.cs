@@ -34,7 +34,7 @@ public class EventsController : ControllerBase
         if (limit < PaginationConstants.MinPageSize || limit > PaginationConstants.MaxPageSize)
             return BadRequest(new { message = $"Limit must be between {PaginationConstants.MinPageSize} and {PaginationConstants.MaxPageSize}." });
 
-        int? currentUserId = User.GetUserId();
+        int currentUserId = User.GetUserId();
         ScrollResult<EventResponse> result = await _eventService.GetEventsAsync(cursor, limit, topicId, status, upcomingOnly, currentUserId);
         return Ok(result);
     }
@@ -42,7 +42,7 @@ public class EventsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<EventResponse>> GetEvent(int id)
     {
-        int? currentUserId = User.GetUserId();
+        int currentUserId = User.GetUserId();
         EventResponse? e = await _eventService.GetEventByIdAsync(id, currentUserId);
         if (e == null) return NotFound(new { message = "Event not found" });
         return Ok(e);
@@ -51,7 +51,7 @@ public class EventsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<EventResponse>> CreateEvent(CreateEventRequest request)
     {
-        int userId = User.GetUserId()!.Value;
+        int userId = User.GetUserId();
         EventResponse created = await _eventService.CreateEventAsync(userId, request);
         return CreatedAtAction(nameof(GetEvent), new { id = created.Id }, created);
     }
@@ -59,7 +59,7 @@ public class EventsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<EventResponse>> UpdateEvent(int id, UpdateEventRequest request)
     {
-        int userId = User.GetUserId()!.Value;
+        int userId = User.GetUserId();
         EventResponse? updated = await _eventService.UpdateEventAsync(id, userId, request);
         if (updated == null) return NotFound(new { message = "Event not found or you are not the organizer" });
         return Ok(updated);
@@ -68,7 +68,7 @@ public class EventsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteEvent(int id)
     {
-        int userId = User.GetUserId()!.Value;
+        int userId = User.GetUserId();
         bool deleted = await _eventService.DeleteEventAsync(id, userId);
         if (!deleted) return NotFound(new { message = "Event not found or you are not the organizer" });
         return NoContent();
@@ -77,7 +77,7 @@ public class EventsController : ControllerBase
     [HttpPost("{id}/rsvp")]
     public async Task<ActionResult<EventAttendeeResponse>> Rsvp(int id)
     {
-        int userId = User.GetUserId()!.Value;
+        int userId = User.GetUserId();
         (bool success, string message, EventAttendeeResponse? attendee) = await _eventService.RsvpAsync(id, userId);
         if (!success) return BadRequest(new { message });
         return Ok(attendee);
@@ -86,7 +86,7 @@ public class EventsController : ControllerBase
     [HttpDelete("{id}/rsvp")]
     public async Task<ActionResult> CancelRsvp(int id)
     {
-        int userId = User.GetUserId()!.Value;
+        int userId = User.GetUserId();
         bool cancelled = await _eventService.CancelRsvpAsync(id, userId);
         if (!cancelled) return NotFound(new { message = "RSVP not found or already cancelled" });
         return NoContent();

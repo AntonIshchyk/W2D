@@ -3,6 +3,7 @@ using AutoMapper;
 using Backend.Data;
 using Backend.Models;
 using Backend.Contracts.Auth;
+using Backend.Contracts.Users;
 
 namespace Backend.Services;
 
@@ -34,18 +35,77 @@ public class UserService : IUserService
         return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
     }
 
-    public async Task<LoginResponse?> RegisterUserAsync(string email, string name)
+    public async Task<bool> IsUsernameTakenAsync(string username)
     {
+        string normalizedUsername = username.Trim().ToLowerInvariant();
+
+        return await _context.Users
+            .AnyAsync(u => u.Username.ToLower() == normalizedUsername);
+    }
+
+    public async Task<LoginResponse?> RegisterUserAsync(string email, string usernameSeed)
+    {
+        string baseUsername = usernameSeed
+            .Trim()
+            .ToLowerInvariant()
+            .Replace(" ", "_");
+
+        baseUsername = System.Text.RegularExpressions.Regex
+            .Replace(baseUsername, "[^a-z0-9_]", string.Empty);
+
+        if (string.IsNullOrWhiteSpace(baseUsername))
+        {
+            baseUsername = email.Split('@')[0].ToLowerInvariant();
+            baseUsername = System.Text.RegularExpressions.Regex
+                .Replace(baseUsername, "[^a-z0-9_]", string.Empty);
+        }
+
+        if (baseUsername.Length < 3)
+        {
+            baseUsername = (baseUsername + "user").PadRight(3, '0');
+        }
+
+        if (baseUsername.Length > 20)
+        {
+            baseUsername = baseUsername[..20];
+        }
+
+        string candidate = baseUsername;
+        int suffix = 1;
+        while (await IsUsernameTakenAsync(candidate))
+        {
+            string suffixText = suffix.ToString();
+            int maxBaseLength = Math.Max(3, 20 - suffixText.Length);
+            string trimmedBase = baseUsername[..Math.Min(baseUsername.Length, maxBaseLength)];
+            candidate = $"{trimmedBase}{suffixText}";
+            suffix++;
+        }
+
         var user = new User
         {
             Email = email,
-            Name = name,
+            Username = candidate,
         };
 
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
 
         return GenerateTokenForUser(user);
+    }
+
+    public async Task<User> CompleteOnboardingAsync(int userId, OnboardingUpdateRequest request)
+    {
+        User user = await _context.Users.FirstAsync(u => u.Id == userId);
+
+        string normalizedUsername = request.Username.Trim().ToLowerInvariant();
+
+        user.Username = normalizedUsername;
+        user.Bio = string.IsNullOrWhiteSpace(request.Bio) ? null : request.Bio.Trim();
+        user.ProfilePhotoUrl = string.IsNullOrWhiteSpace(request.ProfilePhotoUrl) ? null : request.ProfilePhotoUrl.Trim();
+        user.OnboardingCompleted = true;
+
+        await _context.SaveChangesAsync();
+        return user;
     }
 
     public LoginResponse GenerateTokenForUser(User user)
@@ -55,6 +115,4 @@ public class UserService : IUserService
         response.Token = token;
         return response;
     }
-
-
 }

@@ -51,6 +51,11 @@ public class AppDbContext : DbContext
             .HasIndex(u => u.Email)
             .IsUnique();
 
+        // User unique username constraint (nullable for users who haven't completed onboarding)
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Username)
+            .IsUnique();
+
         
 
         // Post - User relationship

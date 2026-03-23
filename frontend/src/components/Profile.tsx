@@ -3,7 +3,7 @@ import { PageLayout } from './Navbar'
 import { fetchCurrentUser } from '../lib/auth'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
-import { Avatar, AvatarFallback } from './ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Separator } from './ui/separator'
 import { Skeleton } from './ui/skeleton'
 
@@ -44,16 +44,18 @@ export function Profile() {
 
           <CardHeader className="-mt-10 relative">
             <Avatar className="h-20 w-20 border-4 border-background shadow-lg">
+              {user.profilePhotoUrl && <AvatarImage src={user.profilePhotoUrl} alt={user.username} />}
               <AvatarFallback className="bg-linear-to-br from-primary to-primary/70 text-white text-2xl font-bold">
-                {user.name.charAt(0).toUpperCase()}
+                {user.username.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <CardTitle className="text-xl pt-2">{user.name}</CardTitle>
+            <CardTitle className="text-xl pt-2">@{user.username}</CardTitle>
             <CardDescription className="text-sm">{user.email}</CardDescription>
           </CardHeader>
 
           <CardContent>
             <Separator />
+            {user.bio && <p className="mt-4 text-sm leading-relaxed text-foreground/80">{user.bio}</p>}
           </CardContent>
         </Card>
       </div>
