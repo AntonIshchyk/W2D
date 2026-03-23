@@ -57,7 +57,7 @@ public class UsersController : ControllerBase
         User updatedUser = await _userService.CompleteOnboardingAsync(userId, request);
 
         LoginResponse response = _userService.GenerateTokenForUser(updatedUser);
-        response.IsNewUser = false;
+
         return Ok(response);
     }
 
