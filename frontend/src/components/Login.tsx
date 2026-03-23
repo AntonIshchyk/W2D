@@ -34,13 +34,11 @@ export function Login() {
 
       if (!data.isOnboardingComplete) {
         localStorage.setItem('onboarding_pending', '1')
-        toast.success('Signed in. Let\'s set up your username.')
         navigate('/onboarding')
         return
       }
 
       localStorage.removeItem('onboarding_pending')
-      toast.success('Signed in with Google!')
       navigate('/')
     },
     onError: (error: Error) => {
