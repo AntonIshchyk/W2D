@@ -6,47 +6,14 @@ import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { fetchCurrentUser } from '../lib/auth'
 import { setAuthToken } from '../hooks/useAuthSync'
 
-interface GoogleProfileDefaults {
-  name?: string
-  picture?: string
-}
-
 interface LoginResponse {
   token: string
 }
 
 const ONBOARDING_PENDING_KEY = 'onboarding_pending'
-const GOOGLE_DEFAULTS_KEY = 'google_profile_defaults'
-
-function createUsernameSuggestion(input: string): string {
-  const normalized = input
-    .toLowerCase()
-    .replace(/[^a-z0-9_\s]/g, '')
-    .trim()
-    .replace(/\s+/g, '_')
-
-  return normalized.slice(0, 20)
-}
-
-function buildGoogleSuggestion(googleName: string | undefined, email: string, currentUsername: string): string {
-  const emailSeed = email.split('@')[0]
-
-  const fromGoogle = createUsernameSuggestion(googleName ?? '')
-  if (fromGoogle.length >= 3) {
-    return fromGoogle
-  }
-
-  const fromEmail = createUsernameSuggestion(emailSeed)
-  if (fromEmail.length >= 3) {
-    return fromEmail
-  }
-
-  return currentUsername || 'user123'
-}
 
 export function Onboarding() {
   const navigate = useNavigate()
-  const [googleDefaults, setGoogleDefaults] = useState<GoogleProfileDefaults>({})
   const [username, setUsername] = useState('')
   const [bio, setBio] = useState('')
   const [profilePhotoUrl, setProfilePhotoUrl] = useState('')
@@ -58,32 +25,18 @@ export function Onboarding() {
   })
 
   useEffect(() => {
-    const rawDefaults = sessionStorage.getItem(GOOGLE_DEFAULTS_KEY)
-    if (!rawDefaults) {
-      return
-    }
-
-    try {
-      const defaults = JSON.parse(rawDefaults) as GoogleProfileDefaults
-      setGoogleDefaults(defaults)
-    } catch {
-      setGoogleDefaults({})
-    }
-  }, [])
-
-  useEffect(() => {
     if (!currentUser) {
       return
     }
 
     setUsername(currentUser.username ?? '')
     setBio(currentUser.bio ?? '')
-    setProfilePhotoUrl(currentUser.profilePhotoUrl ?? googleDefaults.picture ?? '')
+    setProfilePhotoUrl(currentUser.profilePhotoUrl ?? '')
 
     if (!currentUser.onboardingCompleted) {
       localStorage.setItem(ONBOARDING_PENDING_KEY, '1')
     }
-  }, [currentUser, googleDefaults.picture])
+  }, [currentUser])
 
   const usernameError = useMemo(() => {
     if (!username) {
@@ -123,7 +76,6 @@ export function Onboarding() {
     onSuccess: (data) => {
       setAuthToken(data.token)
       localStorage.removeItem(ONBOARDING_PENDING_KEY)
-      sessionStorage.removeItem(GOOGLE_DEFAULTS_KEY)
       toast.success('Profile is ready!')
       navigate('/')
     },
@@ -163,27 +115,6 @@ export function Onboarding() {
             <div>
               <div className="flex items-center justify-between gap-3">
                 <label className="block text-xs font-semibold tracking-wide uppercase text-stone-500">Username</label>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const suggestion = buildGoogleSuggestion(
-                      googleDefaults.name,
-                      currentUser.email,
-                      currentUser.username,
-                    )
-
-                    if (suggestion === username) {
-                      toast.info('You are already using that suggestion.')
-                      return
-                    }
-
-                    setUsername(suggestion)
-                    toast.success(`Suggested @${suggestion}`)
-                  }}
-                  className="rounded-xl border border-stone-300 px-3 py-1.5 text-xs font-semibold text-stone-700 hover:bg-stone-100"
-                >
-                  Use Google suggestion
-                </button>
               </div>
               <input
                 value={username}

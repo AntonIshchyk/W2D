@@ -10,33 +10,15 @@ interface LoginResponse {
   isOnboardingComplete: boolean
 }
 
-interface GoogleLoginInput {
-  credential: string
-  googleName?: string
-  googlePicture?: string
-}
-
-function parseJwtPayload(token: string): Record<string, unknown> | null {
-  try {
-    const payloadPart = token.split('.')[1]
-    const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/')
-    const padded = normalized.padEnd(normalized.length + (4 - (normalized.length % 4 || 4)) % 4, '=')
-    const payloadJson = atob(padded)
-    return JSON.parse(payloadJson) as Record<string, unknown>
-  } catch {
-    return null
-  }
-}
-
 export function Login() {
   const navigate = useNavigate()
 
   const googleMutation = useMutation({
-    mutationFn: async (input: GoogleLoginInput) => {
+    mutationFn: async (credential: string) => {
       const response = await fetch(API_ENDPOINTS.users.googleLogin, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential: input.credential }),
+        body: JSON.stringify({ credential }),
       })
 
       if (!response.ok) {
@@ -47,16 +29,12 @@ export function Login() {
 
       return await response.json() as LoginResponse
     },
-    onSuccess: (data, input) => {
+    onSuccess: (data) => {
       setAuthToken(data.token)
 
       if (!data.isOnboardingComplete) {
         localStorage.setItem('onboarding_pending', '1')
-        sessionStorage.setItem('google_profile_defaults', JSON.stringify({
-          name: input.googleName ?? '',
-          picture: input.googlePicture ?? '',
-        }))
-        toast.success('Signed in. Let\'s finish your profile.')
+        toast.success('Signed in. Let\'s set up your username.')
         navigate('/onboarding')
         return
       }
@@ -104,16 +82,7 @@ export function Login() {
                   if (!cr.credential) {
                     return
                   }
-
-                  const payload = parseJwtPayload(cr.credential)
-                  const googleName = typeof payload?.name === 'string' ? payload.name : undefined
-                  const googlePicture = typeof payload?.picture === 'string' ? payload.picture : undefined
-
-                  googleMutation.mutate({
-                    credential: cr.credential,
-                    googleName,
-                    googlePicture,
-                  })
+                  googleMutation.mutate(cr.credential)
                 }}
                 onError={() => toast.error('Google login failed')}
                 useOneTap
