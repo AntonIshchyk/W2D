@@ -43,48 +43,14 @@ public class UserService : IUserService
             .AnyAsync(u => u.Username.ToLower() == normalizedUsername);
     }
 
-    public async Task<LoginResponse?> RegisterUserAsync(string email, string usernameSeed)
+    public async Task<LoginResponse?> RegisterUserAsync(string email)
     {
-        string baseUsername = usernameSeed
-            .Trim()
-            .ToLowerInvariant()
-            .Replace(" ", "_");
-
-        baseUsername = System.Text.RegularExpressions.Regex
-            .Replace(baseUsername, "[^a-z0-9_]", string.Empty);
-
-        if (string.IsNullOrWhiteSpace(baseUsername))
-        {
-            baseUsername = email.Split('@')[0].ToLowerInvariant();
-            baseUsername = System.Text.RegularExpressions.Regex
-                .Replace(baseUsername, "[^a-z0-9_]", string.Empty);
-        }
-
-        if (baseUsername.Length < 3)
-        {
-            baseUsername = (baseUsername + "user").PadRight(3, '0');
-        }
-
-        if (baseUsername.Length > 20)
-        {
-            baseUsername = baseUsername[..20];
-        }
-
-        string candidate = baseUsername;
-        int suffix = 1;
-        while (await IsUsernameTakenAsync(candidate))
-        {
-            string suffixText = suffix.ToString();
-            int maxBaseLength = Math.Max(3, 20 - suffixText.Length);
-            string trimmedBase = baseUsername[..Math.Min(baseUsername.Length, maxBaseLength)];
-            candidate = $"{trimmedBase}{suffixText}";
-            suffix++;
-        }
+        string username = email.Split('@')[0].ToLowerInvariant();
 
         var user = new User
         {
             Email = email,
-            Username = candidate,
+            Username = username,
         };
 
         await _context.Users.AddAsync(user);

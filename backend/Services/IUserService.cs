@@ -12,5 +12,5 @@ public interface IUserService
     Task<bool> IsUsernameTakenAsync(string username);
     Task<User> CompleteOnboardingAsync(int userId, OnboardingUpdateRequest request);
     LoginResponse GenerateTokenForUser(User user);
-    Task<LoginResponse?> RegisterUserAsync(string email, string usernameSeed);
+    Task<LoginResponse?> RegisterUserAsync(string email);
 }

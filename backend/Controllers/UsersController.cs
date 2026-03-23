@@ -92,22 +92,16 @@ public class UsersController : ControllerBase
             {
                 // User exists, just login
                 LoginResponse loginResponse = _userService.GenerateTokenForUser(existingUser);
-                loginResponse.IsNewUser = false;
                 return Ok(loginResponse);
             }
 
             // New user, create account
-            LoginResponse? result = await _userService.RegisterUserAsync(
-                payload.Email,
-                payload.Name ?? payload.Email.Split('@')[0]
-            );
+            LoginResponse? result = await _userService.RegisterUserAsync(payload.Email);
 
             if (result == null)
             {
                 return BadRequest(new { message = "Failed to create user" });
             }
-
-            result.IsNewUser = true;
 
             return Ok(result);
         }
