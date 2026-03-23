@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { fetchCurrentUser } from '../lib/auth'
 import { setAuthToken } from '../hooks/useAuthSync'
+import { PhotoUpload } from './PhotoUpload'
 
 interface LoginResponse {
   token: string
@@ -16,7 +17,7 @@ export function Onboarding() {
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [bio, setBio] = useState('')
-  const [profilePhotoUrl, setProfilePhotoUrl] = useState('')
+  const [profilePhotoUrls, setProfilePhotoUrls] = useState<string[]>([])
 
   const { data: currentUser, isLoading: isUserLoading, isError } = useQuery({
     queryKey: ['currentUser'],
@@ -31,7 +32,7 @@ export function Onboarding() {
 
     setUsername(currentUser.username ?? '')
     setBio(currentUser.bio ?? '')
-    setProfilePhotoUrl(currentUser.profilePhotoUrl ?? '')
+    setProfilePhotoUrls(currentUser.profilePhotoUrl ? [currentUser.profilePhotoUrl] : [])
 
     if (!currentUser.onboardingCompleted) {
       localStorage.setItem(ONBOARDING_PENDING_KEY, '1')
@@ -56,7 +57,7 @@ export function Onboarding() {
         body: JSON.stringify({
           username,
           bio,
-          profilePhotoUrl,
+          profilePhotoUrl: profilePhotoUrls[0] ?? null,
         }),
       })
 
@@ -139,13 +140,15 @@ export function Onboarding() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold tracking-wide uppercase text-stone-500">Profile photo URL</label>
-              <input
-                value={profilePhotoUrl}
-                onChange={(e) => setProfilePhotoUrl(e.target.value.slice(0, 500))}
-                placeholder="https://..."
-                className="mt-2 w-full rounded-xl border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-stone-800"
-              />
+              <label className="block text-xs font-semibold tracking-wide uppercase text-stone-500">Profile photo</label>
+              <div className="mt-2 rounded-xl border border-stone-300 p-3">
+                <PhotoUpload
+                  value={profilePhotoUrls}
+                  onChange={(urls) => setProfilePhotoUrls(urls.slice(0, 1))}
+                  maxPhotos={1}
+                  disabled={completeMutation.isPending}
+                />
+              </div>
             </div>
 
             <button
@@ -163,9 +166,9 @@ export function Onboarding() {
           <p className="text-xs font-semibold tracking-[0.2em] uppercase text-stone-400">Live preview</p>
           <div className="mt-6 rounded-2xl border border-stone-200 bg-stone-50 p-6">
             <div className="flex items-center gap-4">
-              {profilePhotoUrl ? (
+              {profilePhotoUrls[0] ? (
                 <img
-                  src={profilePhotoUrl}
+                  src={profilePhotoUrls[0]}
                   alt="Profile preview"
                   className="h-16 w-16 rounded-full object-cover border border-stone-200"
                   onError={(e) => {
