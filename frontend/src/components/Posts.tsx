@@ -462,7 +462,7 @@ export function Posts() {
       </div>
 
       {/* Feed */}
-      <div className="max-w-2xl space-y-3">
+      <div className="max-w-2xl mx-auto space-y-3">
         {isLoading ? (
           [...Array(4)].map((_, i) => (
             <div key={i} className="border rounded-xl p-4 space-y-3">
@@ -472,15 +472,19 @@ export function Posts() {
             </div>
           ))
         ) : allPosts.length === 0 ? (
-          <EmptyState
-            icon={MessageSquare}
-            title="No posts yet"
-            description={selectedCommunity || selectedType ? 'Try adjusting your filters' : 'Be the first to share something!'}
-            action={currentUser && !selectedCommunity && !selectedType ? {
-              label: 'Create Post',
-              onClick: () => navigate('/posts/create')
-            } : undefined}
-          />
+          <div className="min-h-[55vh] flex items-center justify-center">
+            <div className="w-full">
+              <EmptyState
+                icon={MessageSquare}
+                title="No posts yet"
+                description={selectedCommunity || selectedType ? 'Try adjusting your filters' : 'Be the first to share something!'}
+                action={currentUser && !selectedCommunity && !selectedType ? {
+                  label: 'Create Post',
+                  onClick: () => navigate('/posts/create')
+                } : undefined}
+              />
+            </div>
+          </div>
         ) : (
           <>
             {allPosts.map(post => (
