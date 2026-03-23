@@ -15,6 +15,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 function App() {
   // Automatically clear cache when auth token changes
   useAuthSync()
+  const isLoggedIn = !!localStorage.getItem('token')
 
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -29,7 +30,7 @@ function App() {
         <Route path="/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
         <Route path="/posts/create" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
         <Route path="/posts/:id" element={<ProtectedRoute><PostDetail /></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to={isLoggedIn ? '/' : '/login'} replace />} />
       </Routes>
     </BrowserRouter>
   )
