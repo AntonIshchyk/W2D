@@ -30,7 +30,12 @@ public class UsersController : ControllerBase
     {
         int userId = User.GetUserId();
 
-        User user = (await _userService.GetUserByIdAsync(userId))!;
+        User? user = await _userService.GetUserByIdAsync(userId);
+
+        if (user == null)
+        {
+            return Unauthorized(new { message = "User not found for the current token" });
+        }
 
         return Ok(new
         {
@@ -49,7 +54,17 @@ public class UsersController : ControllerBase
     {
         int userId = User.GetUserId();
 
-        if (await _userService.IsUsernameTakenAsync(request.Username))
+        User? currentUser = await _userService.GetUserByIdAsync(userId);
+
+        if (currentUser == null)
+        {
+            return Unauthorized(new { message = "User not found for the current token" });
+        }
+
+        string requestedUsername = request.Username.Trim();
+
+        if (!string.Equals(currentUser.Username, requestedUsername, StringComparison.OrdinalIgnoreCase)
+            && await _userService.IsUsernameTakenAsync(requestedUsername))
         {
             return Conflict(new { message = "Username is already taken" });
         }
