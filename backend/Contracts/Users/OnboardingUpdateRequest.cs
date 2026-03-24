@@ -5,7 +5,7 @@ namespace Backend.Contracts.Users;
 public class OnboardingUpdateRequest
 {
     [Required]
-    [RegularExpression("^[a-z0-9_]{3,20}$")]
+    [RegularExpression("^[A-Za-z0-9_]{3,20}$")]
     public string Username { get; set; } = string.Empty;
 
     [MaxLength(160)]

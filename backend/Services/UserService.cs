@@ -37,10 +37,8 @@ public class UserService : IUserService
 
     public async Task<bool> IsUsernameTakenAsync(string username)
     {
-        string normalizedUsername = username.Trim().ToLowerInvariant();
-
         return await _context.Users
-            .AnyAsync(u => u.Username.ToLower() == normalizedUsername);
+            .AnyAsync(u => u.Username == username.Trim());
     }
 
     public async Task<LoginResponse?> RegisterUserAsync(string email)
@@ -63,9 +61,9 @@ public class UserService : IUserService
     {
         User user = await _context.Users.FirstAsync(u => u.Id == userId);
 
-        string normalizedUsername = request.Username.Trim().ToLowerInvariant();
+        string trimmedUsername = request.Username.Trim();
 
-        user.Username = normalizedUsername;
+        user.Username = trimmedUsername;
         user.Bio = string.IsNullOrWhiteSpace(request.Bio) ? null : request.Bio.Trim();
         user.ProfilePhotoUrl = string.IsNullOrWhiteSpace(request.ProfilePhotoUrl) ? null : request.ProfilePhotoUrl.Trim();
         user.OnboardingCompleted = true;

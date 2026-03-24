@@ -43,8 +43,8 @@ export function Onboarding() {
     if (!username) {
       return 'Username is required.'
     }
-    if (!/^[a-z0-9_]{3,20}$/.test(username)) {
-      return 'Use 3-20 chars: lowercase letters, numbers, underscore.'
+    if (!/^[A-Za-z0-9_]{3,20}$/.test(username)) {
+      return 'Use 3-20 chars: letters, numbers, underscore.'
     }
     return null
   }, [username])
@@ -119,7 +119,7 @@ export function Onboarding() {
               </div>
               <input
                 value={username}
-                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20))}
+                onChange={(e) => setUsername(e.target.value.replace(/[^A-Za-z0-9_]/g, '').slice(0, 20))}
                 placeholder="your_handle"
                 className="mt-2 w-full rounded-xl border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-stone-800"
               />
