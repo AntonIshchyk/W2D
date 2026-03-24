@@ -4,14 +4,12 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { fetchCurrentUser } from '../lib/auth'
-import { setAuthToken } from '../hooks/useAuthSync'
+import { setAuthToken, setOnboardingPending } from '../hooks/useAuthSync'
 import { PhotoUpload } from './PhotoUpload'
 
 interface LoginResponse {
   token: string
 }
-
-const ONBOARDING_PENDING_KEY = 'onboarding_pending'
 
 export function Onboarding() {
   const navigate = useNavigate()
@@ -35,7 +33,7 @@ export function Onboarding() {
     setProfilePhotoUrls(currentUser.profilePhotoUrl ? [currentUser.profilePhotoUrl] : [])
 
     if (!currentUser.onboardingCompleted) {
-      localStorage.setItem(ONBOARDING_PENDING_KEY, '1')
+      setOnboardingPending(true)
     }
   }, [currentUser])
 
@@ -76,7 +74,7 @@ export function Onboarding() {
     },
     onSuccess: (data) => {
       setAuthToken(data.token)
-      localStorage.removeItem(ONBOARDING_PENDING_KEY)
+      setOnboardingPending(false)
       toast.success('Profile is ready!')
       navigate('/')
     },
@@ -98,7 +96,7 @@ export function Onboarding() {
   }
 
   if (currentUser.onboardingCompleted) {
-    localStorage.removeItem(ONBOARDING_PENDING_KEY)
+    setOnboardingPending(false)
     return <Navigate to="/" replace />
   }
 

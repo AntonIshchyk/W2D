@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import { toast } from 'sonner'
 import { API_ENDPOINTS } from '../config/api'
-import { setAuthToken } from '../hooks/useAuthSync'
+import { setAuthToken, setOnboardingPending } from '../hooks/useAuthSync'
 
 interface LoginResponse {
   token: string
@@ -33,12 +33,12 @@ export function Login() {
       setAuthToken(data.token)
 
       if (!data.isOnboardingComplete) {
-        localStorage.setItem('onboarding_pending', '1')
+        setOnboardingPending(true)
         navigate('/onboarding')
         return
       }
 
-      localStorage.removeItem('onboarding_pending')
+      setOnboardingPending(false)
       navigate('/')
     },
     onError: (error: Error) => {

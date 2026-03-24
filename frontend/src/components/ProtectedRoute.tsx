@@ -1,14 +1,14 @@
 import React, { useMemo } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { isTokenExpired } from '../lib/auth'
-import { clearAuthToken } from '../hooks/useAuthSync'
+import { clearAuthToken, getOnboardingPending } from '../hooks/useAuthSync'
 
 export const ProtectedRoute = React.memo(({ children }: { children: React.ReactNode }) => {
   const location = useLocation()
   
   // Cache localStorage reads
   const token = localStorage.getItem('token')
-  const isOnboardingPending = localStorage.getItem('onboarding_pending') === '1'
+  const isOnboardingPending = getOnboardingPending()
 
   // Memoize navigation logic
   const navigationTarget = useMemo(() => {
