@@ -1,14 +1,23 @@
 import React, { useMemo } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { isTokenExpired } from '../lib/auth'
-import { clearAuthToken, getOnboardingPending } from '../hooks/useAuthSync'
+import { clearAuthToken } from '../hooks/useAuthSync'
+import { fetchCurrentUser } from '../lib/auth'
 
 export const ProtectedRoute = React.memo(({ children }: { children: React.ReactNode }) => {
   const location = useLocation()
   
   // Cache localStorage reads
   const token = localStorage.getItem('token')
-  const isOnboardingPending = getOnboardingPending()
+  
+  // Use server-side onboarding state
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: fetchCurrentUser,
+    enabled: !!token && !isTokenExpired(token ?? ''),
+    retry: false,
+  })
 
   // Memoize navigation logic
   const navigationTarget = useMemo(() => {
@@ -17,12 +26,16 @@ export const ProtectedRoute = React.memo(({ children }: { children: React.ReactN
       return '/login'
     }
     
+    if (!currentUser) return null // Still loading user data
+    
     const isOnOnboarding = location.pathname === '/onboarding'
-    if (isOnboardingPending && !isOnOnboarding) return '/onboarding'
-    if (!isOnboardingPending && isOnOnboarding) return '/'
+    const isOnboardingComplete = currentUser.onboardingCompleted
+    
+    if (!isOnboardingComplete && !isOnOnboarding) return '/onboarding'
+    if (isOnboardingComplete && isOnOnboarding) return '/'
     
     return null
-  }, [token, isTokenExpired, isOnboardingPending, location.pathname])
+  }, [token, currentUser, location.pathname])
 
   if (navigationTarget) {
     return <Navigate to={navigationTarget} replace />

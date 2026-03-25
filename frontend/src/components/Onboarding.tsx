@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { fetchCurrentUser } from '../lib/auth'
-import { setAuthToken, setOnboardingPending } from '../hooks/useAuthSync'
+import { setAuthToken } from '../hooks/useAuthSync'
 import { PhotoUpload } from './PhotoUpload'
 
 interface LoginResponse {
@@ -13,6 +13,7 @@ interface LoginResponse {
 
 export function Onboarding() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   // State grouped together
   const [profile, setProfile] = useState({
@@ -38,10 +39,6 @@ export function Onboarding() {
       bio: currentUser.bio ?? '',
       profilePhotoUrls: currentUser.profilePhotoUrl ? [currentUser.profilePhotoUrl] : [],
     })
-
-    if (!currentUser.onboardingCompleted) {
-      setOnboardingPending(true)
-    }
   }, [currentUser])
 
   const handleInputChange = useCallback(
@@ -69,12 +66,11 @@ export function Onboarding() {
         throw new Error(body.message ?? 'Failed to complete onboarding')
       }
 
-      return response.json() as Promise<LoginResponse>
+      return response.json()
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({ queryKey: ['currentUser'] })
       setAuthToken(data.token)
-      setOnboardingPending(false)
-      toast.success('Profile is ready!')
       navigate('/')
     },
     onError: (error: Error) => {
@@ -92,7 +88,6 @@ export function Onboarding() {
 
   if (isError || !currentUser) return <Navigate to="/login" replace />
   if (currentUser.onboardingCompleted) {
-    setOnboardingPending(false)
     return <Navigate to="/" replace />
   }
 

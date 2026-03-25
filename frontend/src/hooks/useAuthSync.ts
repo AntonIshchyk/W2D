@@ -1,8 +1,6 @@
 import { useEffect, useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 
-const ONBOARDING_PENDING_KEY = 'onboarding_pending'
-
 /**
  * Hook that clears React Query cache whenever the authentication token changes.
  * This ensures that cached data from a previous user session is not shown to a new user.
@@ -58,17 +56,4 @@ export function setAuthToken(token: string) {
 export function clearAuthToken() {
   localStorage.removeItem('token')
   window.dispatchEvent(new Event('token-changed'))
-}
-
-export function setOnboardingPending(isPending: boolean) {
-  if (isPending) {
-    localStorage.setItem(ONBOARDING_PENDING_KEY, '1')
-    return
-  }
-
-  localStorage.removeItem(ONBOARDING_PENDING_KEY)
-}
-
-export function getOnboardingPending() {
-  return localStorage.getItem(ONBOARDING_PENDING_KEY) === '1'
 }

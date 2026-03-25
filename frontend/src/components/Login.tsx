@@ -3,11 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import { toast } from 'sonner'
 import { API_ENDPOINTS } from '../config/api'
-import { setAuthToken, setOnboardingPending } from '../hooks/useAuthSync'
+import { setAuthToken } from '../hooks/useAuthSync'
 
 interface LoginResponse {
   token: string
-  isOnboardingComplete: boolean
 }
 
 export function Login() {
@@ -31,14 +30,6 @@ export function Login() {
     },
     onSuccess: (data) => {
       setAuthToken(data.token)
-
-      if (!data.isOnboardingComplete) {
-        setOnboardingPending(true)
-        navigate('/onboarding')
-        return
-      }
-
-      setOnboardingPending(false)
       navigate('/')
     },
     onError: (error: Error) => {
