@@ -20,19 +20,21 @@ export function ProfileSetup() {
   })
 
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   const { data: currentUser, isLoading: isUserLoading, isError } = useCurrentUser()
 
   // Initialize state from user data
   useEffect(() => {
-    if (!currentUser) return
+    if (!currentUser || isInitialized) return
 
     setProfile({
       username: currentUser.profileSetupComplete ? (currentUser.username ?? '') : '',
       bio: currentUser.bio ?? '',
       profilePhotoUrls: currentUser.profilePhotoUrl ? [currentUser.profilePhotoUrl] : [],
     })
-  }, [currentUser])
+    setIsInitialized(true)
+  }, [currentUser, isInitialized])
 
   const handleInputChange = useCallback(
     (field: keyof typeof profile, value: string | string[]) => {
