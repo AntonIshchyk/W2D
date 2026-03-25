@@ -22,11 +22,11 @@ export const ProtectedRoute = React.memo(({ children }: { children: React.ReactN
     
     if (!currentUser) return null // Still loading user data
     
-    const isOnOnboarding = location.pathname === '/onboarding'
-    const isOnboardingComplete = currentUser.onboardingCompleted
+    const isProfileSetup = location.pathname === '/profile-setup'
+    const isSetupComplete = currentUser.onboardingCompleted
     
-    if (!isOnboardingComplete && !isOnOnboarding) return '/onboarding'
-    if (isOnboardingComplete && isOnOnboarding) return '/'
+    if (!isSetupComplete && !isProfileSetup) return '/profile-setup'
+    if (isSetupComplete && isProfileSetup) return '/'
     
     return null
   }, [token, currentUser, location.pathname])

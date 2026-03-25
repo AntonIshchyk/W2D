@@ -8,7 +8,7 @@ import { PhotoUpload } from './PhotoUpload'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 
 
-export function Onboarding() {
+export function ProfileSetup() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
@@ -74,7 +74,7 @@ export function Onboarding() {
   if (isUserLoading) {
     return (
       <div className="min-h-screen bg-stone-100 flex items-center justify-center">
-        <p className="text-sm text-stone-500">Preparing onboarding...</p>
+        <p className="text-sm text-stone-500">Preparing profile setup...</p>
       </div>
     )
   }
@@ -108,7 +108,7 @@ export function Onboarding() {
       <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-2">
         {/* Form Section */}
         <section className="rounded-3xl border border-stone-200 bg-white p-6 md:p-8 shadow-sm">
-          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-stone-400">Onboarding</p>
+          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-stone-400">Profile Setup</p>
           <h1 className="mt-2 text-3xl font-black tracking-tight text-stone-900">Set up your profile</h1>
           <p className="mt-2 text-sm text-stone-500">Pick your username and add a short bio.</p>
 
@@ -159,7 +159,7 @@ export function Onboarding() {
               onClick={handleSubmit}
               className="w-full rounded-xl bg-stone-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-300"
             >
-              {completeMutation.isPending ? 'Saving...' : 'Finish onboarding'}
+              {completeMutation.isPending ? 'Saving...' : 'Finish setup'}
             </button>
           </div>
         </section>

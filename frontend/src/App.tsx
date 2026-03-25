@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { Login } from './components/Login'
-import { Onboarding } from './components/Onboarding'
+import { ProfileSetup } from './components/ProfileSetup'
 import { Home } from './components/Home'
 import { Profile } from './components/Profile'
 import { Communities } from './components/Communities'
@@ -23,7 +23,7 @@ function App() {
       <Toaster position="top-center" richColors />
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+        <Route path="/profile-setup" element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
         <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/communities" element={<ProtectedRoute><Communities /></ProtectedRoute>} />
