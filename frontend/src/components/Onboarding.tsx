@@ -7,9 +7,6 @@ import { fetchCurrentUser } from '../lib/auth'
 import { setAuthToken } from '../hooks/useAuthSync'
 import { PhotoUpload } from './PhotoUpload'
 
-interface LoginResponse {
-  token: string
-}
 
 export function Onboarding() {
   const navigate = useNavigate()
