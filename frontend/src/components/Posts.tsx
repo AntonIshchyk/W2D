@@ -140,25 +140,21 @@ function PostCard({
             <p className="text-sm font-semibold text-foreground/90 leading-tight">
               {post.author?.username || 'Anonymous'}
             </p>
-            <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
-              <span>{formatRelativeTime(post.createdAt)}</span>
-              {post.communityName && (
-                <>
-                  <span className="w-1 h-1 rounded-full bg-border"></span>
-                  <span className="font-medium text-foreground/70 hover:text-primary transition-colors cursor-pointer">
-                    {post.communityName}
-                  </span>
-                </>
-              )}
-            </p>
           </div>
         </div>
 
-        {typeStyle && (
-          <span className={cn("px-3 py-1 rounded-full text-xs font-semibold border", typeStyle.bg, typeStyle.text, typeStyle.border)}>
-            {POST_TYPE_LABELS[post.type as PostType]}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {post.communityName && (
+            <span className="px-3 py-1 rounded-full text-xs font-bold border bg-gray-900 text-white border-gray-900 cursor-pointer hover:bg-gray-800 transition-colors">
+              {post.communityName}
+            </span>
+          )}
+          {typeStyle && (
+            <span className={cn("px-3 py-1 rounded-full text-xs font-semibold border", typeStyle.bg, typeStyle.text, typeStyle.border)}>
+              {POST_TYPE_LABELS[post.type as PostType]}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Content */}
@@ -170,7 +166,7 @@ function PostCard({
         </Link>
         
         {post.description && (
-          <p className="text-muted-foreground text-sm md:text-base line-clamp-3 leading-relaxed">
+          <p className="text-foreground text-sm md:text-base line-clamp-3 leading-relaxed">
             {post.description}
           </p>
         )}
@@ -180,44 +176,54 @@ function PostCard({
 
       {/* Footer Actions Minimal */}
       <div className="flex items-center justify-between mt-5 pt-4 border-t border-border/40">
-        <div className="flex items-center gap-2 bg-muted/40 rounded-full p-1 border border-border/50">
-          <button
-            onClick={() => onVote(post.id, post.currentUserVote, 1)}
-            disabled={!currentUser}
-            className={cn(
-              "p-2 rounded-full transition-colors flex items-center justify-center",
-              post.currentUserVote === 1 ? "bg-orange-100 text-orange-600 dark:bg-orange-900/30" : "hover:bg-muted text-muted-foreground"
-            )}
-          >
-            <ArrowBigUp className="w-5 h-5" fill={post.currentUserVote === 1 ? "currentColor" : "none"} />
-          </button>
-          
-          <span className={cn(
-            "text-sm font-bold min-w-[2ch] text-center",
-            post.score > 0 ? "text-orange-600" : post.score < 0 ? "text-blue-600" : "text-foreground"
-          )}>
-            {post.score}
-          </span>
+        <div className="flex items-center gap-3">
+          {/* Upvotes */}
+          <div className="flex items-center gap-1 bg-muted/40 rounded-full p-1 border border-border/50">
+            <button
+              onClick={() => onVote(post.id, post.currentUserVote, 1)}
+              disabled={!currentUser}
+              className={cn(
+                "p-1.5 rounded-full transition-colors flex items-center justify-center",
+                post.currentUserVote === 1 ? "bg-orange-100 text-orange-600 dark:bg-orange-900/30" : "hover:bg-muted text-muted-foreground"
+              )}
+            >
+              <ArrowBigUp className="w-5 h-5" fill={post.currentUserVote === 1 ? "currentColor" : "none"} />
+            </button>
+            
+            <span className={cn(
+              "text-sm font-bold min-w-[2ch] text-center",
+              post.score > 0 ? "text-orange-600" : post.score < 0 ? "text-blue-600" : "text-foreground"
+            )}>
+              {post.score}
+            </span>
 
-          <button
-            onClick={() => onVote(post.id, post.currentUserVote, -1)}
-            disabled={!currentUser}
-            className={cn(
-              "p-2 rounded-full transition-colors flex items-center justify-center",
-              post.currentUserVote === -1 ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30" : "hover:bg-muted text-muted-foreground"
-            )}
+            <button
+              onClick={() => onVote(post.id, post.currentUserVote, -1)}
+              disabled={!currentUser}
+              className={cn(
+                "p-1.5 rounded-full transition-colors flex items-center justify-center",
+                post.currentUserVote === -1 ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30" : "hover:bg-muted text-muted-foreground"
+              )}
+            >
+              <ArrowBigDown className="w-5 h-5" fill={post.currentUserVote === -1 ? "currentColor" : "none"} />
+            </button>
+          </div>
+
+          {/* Comments */}
+          <Link
+            to={`/posts/${post.id}`}
+            className="flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground hover:bg-muted/50 px-3 py-2 rounded-full transition-colors border border-transparent hover:border-border/50 bg-muted/40"
           >
-            <ArrowBigDown className="w-5 h-5" fill={post.currentUserVote === -1 ? "currentColor" : "none"} />
-          </button>
+            <MessageSquare className="w-4 h-4" />
+            <span>{post.commentCount}</span>
+          </Link>
+
+          {/* Time (Next to comments) */}
+          <div className="flex items-center gap-1.5 text-sm font-bold text-muted-foreground bg-muted/40 px-3 py-2 rounded-full border border-border/50">
+            <Clock className="w-4 h-4 opacity-70" />
+            <span>{formatRelativeTime(post.createdAt)}</span>
+          </div>
         </div>
-
-        <Link
-          to={`/posts/${post.id}`}
-          className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 px-4 py-2 rounded-full transition-colors border border-transparent hover:border-border/50"
-        >
-          <MessageSquare className="w-4 h-4" />
-          <span>{post.commentCount} Comments</span>
-        </Link>
       </div>
     </article>
   )
@@ -323,7 +329,7 @@ export function Posts() {
   return (
     <PageLayout>
       {/* Modern Filter Bar with integrated header */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 pb-6 mb-6 mt-2">
+      <div className="flex flex-col md:flex-row items-center justify-center gap-4 pb-6 mb-6 mt-2">
         <div className="flex items-center justify-center gap-3 overflow-x-auto no-scrollbar w-full md:w-auto">
             
             <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-full border border-border/50 shrink-0">
@@ -409,11 +415,11 @@ export function Posts() {
 
         {currentUser && (
           <Button 
-            className="rounded-full shadow-sm hover:shadow-md transition-all gap-2 px-6 shrink-0 w-full md:w-auto"
+            className="rounded-full shadow-sm hover:shadow-md transition-all px-6 shrink-0 w-full md:w-auto flex items-center justify-center bg-gray-900 text-white hover:bg-gray-800"
             onClick={() => navigate('/posts/create')}
           >
             <Plus className="h-4 w-4" />
-            Create Post
+            <span>Create Post</span>
           </Button>
         )}
       </div>
@@ -465,5 +471,3 @@ export function Posts() {
     </PageLayout>
   )
 }
-
-
