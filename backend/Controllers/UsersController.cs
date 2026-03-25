@@ -48,9 +48,9 @@ public class UsersController : ControllerBase
         });
     }
 
-    [HttpPut("onboarding")]
+    [HttpPut("me")]
     [Authorize]
-    public async Task<ActionResult<LoginResponse>> CompleteOnboarding([FromBody] OnboardingUpdateRequest request)
+    public async Task<ActionResult<LoginResponse>> UpdateUserProfile([FromBody] UpdateUserProfileRequest request)
     {
         int userId = User.GetUserId();
 
@@ -69,7 +69,7 @@ public class UsersController : ControllerBase
             return Conflict(new { message = "Username is already taken" });
         }
 
-        User updatedUser = await _userService.CompleteOnboardingAsync(userId, request);
+        User updatedUser = await _userService.UpdateUserProfileAsync(userId, request);
 
         LoginResponse response = _userService.GenerateTokenForUser(updatedUser);
 

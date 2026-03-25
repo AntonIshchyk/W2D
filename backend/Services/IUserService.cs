@@ -10,7 +10,7 @@ public interface IUserService
     Task<User?> GetUserByIdAsync(int id);
     Task<User?> GetUserByEmailAsync(string email);
     Task<bool> IsUsernameTakenAsync(string username);
-    Task<User> CompleteOnboardingAsync(int userId, OnboardingUpdateRequest request);
+    Task<User> UpdateUserProfileAsync(int userId, UpdateUserProfileRequest request);
     LoginResponse GenerateTokenForUser(User user);
     Task<LoginResponse?> RegisterUserAsync(string email);
 }

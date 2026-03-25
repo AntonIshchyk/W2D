@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Contracts.Users;
 
-public class OnboardingUpdateRequest
+public class UpdateUserProfileRequest
 {
     [Required]
     [RegularExpression("^[A-Za-z0-9_]{3,20}$")]

@@ -41,10 +41,10 @@ export function ProfileSetup() {
     []
   )
 
-  // Mutation to complete onboarding
+  // Mutation to update user profile
   const completeMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(API_ENDPOINTS.users.onboarding, {
+      const response = await fetch(API_ENDPOINTS.users.me, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({

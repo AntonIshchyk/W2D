@@ -57,7 +57,7 @@ public class UserService : IUserService
         return GenerateTokenForUser(user);
     }
 
-    public async Task<User> CompleteOnboardingAsync(int userId, OnboardingUpdateRequest request)
+    public async Task<User> UpdateUserProfileAsync(int userId, UpdateUserProfileRequest request)
     {
         User user = await _context.Users.FirstAsync(u => u.Id == userId);
 
