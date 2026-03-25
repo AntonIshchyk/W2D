@@ -9,13 +9,18 @@ export const PostType = {
 
 export type PostType = typeof PostType[keyof typeof PostType]
 
+export interface UserSummary {
+  id: number
+  username: string
+  profilePhotoUrl?: string
+}
+
 export interface Post {
   id: number
   title: string
   description: string
   type: PostType
-  userId: number
-  userName?: string
+  author?: UserSummary
   topicId: number
   communityName?: string
   score: number

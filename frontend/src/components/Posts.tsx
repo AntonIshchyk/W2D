@@ -4,10 +4,9 @@ import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
   ArrowBigUp, ArrowBigDown, MessageSquare,
-  Plus, Check, ChevronsUpDown, ImageIcon
+  Plus, Check, ChevronsUpDown, ImageIcon, Flame, Clock, TrendingUp, Filter
 } from 'lucide-react'
 import { Button } from './ui/button'
-import { Tabs, TabsList, TabsTrigger } from './ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Skeleton } from './ui/skeleton'
 import { PageLayout } from './Navbar'
@@ -71,76 +70,45 @@ const POST_TYPE_LABELS: Record<PostType, string> = {
   [PostType.Challenge]: 'Challenge'
 }
 
-const POST_TYPE_COLORS: Record<PostType, { bg: string; text: string }> = {
-  [PostType.ExperienceShare]: { bg: '#dbeafe', text: '#1e40af' },
-  [PostType.Guide]:           { bg: '#dcfce7', text: '#166534' },
-  [PostType.Question]:        { bg: '#fef9c3', text: '#854d0e' },
-  [PostType.Recommendation]:  { bg: '#f3e8ff', text: '#6b21a8' },
-  [PostType.Achievement]:     { bg: '#ffedd5', text: '#9a3412' },
-  [PostType.Challenge]:       { bg: '#fee2e2', text: '#991b1b' },
+const POST_TYPE_COLORS: Record<PostType, { bg: string; text: string, border: string }> = {
+  [PostType.ExperienceShare]: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
+  [PostType.Guide]:           { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+  [PostType.Question]:        { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
+  [PostType.Recommendation]:  { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
+  [PostType.Achievement]:     { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' },
+  [PostType.Challenge]:       { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
 }
 
-// ── Photo grid for feed cards ─────────────────────────────────────────────────
+// ── Photo Grid (Compact style) ──────────────────────────────────────────────
 
-function PhotoGrid({ urls, onClick }: { urls: string[]; onClick?: (i: number) => void }) {
+function PhotoGrid({ urls }: { urls: string[] }) {
   if (urls.length === 0) return null
 
-  // 1 photo — wide
-  if (urls.length === 1) {
-    return (
-      <div
-        className="mt-3 rounded-xl overflow-hidden cursor-pointer"
-        onClick={() => onClick?.(0)}
-      >
-        <img src={urls[0]} alt="" className="w-full max-h-80 object-cover" />
-      </div>
-    )
-  }
-
-  // 2 photos — side by side
-  if (urls.length === 2) {
-    return (
-      <div className="mt-3 grid grid-cols-2 gap-1 rounded-xl overflow-hidden cursor-pointer">
-        {urls.map((url, i) => (
-          <img key={i} src={url} alt="" className="w-full h-48 object-cover" onClick={() => onClick?.(i)} />
-        ))}
-      </div>
-    )
-  }
-
-  // 3 photos — one large left, two stacked right
-  if (urls.length === 3) {
-    return (
-      <div className="mt-3 grid grid-cols-2 gap-1 rounded-xl overflow-hidden cursor-pointer" style={{ height: 240 }}>
-        <img src={urls[0]} alt="" className="w-full h-full object-cover" onClick={() => onClick?.(0)} />
-        <div className="grid grid-rows-2 gap-1">
-          <img src={urls[1]} alt="" className="w-full h-full object-cover" onClick={() => onClick?.(1)} />
-          <img src={urls[2]} alt="" className="w-full h-full object-cover" onClick={() => onClick?.(2)} />
-        </div>
-      </div>
-    )
-  }
-
-  // 4+ photos — 2x2 grid with overflow indicator
-  const shown = urls.slice(0, 4)
-  const extra = urls.length - 4
   return (
-    <div className="mt-3 grid grid-cols-2 gap-1 rounded-xl overflow-hidden cursor-pointer" style={{ height: 240 }}>
-      {shown.map((url, i) => (
-        <div key={i} className="relative" onClick={() => onClick?.(i)}>
-          <img src={url} alt="" className="w-full h-full object-cover" />
-          {i === 3 && extra > 0 && (
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <span className="text-white text-xl font-bold">+{extra}</span>
-            </div>
-          )}
+    <div className="mt-4 mb-2">
+      {urls.length === 1 ? (
+        <div className="rounded-2xl overflow-hidden shadow-sm border border-border/50 bg-muted/30">
+          <img src={urls[0]} alt="Post attachment" className="w-full max-h-[400px] object-cover hover:scale-[1.02] transition-transform duration-500" />
         </div>
-      ))}
+      ) : (
+        <div className="grid grid-cols-2 gap-2 rounded-2xl overflow-hidden shadow-sm border border-border/50">
+          {urls.slice(0, 4).map((url, i) => (
+            <div key={i} className="relative aspect-square">
+              <img src={url} alt={`Attachment ${i + 1}`} className="w-full h-full object-cover hover:scale-[1.05] transition-transform duration-500" />
+              {i === 3 && urls.length > 4 && (
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+                  <span className="text-white text-2xl font-semibold">+{urls.length - 4}</span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
 
-// ── Post card ─────────────────────────────────────────────────────────────────
+// ── Modern Post Card ────────────────────────────────────────────────────────
 
 function PostCard({
   post,
@@ -151,138 +119,120 @@ function PostCard({
   currentUser: any
   onVote: (postId: number, currentVote: number | undefined, newValue: number) => void
 }) {
-  const typeColor = POST_TYPE_COLORS[post.type as PostType]
-  const hasPhotos = post.photoUrls && post.photoUrls.length > 0
+  const typeStyle = POST_TYPE_COLORS[post.type as PostType]
 
   return (
-    <article className="bg-card border rounded-xl overflow-hidden hover:shadow-sm transition-shadow">
-      {/* Single hero image if only one photo — above the content */}
-      {hasPhotos && post.photoUrls.length === 1 && (
-        <Link to={`/posts/${post.id}`}>
-          <img
-            src={post.photoUrls[0]}
-            alt=""
-            className="w-full h-56 object-cover"
-          />
-        </Link>
-      )}
+    <article className="group bg-card border border-border/50 rounded-3xl p-5 md:p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 flex flex-col">
+      
+      {/* Header Info */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          {post.author?.profilePhotoUrl ? (
+            <img src={post.author.profilePhotoUrl} alt="User" className="h-10 w-10 rounded-full object-cover border border-primary/20 flex-shrink-0" />
+          ) : (
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center border border-primary/20 flex-shrink-0">
+              <span className="text-primary font-bold text-sm">
+                {post.author?.username ? post.author.username.substring(0, 2).toUpperCase() : 'AN'}
+              </span>
+            </div>
+          )}
+          <div>
+            <p className="text-sm font-semibold text-foreground/90 leading-tight">
+              {post.author?.username || 'Anonymous'}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
+              <span>{formatRelativeTime(post.createdAt)}</span>
+              {post.communityName && (
+                <>
+                  <span className="w-1 h-1 rounded-full bg-border"></span>
+                  <span className="font-medium text-foreground/70 hover:text-primary transition-colors cursor-pointer">
+                    {post.communityName}
+                  </span>
+                </>
+              )}
+            </p>
+          </div>
+        </div>
 
-      <div className="p-4 flex gap-3">
-        {/* Vote column */}
-        <div className="flex flex-col items-center gap-1 shrink-0 pt-0.5">
+        {typeStyle && (
+          <span className={cn("px-3 py-1 rounded-full text-xs font-semibold border", typeStyle.bg, typeStyle.text, typeStyle.border)}>
+            {POST_TYPE_LABELS[post.type as PostType]}
+          </span>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1">
+        <Link to={`/posts/${post.id}`}>
+          <h3 className="font-bold text-xl md:text-2xl text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
+            {post.title}
+          </h3>
+        </Link>
+        
+        {post.description && (
+          <p className="text-muted-foreground text-sm md:text-base line-clamp-3 leading-relaxed">
+            {post.description}
+          </p>
+        )}
+
+        <PhotosWrapper urls={post.photoUrls || []} postId={post.id} />
+      </div>
+
+      {/* Footer Actions Minimal */}
+      <div className="flex items-center justify-between mt-5 pt-4 border-t border-border/40">
+        <div className="flex items-center gap-2 bg-muted/40 rounded-full p-1 border border-border/50">
           <button
-            type="button"
             onClick={() => onVote(post.id, post.currentUserVote, 1)}
             disabled={!currentUser}
-            aria-label="Upvote"
             className={cn(
-              'w-7 h-7 flex items-center justify-center rounded-md transition-all',
-              post.currentUserVote === 1
-                ? 'text-orange-500 bg-orange-50'
-                : 'text-muted-foreground hover:text-orange-500 hover:bg-orange-50',
-              !currentUser && 'cursor-not-allowed opacity-40'
+              "p-2 rounded-full transition-colors flex items-center justify-center",
+              post.currentUserVote === 1 ? "bg-orange-100 text-orange-600 dark:bg-orange-900/30" : "hover:bg-muted text-muted-foreground"
             )}
           >
-            <ArrowBigUp className="w-5 h-5" fill={post.currentUserVote === 1 ? 'currentColor' : 'none'} />
+            <ArrowBigUp className="w-5 h-5" fill={post.currentUserVote === 1 ? "currentColor" : "none"} />
           </button>
-
+          
           <span className={cn(
-            'text-sm font-bold tabular-nums',
-            post.score > 0 ? 'text-orange-500' :
-            post.score < 0 ? 'text-blue-500' :
-            'text-muted-foreground'
+            "text-sm font-bold min-w-[2ch] text-center",
+            post.score > 0 ? "text-orange-600" : post.score < 0 ? "text-blue-600" : "text-foreground"
           )}>
             {post.score}
           </span>
 
           <button
-            type="button"
             onClick={() => onVote(post.id, post.currentUserVote, -1)}
             disabled={!currentUser}
-            aria-label="Downvote"
             className={cn(
-              'w-7 h-7 flex items-center justify-center rounded-md transition-all',
-              post.currentUserVote === -1
-                ? 'text-blue-500 bg-blue-50'
-                : 'text-muted-foreground hover:text-blue-500 hover:bg-blue-50',
-              !currentUser && 'cursor-not-allowed opacity-40'
+              "p-2 rounded-full transition-colors flex items-center justify-center",
+              post.currentUserVote === -1 ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30" : "hover:bg-muted text-muted-foreground"
             )}
           >
-            <ArrowBigDown className="w-5 h-5" fill={post.currentUserVote === -1 ? 'currentColor' : 'none'} />
+            <ArrowBigDown className="w-5 h-5" fill={post.currentUserVote === -1 ? "currentColor" : "none"} />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          {/* Meta row */}
-          <div className="flex items-center gap-1.5 flex-wrap mb-2">
-            {typeColor && (
-              <span
-                className="text-xs font-medium px-2 py-0.5 rounded-full"
-                style={{ background: typeColor.bg, color: typeColor.text }}
-              >
-                {POST_TYPE_LABELS[post.type as PostType]}
-              </span>
-            )}
-            {post.communityName && (
-              <span className="text-xs text-muted-foreground font-medium">
-                {post.communityName}
-              </span>
-            )}
-            <span className="text-xs text-muted-foreground/50 ml-auto">
-              {formatRelativeTime(post.createdAt)}
-            </span>
-          </div>
-
-          {/* Title */}
-          <Link to={`/posts/${post.id}`}>
-            <h3 className="font-semibold text-base leading-snug mb-1 hover:text-primary transition-colors line-clamp-2">
-              {post.title}
-            </h3>
-          </Link>
-
-          {/* Author */}
-          <p className="text-xs text-muted-foreground mb-2">
-            by {post.userName || 'Anonymous'}
-          </p>
-
-          {/* Description preview — skip if photo-dominant */}
-          {(!hasPhotos || post.photoUrls.length > 1) && (
-            <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed mb-2">
-              {post.description}
-            </p>
-          )}
-
-          {/* Multi-photo grid */}
-          {hasPhotos && post.photoUrls.length > 1 && (
-            <Link to={`/posts/${post.id}`}>
-              <PhotoGrid urls={post.photoUrls} />
-            </Link>
-          )}
-
-          {/* Footer */}
-          <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
-            {hasPhotos && post.photoUrls.length === 1 && (
-              <span className="flex items-center gap-1">
-                <ImageIcon className="h-3 w-3" />
-                1 photo
-              </span>
-            )}
-            <Link
-              to={`/posts/${post.id}`}
-              className="flex items-center gap-1 hover:text-foreground transition-colors ml-auto"
-            >
-              <MessageSquare className="h-3.5 w-3.5" />
-              <span>{post.commentCount}</span>
-            </Link>
-          </div>
-        </div>
+        <Link
+          to={`/posts/${post.id}`}
+          className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 px-4 py-2 rounded-full transition-colors border border-transparent hover:border-border/50"
+        >
+          <MessageSquare className="w-4 h-4" />
+          <span>{post.commentCount} Comments</span>
+        </Link>
       </div>
     </article>
   )
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
+function PhotosWrapper({ urls, postId }: { urls: string[], postId: number }) {
+  if (!urls.length) return null
+  return (
+    <Link to={`/posts/${postId}`} className="block">
+      <PhotoGrid urls={urls} />
+    </Link>
+  )
+}
+
+// ── Main Page Component ─────────────────────────────────────────────────────
 
 export function Posts() {
   const navigate = useNavigate()
@@ -314,6 +264,7 @@ export function Posts() {
   const voteMutation = useMutation({
     mutationFn: ({ postId, value }: { postId: number; value: number }) => votePost(postId, value),
     onMutate: async ({ postId, value }) => {
+      // Optmistic update code...
       const key = ['posts', selectedCommunity, selectedType, sortBy]
       await queryClient.cancelQueries({ queryKey: key })
       const previous = queryClient.getQueryData(key)
@@ -371,42 +322,46 @@ export function Posts() {
 
   return (
     <PageLayout>
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Posts</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Share experiences, ask questions, find tips</p>
-        </div>
-        {currentUser && (
-          <Button type="button" size="sm" className="gap-2 shrink-0" onClick={() => navigate('/posts/create')}>
-            <Plus className="h-4 w-4" />
-            New post
-          </Button>
-        )}
-      </div>
+      {/* Modern Filter Bar with integrated header */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 pb-6 mb-6 mt-2">
+        <div className="flex items-center justify-center gap-3 overflow-x-auto no-scrollbar w-full md:w-auto">
+            
+            <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-full border border-border/50 shrink-0">
+              <button
+                onClick={() => setSortBy('new')}
+                className={cn("px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2", sortBy === 'new' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}
+              >
+              <Clock className="w-4 h-4" /> New
+            </button>
+            <button
+              onClick={() => setSortBy('hot')}
+              className={cn("px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2", sortBy === 'hot' ? "bg-background shadow-sm text-orange-600" : "text-muted-foreground hover:text-foreground")}
+            >
+              <Flame className="w-4 h-4" /> Hot
+            </button>
+            <button
+              onClick={() => setSortBy('top')}
+              className={cn("px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2", sortBy === 'top' ? "bg-background shadow-sm text-blue-600" : "text-muted-foreground hover:text-foreground")}
+            >
+              <TrendingUp className="w-4 h-4" /> Top
+            </button>
+          </div>
 
-      {/* Sort + filters */}
-      <div className="mb-5 space-y-3">
-        <Tabs value={sortBy} onValueChange={setSortBy}>
-          <TabsList>
-            <TabsTrigger value="new">New</TabsTrigger>
-            <TabsTrigger value="hot">Hot</TabsTrigger>
-            <TabsTrigger value="top">Top</TabsTrigger>
-          </TabsList>
-        </Tabs>
+          <div className="h-8 w-px bg-border/50 mx-1 shrink-0"></div>
 
-        <div className="flex items-center gap-2 flex-wrap pb-4 border-b">
           <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" role="combobox" className="h-8 text-xs gap-1.5">
+              <Button variant="outline" className="rounded-full h-10 gap-2 shrink-0 border-border/60 hover:border-primary/50 transition-colors">
+                <Filter className="w-4 h-4 text-muted-foreground" />
                 {selectedCommunity
-                  ? communities?.find(c => c.id === selectedCommunity)?.name ?? 'Community'
-                  : 'All communities'}
-                <ChevronsUpDown className="h-3.5 w-3.5 opacity-50" />
+                  ? communities?.find(c => c.id === selectedCommunity)?.name
+                  : 'All Communities'}
+                <ChevronsUpDown className="h-3 w-3 opacity-50 ml-1" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-56 p-0" align="start">
+            <PopoverContent className="w-56 p-0 rounded-2xl" align="start">
               <Command>
-                <CommandInput placeholder="Search…" />
+                <CommandInput placeholder="Search communities…" className="h-10" />
                 <CommandList>
                   <CommandEmpty>No community found.</CommandEmpty>
                   <CommandGroup>
@@ -430,10 +385,10 @@ export function Posts() {
             value={selectedType?.toString() ?? 'all'}
             onValueChange={v => setSelectedType(v === 'all' ? undefined : Number(v))}
           >
-            <SelectTrigger className="h-8 text-xs w-36">
+            <SelectTrigger className="h-10 rounded-full border-border/60 shrink-0 w-[160px] hover:border-primary/50 transition-colors">
               <SelectValue placeholder="All types" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-2xl">
               <SelectItem value="all">All types</SelectItem>
               {Object.entries(POST_TYPE_LABELS).map(([value, label]) => (
                 <SelectItem key={value} value={value}>{label}</SelectItem>
@@ -441,41 +396,58 @@ export function Posts() {
             </SelectContent>
           </Select>
 
-          {(selectedCommunity || selectedType) && (
-            <Button type="button" variant="ghost" size="sm" className="h-8 text-xs ml-auto"
-              onClick={() => { setSelectedCommunity(undefined); setSelectedType(undefined) }}>
-              Clear
+          {(selectedCommunity !== undefined || selectedType !== undefined || sortBy !== 'new') && (
+            <Button 
+              variant="ghost" 
+              className="rounded-full h-10 px-4 text-muted-foreground hover:text-destructive shrink-0"
+              onClick={() => { setSelectedCommunity(undefined); setSelectedType(undefined); setSortBy('new') }}
+            >
+              Reset
             </Button>
           )}
         </div>
+
+        {currentUser && (
+          <Button 
+            className="rounded-full shadow-sm hover:shadow-md transition-all gap-2 px-6 shrink-0 w-full md:w-auto"
+            onClick={() => navigate('/posts/create')}
+          >
+            <Plus className="h-4 w-4" />
+            Create Post
+          </Button>
+        )}
       </div>
 
-      {/* Feed */}
-      <div className="max-w-2xl mx-auto space-y-3">
+      {/* Post Feed */}
+      <div className="max-w-3xl mx-auto space-y-6">
         {isLoading ? (
-          [...Array(4)].map((_, i) => (
-            <div key={i} className="border rounded-xl p-4 space-y-3">
-              <Skeleton className="h-4 w-1/4" />
-              <Skeleton className="h-5 w-3/4" />
-              <Skeleton className="h-32 w-full rounded-lg" />
+          [...Array(3)].map((_, i) => (
+            <div key={i} className="border border-border/40 rounded-3xl p-6 space-y-4 shadow-sm bg-card">
+              <div className="flex gap-4 items-center">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-1/4" />
+                  <Skeleton className="h-3 w-1/5" />
+                </div>
+              </div>
+              <Skeleton className="h-6 w-3/4 mt-4" />
+              <Skeleton className="h-24 w-full rounded-xl" />
             </div>
           ))
         ) : allPosts.length === 0 ? (
-          <div className="min-h-[55vh] flex items-center justify-center">
-            <div className="w-full">
-              <EmptyState
-                icon={MessageSquare}
-                title="No posts yet"
-                description={selectedCommunity || selectedType ? 'Try adjusting your filters' : 'Be the first to share something!'}
-                action={currentUser && !selectedCommunity && !selectedType ? {
-                  label: 'Create Post',
-                  onClick: () => navigate('/posts/create')
-                } : undefined}
-              />
-            </div>
+          <div className="py-20 text-center">
+            <EmptyState
+              icon={Filter}
+              title="No posts found"
+              description="There are no posts here yet. Try changing your filters or be the first to post!"
+              action={currentUser && !selectedCommunity && !selectedType ? {
+                label: 'Create Post',
+                onClick: () => navigate('/posts/create')
+              } : undefined}
+            />
           </div>
         ) : (
-          <>
+          <div className="grid gap-6">
             {allPosts.map(post => (
               <PostCard
                 key={post.id}
@@ -484,13 +456,14 @@ export function Posts() {
                 onVote={handleVote}
               />
             ))}
-            <div ref={observerTarget} className="h-10 flex items-center justify-center">
-              {isFetchingNextPage && <LoadingSpinner text="Loading more…" />}
+            <div ref={observerTarget} className="h-20 flex items-center justify-center">
+              {isFetchingNextPage && <LoadingSpinner text="Fetching more amazing content…" />}
             </div>
-          </>
+          </div>
         )}
       </div>
     </PageLayout>
   )
 }
+
 

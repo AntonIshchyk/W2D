@@ -1,3 +1,5 @@
+using Backend.Contracts.Users;
+
 namespace Backend.Contracts.Posts;
 
 public class PostResponse
@@ -6,8 +8,7 @@ public class PostResponse
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int Type { get; set; }
-    public int UserId { get; set; }
-    public string? UserName { get; set; }
+    public UserSummary? Author { get; set; }
     public int TopicId { get; set; }
     public string? CommunityName { get; set; }
     public int Score { get; set; }

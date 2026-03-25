@@ -243,7 +243,7 @@ export function PostDetail() {
   )
 
   const typeStyle = POST_TYPE_COLORS[post.type as PostType]
-  const isOwner = currentUser?.userId === post.userId
+  const isOwner = currentUser?.userId === post.author?.id
   const photos = post.photoUrls ?? []
 
   return (
@@ -330,7 +330,7 @@ export function PostDetail() {
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                <span>{post.userName || 'Anonymous'}</span>
+                <span>{post.author?.username || 'Anonymous'}</span>
                 <span className="text-gray-200">·</span>
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
