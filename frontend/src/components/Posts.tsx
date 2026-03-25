@@ -4,7 +4,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
   ArrowBigUp, ArrowBigDown, MessageSquare,
-  Plus, Check, ChevronsUpDown, ImageIcon, Flame, Clock, TrendingUp, Filter
+  Plus, Check, ChevronsUpDown, ImageIcon, Flame, Clock, TrendingUp, Filter,
+  HelpCircle, BookOpen, Map, ThumbsUp, Trophy, Target
 } from 'lucide-react'
 import { Button } from './ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
@@ -79,6 +80,15 @@ const POST_TYPE_COLORS: Record<PostType, { bg: string; text: string, border: str
   [PostType.Challenge]:       { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
 }
 
+const POST_TYPE_ICONS: Record<PostType, any> = {
+  [PostType.ExperienceShare]: BookOpen,
+  [PostType.Guide]: Map,
+  [PostType.Question]: HelpCircle,
+  [PostType.Recommendation]: ThumbsUp,
+  [PostType.Achievement]: Trophy,
+  [PostType.Challenge]: Target,
+}
+
 // ── Photo Grid (Compact style) ──────────────────────────────────────────────
 
 function PhotoGrid({ urls }: { urls: string[] }) {
@@ -140,6 +150,15 @@ function PostCard({
             <p className="text-sm font-semibold text-foreground/90 leading-tight">
               {post.author?.username || 'Anonymous'}
             </p>
+            {typeStyle && (() => {
+              const Icon = POST_TYPE_ICONS[post.type as PostType]
+              return (
+                <div className={cn("flex items-center gap-1 mt-0.5 text-xs font-medium", typeStyle.text)}>
+                  {Icon && <Icon className="w-3.5 h-3.5" />}
+                  <span>{POST_TYPE_LABELS[post.type as PostType]}</span>
+                </div>
+              )
+            })()}
           </div>
         </div>
 
@@ -147,11 +166,6 @@ function PostCard({
           {post.communityName && (
             <span className="px-3 py-1 rounded-full text-xs font-bold border bg-gray-900 text-white border-gray-900 cursor-pointer hover:bg-gray-800 transition-colors">
               {post.communityName}
-            </span>
-          )}
-          {typeStyle && (
-            <span className={cn("px-3 py-1 rounded-full text-xs font-semibold border", typeStyle.bg, typeStyle.text, typeStyle.border)}>
-              {POST_TYPE_LABELS[post.type as PostType]}
             </span>
           )}
         </div>
@@ -396,9 +410,17 @@ export function Posts() {
             </SelectTrigger>
             <SelectContent className="rounded-2xl">
               <SelectItem value="all">All types</SelectItem>
-              {Object.entries(POST_TYPE_LABELS).map(([value, label]) => (
-                <SelectItem key={value} value={value}>{label}</SelectItem>
-              ))}
+              {Object.entries(POST_TYPE_LABELS).map(([value, label]) => {
+                const Icon = POST_TYPE_ICONS[Number(value) as PostType]
+                return (
+                  <SelectItem key={value} value={value}>
+                    <div className="flex items-center gap-2">
+                      {Icon && <Icon className="w-4 h-4" />}
+                      <span>{label}</span>
+                    </div>
+                  </SelectItem>
+                )
+              })}
             </SelectContent>
           </Select>
 
