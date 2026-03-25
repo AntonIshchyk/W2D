@@ -1,9 +1,8 @@
 import React, { useMemo } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import { isTokenExpired } from '../lib/auth'
 import { clearAuthToken } from '../hooks/useAuthSync'
-import { fetchCurrentUser } from '../lib/auth'
+import { useCurrentUser } from '../hooks/useCurrentUser'
 
 export const ProtectedRoute = React.memo(({ children }: { children: React.ReactNode }) => {
   const location = useLocation()
@@ -12,12 +11,7 @@ export const ProtectedRoute = React.memo(({ children }: { children: React.ReactN
   const token = localStorage.getItem('token')
   
   // Use server-side onboarding state
-  const { data: currentUser } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: fetchCurrentUser,
-    enabled: !!token && !isTokenExpired(token ?? ''),
-    retry: false,
-  })
+  const { data: currentUser } = useCurrentUser()
 
   // Memoize navigation logic
   const navigationTarget = useMemo(() => {

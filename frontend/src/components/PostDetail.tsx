@@ -7,7 +7,7 @@ import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { PostType } from '../types/posts'
 import type { Post } from '../types/posts'
-import { fetchCurrentUser } from '../lib/auth'
+import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { formatDate } from '../lib/utils/date'
 import { Comments } from './Comments'
@@ -180,9 +180,7 @@ export function PostDetail() {
   const queryClient = useQueryClient()
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
-  const { data: currentUser, isError: userError, error: userQueryError } = useQuery({
-    queryKey: ['currentUser'], queryFn: fetchCurrentUser, retry: false,
-  })
+  const { data: currentUser, isError: userError, error: userQueryError } = useCurrentUser()
 
   const { data: post, isLoading, isError } = useQuery({
     queryKey: ['post', id],

@@ -1,15 +1,10 @@
-import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { PageLayout } from './Navbar'
-import { fetchCurrentUser } from '../lib/auth'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
+import { useCurrentUser } from '../hooks/useCurrentUser'
 
 export function Home() {
-  const { data: user, isLoading, isError, error: userError } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: fetchCurrentUser,
-    retry: false
-  })
+  const { data: user, isLoading, isError, error: userError } = useCurrentUser()
 
   useAuthErrorHandler(isError, userError)
 

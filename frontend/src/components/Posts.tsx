@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Skeleton } from './ui/skeleton'
 import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
-import { fetchCurrentUser } from '../lib/auth'
+import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { PostType } from '../types/posts'
 import type { Post, ScrollResult } from '../types/posts'
@@ -292,11 +292,7 @@ export function Posts() {
   const [communityOpen, setCommunityOpen]         = useState(false)
   const observerTarget = useRef<HTMLDivElement>(null)
 
-  const { data: currentUser, isError, error: userError } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: fetchCurrentUser,
-    retry: false,
-  })
+  const { data: currentUser, isError, error: userError } = useCurrentUser()
 
   const { data: communities } = useQuery({
     queryKey: ['communities'],

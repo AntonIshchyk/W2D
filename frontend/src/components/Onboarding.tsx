@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
-import { fetchCurrentUser } from '../lib/auth'
 import { setAuthToken } from '../hooks/useAuthSync'
 import { PhotoUpload } from './PhotoUpload'
+import { useCurrentUser } from '../hooks/useCurrentUser'
 
 
 export function Onboarding() {
@@ -21,11 +21,7 @@ export function Onboarding() {
 
   const [submitError, setSubmitError] = useState<string | null>(null)
 
-  const { data: currentUser, isLoading: isUserLoading, isError } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: fetchCurrentUser,
-    retry: false,
-  })
+  const { data: currentUser, isLoading: isUserLoading, isError } = useCurrentUser()
 
   // Initialize state from user data
   useEffect(() => {

@@ -1,6 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
 import { PageLayout } from './Navbar'
-import { fetchCurrentUser } from '../lib/auth'
+import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
@@ -8,11 +7,7 @@ import { Separator } from './ui/separator'
 import { Skeleton } from './ui/skeleton'
 
 export function Profile() {
-  const { data: user, isLoading, isError, error: userError } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: fetchCurrentUser,
-    retry: false
-  })
+  const { data: user, isLoading, isError, error: userError } = useCurrentUser()
 
   useAuthErrorHandler(isError, userError)
 

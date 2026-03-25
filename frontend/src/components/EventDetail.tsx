@@ -22,7 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { PageLayout } from './Navbar'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { cn } from '../lib/utils'
-import { fetchCurrentUser } from '../lib/auth'
+import { useCurrentUser } from '../hooks/useCurrentUser'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -265,12 +265,7 @@ export function EventDetail() {
   const [showEdit, setShowEdit]     = useState(false)
   const [showDelete, setShowDelete] = useState(false)
 
-  const { data: currentUser } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: fetchCurrentUser,
-    retry: false,
-    staleTime: 5 * 60 * 1000,
-  })
+  const { data: currentUser } = useCurrentUser()
 
   const { data: event, isLoading, isError } = useQuery({
     queryKey: ['event', eventId],

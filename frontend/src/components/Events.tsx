@@ -24,7 +24,7 @@ import { PAGINATION } from '../config/constants'
 import { EmptyState } from './ui/empty-state'
 import { LoadingSpinner } from './ui/loading-spinner'
 import { cn } from '../lib/utils'
-import { fetchCurrentUser } from '../lib/auth'
+import { useCurrentUser } from '../hooks/useCurrentUser'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -529,12 +529,7 @@ export function Events() {
   const [communityOpen, setCommunityOpen]         = useState(false)
   const observerTarget = useRef<HTMLDivElement>(null)
 
-  const { data: currentUser } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: fetchCurrentUser,
-    retry: false,
-    staleTime: 5 * 60 * 1000,
-  })
+  const { data: currentUser } = useCurrentUser()
 
   const { data: communities } = useQuery({ queryKey: ['communities-list'], queryFn: fetchCommunities })
   const { data: tags }       = useQuery({ queryKey: ['tags'], queryFn: fetchTags })
