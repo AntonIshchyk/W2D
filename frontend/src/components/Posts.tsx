@@ -8,6 +8,8 @@ import {
   HelpCircle, BookOpen, Map, ThumbsUp, Trophy, Target
 } from 'lucide-react'
 import { Button } from './ui/button'
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from './ui/dialog'
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Skeleton } from './ui/skeleton'
 import { PageLayout } from './Navbar'
@@ -89,31 +91,49 @@ const POST_TYPE_ICONS: Record<PostType, any> = {
   [PostType.Challenge]: Target,
 }
 
-// ── Photo Grid (Compact style) ──────────────────────────────────────────────
+// ── Photo Carousel ──────────────────────────────────────────────
 
-function PhotoGrid({ urls }: { urls: string[] }) {
-  if (urls.length === 0) return null
+function PostCarousel({ urls }: { urls: string[] }) {
+  if (!urls || urls.length === 0) return null
 
   return (
-    <div className="mt-4 mb-2">
-      {urls.length === 1 ? (
-        <div className="rounded-2xl overflow-hidden shadow-sm border border-border/50 bg-muted/30">
-          <img src={urls[0]} alt="Post attachment" className="w-full max-h-[400px] object-cover hover:scale-[1.02] transition-transform duration-500" />
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-2 rounded-2xl overflow-hidden shadow-sm border border-border/50">
-          {urls.slice(0, 4).map((url, i) => (
-            <div key={i} className="relative aspect-square">
-              <img src={url} alt={`Attachment ${i + 1}`} className="w-full h-full object-cover hover:scale-[1.05] transition-transform duration-500" />
-              {i === 3 && urls.length > 4 && (
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-                  <span className="text-white text-2xl font-semibold">+{urls.length - 4}</span>
-                </div>
-              )}
-            </div>
+    <div className="mt-4 mb-2 md:px-0" onClick={(e) => e.preventDefault()}>
+      <Carousel className="w-full">
+        <CarouselContent>
+          {urls.map((url, i) => (
+            <CarouselItem key={i}>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="relative w-full h-[300px] md:h-[450px] flex items-center justify-center bg-black/95 rounded-2xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity">
+                    <img 
+                      src={url} 
+                      alt={`Attachment ${i + 1}`} 
+                      className="max-w-full max-h-full object-contain"
+                    />
+                    {urls.length > 1 && (
+                      <div className="absolute top-3 right-3 bg-black/60 text-white text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-md">
+                        {i + 1} / {urls.length}
+                      </div>
+                    )}
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-[95vw] sm:max-w-[90vw] md:max-w-[80vw] h-[90vh] p-0 border-0 bg-transparent flex flex-col justify-center shadow-none">
+                  <DialogTitle className="sr-only">Image View</DialogTitle>
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    <img src={url} className="max-w-full max-h-full object-contain" alt="Fullscreen view" />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </CarouselItem>
           ))}
-        </div>
-      )}
+        </CarouselContent>
+        {urls.length > 1 && (
+          <div className="absolute inset-y-0 left-2 right-2 flex items-center justify-between pointer-events-none">
+            <CarouselPrevious className="relative inset-0 translate-x-0 translate-y-0 bg-black/50 text-white border-0 hover:bg-black/80 hover:text-white pointer-events-auto" />
+            <CarouselNext className="relative inset-0 translate-x-0 translate-y-0 bg-black/50 text-white border-0 hover:bg-black/80 hover:text-white pointer-events-auto" />
+          </div>
+        )}
+      </Carousel>
     </div>
   )
 }
@@ -185,7 +205,7 @@ function PostCard({
           </p>
         )}
 
-        <PhotosWrapper urls={post.photoUrls || []} postId={post.id} />
+        <PostCarousel urls={post.photoUrls || []} />
       </div>
 
       {/* Footer Actions Minimal */}
@@ -240,15 +260,6 @@ function PostCard({
         </div>
       </div>
     </article>
-  )
-}
-
-function PhotosWrapper({ urls, postId }: { urls: string[], postId: number }) {
-  if (!urls.length) return null
-  return (
-    <Link to={`/posts/${postId}`} className="block">
-      <PhotoGrid urls={urls} />
-    </Link>
   )
 }
 
