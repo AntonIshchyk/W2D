@@ -28,7 +28,7 @@ export function ProfileSetup() {
     if (!currentUser) return
 
     setProfile({
-      username: currentUser.onboardingCompleted ? (currentUser.username ?? '') : '',
+      username: currentUser.profileSetupComplete ? (currentUser.username ?? '') : '',
       bio: currentUser.bio ?? '',
       profilePhotoUrls: currentUser.profilePhotoUrl ? [currentUser.profilePhotoUrl] : [],
     })
@@ -56,7 +56,7 @@ export function ProfileSetup() {
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}))
-        throw new Error(body.message ?? 'Failed to complete onboarding')
+        throw new Error(body.message ?? 'Failed to update profile')
       }
 
       return response.json()
@@ -80,7 +80,7 @@ export function ProfileSetup() {
   }
 
   if (isError || !currentUser) return <Navigate to="/login" replace />
-  if (currentUser.onboardingCompleted) {
+  if (currentUser.profileSetupComplete) {
     return <Navigate to="/" replace />
   }
 

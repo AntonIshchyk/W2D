@@ -66,7 +66,7 @@ public class UserService : IUserService
         user.Username = trimmedUsername;
         user.Bio = string.IsNullOrWhiteSpace(request.Bio) ? null : request.Bio.Trim();
         user.ProfilePhotoUrl = string.IsNullOrWhiteSpace(request.ProfilePhotoUrl) ? null : request.ProfilePhotoUrl.Trim();
-        user.OnboardingCompleted = true;
+        user.ProfileSetupComplete = true;
 
         await _context.SaveChangesAsync();
         return user;

@@ -7,7 +7,7 @@ export interface UserInfo {
   username: string
   bio?: string | null
   profilePhotoUrl?: string | null
-  onboardingCompleted: boolean
+  profileSetupComplete: boolean
 }
 
 export class ApiError extends Error {

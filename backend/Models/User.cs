@@ -15,7 +15,7 @@ public class User : BaseModel
     [MaxLength(500)]
     public string? ProfilePhotoUrl { get; set; }
 
-    public bool OnboardingCompleted { get; set; } = false;
+    public bool ProfileSetupComplete { get; set; } = false;
 
     [Required]
     [EmailAddress]

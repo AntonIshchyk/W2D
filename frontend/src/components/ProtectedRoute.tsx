@@ -10,7 +10,7 @@ export const ProtectedRoute = React.memo(({ children }: { children: React.ReactN
   // Cache localStorage reads
   const token = localStorage.getItem('token')
   
-  // Use server-side onboarding state
+  // Use server-side profile setup state
   const { data: currentUser } = useCurrentUser()
 
   // Memoize navigation logic
@@ -23,7 +23,7 @@ export const ProtectedRoute = React.memo(({ children }: { children: React.ReactN
     if (!currentUser) return null // Still loading user data
     
     const isProfileSetup = location.pathname === '/profile-setup'
-    const isSetupComplete = currentUser.onboardingCompleted
+    const isSetupComplete = currentUser.profileSetupComplete
     
     if (!isSetupComplete && !isProfileSetup) return '/profile-setup'
     if (isSetupComplete && isProfileSetup) return '/'
