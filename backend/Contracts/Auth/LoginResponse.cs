@@ -7,7 +7,7 @@ public class LoginResponse
     public string? Username { get; set; }
     public string? Bio { get; set; }
     public string? ProfilePhotoUrl { get; set; }
-    public bool IsOnboardingComplete { get; set; }
+    public bool OnboardingCompleted { get; set; }
     public bool IsAdmin { get; set; }
     public string Token { get; set; } = null!;
 }
