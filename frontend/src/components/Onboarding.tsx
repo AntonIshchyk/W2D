@@ -28,7 +28,7 @@ export function Onboarding() {
     if (!currentUser) return
 
     setProfile({
-      username: currentUser.username ?? '',
+      username: currentUser.onboardingCompleted ? (currentUser.username ?? '') : '',
       bio: currentUser.bio ?? '',
       profilePhotoUrls: currentUser.profilePhotoUrl ? [currentUser.profilePhotoUrl] : [],
     })
