@@ -69,9 +69,9 @@ export function Navbar() {
   ]
 
   return (
-    <nav className="fixed left-0 top-0 bottom-0 w-18 bg-gray-900 flex flex-col items-center py-6 z-50">
+    <nav className="fixed left-0 top-0 bottom-0 w-18 bg-card flex flex-col items-center py-6 z-50 shadow-sm border-r border-border">
       {/* Logo */}
-      <Link to="/" className="text-white font-black text-lg tracking-tighter mb-10 hover:opacity-80 transition-opacity">
+      <Link to="/" className="text-card-foreground font-black text-lg tracking-tighter mb-10 hover:opacity-80 transition-opacity">
         W2D
       </Link>
 
@@ -83,13 +83,13 @@ export function Navbar() {
             to={item.path}
             className={`group relative w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 ${
               item.active
-                ? 'bg-white text-gray-900 shadow-lg shadow-white/10'
-                : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/10'
+                : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
             }`}
           >
             {item.icon}
             {/* Tooltip */}
-            <span className="absolute left-full ml-3 px-2.5 py-1 bg-gray-800 text-white text-xs rounded-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-lg">
+            <span className="absolute left-full ml-3 px-2.5 py-1 bg-popover text-popover-foreground text-xs rounded-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-lg border border-border">
               {item.label}
             </span>
           </Link>
@@ -99,12 +99,12 @@ export function Navbar() {
       {/* Logout at bottom */}
       <button
         onClick={handleLogout}
-        className="group relative w-11 h-11 rounded-xl flex items-center justify-center text-gray-500 hover:text-red-400 hover:bg-gray-800 transition-all duration-200"
+        className="group relative w-11 h-11 rounded-xl flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-secondary transition-all duration-200"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
         </svg>
-        <span className="absolute left-full ml-3 px-2.5 py-1 bg-gray-800 text-white text-xs rounded-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-lg">
+        <span className="absolute left-full ml-3 px-2.5 py-1 bg-popover text-popover-foreground text-xs rounded-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-lg border border-border">
           Logout
         </span>
       </button>
@@ -115,7 +115,7 @@ export function Navbar() {
 /** Layout wrapper that accounts for the sidebar */
 export function PageLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-gray-50 pl-18">
+    <div className="min-h-screen bg-background text-foreground pl-18">
       <Navbar />
       <div className="p-6 lg:p-10">
         <div className="max-w-6xl mx-auto">

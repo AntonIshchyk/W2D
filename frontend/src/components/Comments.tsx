@@ -179,8 +179,8 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
                 </button>
                 <button type="button" onClick={() => submitReply(comment.id)}
                   disabled={(!replyDrafts[comment.id]?.trim() && !replyPhotos[comment.id]) || createPending}
-                  className="px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                  {createPending ? 'Posting…' : 'Reply'}
+                  className="px-3 py-1.5 bg-primary text-primary-foreground text-xs rounded-lg hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                  {createPending ? 'Posting...' : 'Reply'}
                 </button>
               </div>
             </div>
@@ -342,9 +342,9 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
             <button
               type="submit"
               disabled={!canSubmit}
-              className="px-4 py-1.5 bg-gray-900 text-white text-xs rounded-lg hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-1.5 bg-primary text-primary-foreground text-xs rounded-lg hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              {createMutation.isPending ? 'Posting…' : 'Post comment'}
+              {createMutation.isPending ? 'Posting...' : 'Post comment'}
             </button>
           </div>
           {createMutation.isError && (

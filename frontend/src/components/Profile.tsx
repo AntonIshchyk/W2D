@@ -40,7 +40,7 @@ export function Profile() {
           <CardHeader className="-mt-10 relative">
             <Avatar className="h-20 w-20 border-4 border-background shadow-lg">
               {user.profilePhotoUrl && <AvatarImage src={user.profilePhotoUrl} alt={user.username} />}
-              <AvatarFallback className="bg-linear-to-br from-primary to-primary/70 text-white text-2xl font-bold">
+                <AvatarFallback className="bg-linear-to-br from-primary to-primary/70 text-primary-foreground text-2xl font-bold">
                 {user.username.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>

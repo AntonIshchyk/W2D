@@ -184,7 +184,7 @@ function PostCard({
 
         <div className="flex items-center gap-2">
           {post.communityName && (
-            <span className="px-3 py-1 rounded-full text-xs font-bold border bg-gray-900 text-white border-gray-900 cursor-pointer hover:bg-gray-800 transition-colors">
+            <span className="px-3 py-1 rounded-full text-xs font-bold border bg-primary text-primary-foreground border-primary cursor-pointer hover:bg-primary/90 transition-colors">
               {post.communityName}
             </span>
           )}
@@ -445,8 +445,8 @@ export function Posts() {
         </div>
 
         {currentUser && (
-          <Button 
-            className="rounded-full shadow-sm hover:shadow-md transition-all px-6 shrink-0 w-full md:w-auto flex items-center justify-center bg-gray-900 text-white hover:bg-gray-800"
+          <Button
+            className="rounded-full shadow-sm hover:shadow-md transition-all px-6 shrink-0 w-full md:w-auto flex items-center justify-center"
             onClick={() => navigate('/posts/create')}
           >
             <Plus className="h-4 w-4" />

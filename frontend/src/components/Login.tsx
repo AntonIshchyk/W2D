@@ -38,34 +38,34 @@ export function Login() {
   })
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex text-foreground">
       {/* Left — placeholder, slightly wider for future content */}
-      <div className="hidden lg:block lg:w-[58%] bg-gray-900" />
+      <div className="hidden lg:block lg:w-[58%] bg-primary" />
 
       {/* Right — sign in */}
-      <div className="flex-1 flex flex-col items-center justify-center px-10 py-16 bg-white">
+      <div className="flex-1 flex flex-col items-center justify-center px-10 py-16 bg-background">
         <div className="w-full max-w-[320px] space-y-10">
 
           {/* Brand */}
           <div className="space-y-1">
-            <h1 className="text-3xl font-black tracking-tight text-gray-900">W2D</h1>
-            <p className="text-[11px] font-medium tracking-widest uppercase text-gray-400">
+            <h1 className="text-3xl font-black tracking-tight text-foreground">W2D</h1>
+            <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
               What to do
             </p>
           </div>
 
           {/* Headline */}
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold text-gray-900 leading-snug">
+            <h2 className="text-xl font-semibold text-foreground leading-snug">
               Find your people,<br />make plans.
             </h2>
-            <p className="text-sm text-gray-500 leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Join communities you love and organise events with others.
             </p>
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-lg border border-gray-100 p-3 bg-gray-50 inline-block">
+            <div className="rounded-lg border border-border p-3 bg-card inline-block">
               <GoogleLogin
                 onSuccess={(cr) => {
                   if (!cr.credential) {
@@ -79,7 +79,7 @@ export function Login() {
             </div>
           </div>
 
-          <p className="text-[11px] text-gray-300 leading-relaxed">
+          <p className="text-[11px] text-muted-foreground/70 leading-relaxed">
             By signing in you agree to share good times and have fun.
           </p>
         </div>
