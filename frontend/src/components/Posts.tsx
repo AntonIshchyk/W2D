@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
   ArrowBigUp, ArrowBigDown, MessageSquare,
-  Plus, Check, ChevronsUpDown, ImageIcon, Flame, Clock, TrendingUp, Filter,
+  Plus, Check, ChevronsUpDown, ImageIcon, Flame, Clock, TrendingUp,
   HelpCircle, BookOpen, Map, ThumbsUp, Trophy, Target
 } from 'lucide-react'
 import { Button } from './ui/button'
@@ -353,7 +353,6 @@ export function Posts() {
 
   return (
     <PageLayout>
-      {/* Modern Filter Bar with integrated header */}
       <div className="flex flex-col md:flex-row items-center justify-center gap-4 pb-6 mb-6 mt-2">
         <div className="flex items-center justify-center gap-3 overflow-x-auto no-scrollbar w-full md:w-auto">
             
@@ -383,7 +382,6 @@ export function Posts() {
           <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" className="rounded-full h-10 gap-2 shrink-0 border-border/60 hover:border-primary/50 transition-colors">
-                <Filter className="w-4 h-4 text-muted-foreground" />
                 {selectedCommunity
                   ? communities?.find(c => c.id === selectedCommunity)?.name
                   : 'All Communities'}
