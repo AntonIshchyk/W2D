@@ -5,6 +5,10 @@ import { toast } from 'sonner'
 import { API_ENDPOINTS } from '../config/api'
 import { setAuthToken } from '../hooks/useAuthSync'
 
+interface LoginResponse {
+  token: string
+}
+
 export function Login() {
   const navigate = useNavigate()
 
@@ -22,11 +26,10 @@ export function Login() {
         throw new Error(errorMsg)
       }
 
-      return response.json()
+      return await response.json() as LoginResponse
     },
     onSuccess: (data) => {
       setAuthToken(data.token)
-      toast.success('Signed in with Google!')
       navigate('/')
     },
     onError: (error: Error) => {
@@ -65,7 +68,10 @@ export function Login() {
             <div className="rounded-lg border border-gray-100 p-3 bg-gray-50 inline-block">
               <GoogleLogin
                 onSuccess={(cr) => {
-                  if (cr.credential) googleMutation.mutate(cr.credential)
+                  if (!cr.credential) {
+                    return
+                  }
+                  googleMutation.mutate(cr.credential)
                 }}
                 onError={() => toast.error('Google login failed')}
                 useOneTap

@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ImagePlus, X, Loader2 } from 'lucide-react'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { formatRelativeTime } from '../lib/utils/date'
 import type { Comment } from '../types/posts'
+import { PhotoUpload } from './PhotoUpload'
 
 // ── API helpers ───────────────────────────────────────────────────────────────
 
@@ -43,112 +43,6 @@ async function voteComment(postId: number, commentId: number, value: number): Pr
     body: JSON.stringify({ value }),
   })
   if (!response.ok) throw new Error('Failed to vote on comment')
-}
-
-// ── Photo upload for comments ─────────────────────────────────────────────────
-
-const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
-const MAX_SIZE = 10 * 1024 * 1024
-
-async function uploadCommentPhoto(file: File): Promise<string> {
-  if (!ALLOWED_TYPES.includes(file.type)) throw new Error('Only images allowed')
-  if (file.size > MAX_SIZE) throw new Error('Max file size is 10MB')
-
-  const presignRes = await fetch(API_ENDPOINTS.uploads.presign, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ fileName: file.name, contentType: file.type }),
-  })
-  if (!presignRes.ok) throw new Error('Failed to get upload URL')
-  const { uploadUrl, publicUrl } = await presignRes.json()
-
-  const uploadRes = await fetch(uploadUrl, {
-    method: 'PUT',
-    headers: { 'Content-Type': file.type },
-    body: file,
-  })
-  if (!uploadRes.ok) throw new Error('Upload failed')
-
-  return publicUrl
-}
-
-// ── Inline photo picker ───────────────────────────────────────────────────────
-
-function PhotoPicker({
-  value,
-  onChange,
-  disabled,
-}: {
-  value: string | null
-  onChange: (url: string | null) => void
-  disabled?: boolean
-}) {
-  const [uploading, setUploading] = useState(false)
-  const [preview, setPreview] = useState<string | null>(null)
-  const inputRef = React.useRef<HTMLInputElement>(null)
-
-  const handleFile = async (file: File) => {
-    const localPreview = URL.createObjectURL(file)
-    setPreview(localPreview)
-    setUploading(true)
-    try {
-      const url = await uploadCommentPhoto(file)
-      onChange(url)
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Upload failed')
-      setPreview(null)
-      onChange(null)
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  const clear = () => {
-    setPreview(null)
-    onChange(null)
-    if (inputRef.current) inputRef.current.value = ''
-  }
-
-  if (value || preview) {
-    return (
-      <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200">
-        <img src={preview ?? value ?? ''} alt="" className="w-full h-full object-cover" />
-        {uploading && (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <Loader2 className="h-4 w-4 text-white animate-spin" />
-          </div>
-        )}
-        {!uploading && (
-          <button
-            type="button"
-            onClick={clear}
-            className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80"
-          >
-            <X className="h-3 w-3" />
-          </button>
-        )}
-      </div>
-    )
-  }
-
-  return (
-    <button
-      type="button"
-      disabled={disabled || uploading}
-      onClick={() => inputRef.current?.click()}
-      className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-40"
-      title="Attach a photo"
-    >
-      <ImagePlus className="h-4 w-4" />
-      <input
-        ref={inputRef}
-        type="file"
-        accept={ALLOWED_TYPES.join(',')}
-        className="hidden"
-        onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])}
-      />
-    </button>
-  )
 }
 
 // ── CommentNode ───────────────────────────────────────────────────────────────
@@ -263,16 +157,6 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
         {/* Reply box */}
         {activeReplyId === comment.id && currentUserId && (
           <div className="mt-3">
-            {/* Show photo preview if attached */}
-            {replyPhotos[comment.id] && (
-              <div className="mb-2 relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
-                <img src={replyPhotos[comment.id]!} alt="" className="w-full h-full object-cover" />
-                <button type="button" onClick={() => setReplyPhoto(comment.id, null)}
-                  className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center">
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            )}
             <textarea
               value={replyDrafts[comment.id] || ''}
               onChange={e => setReplyDraft(comment.id, e.target.value)}
@@ -282,9 +166,10 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
             />
             <div className="flex justify-between items-center mt-1.5">
-              <PhotoPicker
-                value={replyPhotos[comment.id] ?? null}
-                onChange={url => setReplyPhoto(comment.id, url)}
+              <PhotoUpload
+                value={replyPhotos[comment.id] ? [replyPhotos[comment.id]!] : []}
+                onChange={urls => setReplyPhoto(comment.id, urls[0] ?? null)}
+                maxPhotos={1}
                 disabled={createPending}
               />
               <div className="flex items-center gap-2">
@@ -435,17 +320,6 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
 
       {currentUserId ? (
         <form onSubmit={handleSubmit} className="mb-7">
-          {/* Photo preview above textarea */}
-          {newPhoto && (
-            <div className="mb-2 relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200">
-              <img src={newPhoto} alt="" className="w-full h-full object-cover" />
-              <button type="button" onClick={() => setNewPhoto(null)}
-                className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center">
-                <X className="h-3 w-3" />
-              </button>
-            </div>
-          )}
-
           <textarea
             value={newComment}
             onChange={e => setNewComment(e.target.value)}
@@ -457,9 +331,10 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
 
           <div className="flex items-center justify-between mt-2">
             <div className="flex items-center gap-2">
-              <PhotoPicker
-                value={newPhoto}
-                onChange={setNewPhoto}
+              <PhotoUpload
+                value={newPhoto ? [newPhoto] : []}
+                onChange={urls => setNewPhoto(urls[0] ?? null)}
+                maxPhotos={1}
                 disabled={createMutation.isPending}
               />
               <span className="text-xs text-gray-400 tabular-nums">{newComment.length}/1000</span>

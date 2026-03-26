@@ -5,6 +5,7 @@ using Backend.Contracts.Auth;
 using Backend.Models;
 using Backend.Services;
 using Backend.Extensions;
+using Backend.Contracts.Users;
 using Google.Apis.Auth;
 
 namespace Backend.Controllers;
@@ -25,24 +26,55 @@ public class UsersController : ControllerBase
 
     [HttpGet("me")]
     [Authorize]
-    public ActionResult GetCurrentUser()
+    public async Task<ActionResult> GetCurrentUser()
     {
-        var userId = User.GetUserId();
-        var emailClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-        var nameClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-        if (userId == null || string.IsNullOrEmpty(emailClaim) || string.IsNullOrEmpty(nameClaim))
+        int userId = User.GetUserId();
+
+        User? user = await _userService.GetUserByIdAsync(userId);
+
+        if (user == null)
         {
-            return BadRequest("User claims missing or invalid.");
+            return Unauthorized(new { message = "User not found for the current token" });
         }
+
         return Ok(new
         {
-            userId = userId.Value,
-            email = emailClaim,
-            name = nameClaim,
+            userId,
+            email = user.Email,
+            username = user.Username,
+            bio = user.Bio,
+            profilePhotoUrl = user.ProfilePhotoUrl,
+            profileSetupComplete = user.ProfileSetupComplete,
         });
     }
 
+    [HttpPut("me")]
+    [Authorize]
+    public async Task<ActionResult<LoginResponse>> UpdateUserProfile([FromBody] UpdateUserProfileRequest request)
+    {
+        int userId = User.GetUserId();
 
+        User? currentUser = await _userService.GetUserByIdAsync(userId);
+
+        if (currentUser == null)
+        {
+            return Unauthorized(new { message = "User not found for the current token" });
+        }
+
+        string requestedUsername = request.Username.Trim();
+
+        if (!string.Equals(currentUser.Username, requestedUsername, StringComparison.OrdinalIgnoreCase)
+            && await _userService.IsUsernameTakenAsync(requestedUsername))
+        {
+            return Conflict(new { message = "Username is already taken" });
+        }
+
+        User updatedUser = await _userService.UpdateUserProfileAsync(userId, request);
+
+        LoginResponse response = _userService.GenerateTokenForUser(updatedUser);
+
+        return Ok(response);
+    }
 
     [HttpPost("google-login")]
     public async Task<ActionResult<LoginResponse>> GoogleLogin([FromBody] GoogleLoginRequest request)
@@ -79,10 +111,7 @@ public class UsersController : ControllerBase
             }
 
             // New user, create account
-            LoginResponse? result = await _userService.RegisterUserAsync(
-                payload.Email,
-                payload.Name ?? payload.Email.Split('@')[0]
-            );
+            LoginResponse? result = await _userService.RegisterUserAsync(payload.Email);
 
             if (result == null)
             {

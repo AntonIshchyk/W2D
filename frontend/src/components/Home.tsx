@@ -1,15 +1,10 @@
-import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { PageLayout } from './Navbar'
-import { fetchCurrentUser } from '../lib/auth'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
+import { useCurrentUser } from '../hooks/useCurrentUser'
 
 export function Home() {
-  const { data: user, isLoading, isError, error: userError } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: fetchCurrentUser,
-    retry: false
-  })
+  const { data: user, isLoading, isError, error: userError } = useCurrentUser()
 
   useAuthErrorHandler(isError, userError)
 
@@ -30,7 +25,7 @@ export function Home() {
       {/* Greeting - subtle, not a hero */}
       <div className="mb-10">
         <h1 className="text-2xl font-medium text-gray-400">
-          Hey, <span className="text-gray-900 font-semibold">{user?.name}</span>
+          Hey, <span className="text-gray-900 font-semibold">{user?.username}</span>
         </h1>
       </div>
 

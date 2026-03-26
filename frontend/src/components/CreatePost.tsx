@@ -19,7 +19,7 @@ import { Label } from '@/components/ui/label'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { PostType } from '../types/posts'
 import type { CreatePostRequest } from '../types/posts'
-import { fetchCurrentUser } from '../lib/auth'
+import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
@@ -90,11 +90,7 @@ export function CreatePost() {
   const [locationName, setLocationName] = useState('')
   const [photoUrls, setPhotoUrls] = useState<string[]>([])
 
-  const { data: currentUser, isError, error: userError } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: fetchCurrentUser,
-    retry: false
-  })
+  const { data: currentUser, isError, error: userError } = useCurrentUser()
 
   const { data: communities, isLoading: communitiesLoading } = useQuery({
     queryKey: ['communities'],

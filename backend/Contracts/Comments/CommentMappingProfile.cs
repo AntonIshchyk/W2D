@@ -9,7 +9,7 @@ public class CommentMappingProfile : Profile
     {
         // Comment -> CommentResponse
         CreateMap<Comment, CommentResponse>()
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.Name : null))
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.Username : null))
             .ForMember(dest => dest.CurrentUserVote, opt => opt.Ignore())
             .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => src.PhotoUrl));
         // Set manually in service
