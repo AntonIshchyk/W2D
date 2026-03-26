@@ -476,9 +476,9 @@ export function Posts() {
         ) : allPosts.length === 0 ? (
           <div className="py-20 text-center">
             <EmptyState
-              icon={Filter}
+              icon={ImageIcon}
               title="No posts found"
-              description="There are no posts here yet. Try changing your filters or be the first to post!"
+              description="There are no posts here yet."
               action={currentUser && !selectedCommunity && !selectedType ? {
                 label: 'Create Post',
                 onClick: () => navigate('/posts/create')
@@ -496,7 +496,7 @@ export function Posts() {
               />
             ))}
             <div ref={observerTarget} className="h-20 flex items-center justify-center">
-              {isFetchingNextPage && <LoadingSpinner text="Fetching more amazing content…" />}
+              {isFetchingNextPage && <LoadingSpinner text="Fetching…" />}
             </div>
           </div>
         )}
