@@ -34,19 +34,19 @@ export function AvatarCropModal({ imageSrc, onClose, onCropComplete }: AvatarCro
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 sm:p-8">
+      <div className="relative w-full max-w-2xl rounded-3xl bg-background p-8 shadow-2xl">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-full p-2 text-stone-500 hover:bg-stone-100"
+          className="absolute right-6 top-6 rounded-full p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
         >
-          <X className="h-5 w-5" />
+          <X className="h-6 w-6" />
         </button>
 
-        <h3 className="text-lg font-bold text-stone-900">Crop your photo</h3>
-        <p className="mt-1 text-sm text-stone-500">Adjust the image to fit your profile.</p>
+        <h3 className="text-2xl font-black tracking-tight text-foreground">Crop your photo</h3>
+        <p className="mt-2 text-base text-muted-foreground">Adjust the image to fit your profile.</p>
 
-        <div className="relative mt-6 h-64 w-full overflow-hidden rounded-xl bg-stone-900">
+        <div className="relative mt-8 h-96 w-full overflow-hidden rounded-2xl bg-muted">
           <Cropper
             image={imageSrc}
             crop={crop}
@@ -60,7 +60,7 @@ export function AvatarCropModal({ imageSrc, onClose, onCropComplete }: AvatarCro
           />
         </div>
 
-        <div className="mt-6 flex items-center justify-between gap-4">
+        <div className="mt-8 flex items-center justify-between gap-6 pb-2">
           <input
             type="range"
             value={zoom}
@@ -69,12 +69,12 @@ export function AvatarCropModal({ imageSrc, onClose, onCropComplete }: AvatarCro
             step={0.1}
             aria-labelledby="Zoom"
             onChange={(e) => setZoom(Number(e.target.value))}
-            className="w-full accent-stone-900"
+            className="w-full h-2 rounded-lg appearance-none bg-muted accent-primary cursor-pointer"
           />
           <button
             onClick={handleSave}
             disabled={isProcessing}
-            className="shrink-0 rounded-xl bg-stone-900 px-6 py-2 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:opacity-50"
+            className="shrink-0 rounded-xl bg-primary px-8 py-3 text-base font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
           >
             {isProcessing ? 'Saving...' : 'Apply'}
           </button>

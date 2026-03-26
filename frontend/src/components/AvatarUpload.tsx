@@ -59,15 +59,15 @@ export function AvatarUpload({ value, onChange, disabled }: AvatarUploadProps) {
         <img
           src={value}
           alt="Profile photo"
-          className="h-24 w-24 rounded-full object-cover border border-stone-200"
+          className="h-32 w-32 rounded-full object-cover border border-border"
         />
         {!disabled && (
           <button
             type="button"
             onClick={() => onChange('')}
-            className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-stone-900 text-white hover:bg-stone-800"
+            className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground hover:opacity-90"
           >
-            <X className="h-3 w-3" />
+            <X className="h-4 w-4" />
           </button>
         )}
       </div>
@@ -78,14 +78,14 @@ export function AvatarUpload({ value, onChange, disabled }: AvatarUploadProps) {
     <>
       <div
         onClick={() => !disabled && !isUploading && fileInputRef.current?.click()}
-        className={`flex h-24 w-24 flex-col items-center justify-center rounded-full border-2 border-dashed ${
-          disabled || isUploading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-stone-50'
+        className={`flex h-32 w-32 flex-col items-center justify-center rounded-full border-2 border-dashed border-input ${
+          disabled || isUploading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-muted/50'
         }`}
       >
         {isUploading ? (
-          <Loader2 className="h-6 w-6 animate-spin text-stone-400" />
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         ) : (
-          <ImagePlus className="h-6 w-6 text-stone-400" />
+          <ImagePlus className="h-8 w-8 text-muted-foreground" />
         )}
       </div>
 

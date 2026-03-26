@@ -106,92 +106,71 @@ export function ProfileSetup() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-stone-100 via-white to-amber-50 px-4 py-8 md:py-12">
-      <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-2">
-        {/* Form Section */}
-        <section className="rounded-3xl border border-stone-200 bg-white p-6 md:p-8 shadow-sm">
-          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-stone-400">Profile Setup</p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight text-stone-900">Set up your profile</h1>
-          <p className="mt-2 text-sm text-stone-500">Pick your username and add a short bio.</p>
+    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-xl space-y-10 rounded-[2rem] bg-background p-10 shadow-sm ring-1 ring-border sm:p-14">
+        
+        {/* Header */}
+        <div className="text-center">
+          <h2 className="text-4xl font-black tracking-tight text-foreground">Complete your profile</h2>
+          <p className="mt-3 text-base text-muted-foreground">Add a photo, pick a username, and write a short bio.</p>
+        </div>
 
-          <div className="mt-8 space-y-5">
+        <div className="mt-12 space-y-8">
+          {/* Avatar Upload (Centered prominently at the top) */}
+          <div className="flex flex-col items-center justify-center space-y-4 pb-4 pt-2">
+            <AvatarUpload
+              value={profile.profilePhotoUrls[0] || ''}
+              onChange={(url) => handleInputChange('profilePhotoUrls', url ? [url] : [])}
+              disabled={completeMutation.isPending}
+            />
+            <p className="text-sm font-bold uppercase tracking-widest text-foreground">Profile Photo (Optional)</p>
+          </div>
+
+          <div className="space-y-6">
             {/* Username */}
             <div>
-              <label className="block text-xs font-semibold tracking-wide uppercase text-stone-500">Username</label>
-              <input
-                value={profile.username}
-                onChange={(e) =>
-                  handleInputChange('username', e.target.value.replace(/[^A-Za-z0-9_]/g, '').slice(0, 20))
-                }
-                placeholder="your_handle"
-                className="mt-2 w-full rounded-xl border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-stone-800"
-              />
-              {submitError && <p className="mt-1 text-xs text-rose-600">{submitError}</p>}
+              <label className="block text-sm font-bold tracking-wide uppercase text-foreground">Username *</label>
+              <div className="relative mt-2.5">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                  <span className="text-foreground font-medium sm:text-base">@</span>
+                </div>
+                <input
+                  value={profile.username}
+                  onChange={(e) =>
+                    handleInputChange('username', e.target.value.replace(/[^A-Za-z0-9_]/g, '').slice(0, 20))
+                  }
+                  placeholder="your_handle"
+                  className="block w-full rounded-2xl border border-input bg-background py-3.5 pl-10 pr-4 text-base text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+              </div>
+              {submitError && <p className="mt-2 text-sm text-destructive">{submitError}</p>}
             </div>
 
             {/* Bio */}
             <div>
-              <label className="block text-xs font-semibold tracking-wide uppercase text-stone-500">Bio</label>
+              <label className="block text-sm font-bold tracking-wide uppercase text-foreground">Bio (Optional)</label>
               <textarea
                 value={profile.bio}
                 onChange={(e) => handleInputChange('bio', e.target.value.slice(0, 160))}
                 rows={4}
-                placeholder="Tell the community what you like doing..."
-                className="mt-2 w-full rounded-xl border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-stone-800"
+                placeholder="Tell us a little about yourself..."
+                className="mt-2.5 block w-full rounded-2xl border border-input bg-background p-4 text-base text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
               />
-              <p className="mt-1 text-right text-xs text-stone-400">{profile.bio.length}/160</p>
+              <p className="mt-2 text-right text-sm font-medium text-muted-foreground">{profile.bio.length}/160</p>
             </div>
+          </div>
 
-            {/* Profile Photo */}
-            <div>
-              <label className="block text-xs font-semibold tracking-wide uppercase text-stone-500 mb-2">Profile photo</label>
-              <AvatarUpload
-                value={profile.profilePhotoUrls[0] || ''}
-                onChange={(url) => handleInputChange('profilePhotoUrls', url ? [url] : [])}
-                disabled={completeMutation.isPending}
-              />
-            </div>
-
+          <div className="pt-4">
             <button
               type="button"
               disabled={completeMutation.isPending}
               onClick={handleSubmit}
-              className="w-full rounded-xl bg-stone-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-300"
+              className="w-full rounded-2xl bg-primary px-6 py-4 text-base font-bold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {completeMutation.isPending ? 'Saving...' : 'Finish setup'}
             </button>
           </div>
-        </section>
-
-        {/* Preview Section */}
-        <section className="rounded-3xl border border-stone-200 bg-white p-6 md:p-8 shadow-sm">
-          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-stone-400">Live preview</p>
-          <div className="mt-6 rounded-2xl border border-stone-200 bg-stone-50 p-6">
-            <div className="flex items-center gap-4">
-              {profile.profilePhotoUrls[0] ? (
-                <img
-                  src={profile.profilePhotoUrls[0]}
-                  alt="Profile preview"
-                  className="h-16 w-16 rounded-full object-cover border border-stone-200"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.display = 'none'
-                  }}
-                />
-              ) : (
-                <div className="flex h-16 w-16 items-center justify-center rounded-full border border-stone-300 bg-white text-xl font-bold text-stone-500">
-                  {(profile.username.trim() || '?').charAt(0).toUpperCase()}
-                </div>
-              )}
-              <div>
-                <h2 className="text-lg font-bold text-stone-900">@{profile.username || 'your_handle'}</h2>
-              </div>
-            </div>
-
-            <p className="mt-4 text-sm leading-relaxed text-stone-700">
-              {profile.bio.trim() || 'Your bio will appear here so people can quickly understand what you are into.'}
-            </p>
-          </div>
-        </section>
+        </div>
       </div>
     </div>
   )
