@@ -162,29 +162,11 @@ export function PhotoUpload({
 
       {canAddMore && !disabled && (
         <div
-          onDragOver={e => { e.preventDefault(); setIsDragging(true) }}
-          onDragLeave={() => setIsDragging(false)}
-          onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
-          className={`
-            flex flex-col items-center justify-center gap-1.5
-            border-2 border-dashed rounded-lg p-4 cursor-pointer
-            transition-colors text-center
-            ${isDragging
-              ? 'border-foreground bg-muted'
-              : 'border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/50'
-            }
-          `}
+          className="inline-flex items-center justify-center p-2 rounded-full hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors cursor-pointer w-fit"
+          title={`Upload photo (max ${maxPhotos})`}
         >
-          <ImagePlus className="h-5 w-5 text-muted-foreground" />
-          <div>
-            <p className="text-xs text-muted-foreground">
-              Drop photos here or <span className="underline">browse</span>
-            </p>
-            <p className="text-xs text-muted-foreground/60 mt-0.5">
-              JPEG, PNG, WebP · max 10MB · {maxPhotos - value.length} remaining
-            </p>
-          </div>
+          <ImagePlus className="h-5 w-5" />
           <input
             ref={inputRef}
             type="file"
