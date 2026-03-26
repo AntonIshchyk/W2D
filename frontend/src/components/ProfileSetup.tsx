@@ -4,7 +4,7 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { setAuthToken } from '../hooks/useAuthSync'
-import { PhotoUpload } from './PhotoUpload'
+import { AvatarUpload } from './AvatarUpload'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 
 
@@ -144,15 +144,12 @@ export function ProfileSetup() {
 
             {/* Profile Photo */}
             <div>
-              <label className="block text-xs font-semibold tracking-wide uppercase text-stone-500">Profile photo</label>
-              <div className="mt-2 rounded-xl border border-stone-300 p-3">
-                <PhotoUpload
-                  value={profile.profilePhotoUrls}
-                  onChange={(urls) => handleInputChange('profilePhotoUrls', urls.slice(0, 1))}
-                  maxPhotos={1}
-                  disabled={completeMutation.isPending}
-                />
-              </div>
+              <label className="block text-xs font-semibold tracking-wide uppercase text-stone-500 mb-2">Profile photo</label>
+              <AvatarUpload
+                value={profile.profilePhotoUrls[0] || ''}
+                onChange={(url) => handleInputChange('profilePhotoUrls', url ? [url] : [])}
+                disabled={completeMutation.isPending}
+              />
             </div>
 
             <button

@@ -17,7 +17,7 @@ interface UploadingFile {
   progress: 'uploading' | 'done' | 'error'
 }
 
-async function getPresignedUrl(file: File): Promise<{ uploadUrl: string; publicUrl: string }> {
+export async function getPresignedUrl(file: File): Promise<{ uploadUrl: string; publicUrl: string }> {
   const res = await fetch(API_ENDPOINTS.uploads.presign, {
     method: 'POST',
     headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
@@ -30,7 +30,7 @@ async function getPresignedUrl(file: File): Promise<{ uploadUrl: string; publicU
   return res.json()
 }
 
-async function uploadToR2(uploadUrl: string, file: File): Promise<void> {
+export async function uploadToR2(uploadUrl: string, file: File): Promise<void> {
   const res = await fetch(uploadUrl, {
     method: 'PUT',
     headers: { 'Content-Type': file.type },
