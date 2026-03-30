@@ -174,6 +174,7 @@ export function Events() {
   const [mapZoom, setMapZoom] = useState<number>(12)
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchingCity, setIsSearchingCity] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   
   const observerTarget = useRef<HTMLDivElement>(null)
 
@@ -353,13 +354,35 @@ export function Events() {
 
       {/* Content */}
       {viewMode === 'map' ? (
-        <div className="h-150 rounded-xl overflow-hidden border shadow-sm">
-          <EventsMap 
-            events={visibleEvents} 
-            onBoundsChange={setBounds} 
-            center={mapCenter}
-            zoom={mapZoom}
-          />
+        <div className="flex flex-col md:flex-row gap-4 h-150">
+          <div className={cn(
+            "rounded-xl overflow-hidden border shadow-sm transition-all duration-300 relative",
+            selectedEvent ? "w-full md:w-2/3" : "w-full"
+          )}>
+            <EventsMap 
+              events={visibleEvents} 
+              onBoundsChange={setBounds} 
+              center={mapCenter}
+              zoom={mapZoom}
+              onEventClick={setSelectedEvent}
+              selectedEventId={selectedEvent?.id}
+            />
+          </div>
+          {selectedEvent && (
+            <div className="w-full md:w-1/3 flex flex-col relative animate-in slide-in-from-right-8 duration-300">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-background/80 hover:bg-background backdrop-blur-sm shadow-sm"
+                onClick={() => setSelectedEvent(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+              <div className="h-full overflow-y-auto pb-4">
+                <EventCard event={selectedEvent} currentUserId={currentUser?.userId} />
+              </div>
+            </div>
+          )}
         </div>
       ) : isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
