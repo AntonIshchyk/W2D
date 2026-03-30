@@ -69,3 +69,9 @@ export interface UpdateEventRequest {
   scheduledAt?: string
   maxAttendees?: number | null
 }
+
+export interface CitySearchResult {
+  lat: string
+  lon: string
+  display_name: string
+}

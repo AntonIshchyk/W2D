@@ -2,6 +2,7 @@ import { API_ENDPOINTS, getAuthHeaders } from '../../config/api'
 import { PAGINATION } from '../../config/constants'
 import type {
   Attendee,
+  CitySearchResult,
   Community,
   CreateEventRequest,
   Event,
@@ -168,4 +169,14 @@ export async function deleteEvent(id: number): Promise<void> {
   })
 
   if (!response.ok) throw new Error('Failed to delete event')
+}
+
+export async function searchCities(query: string): Promise<CitySearchResult[]> {
+  const response = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
+  )
+
+  if (!response.ok) throw new Error('Search failed')
+
+  return response.json()
 }

@@ -21,7 +21,7 @@ import { EmptyState } from './ui/empty-state'
 import { LoadingSpinner } from './ui/loading-spinner'
 import { cn } from '../lib/utils'
 import { useCurrentUser } from '../hooks/useCurrentUser'
-import { cancelRsvp, fetchCommunities, fetchEvents, rsvpEvent } from '../features/events/api'
+import { cancelRsvp, fetchCommunities, fetchEvents, rsvpEvent, searchCities } from '../features/events/api'
 import type { Event, EventQueryBounds } from '../types/events'
 
 // ── EventCard ─────────────────────────────────────────────────────────────────
@@ -164,6 +164,7 @@ function EventCard({ event, currentUserId }: { event: Event; currentUserId?: num
 }
 
 export function Events() {
+  const navigate = useNavigate()
   const [selectedCommunity, setSelectedCommunity] = useState<number | undefined>(undefined)
   const [upcomingOnly, setUpcomingOnly]         = useState(true)
   const [communityOpen, setCommunityOpen]         = useState(false)
@@ -194,8 +195,7 @@ export function Events() {
     if (!searchQuery.trim()) return
     setIsSearchingCity(true)
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`)
-      const results = await res.json()
+      const results = await searchCities(searchQuery)
       if (results && results.length > 0) {
         setMapCenter([parseFloat(results[0].lat), parseFloat(results[0].lon)])
         setMapZoom(12)
