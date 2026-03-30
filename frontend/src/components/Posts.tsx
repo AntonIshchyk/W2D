@@ -104,7 +104,7 @@ function PostCarousel({ urls }: { urls: string[] }) {
             <CarouselItem key={i}>
               <Dialog>
                 <DialogTrigger asChild>
-                  <div className="relative w-full h-[300px] md:h-[450px] flex items-center justify-center bg-black/95 rounded-2xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity">
+                  <div className="relative w-full h-75 md:h-112.5 flex items-center justify-center bg-black/95 rounded-2xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity">
                     <img 
                       src={url} 
                       alt={`Attachment ${i + 1}`} 
@@ -158,9 +158,9 @@ function PostCard({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           {post.author?.profilePhotoUrl ? (
-            <img src={post.author.profilePhotoUrl} alt="User" className="h-10 w-10 rounded-full object-cover border border-primary/20 flex-shrink-0" />
+            <img src={post.author.profilePhotoUrl} alt="User" className="h-10 w-10 rounded-full object-cover border border-primary/20 shrink-0" />
           ) : (
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center border border-primary/20 flex-shrink-0">
+            <div className="h-10 w-10 rounded-full bg-linear-to-br from-primary/20 to-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
               <span className="text-primary font-bold text-sm">
                 {post.author?.username ? post.author.username.substring(0, 2).toUpperCase() : 'AN'}
               </span>
@@ -414,7 +414,7 @@ export function Posts() {
             value={selectedType?.toString() ?? 'all'}
             onValueChange={v => setSelectedType(v === 'all' ? undefined : Number(v))}
           >
-            <SelectTrigger className="h-10 rounded-full border-border/60 shrink-0 w-[160px] hover:border-primary/50 transition-colors">
+            <SelectTrigger className="h-10 rounded-full border-border/60 shrink-0 w-40 hover:border-primary/50 transition-colors">
               <SelectValue placeholder="All types" />
             </SelectTrigger>
             <SelectContent className="rounded-2xl">

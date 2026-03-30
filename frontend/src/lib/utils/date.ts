@@ -1,11 +1,3 @@
-export function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', { 
-    weekday: 'short', 
-    month: 'short', 
-    day: 'numeric' 
-  })
-}
-
 export function formatRelativeTime(dateString: string): string {
   const normalizedDateString = dateString.endsWith('Z') ? dateString : `${dateString}Z`
   const date = new Date(normalizedDateString)

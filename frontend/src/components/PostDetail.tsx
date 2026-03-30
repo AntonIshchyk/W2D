@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import {
   ArrowBigUp, ArrowBigDown, ChevronLeft, ChevronRight, X,
-  MapPin, Clock, Trash2, Tag,
+  MapPin, Clock, Trash2,
   BookOpen, Map, HelpCircle, ThumbsUp, Trophy, Target,
 } from 'lucide-react'
 import { PageLayout } from './Navbar'
@@ -151,7 +151,7 @@ function PhotoGallery({ urls, onOpen }: { urls: string[]; onOpen: (i: number) =>
 
   if (urls.length === 1) return (
     <div className="mb-6 rounded-2xl overflow-hidden cursor-pointer" onClick={() => onOpen(0)}>
-      <img src={urls[0]} alt="" className="w-full max-h-[28rem] object-cover" />
+      <img src={urls[0]} alt="" className="w-full max-h-112 object-cover" />
     </div>
   )
 
@@ -294,9 +294,9 @@ export function PostDetail() {
               <div className="flex items-center gap-3">
                 {post.author?.profilePhotoUrl ? (
                   <img src={post.author.profilePhotoUrl} alt="User"
-                    className="h-10 w-10 rounded-full object-cover border border-primary/20 flex-shrink-0" />
+                    className="h-10 w-10 rounded-full object-cover border border-primary/20 shrink-0" />
                 ) : (
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center border border-primary/20 flex-shrink-0">
+                  <div className="h-10 w-10 rounded-full bg-linear-to-br from-primary/20 to-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
                     <span className="text-primary font-bold text-sm">
                       {post.author?.username ? post.author.username.substring(0, 2).toUpperCase() : 'AN'}
                     </span>

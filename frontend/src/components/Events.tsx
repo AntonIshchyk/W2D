@@ -381,6 +381,10 @@ export function Events() {
           icon={CalendarDays}
           title="No events found"
           description={hasFilters ? 'Try adjusting your filters.' : 'Be the first to organise something!'}
+          action={currentUser ? {
+            label: 'Create Event',
+            onClick: () => navigate('/events/create')
+          } : undefined}
         />
       ) : (
         <>
