@@ -4,72 +4,16 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import {
   ArrowBigUp, ArrowBigDown, ChevronLeft, ChevronRight, X,
-  MapPin, Clock, Trash2,
-  BookOpen, Map, HelpCircle, ThumbsUp, Trophy, Target,
+  MapPin, Clock, Trash2
 } from 'lucide-react'
 import { PageLayout } from './Navbar'
-import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { PostType } from '../types/posts'
-import type { Post } from '../types/posts'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { formatRelativeTime } from '../lib/utils/date'
 import { Comments } from './Comments'
 import { cn } from '../lib/utils'
-
-// ── Type maps (mirrors Posts.tsx) ─────────────────────────────────────────────
-
-const POST_TYPE_LABELS: Record<PostType, string> = {
-  [PostType.ExperienceShare]: 'Experience',
-  [PostType.Guide]: 'Guide',
-  [PostType.Question]: 'Question',
-  [PostType.Recommendation]: 'Recommendation',
-  [PostType.Achievement]: 'Achievement',
-  [PostType.Challenge]: 'Challenge',
-}
-
-const POST_TYPE_COLORS: Record<PostType, { bg: string; text: string; border: string }> = {
-  [PostType.ExperienceShare]: { bg: 'bg-blue-50',    text: 'text-blue-700',    border: 'border-blue-200'    },
-  [PostType.Guide]:           { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  [PostType.Question]:        { bg: 'bg-amber-50',   text: 'text-amber-700',   border: 'border-amber-200'   },
-  [PostType.Recommendation]:  { bg: 'bg-purple-50',  text: 'text-purple-700',  border: 'border-purple-200'  },
-  [PostType.Achievement]:     { bg: 'bg-rose-50',    text: 'text-rose-700',    border: 'border-rose-200'    },
-  [PostType.Challenge]:       { bg: 'bg-red-50',     text: 'text-red-700',     border: 'border-red-200'     },
-}
-
-const POST_TYPE_ICONS: Record<PostType, React.ElementType> = {
-  [PostType.ExperienceShare]: BookOpen,
-  [PostType.Guide]: Map,
-  [PostType.Question]: HelpCircle,
-  [PostType.Recommendation]: ThumbsUp,
-  [PostType.Achievement]: Trophy,
-  [PostType.Challenge]: Target,
-}
-
-// ── API ───────────────────────────────────────────────────────────────────────
-
-async function fetchPost(id: number): Promise<Post> {
-  const response = await fetch(API_ENDPOINTS.posts.byId(id), { headers: getAuthHeaders() })
-  if (!response.ok) throw new Error('Failed to fetch post')
-  return response.json()
-}
-
-async function votePost(postId: number, value: number): Promise<void> {
-  const response = await fetch(API_ENDPOINTS.posts.vote(postId), {
-    method: 'POST',
-    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ value }),
-  })
-  if (!response.ok) throw new Error('Failed to vote on post')
-}
-
-async function deletePost(postId: number): Promise<void> {
-  const response = await fetch(API_ENDPOINTS.posts.byId(postId), {
-    method: 'DELETE',
-    headers: getAuthHeaders(),
-  })
-  if (!response.ok) throw new Error('Failed to delete post')
-}
+import { fetchPost, votePost, deletePost, POST_TYPE_LABELS, POST_TYPE_COLORS, POST_TYPE_ICONS } from '../features/posts/api'
 
 // ── Lightbox ──────────────────────────────────────────────────────────────────
 

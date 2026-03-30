@@ -26,18 +26,7 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { cn } from '../lib/utils'
 import { PhotoUpload } from './PhotoUpload'
-
-interface Community {
-  id: number
-  name: string
-}
-
-async function fetchCommunities(): Promise<Community[]> {
-  const response = await fetch(API_ENDPOINTS.communities.base, { headers: getAuthHeaders() })
-
-  if (!response.ok) throw new Error('Failed to fetch communities')
-  return response.json()
-}
+import { fetchCommunities } from '../features/communities/api'
 
 async function createPost(data: CreatePostRequest): Promise<void> {
   const response = await fetch(API_ENDPOINTS.posts.base, {

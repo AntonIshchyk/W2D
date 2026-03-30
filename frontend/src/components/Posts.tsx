@@ -4,8 +4,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
   ArrowBigUp, ArrowBigDown, MessageSquare,
-  Plus, Check, ChevronsUpDown, ImageIcon, Flame, Clock, TrendingUp,
-  HelpCircle, BookOpen, Map, ThumbsUp, Trophy, Target
+  Plus, Check, ChevronsUpDown, ImageIcon, Flame, Clock, TrendingUp
 } from 'lucide-react'
 import { Button } from './ui/button'
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from './ui/dialog'
@@ -13,83 +12,18 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Skeleton } from './ui/skeleton'
 import { PageLayout } from './Navbar'
-import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { PostType } from '../types/posts'
-import type { Post, ScrollResult } from '../types/posts'
-import { PAGINATION } from '../config/constants'
+import type { Post } from '../types/posts'
 import { formatRelativeTime } from '../lib/utils/date'
 import { EmptyState } from './ui/empty-state'
 import { LoadingSpinner } from './ui/loading-spinner'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { cn } from '../lib/utils'
-
-interface Community {
-  id: number
-  name: string
-}
-
-async function fetchPosts(
-  cursor: number | null,
-  topicId?: number,
-  userId?: number,
-  type?: number,
-  sortBy?: string
-): Promise<ScrollResult<Post>> {
-  const params = new URLSearchParams({ limit: PAGINATION.DEFAULT_PAGE_SIZE.toString() })
-  if (cursor !== null) params.append('cursor', cursor.toString())
-  if (topicId) params.append('topicId', topicId.toString())
-  if (userId) params.append('userId', userId.toString())
-  if (type) params.append('type', type.toString())
-  if (sortBy) params.append('sortBy', sortBy)
-  const response = await fetch(`${API_ENDPOINTS.posts.base}?${params}`, { headers: getAuthHeaders() })
-  if (!response.ok) throw new Error('Failed to fetch posts')
-  return response.json()
-}
-
-async function fetchCommunities(): Promise<Community[]> {
-  const response = await fetch(API_ENDPOINTS.communities.base, { headers: getAuthHeaders() })
-  if (!response.ok) throw new Error('Failed to fetch communities')
-  return response.json()
-}
-
-async function votePost(postId: number, value: number): Promise<void> {
-  const response = await fetch(API_ENDPOINTS.posts.vote(postId), {
-    method: 'POST',
-    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ value })
-  })
-  if (!response.ok) throw new Error('Failed to vote on post')
-}
-
-const POST_TYPE_LABELS: Record<PostType, string> = {
-  [PostType.ExperienceShare]: 'Experience',
-  [PostType.Guide]: 'Guide',
-  [PostType.Question]: 'Question',
-  [PostType.Recommendation]: 'Recommendation',
-  [PostType.Achievement]: 'Achievement',
-  [PostType.Challenge]: 'Challenge'
-}
-
-const POST_TYPE_COLORS: Record<PostType, { bg: string; text: string, border: string }> = {
-  [PostType.ExperienceShare]: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-  [PostType.Guide]:           { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  [PostType.Question]:        { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
-  [PostType.Recommendation]:  { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
-  [PostType.Achievement]:     { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' },
-  [PostType.Challenge]:       { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
-}
-
-const POST_TYPE_ICONS: Record<PostType, any> = {
-  [PostType.ExperienceShare]: BookOpen,
-  [PostType.Guide]: Map,
-  [PostType.Question]: HelpCircle,
-  [PostType.Recommendation]: ThumbsUp,
-  [PostType.Achievement]: Trophy,
-  [PostType.Challenge]: Target,
-}
+import { fetchPosts, votePost, POST_TYPE_LABELS, POST_TYPE_COLORS, POST_TYPE_ICONS } from '../features/posts/api'
+import { fetchCommunities } from '../features/communities/api'
 
 // ── Photo Carousel ──────────────────────────────────────────────
 
