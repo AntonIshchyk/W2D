@@ -5,31 +5,22 @@ import 'leaflet/dist/leaflet.css';
 import { Button } from './ui/button';
 import { format } from 'date-fns';
 import L from 'leaflet';
+import { ensureLeafletDefaultIcon } from '../utils/leafletIcon';
+import type { Event, EventQueryBounds } from '../types/events';
 
-// Fix Leaflet's default icon path issues in React
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
+ensureLeafletDefaultIcon();
 
-interface Bounds {
-  minLat: number;
-  maxLat: number;
-  minLng: number;
-  maxLng: number;
-}
+type PopupEvent = Event & { latitude: number; longitude: number };
 
 interface EventsMapProps {
-  events: any[];
-  onBoundsChange: (bounds: Bounds) => void;
+  events: Event[];
+  onBoundsChange: (bounds: EventQueryBounds) => void;
   center?: [number, number];
   zoom?: number;
 }
 
 // Sub-component to handle map bounds detection and update parent
-function MapBoundsHandler({ onBoundsChange }: { onBoundsChange: (b: Bounds) => void }) {
+function MapBoundsHandler({ onBoundsChange }: { onBoundsChange: (b: EventQueryBounds) => void }) {
   useMapEvents({
     moveend: (e) => {
       const bounds = e.target.getBounds() as L.LatLngBounds;
@@ -55,7 +46,7 @@ function MapUpdater({ center, zoom }: { center: [number, number]; zoom: number }
 
 export function EventsMap({ events, onBoundsChange, center = [51.505, -0.09], zoom = 12 }: EventsMapProps) {
   const navigate = useNavigate();
-  const [popupInfo, setPopupInfo] = useState<any | null>(null);
+  const [popupInfo, setPopupInfo] = useState<PopupEvent | null>(null);
 
   return (
     <div className="w-full h-150 rounded-xl overflow-hidden border shadow-sm relative z-0">
@@ -73,14 +64,19 @@ export function EventsMap({ events, onBoundsChange, center = [51.505, -0.09], zo
         <MapUpdater center={center} zoom={zoom} />
 
         {events.map((event) => {
-          if (!event.latitude || !event.longitude) return null;
+          if (event.latitude == null || event.longitude == null) return null;
           
           return (
             <Marker
               key={event.id}
               position={[event.latitude, event.longitude]}
               eventHandlers={{
-                click: () => setPopupInfo(event)
+                click: () =>
+                  setPopupInfo({
+                    ...event,
+                    latitude: event.latitude!,
+                    longitude: event.longitude!,
+                  })
               }}
             />
           );
@@ -89,7 +85,9 @@ export function EventsMap({ events, onBoundsChange, center = [51.505, -0.09], zo
         {popupInfo && (
           <Popup
             position={[popupInfo.latitude, popupInfo.longitude]}
-            onClose={() => setPopupInfo(null)}
+            eventHandlers={{
+              remove: () => setPopupInfo(null)
+            }}
           >
             <div className="p-1 space-y-2 min-w-50">
               <h3 className="font-semibold text-sm leading-tight m-0">{popupInfo.title}</h3>
