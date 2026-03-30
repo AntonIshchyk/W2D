@@ -3,7 +3,8 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Calendar, Users, Plus, X,
-  ChevronsUpDown, Check, Clock, CalendarDays
+  ChevronsUpDown, Check, Clock, CalendarDays,
+  Search, Loader2, Map as MapIcon, List
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
@@ -19,6 +20,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { PageLayout } from './Navbar'
+import { EventsMap } from './EventsMap'
+import { LocationPickerMap } from './LocationPickerMap'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { PAGINATION } from '../config/constants'
 import { EmptyState } from './ui/empty-state'
@@ -52,6 +55,10 @@ interface Event {
   attendeeCount: number
   status: string
   currentUserRsvp: string | null
+  latitude?: number
+  longitude?: number
+  locationName?: string
+  placeId?: string
   createdAt: string
   updatedAt: string
 }
@@ -70,6 +77,9 @@ interface CreateEventRequest {
   topicId?: number | null
   tagIds?: number[]
   maxAttendees?: number | null
+  latitude?: number
+  longitude?: number
+  locationName?: string
 }
 
 // ── API helpers ───────────────────────────────────────────────────────────────
@@ -311,10 +321,12 @@ function CreateEventDialog({
   const [description, setDescription] = useState('')
   const [scheduledAt, setScheduledAt] = useState('')
   const [maxAttendees, setMaxAttendees] = useState<string>('')
-  const [topicId, setCommunityId] = useState<number | null>(null)
+  const [topicId, setCommunityId]       = useState<number | null>(null)
   const [communityOpen, setCommunityOpen] = useState(false)
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([])
-  const [tagsOpen, setTagsOpen] = useState(false)
+  const [tagsOpen, setTagsOpen]         = useState(false)
+  const [location, setLocation]         = useState<{lat: number, lng: number} | null>(null)
+  const [locationName, setLocationName] = useState('')
 
   const mutation = useMutation({
     mutationFn: createEvent,
@@ -334,6 +346,8 @@ function CreateEventDialog({
     setMaxAttendees('')
     setCommunityId(null)
     setSelectedTagIds([])
+    setLocation(null)
+    setLocationName('')
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -349,6 +363,9 @@ function CreateEventDialog({
       topicId: topicId ?? null,
       tagIds: selectedTagIds,
       maxAttendees: maxAttendees ? parseInt(maxAttendees, 10) : null,
+      latitude: location?.lat,
+      longitude: location?.lng,
+      locationName: locationName.trim() || undefined,
     })
   }
 
@@ -417,6 +434,25 @@ function CreateEventDialog({
               value={maxAttendees}
               onChange={e => setMaxAttendees(e.target.value)}
             />
+          </div>
+
+          <div className="space-y-1.5 border rounded-lg p-3 bg-muted/20">
+             <div className="flex justify-between items-center mb-2">
+                 <Label>Event Location</Label>
+             </div>
+             <Input 
+                placeholder="Location name (e.g. Central Park)" 
+                value={locationName} 
+                onChange={e => setLocationName(e.target.value)} 
+                className="mb-3"
+             />
+             <div className="text-xs text-muted-foreground mb-2">Click on the map to drop a pin.</div>
+             {open && (
+               <LocationPickerMap 
+                 onLocationSelect={(lat, lng) => setLocation({lat, lng})} 
+                 defaultLocation={location ? [location.lat, location.lng] : undefined} 
+               />
+             )}
           </div>
 
           {/* Community (optional) */}
@@ -527,6 +563,13 @@ export function Events() {
   const [statusFilter, setStatusFilter]         = useState<string>('')
   const [upcomingOnly, setUpcomingOnly]         = useState(true)
   const [communityOpen, setCommunityOpen]         = useState(false)
+  const [viewMode, setViewMode] = useState<'map' | 'list'>('map')
+  const [bounds, setBounds] = useState<{ minLat: number; maxLat: number; minLng: number; maxLng: number } | undefined>()
+  const [mapCenter, setMapCenter] = useState<[number, number]>([51.505, -0.09])
+  const [mapZoom, setMapZoom] = useState<number>(12)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchingCity, setIsSearchingCity] = useState(false)
+  
   const observerTarget = useRef<HTMLDivElement>(null)
 
   const { data: currentUser } = useCurrentUser()
@@ -535,13 +578,34 @@ export function Events() {
   const { data: tags }       = useQuery({ queryKey: ['tags'], queryFn: fetchTags })
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
-    queryKey: ['events', selectedCommunity, statusFilter, upcomingOnly],
+    queryKey: ['events', selectedCommunity, statusFilter, upcomingOnly, bounds, viewMode],
     queryFn: ({ pageParam }) =>
-      fetchEvents(pageParam, selectedCommunity, statusFilter || undefined, upcomingOnly),
+      fetchEvents(pageParam, selectedCommunity, statusFilter || undefined, upcomingOnly, viewMode === 'map' ? bounds : undefined),
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
     initialPageParam: null as number | null,
     retry: false,
   })
+
+  async function handleSearchCity(e: React.FormEvent) {
+    e.preventDefault()
+    if (!searchQuery.trim()) return
+    setIsSearchingCity(true)
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`)
+      const results = await res.json()
+      if (results && results.length > 0) {
+        setMapCenter([parseFloat(results[0].lat), parseFloat(results[0].lon)])
+        setMapZoom(12)
+        toast.success(`Showing events near ${results[0].display_name.split(',')[0]}`)
+      } else {
+        toast.error('City not found')
+      }
+    } catch {
+      toast.error('Search failed')
+    } finally {
+      setIsSearchingCity(false)
+    }
+  }
 
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
     const [target] = entries
@@ -572,17 +636,59 @@ export function Events() {
               {totalCount > 0 ? `${totalCount} event${totalCount !== 1 ? 's' : ''}` : 'Upcoming events near you'}
             </p>
           </div>
-          {currentUser && (
-            <CreateEventDialog
-              communities={communities ?? []}
-              tags={tags ?? []}
-            />
-          )}
+          <div className="flex gap-2">
+            <div className="bg-muted p-1 rounded-md flex items-center">
+              <Button
+                variant={viewMode === 'map' ? 'secondary' : 'ghost'}
+                size="sm"
+                className="h-8 px-2"
+                onClick={() => setViewMode('map')}
+              >
+                <MapIcon className="h-4 w-4 mr-1" />
+                Map
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                size="sm"
+                className="h-8 px-2"
+                onClick={() => setViewMode('list')}
+              >
+                <List className="h-4 w-4 mr-1" />
+                List
+              </Button>
+            </div>
+            {currentUser && (
+              <CreateEventDialog
+                communities={communities ?? []}
+                tags={tags ?? []}
+              />
+            )}
+          </div>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-2">
-          {/* Upcoming toggle */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-4">
+          {viewMode === 'map' && (
+            <form onSubmit={handleSearchCity} className="flex gap-2">
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Search city..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 h-9 text-sm w-48"
+                  disabled={isSearchingCity}
+                />
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              </div>
+              <Button type="submit" size="sm" className="h-9" disabled={isSearchingCity || !searchQuery.trim()}>
+                {isSearchingCity ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
+              </Button>
+            </form>
+          )}
+          
+          <div className="flex flex-wrap gap-2 items-center">
+            {/* Upcoming toggle */}
           <Button
             variant={upcomingOnly ? 'default' : 'outline'}
             size="sm"
@@ -660,11 +766,21 @@ export function Events() {
               Clear
             </Button>
           )}
+          </div>
         </div>
       </div>
 
       {/* Content */}
-      {isLoading ? (
+      {viewMode === 'map' ? (
+        <div className="h-[600px] rounded-xl overflow-hidden border shadow-sm">
+          <EventsMap 
+            events={allEvents} 
+            onBoundsChange={setBounds} 
+            center={mapCenter}
+            zoom={mapZoom}
+          />
+        </div>
+      ) : isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
             <Card key={i} className="flex flex-col h-52">

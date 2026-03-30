@@ -66,7 +66,7 @@ namespace Backend.Migrations
                     b.HasIndex("PostId", "ParentCommentId")
                         .HasDatabaseName("IX_Comments_PostId_ParentCommentId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Models.CommentVote", b =>
@@ -97,7 +97,7 @@ namespace Backend.Migrations
                     b.HasIndex("UserId", "CommentId")
                         .IsUnique();
 
-                    b.ToTable("CommentVotes");
+                    b.ToTable("CommentVotes", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Models.Community", b =>
@@ -125,7 +125,7 @@ namespace Backend.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Communities");
+                    b.ToTable("Communities", (string)null);
 
                     b.HasData(
                         new
@@ -1381,7 +1381,7 @@ namespace Backend.Migrations
                     b.HasIndex("Status")
                         .HasDatabaseName("IX_Events_Status");
 
-                    b.ToTable("Events");
+                    b.ToTable("Events", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Models.EventAttendee", b =>
@@ -1413,7 +1413,7 @@ namespace Backend.Migrations
                     b.HasIndex("EventId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("EventAttendees");
+                    b.ToTable("EventAttendees", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Models.Post", b =>
@@ -1489,7 +1489,7 @@ namespace Backend.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Posts");
+                    b.ToTable("Posts", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Models.PostVote", b =>
@@ -1520,7 +1520,7 @@ namespace Backend.Migrations
                     b.HasIndex("UserId", "PostId")
                         .IsUnique();
 
-                    b.ToTable("PostVotes");
+                    b.ToTable("PostVotes", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Models.Tag", b =>
@@ -1545,7 +1545,7 @@ namespace Backend.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Tags");
+                    b.ToTable("Tags", (string)null);
 
                     b.HasData(
                         new
@@ -1769,7 +1769,7 @@ namespace Backend.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("EventTag", b =>

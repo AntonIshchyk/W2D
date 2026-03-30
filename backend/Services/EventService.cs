@@ -46,6 +46,10 @@ public class EventService : IEventService
             AttendeeCount = e.Attendees.Count(a => a.Status == EventAttendeeStatus.Confirmed),
             Status = e.Status.ToString(),
             CurrentUserRsvp = userAttendee?.Status.ToString(),
+            Latitude = e.Latitude,
+            Longitude = e.Longitude,
+            LocationName = e.LocationName,
+            PlaceId = e.PlaceId,
             CreatedAt = e.CreatedAt,
             UpdatedAt = e.UpdatedAt
         };
@@ -121,6 +125,9 @@ public class EventService : IEventService
             SpaceId = request.TopicId,
             ScheduledAt = request.ScheduledAt,
             MaxAttendees = request.MaxAttendees,
+            Latitude = request.Latitude,
+            Longitude = request.Longitude,
+            LocationName = request.LocationName,
             Status = EventStatus.Open,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

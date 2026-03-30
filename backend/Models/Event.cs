@@ -29,6 +29,15 @@ public class Event : BaseModel
 
     public int? MaxAttendees { get; set; }
 
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
+
+    [MaxLength(255)]
+    public string? LocationName { get; set; }
+
+    [MaxLength(255)]
+    public string? PlaceId { get; set; }
+
     public EventStatus Status { get; set; } = EventStatus.Open;
 
     public ICollection<EventAttendee> Attendees { get; set; } = new List<EventAttendee>();

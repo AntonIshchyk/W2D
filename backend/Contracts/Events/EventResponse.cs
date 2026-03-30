@@ -15,6 +15,10 @@ public class EventResponse
     public int AttendeeCount { get; set; }
     public string Status { get; set; } = string.Empty;
     public string? CurrentUserRsvp { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
+    public string? LocationName { get; set; }
+    public string? PlaceId { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
