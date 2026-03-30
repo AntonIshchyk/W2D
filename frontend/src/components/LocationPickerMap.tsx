@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -36,7 +36,7 @@ function LocationMarker({ onLocationSelect, defaultLocation }: LocationPickerPro
 
 export function LocationPickerMap({ onLocationSelect, defaultLocation }: LocationPickerProps) {
   return (
-    <div className="w-full h-[300px] rounded-md overflow-hidden border">
+    <div className="w-full h-75 rounded-md overflow-hidden border">
       <MapContainer 
         center={defaultLocation || [51.505, -0.09]} 
         zoom={13} 

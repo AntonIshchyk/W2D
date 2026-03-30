@@ -18,115 +18,18 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
   DialogDescription, DialogFooter
 } from './ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { PageLayout } from './Navbar'
-import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
+import {
+  cancelRsvp,
+  deleteEvent,
+  fetchAttendees,
+  fetchEvent,
+  rsvpEvent,
+  updateEvent,
+} from '../features/events/api'
 import { cn } from '../lib/utils'
 import { useCurrentUser } from '../hooks/useCurrentUser'
-
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-interface Tag {
-  id: number
-  name: string
-}
-
-interface Event {
-  id: number
-  title: string
-  description: string
-  organizerId: number
-  organizerName: string
-  topicId: number | null
-  communityName: string | null
-  tags: Tag[]
-  scheduledAt: string
-  maxAttendees: number | null
-  attendeeCount: number
-  status: string
-  currentUserRsvp: string | null
-  createdAt: string
-  updatedAt: string
-}
-
-interface Attendee {
-  userId: number
-  userName: string | null
-  status: string
-  joinedAt: string
-}
-
-interface UpdateEventRequest {
-  title?: string
-  description?: string
-  scheduledAt?: string
-  maxAttendees?: number | null
-  status?: string
-}
-
-// ── API helpers ───────────────────────────────────────────────────────────────
-
-async function fetchEvent(id: number): Promise<Event> {
-  const response = await fetch(API_ENDPOINTS.events.byId(id), {
-    headers: getAuthHeaders(),
-  })
-  if (!response.ok) throw new Error('Event not found')
-  return response.json()
-}
-
-async function fetchAttendees(id: number): Promise<Attendee[]> {
-  const response = await fetch(API_ENDPOINTS.events.attendees(id), {
-    headers: getAuthHeaders(),
-  })
-  if (!response.ok) throw new Error('Failed to fetch attendees')
-  return response.json()
-}
-
-async function rsvpEvent(eventId: number): Promise<void> {
-  const response = await fetch(API_ENDPOINTS.events.rsvp(eventId), {
-    method: 'POST',
-    headers: getAuthHeaders(),
-  })
-  if (!response.ok) {
-    let msg = 'Failed to RSVP'
-    try { msg = (await response.json()).message || msg } catch {}
-    throw new Error(msg)
-  }
-}
-
-async function cancelRsvp(eventId: number): Promise<void> {
-  const response = await fetch(API_ENDPOINTS.events.rsvp(eventId), {
-    method: 'DELETE',
-    headers: getAuthHeaders(),
-  })
-  if (!response.ok) {
-    let msg = 'Failed to cancel RSVP'
-    try { msg = (await response.json()).message || msg } catch {}
-    throw new Error(msg)
-  }
-}
-
-async function updateEvent(id: number, data: UpdateEventRequest): Promise<Event> {
-  const response = await fetch(API_ENDPOINTS.events.byId(id), {
-    method: 'PUT',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(data),
-  })
-  if (!response.ok) {
-    let msg = 'Failed to update event'
-    try { msg = (await response.json()).message || msg } catch {}
-    throw new Error(msg)
-  }
-  return response.json()
-}
-
-async function deleteEvent(id: number): Promise<void> {
-  const response = await fetch(API_ENDPOINTS.events.byId(id), {
-    method: 'DELETE',
-    headers: getAuthHeaders(),
-  })
-  if (!response.ok) throw new Error('Failed to delete event')
-}
+import type { Event, UpdateEventRequest } from '../types/events'
 
 // ── EditEventDialog ───────────────────────────────────────────────────────────
 
@@ -141,7 +44,6 @@ function EditEventDialog({ event, onClose }: { event: Event; onClose: () => void
   const [maxAttendees, setMaxAttendees] = useState<string>(
     event.maxAttendees != null ? String(event.maxAttendees) : ''
   )
-  const [status, setStatus] = useState(event.status)
 
   const mutation = useMutation({
     mutationFn: (data: UpdateEventRequest) => updateEvent(event.id, data),
@@ -168,7 +70,6 @@ function EditEventDialog({ event, onClose }: { event: Event; onClose: () => void
       description: description.trim(),
       scheduledAt: new Date(scheduledAt).toISOString(),
       maxAttendees: safeMaxAttendees,
-      status,
     })
   }
 
@@ -194,18 +95,6 @@ function EditEventDialog({ event, onClose }: { event: Event; onClose: () => void
           <div className="space-y-1.5">
             <Label htmlFor="edit-max">Max attendees</Label>
             <Input id="edit-max" type="number" min={1} placeholder="Unlimited" value={maxAttendees} onChange={e => setMaxAttendees(e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Status</Label>
-            <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Open">Open</SelectItem>
-                <SelectItem value="Full">Full</SelectItem>
-                <SelectItem value="Cancelled">Cancelled</SelectItem>
-                <SelectItem value="Completed">Completed</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
@@ -329,14 +218,13 @@ export function EventDetail() {
   }
 
   const isPast      = new Date(event.scheduledAt) < new Date()
-  const isFull      = event.status === 'Full'
-  const isCancelled = event.status === 'Cancelled'
-  const isOrganizer = currentUser?.userId === event.organizerId
-  const hasRsvp     = event.currentUserRsvp === 'Confirmed' || event.currentUserRsvp === 'Waitlisted'
-  const spotsLeft   = event.maxAttendees != null
-    ? Math.max(0, event.maxAttendees - event.attendeeCount)
-    : null
-
+    const isCancelled = event.status === 'Cancelled'
+    const isOrganizer = currentUser?.userId === event.organizerId
+    const hasRsvp     = event.currentUserRsvp === 'Confirmed' || event.currentUserRsvp === 'Waitlisted'
+    const spotsLeft   = event.maxAttendees != null
+      ? Math.max(0, event.maxAttendees - event.attendeeCount)
+      : null
+    const isFull      = spotsLeft === 0
   const confirmed  = attendees?.filter(a => a.status === 'Confirmed')  ?? []
   const waitlisted = attendees?.filter(a => a.status === 'Waitlisted') ?? []
 
@@ -364,13 +252,6 @@ export function EventDetail() {
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            {event.status !== 'Open' && (
-              <Badge
-                variant={isCancelled ? 'destructive' : event.status === 'Full' ? 'secondary' : 'outline'}
-              >
-                {event.status}
-              </Badge>
-            )}
             {isOrganizer && (
               <>
                 <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShowEdit(true)}>

@@ -58,7 +58,7 @@ export function EventsMap({ events, onBoundsChange, center = [51.505, -0.09], zo
   const [popupInfo, setPopupInfo] = useState<any | null>(null);
 
   return (
-    <div className="w-full h-[600px] rounded-xl overflow-hidden border shadow-sm relative z-0">
+    <div className="w-full h-150 rounded-xl overflow-hidden border shadow-sm relative z-0">
       <MapContainer
         center={center}
         zoom={zoom}
@@ -91,7 +91,7 @@ export function EventsMap({ events, onBoundsChange, center = [51.505, -0.09], zo
             position={[popupInfo.latitude, popupInfo.longitude]}
             onClose={() => setPopupInfo(null)}
           >
-            <div className="p-1 space-y-2 min-w-[200px]">
+            <div className="p-1 space-y-2 min-w-50">
               <h3 className="font-semibold text-sm leading-tight m-0">{popupInfo.title}</h3>
               <p className="text-xs text-muted-foreground line-clamp-2 m-0 mt-1">
                 {popupInfo.description}

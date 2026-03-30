@@ -232,13 +232,6 @@ public class EventService : IEventService
             _context.EventAttendees.Add(existing);
         }
 
-        // Mark event Full if this fills the last spot
-        if (!isFull && newStatus == EventAttendeeStatus.Confirmed && eventEntity.MaxAttendees.HasValue)
-        {
-            if (confirmedCount + 1 >= eventEntity.MaxAttendees.Value)
-                eventEntity.Status = EventStatus.Full;
-        }
-
         await _context.SaveChangesAsync();
 
         User? user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
@@ -265,7 +258,7 @@ public class EventService : IEventService
         attendee.Status = EventAttendeeStatus.Cancelled;
         attendee.UpdatedAt = DateTime.UtcNow;
 
-        if (wasConfirmed && attendee.Event != null && attendee.Event.Status == EventStatus.Full)
+        if (wasConfirmed && attendee.Event != null)
         {
             EventAttendee? firstWaitlisted = await _context.EventAttendees
                 .Where(a => a.EventId == eventId && a.Status == EventAttendeeStatus.Waitlisted)
@@ -276,11 +269,6 @@ public class EventService : IEventService
             {
                 firstWaitlisted.Status = EventAttendeeStatus.Confirmed;
                 firstWaitlisted.UpdatedAt = DateTime.UtcNow;
-            }
-            else
-            {
-                attendee.Event.Status = EventStatus.Open;
-                attendee.Event.UpdatedAt = DateTime.UtcNow;
             }
         }
 
