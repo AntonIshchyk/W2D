@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   Calendar, Users, Plus, X,
   ChevronsUpDown, Check, CalendarDays,
-  Search, Loader2, Map as MapIcon, List
+  Search, Loader2, Map as MapIcon, List, MapPin
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
@@ -170,8 +170,46 @@ export function Events() {
   const [communityOpen, setCommunityOpen]         = useState(false)
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map')
   const [bounds, setBounds] = useState<EventQueryBounds | undefined>()
-  const [mapCenter, setMapCenter] = useState<[number, number]>([20, 0])
-  const [mapZoom, setMapZoom] = useState<number>(2)
+  const defaultCenter: [number, number] = [20, 0]
+  const defaultZoom = 2
+
+  const [mapCenter, setMapCenter] = useState<[number, number]>(() => {
+    try {
+      const raw = localStorage.getItem('events.mapState')
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed.center) && typeof parsed.zoom === 'number') {
+          return [Number(parsed.center[0]), Number(parsed.center[1])]
+        }
+      }
+    } catch {
+      // ignore parse errors
+    }
+    return defaultCenter
+  })
+
+  const [mapZoom, setMapZoom] = useState<number>(() => {
+    try {
+      const raw = localStorage.getItem('events.mapState')
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (typeof parsed.zoom === 'number') return parsed.zoom
+      }
+    } catch {
+      // ignore
+    }
+    return defaultZoom
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('events.mapState', JSON.stringify({ center: mapCenter, zoom: mapZoom }))
+    } catch {
+      // ignore storage errors
+    }
+  }, [mapCenter, mapZoom])
+
+  const [isGettingLocation, setIsGettingLocation] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchingCity, setIsSearchingCity] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
@@ -209,6 +247,28 @@ export function Events() {
     } finally {
       setIsSearchingCity(false)
     }
+  }
+
+  function handleUseMyLocation() {
+    if (!('geolocation' in navigator)) {
+      toast.error('Geolocation is not supported by your browser')
+      return
+    }
+
+    setIsGettingLocation(true)
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setMapCenter([pos.coords.latitude, pos.coords.longitude])
+        setMapZoom(12)
+        toast.success('Map centered to your location')
+        setIsGettingLocation(false)
+      },
+      (err) => {
+        toast.error('Unable to retrieve location')
+        setIsGettingLocation(false)
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
   }
 
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
@@ -286,9 +346,20 @@ export function Events() {
                 />
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               </div>
-              <Button type="submit" size="sm" className="h-9" disabled={isSearchingCity || !searchQuery.trim()}>
-                {isSearchingCity ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
-              </Button>
+                <Button type="submit" size="sm" className="h-9" disabled={isSearchingCity || !searchQuery.trim()}>
+                  {isSearchingCity ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="h-9"
+                  variant="outline"
+                  onClick={handleUseMyLocation}
+                  disabled={isGettingLocation}
+                >
+                  {isGettingLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4 mr-1" />}
+                  My location
+                </Button>
             </form>
           )}
           
