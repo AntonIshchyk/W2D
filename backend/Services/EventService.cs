@@ -70,6 +70,10 @@ public class EventService : IEventService
 
         if (status.HasValue)
             query = query.Where(e => e.Status == status.Value);
+        else
+            query = query.Where(e => e.Status == EventStatus.Open);
+
+        query = query.Where(e => e.MaxAttendees == null || e.Attendees.Count(a => a.Status == EventAttendeeStatus.Confirmed) < e.MaxAttendees);
 
         if (upcomingOnly)
             query = query.Where(e => e.ScheduledAt >= DateTime.UtcNow);

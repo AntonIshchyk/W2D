@@ -224,10 +224,7 @@ export function Events() {
   }, [handleObserver])
 
   const allEvents  = useMemo(() => data?.pages.flatMap(p => p.items) ?? [], [data?.pages])
-  const visibleEvents = useMemo(
-    () => allEvents.filter(event => event.status === 'Open' && (event.maxAttendees == null || event.attendeeCount < event.maxAttendees)),
-    [allEvents]
-  )
+
   const totalCount = data?.pages[0]?.totalCount ?? 0
   const hasFilters = !!(selectedCommunity || !upcomingOnly)
 
@@ -360,7 +357,7 @@ export function Events() {
             selectedEvent ? "w-full md:w-2/3" : "w-full"
           )}>
             <EventsMap 
-              events={visibleEvents} 
+              events={allEvents} 
               onBoundsChange={setBounds} 
               center={mapCenter}
               zoom={mapZoom}
@@ -399,7 +396,7 @@ export function Events() {
             </Card>
           ))}
         </div>
-      ) : visibleEvents.length === 0 ? (
+      ) : allEvents.length === 0 ? (
         <EmptyState
           icon={CalendarDays}
           title="No events found"
@@ -412,7 +409,7 @@ export function Events() {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {visibleEvents.map(event => (
+            {allEvents.map(event => (
               <EventCard key={event.id} event={event} currentUserId={currentUser?.userId} />
             ))}
           </div>
