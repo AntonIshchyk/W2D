@@ -55,7 +55,7 @@ function MapUpdater({ center, zoom, selectedEventId }: { center: [number, number
   return null;
 }
 
-export function EventsMap({ events, onBoundsChange, center = [51.505, -0.09], zoom = 12, onEventClick, selectedEventId }: EventsMapProps) {
+export function EventsMap({ events, onBoundsChange, center = [20, 0], zoom = 2, onEventClick, selectedEventId }: EventsMapProps) {
   return (
     <div className="w-full h-full relative z-0">
       <MapContainer

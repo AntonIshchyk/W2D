@@ -33,7 +33,7 @@ export function LocationPickerMap({ onLocationSelect, defaultLocation }: Locatio
   return (
     <div className="w-full h-75 rounded-md overflow-hidden border">
       <MapContainer 
-        center={defaultLocation || [51.505, -0.09]} 
+        center={defaultLocation || [20, 0]} 
         zoom={13} 
         scrollWheelZoom={true} 
         style={{ height: '100%', width: '100%' }}
