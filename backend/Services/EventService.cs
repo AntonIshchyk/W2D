@@ -55,13 +55,15 @@ public class EventService : IEventService
         };
     }
 
-    public async Task<ScrollResult<EventResponse>> GetEventsAsync(
-        int? cursor = null,
-        int limit = PaginationConstants.DefaultPageSize,
+    public async Task<IEnumerable<EventResponse>> GetEventsAsync(
         int? topicId = null,
         EventStatus? status = null,
         bool upcomingOnly = true,
-        int? currentUserId = null)
+        int? currentUserId = null,
+        double? minLat = null,
+        double? maxLat = null,
+        double? minLng = null,
+        double? maxLng = null)
     {
         IQueryable<Event> query = IncludeDetails(_context.Events.AsNoTracking());
 
@@ -78,37 +80,18 @@ public class EventService : IEventService
         if (upcomingOnly)
             query = query.Where(e => e.ScheduledAt >= DateTime.UtcNow);
 
-        int totalCount = await query.CountAsync();
+        if (minLat.HasValue) query = query.Where(e => e.Latitude >= minLat.Value);
+        if (maxLat.HasValue) query = query.Where(e => e.Latitude <= maxLat.Value);
+        if (minLng.HasValue) query = query.Where(e => e.Longitude >= minLng.Value);
+        if (maxLng.HasValue) query = query.Where(e => e.Longitude <= maxLng.Value);
 
-        if (cursor.HasValue)
-        {
-            Event? cursorEvent = await _context.Events.AsNoTracking()
-                .FirstOrDefaultAsync(e => e.Id == cursor.Value);
+        // Fetch up to reasonably large limit instead of unbounded for a map, 
+        // e.g., 500 points for performance. Adjust as needed.
+        query = query.OrderBy(e => e.ScheduledAt).ThenBy(e => e.Id).Take(500);
 
-            if (cursorEvent != null)
-            {
-                query = query.Where(e =>
-                    e.ScheduledAt > cursorEvent.ScheduledAt ||
-                    (e.ScheduledAt == cursorEvent.ScheduledAt && e.Id > cursor.Value));
-            }
-        }
+        List<Event> items = await query.ToListAsync();
 
-        query = query.OrderBy(e => e.ScheduledAt).ThenBy(e => e.Id);
-
-        List<Event> items = await query.Take(limit + 1).ToListAsync();
-
-        bool hasMore = items.Count > limit;
-        if (hasMore) items = items.Take(limit).ToList();
-
-        int? nextCursor = hasMore && items.Any() ? items.Last().Id : (int?)null;
-
-        return new ScrollResult<EventResponse>
-        {
-            Items = items.Select(e => MapToResponse(e, currentUserId)).ToList(),
-            NextCursor = nextCursor,
-            HasMore = hasMore,
-            TotalCount = totalCount
-        };
+        return items.Select(e => MapToResponse(e, currentUserId));
     }
 
     public async Task<EventResponse?> GetEventByIdAsync(int id, int? currentUserId = null)

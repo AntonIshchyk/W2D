@@ -103,15 +103,21 @@ export function Navbar() {
 }
 
 /** Layout wrapper that accounts for the sidebar */
-export function PageLayout({ children }: { children: React.ReactNode }) {
+export function PageLayout({ children, fullWidth = false }: { children: React.ReactNode, fullWidth?: boolean }) {
   return (
     <div className="min-h-screen bg-background text-foreground pl-18">
       <Navbar />
-      <div className="p-6 lg:p-10">
-        <div className="max-w-6xl mx-auto">
+      {fullWidth ? (
+        <div className="h-screen w-full relative">
           {children}
         </div>
-      </div>
+      ) : (
+        <div className="p-6 lg:p-10">
+          <div className="max-w-6xl mx-auto">
+            {children}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

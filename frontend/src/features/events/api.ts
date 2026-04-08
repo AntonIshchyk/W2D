@@ -23,14 +23,12 @@ function getErrorMessage(fallback: string, payload: unknown): string {
 }
 
 export async function fetchEvents(
-  cursor: number | null,
   topicId?: number,
   upcomingOnly: boolean = true,
   bounds?: EventQueryBounds
-): Promise<ScrollResult<Event>> {
-  const params = new URLSearchParams({ limit: PAGINATION.DEFAULT_PAGE_SIZE.toString() })
+): Promise<Event[]> {
+  const params = new URLSearchParams()
 
-  if (cursor !== null) params.append('cursor', cursor.toString())
   if (topicId) params.append('topicId', topicId.toString())
   if (upcomingOnly) params.append('upcomingOnly', 'true')
 

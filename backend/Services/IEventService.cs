@@ -6,13 +6,15 @@ namespace Backend.Services;
 
 public interface IEventService
 {
-    Task<ScrollResult<EventResponse>> GetEventsAsync(
-        int? cursor = null,
-        int limit = 20,
+    Task<IEnumerable<EventResponse>> GetEventsAsync(
         int? topicId = null,
         EventStatus? status = null,
         bool upcomingOnly = true,
-        int? currentUserId = null);
+        int? currentUserId = null,
+        double? minLat = null,
+        double? maxLat = null,
+        double? minLng = null,
+        double? maxLng = null);
 
     Task<EventResponse?> GetEventByIdAsync(int id, int? currentUserId = null);
 

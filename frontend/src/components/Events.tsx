@@ -1,10 +1,10 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Calendar, Users, Plus, X,
-  ChevronsUpDown, Check, CalendarDays,
-  Search, Loader2, Map as MapIcon, List, MapPin
+  ChevronsUpDown, Check,
+  Search, Loader2, MapPin
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
@@ -12,13 +12,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
-import { Skeleton } from './ui/skeleton'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { PageLayout } from './Navbar'
 import { EventsMap } from './EventsMap'
-import { EmptyState } from './ui/empty-state'
-import { LoadingSpinner } from './ui/loading-spinner'
 import { cn } from '../lib/utils'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { cancelRsvp, fetchCommunities, fetchEvents, rsvpEvent, searchCities } from '../features/events/api'
@@ -168,7 +165,6 @@ export function Events() {
   const [selectedCommunity, setSelectedCommunity] = useState<number | undefined>(undefined)
   const [upcomingOnly, setUpcomingOnly]         = useState(true)
   const [communityOpen, setCommunityOpen]         = useState(false)
-  const [viewMode, setViewMode] = useState<'map' | 'list'>('map')
   const [bounds, setBounds] = useState<EventQueryBounds | undefined>()
   const defaultCenter: [number, number] = [20, 0]
   const defaultZoom = 2
@@ -214,19 +210,36 @@ export function Events() {
   const [isSearchingCity, setIsSearchingCity] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   
-  const observerTarget = useRef<HTMLDivElement>(null)
+  // Auto-fetch location on mount if permission granted
+  useEffect(() => {
+    if (!('geolocation' in navigator) || !navigator.permissions) return
+    
+    let isMounted = true
+    navigator.permissions.query({ name: 'geolocation' }).then(result => {
+      if (result.state === 'granted' && isMounted) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            if (isMounted) {
+              setMapCenter([pos.coords.latitude, pos.coords.longitude])
+              // We won't automatically zoom in too tight on initial auto-load, just center
+              if (mapZoom < 10) setMapZoom(10)
+            }
+          },
+          () => {} // silence errors on auto-fetch
+        )
+      }
+    }).catch(() => {}) // Some browsers throw on query
+    
+    return () => { isMounted = false }
+  }, [])
 
   const { data: currentUser } = useCurrentUser()
 
   const { data: communities } = useQuery({ queryKey: ['communities-list'], queryFn: fetchCommunities })
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
-    queryKey: ['events', selectedCommunity, upcomingOnly, bounds, viewMode],
-    queryFn: ({ pageParam }) =>
-      fetchEvents(pageParam, selectedCommunity, upcomingOnly, viewMode === 'map' ? bounds : undefined),
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
-    initialPageParam: null as number | null,
-    retry: false,
+  const { data: allEvents = [] } = useQuery({
+    queryKey: ['events', selectedCommunity, upcomingOnly, bounds],
+    queryFn: () => fetchEvents(selectedCommunity, upcomingOnly, bounds),
   })
 
   async function handleSearchCity(e: React.FormEvent) {
@@ -271,81 +284,39 @@ export function Events() {
     )
   }
 
-  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
-    const [target] = entries
-    if (target.isIntersecting && hasNextPage && !isFetchingNextPage) fetchNextPage()
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
-
-  useEffect(() => {
-    const el = observerTarget.current
-    const observer = new IntersectionObserver(handleObserver, { threshold: 0.1 })
-    if (el) observer.observe(el)
-    return () => { if (el) observer.unobserve(el) }
-  }, [handleObserver])
-
-  const allEvents  = useMemo(() => data?.pages.flatMap(p => p.items) ?? [], [data?.pages])
-
-  const totalCount = data?.pages[0]?.totalCount ?? 0
+  const totalCount = allEvents?.length ?? 0
   const hasFilters = !!(selectedCommunity || !upcomingOnly)
 
   const selectedCommunityName = communities?.find(a => a.id === selectedCommunity)?.name
 
   return (
-    <PageLayout>
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-baseline justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold">Events</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {totalCount > 0 ? `${totalCount} event${totalCount !== 1 ? 's' : ''}` : 'Upcoming events near you'}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <div className="bg-muted p-1 rounded-md flex items-center">
-              <Button
-                variant={viewMode === 'map' ? 'secondary' : 'ghost'}
-                size="sm"
-                className="h-8 px-2"
-                onClick={() => setViewMode('map')}
-              >
-                <MapIcon className="h-4 w-4 mr-1" />
-                Map
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                size="sm"
-                className="h-8 px-2"
-                onClick={() => setViewMode('list')}
-              >
-                <List className="h-4 w-4 mr-1" />
-                List
-              </Button>
-            </div>
-            {currentUser && (
-              <Button onClick={() => navigate('/events/create')} size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Event
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-4">
-          {viewMode === 'map' && (
-            <form onSubmit={handleSearchCity} className="flex gap-2">
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Search city..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 h-9 text-sm w-48"
-                  disabled={isSearchingCity}
-                />
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+    <PageLayout fullWidth>
+      <div className="relative w-full h-[100dvh] flex flex-col overflow-hidden">
+        {/* Floating UI Container */}
+        <div className="absolute top-0 left-0 right-0 z-10 p-4 pointer-events-none flex flex-col gap-2">
+          {/* Top Bar */}
+          <div className="pointer-events-auto flex flex-col sm:flex-row sm:items-center justify-between bg-card/95 backdrop-blur shadow-sm border rounded-xl p-3 gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+              <div>
+                <h1 className="text-xl font-bold leading-none">Events</h1>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {totalCount > 0 ? `${totalCount} event${totalCount !== 1 ? 's' : ''}` : 'Loading...'}
+                </p>
               </div>
+              
+              {/* Search */}
+              <form onSubmit={handleSearchCity} className="flex gap-2">
+                <div className="relative">
+                  <Input
+                    type="text"
+                    placeholder="Search city..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-8 h-9 text-sm w-40 sm:w-48 bg-background"
+                    disabled={isSearchingCity}
+                  />
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                </div>
                 <Button type="submit" size="sm" className="h-9" disabled={isSearchingCity || !searchQuery.trim()}>
                   {isSearchingCity ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
                 </Button>
@@ -356,141 +327,109 @@ export function Events() {
                   variant="outline"
                   onClick={handleUseMyLocation}
                   disabled={isGettingLocation}
+                  title="My location"
                 >
-                  {isGettingLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4 mr-1" />}
-                  My location
+                  {isGettingLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
                 </Button>
-            </form>
-          )}
-          
-          <div className="flex flex-wrap gap-2 items-center">
-          {/* Community filter */}
-          <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 text-xs gap-1">
-                {selectedCommunityName ?? 'Community'}
-                <ChevronsUpDown className="h-3 w-3 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-56 p-0">
-              <Command>
-                <CommandInput placeholder="Search…" />
-                <CommandList>
-                  <CommandEmpty>No communities.</CommandEmpty>
-                  <CommandGroup>
-                    <CommandItem
-                      value="__all__"
-                      onSelect={() => { setSelectedCommunity(undefined); setCommunityOpen(false) }}
-                    >
-                      <Check className={cn('mr-2 h-4 w-4', !selectedCommunity ? 'opacity-100' : 'opacity-0')} />
-                      All communities
-                    </CommandItem>
-                    {(communities ?? []).map(a => (
+              </form>
+            </div>
+
+            {/* Right Side Tools */}
+            <div className="flex items-center gap-3">
+              {currentUser && (
+                <Button onClick={() => navigate('/events/create')} size="sm" className="h-9">
+                  <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Create Event</span>
+                  <span className="sm:hidden">Create</span>
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Floating Filters Row */}
+          <div className="pointer-events-auto flex flex-wrap gap-2 items-center bg-card/95 backdrop-blur shadow-sm border rounded-xl p-2 w-fit">
+            <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 text-xs gap-1">
+                  {selectedCommunityName ?? 'All Communities'}
+                  <ChevronsUpDown className="h-3 w-3 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search…" />
+                  <CommandList>
+                    <CommandEmpty>No communities.</CommandEmpty>
+                    <CommandGroup>
                       <CommandItem
-                        key={a.id}
-                        value={a.name}
-                        onSelect={() => { setSelectedCommunity(a.id); setCommunityOpen(false) }}
+                        value="__all__"
+                        onSelect={() => { setSelectedCommunity(undefined); setCommunityOpen(false) }}
                       >
-                        <Check className={cn('mr-2 h-4 w-4', selectedCommunity === a.id ? 'opacity-100' : 'opacity-0')} />
-                        {a.name}
+                        <Check className={cn('mr-2 h-4 w-4', !selectedCommunity ? 'opacity-100' : 'opacity-0')} />
+                        All communities
                       </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+                      {(communities ?? []).map(a => (
+                        <CommandItem
+                          key={a.id}
+                          value={a.name}
+                          onSelect={() => { setSelectedCommunity(a.id); setCommunityOpen(false) }}
+                        >
+                          <Check className={cn('mr-2 h-4 w-4', selectedCommunity === a.id ? 'opacity-100' : 'opacity-0')} />
+                          {a.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
 
-          {/* Clear filters */}
-          {hasFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 text-xs"
-              onClick={() => {
-                setSelectedCommunity(undefined)
-                setUpcomingOnly(true)
-              }}
-            >
-              <X className="h-3.5 w-3.5 mr-1" />
-              Clear
-            </Button>
-          )}
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      {viewMode === 'map' ? (
-        <div className="flex flex-col md:flex-row gap-4 h-150">
-          <div className={cn(
-            "rounded-xl overflow-hidden border shadow-sm transition-all duration-300 relative",
-            selectedEvent ? "w-full md:w-2/3" : "w-full"
-          )}>
-            <EventsMap 
-              events={allEvents} 
-              onBoundsChange={setBounds} 
-              center={mapCenter}
-              zoom={mapZoom}
-              onEventClick={setSelectedEvent}
-              selectedEventId={selectedEvent?.id}
-            />
-          </div>
-          {selectedEvent && (
-            <div className="w-full md:w-1/3 flex flex-col relative animate-in slide-in-from-right-8 duration-300">
+            {hasFilters && (
               <Button
                 variant="ghost"
-                size="icon"
-                className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-background/80 hover:bg-background backdrop-blur-sm shadow-sm"
-                onClick={() => setSelectedEvent(null)}
+                size="sm"
+                className="h-8 text-xs"
+                onClick={() => {
+                  setSelectedCommunity(undefined)
+                  setUpcomingOnly(true)
+                }}
               >
-                <X className="h-4 w-4" />
+                <X className="h-3.5 w-3.5 mr-1" />
+                Clear
               </Button>
-              <div className="h-full overflow-y-auto pb-4">
-                <EventCard event={selectedEvent} currentUserId={currentUser?.userId} />
-              </div>
-            </div>
-          )}
-        </div>
-      ) : isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="flex flex-col h-52">
-              <CardHeader className="pb-2">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-full mt-2" />
-              </CardHeader>
-              <CardContent className="flex-1 space-y-2">
-                <Skeleton className="h-3 w-1/2" />
-                <Skeleton className="h-3 w-1/3" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : allEvents.length === 0 ? (
-        <EmptyState
-          icon={CalendarDays}
-          title="No events found"
-          description={hasFilters ? 'Try adjusting your filters.' : 'Be the first to organise something!'}
-          action={currentUser ? {
-            label: 'Create Event',
-            onClick: () => navigate('/events/create')
-          } : undefined}
-        />
-      ) : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {allEvents.map(event => (
-              <EventCard key={event.id} event={event} currentUserId={currentUser?.userId} />
-            ))}
+            )}
           </div>
+        </div>
 
-          {/* Infinite scroll sentinel */}
-          <div ref={observerTarget} className="flex justify-center py-6">
-            {isFetchingNextPage && <LoadingSpinner />}
+        {/* Map Layer */}
+        <div className="flex-1 w-full h-full relative z-0">
+          <EventsMap 
+            events={allEvents} 
+            onBoundsChange={setBounds} 
+            center={mapCenter}
+            zoom={mapZoom}
+            onEventClick={setSelectedEvent}
+            selectedEventId={selectedEvent?.id}
+          />
+        </div>
+
+        {/* Floating Selected Event Drawer */}
+        {selectedEvent && (
+          <div className="absolute top-28 sm:top-24 right-4 sm:bottom-4 w-[calc(100vw-2rem)] sm:w-80 max-h-[60vh] sm:max-h-none z-20 pointer-events-auto bg-card border shadow-2xl rounded-xl overflow-hidden flex flex-col animate-in slide-in-from-right-8 duration-300">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 z-30 w-8 h-8 rounded-full bg-background/80 hover:bg-background shadow-sm"
+              onClick={() => setSelectedEvent(null)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+              <EventCard event={selectedEvent} currentUserId={currentUser?.userId} />
+            </div>
           </div>
-        </>
-      )}
+        )}
+      </div>
     </PageLayout>
   )
 }
