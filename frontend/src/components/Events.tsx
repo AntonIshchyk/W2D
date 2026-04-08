@@ -295,8 +295,8 @@ export function Events() {
         {/* Floating UI Container */}
         <div className="absolute top-0 left-0 right-0 z-10 p-4 pointer-events-none flex flex-col gap-2">
           {/* Top Bar */}
-          <div className="pointer-events-auto flex flex-col sm:flex-row sm:items-center justify-between bg-card/95 backdrop-blur shadow-sm border rounded-xl p-3 gap-3">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+          <div className="pointer-events-auto flex flex-col xl:flex-row xl:items-center justify-between bg-card/95 backdrop-blur shadow-sm border rounded-xl p-3 gap-3">
+            <div className="flex flex-wrap items-center gap-3 xl:gap-6">
               <div>
                 <h1 className="text-xl font-bold leading-none">Events</h1>
                 <p className="text-xs text-muted-foreground mt-1">
@@ -332,6 +332,60 @@ export function Events() {
                   {isGettingLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
                 </Button>
               </form>
+
+              {/* Filters */}
+              <div className="flex items-center gap-2">
+                <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-9 text-xs gap-1">
+                      {selectedCommunityName ?? 'All Communities'}
+                      <ChevronsUpDown className="h-3 w-3 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56 p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Search…" />
+                      <CommandList>
+                        <CommandEmpty>No communities.</CommandEmpty>
+                        <CommandGroup>
+                          <CommandItem
+                            value="__all__"
+                            onSelect={() => { setSelectedCommunity(undefined); setCommunityOpen(false) }}
+                          >
+                            <Check className={cn('mr-2 h-4 w-4', !selectedCommunity ? 'opacity-100' : 'opacity-0')} />
+                            All communities
+                          </CommandItem>
+                          {(communities ?? []).map(a => (
+                            <CommandItem
+                              key={a.id}
+                              value={a.name}
+                              onSelect={() => { setSelectedCommunity(a.id); setCommunityOpen(false) }}
+                            >
+                              <Check className={cn('mr-2 h-4 w-4', selectedCommunity === a.id ? 'opacity-100' : 'opacity-0')} />
+                              {a.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+
+                {hasFilters && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 text-xs"
+                    onClick={() => {
+                      setSelectedCommunity(undefined)
+                      setUpcomingOnly(true)
+                    }}
+                  >
+                    <X className="h-3.5 w-3.5 mr-1" />
+                    Clear
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Right Side Tools */}
@@ -344,60 +398,6 @@ export function Events() {
                 </Button>
               )}
             </div>
-          </div>
-
-          {/* Floating Filters Row */}
-          <div className="pointer-events-auto flex flex-wrap gap-2 items-center bg-card/95 backdrop-blur shadow-sm border rounded-xl p-2 w-fit">
-            <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 text-xs gap-1">
-                  {selectedCommunityName ?? 'All Communities'}
-                  <ChevronsUpDown className="h-3 w-3 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-56 p-0" align="start">
-                <Command>
-                  <CommandInput placeholder="Search…" />
-                  <CommandList>
-                    <CommandEmpty>No communities.</CommandEmpty>
-                    <CommandGroup>
-                      <CommandItem
-                        value="__all__"
-                        onSelect={() => { setSelectedCommunity(undefined); setCommunityOpen(false) }}
-                      >
-                        <Check className={cn('mr-2 h-4 w-4', !selectedCommunity ? 'opacity-100' : 'opacity-0')} />
-                        All communities
-                      </CommandItem>
-                      {(communities ?? []).map(a => (
-                        <CommandItem
-                          key={a.id}
-                          value={a.name}
-                          onSelect={() => { setSelectedCommunity(a.id); setCommunityOpen(false) }}
-                        >
-                          <Check className={cn('mr-2 h-4 w-4', selectedCommunity === a.id ? 'opacity-100' : 'opacity-0')} />
-                          {a.name}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-
-            {hasFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 text-xs"
-                onClick={() => {
-                  setSelectedCommunity(undefined)
-                  setUpcomingOnly(true)
-                }}
-              >
-                <X className="h-3.5 w-3.5 mr-1" />
-                Clear
-              </Button>
-            )}
           </div>
         </div>
 

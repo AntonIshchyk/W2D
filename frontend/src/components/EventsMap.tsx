@@ -1,5 +1,5 @@
 ﻿import { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap, ZoomControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { ensureLeafletDefaultIcon } from '../utils/leafletIcon';
@@ -62,8 +62,10 @@ export function EventsMap({ events, onBoundsChange, center = [20, 0], zoom = 2, 
         center={center}
         zoom={zoom}
         scrollWheelZoom={true}
+        zoomControl={false}
         style={{ height: '100%', width: '100%', zIndex: 0 }}
       >
+        <ZoomControl position="bottomleft" />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
