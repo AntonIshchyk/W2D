@@ -25,7 +25,6 @@ export function CreateEvent() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [scheduledAt, setScheduledAt] = useState('')
-  const [maxAttendees, setMaxAttendees] = useState<string>('')
   const [topicId, setCommunityId] = useState<number | null>(null)
   const [communityOpen, setCommunityOpen] = useState(false)
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([])
@@ -55,7 +54,6 @@ export function CreateEvent() {
       description,
       scheduledAt: new Date(scheduledAt).toISOString(),
       topicId: topicId || null,
-      maxAttendees: maxAttendees ? parseInt(maxAttendees, 10) : null,
       tagIds: selectedTagIds,
       latitude: location?.lat,
       longitude: location?.lng,
@@ -108,17 +106,6 @@ export function CreateEvent() {
                     required
                     value={scheduledAt}
                     onChange={e => setScheduledAt(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="max">Max Attendees (Optional)</Label>
-                  <Input
-                    id="max"
-                    type="number"
-                    min="1"
-                    value={maxAttendees}
-                    onChange={e => setMaxAttendees(e.target.value)}
-                    placeholder="No limit"
                   />
                 </div>
               </div>

@@ -1,7 +1,6 @@
 import { API_ENDPOINTS, getAuthHeaders } from '../../config/api'
 import { PAGINATION } from '../../config/constants'
 import type {
-  Attendee,
   CitySearchResult,
   Community,
   CreateEventRequest,
@@ -93,50 +92,6 @@ export async function fetchEvent(id: number): Promise<Event> {
   if (!response.ok) throw new Error('Event not found')
 
   return response.json()
-}
-
-export async function fetchAttendees(id: number): Promise<Attendee[]> {
-  const response = await fetch(API_ENDPOINTS.events.attendees(id), {
-    headers: getAuthHeaders(),
-  })
-
-  if (!response.ok) throw new Error('Failed to fetch attendees')
-
-  return response.json()
-}
-
-export async function rsvpEvent(eventId: number): Promise<void> {
-  const response = await fetch(API_ENDPOINTS.events.rsvp(eventId), {
-    method: 'POST',
-    headers: getAuthHeaders(),
-  })
-
-  if (!response.ok) {
-    let msg = 'Failed to RSVP'
-    try {
-      msg = getErrorMessage(msg, await response.json())
-    } catch {
-      // Keep fallback message.
-    }
-    throw new Error(msg)
-  }
-}
-
-export async function cancelRsvp(eventId: number): Promise<void> {
-  const response = await fetch(API_ENDPOINTS.events.rsvp(eventId), {
-    method: 'DELETE',
-    headers: getAuthHeaders(),
-  })
-
-  if (!response.ok) {
-    let msg = 'Failed to cancel RSVP'
-    try {
-      msg = getErrorMessage(msg, await response.json())
-    } catch {
-      // Keep fallback message.
-    }
-    throw new Error(msg)
-  }
 }
 
 export async function updateEvent(id: number, data: UpdateEventRequest): Promise<Event> {

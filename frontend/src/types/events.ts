@@ -18,23 +18,13 @@ export interface Event {
   communityName: string | null
   tags: Tag[]
   scheduledAt: string
-  maxAttendees: number | null
-  attendeeCount: number
   status: string
-  currentUserRsvp: string | null
   latitude?: number
   longitude?: number
   locationName?: string
   placeId?: string
   createdAt: string
   updatedAt: string
-}
-
-export interface Attendee {
-  userId: number
-  userName: string | null
-  status: string
-  joinedAt: string
 }
 
 export interface EventQueryBounds {
@@ -50,7 +40,6 @@ export interface CreateEventRequest {
   scheduledAt: string
   topicId?: number | null
   tagIds?: number[]
-  maxAttendees?: number | null
   latitude?: number
   longitude?: number
   locationName?: string
@@ -60,7 +49,6 @@ export interface UpdateEventRequest {
   title?: string
   description?: string
   scheduledAt?: string
-  maxAttendees?: number | null
 }
 
 export interface CitySearchResult {

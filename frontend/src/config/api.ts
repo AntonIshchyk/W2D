@@ -15,8 +15,6 @@ export const API_ENDPOINTS = {
   events: {
     base: `${API_BASE_URL}/api/events`,
     byId: (id: number) => `${API_BASE_URL}/api/events/${id}`,
-    rsvp: (id: number) => `${API_BASE_URL}/api/events/${id}/rsvp`,
-    attendees: (id: number) => `${API_BASE_URL}/api/events/${id}/attendees`,
   },
   posts: {
     base: `${API_BASE_URL}/api/posts`,

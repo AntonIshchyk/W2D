@@ -11,10 +11,7 @@ public class EventResponse
     public string? CommunityName { get; set; }
     public List<TagDto> Tags { get; set; } = new();
     public DateTime ScheduledAt { get; set; }
-    public int? MaxAttendees { get; set; }
-    public int AttendeeCount { get; set; }
     public string Status { get; set; } = string.Empty;
-    public string? CurrentUserRsvp { get; set; }
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
     public string? LocationName { get; set; }

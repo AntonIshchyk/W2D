@@ -21,16 +21,11 @@ public class EventService : IEventService
         return query
             .Include(e => e.Organizer)
             .Include(e => e.Community)
-            .Include(e => e.Tags)
-            .Include(e => e.Attendees);
+            .Include(e => e.Tags);
     }
 
     private static EventResponse MapToResponse(Event e, int? currentUserId = null)
     {
-        EventAttendee? userAttendee = currentUserId.HasValue
-            ? e.Attendees.FirstOrDefault(a => a.UserId == currentUserId.Value)
-            : null;
-
         return new EventResponse
         {
             Id = e.Id,
@@ -42,10 +37,7 @@ public class EventService : IEventService
             CommunityName = e.Community?.Name,
             Tags = e.Tags.Select(t => new TagDto { Id = t.Id, Name = t.Name }).ToList(),
             ScheduledAt = e.ScheduledAt,
-            MaxAttendees = e.MaxAttendees,
-            AttendeeCount = e.Attendees.Count(a => a.Status == EventAttendeeStatus.Confirmed),
             Status = e.Status.ToString(),
-            CurrentUserRsvp = userAttendee?.Status.ToString(),
             Latitude = e.Latitude,
             Longitude = e.Longitude,
             LocationName = e.LocationName,
@@ -74,8 +66,6 @@ public class EventService : IEventService
             query = query.Where(e => e.Status == status.Value);
         else
             query = query.Where(e => e.Status == EventStatus.Open);
-
-        query = query.Where(e => e.MaxAttendees == null || e.Attendees.Count(a => a.Status == EventAttendeeStatus.Confirmed) < e.MaxAttendees);
 
         if (upcomingOnly)
             query = query.Where(e => e.ScheduledAt >= DateTime.UtcNow);
@@ -111,7 +101,6 @@ public class EventService : IEventService
             OrganizerId = organizerId,
             SpaceId = request.TopicId,
             ScheduledAt = request.ScheduledAt,
-            MaxAttendees = request.MaxAttendees,
             Latitude = request.Latitude,
             Longitude = request.Longitude,
             LocationName = request.LocationName,
@@ -148,7 +137,6 @@ public class EventService : IEventService
         if (request.Description != null) eventEntity.Description = request.Description;
         if (request.TopicId.HasValue) eventEntity.SpaceId = request.TopicId;
         if (request.ScheduledAt.HasValue) eventEntity.ScheduledAt = request.ScheduledAt.Value;
-        if (request.MaxAttendees.HasValue) eventEntity.MaxAttendees = request.MaxAttendees;
         if (request.Status.HasValue) eventEntity.Status = request.Status.Value;
 
         if (request.TagIds != null)
@@ -175,108 +163,5 @@ public class EventService : IEventService
         _context.Events.Remove(eventEntity);
         await _context.SaveChangesAsync();
         return true;
-    }
-
-    public async Task<(bool success, string message, EventAttendeeResponse? attendee)> RsvpAsync(int eventId, int userId)
-    {
-        Event? eventEntity = await _context.Events
-            .Include(e => e.Attendees)
-            .FirstOrDefaultAsync(e => e.Id == eventId);
-
-        if (eventEntity == null)
-            return (false, "Event not found", null);
-
-        if (eventEntity.Status == EventStatus.Cancelled)
-            return (false, "Event is cancelled", null);
-
-        if (eventEntity.OrganizerId == userId)
-            return (false, "Organizer cannot RSVP to their own event", null);
-
-        EventAttendee? existing = eventEntity.Attendees.FirstOrDefault(a => a.UserId == userId);
-
-        if (existing != null && existing.Status == EventAttendeeStatus.Confirmed)
-            return (false, "Already attending this event", null);
-
-        int confirmedCount = eventEntity.Attendees.Count(a => a.Status == EventAttendeeStatus.Confirmed);
-        bool isFull = eventEntity.MaxAttendees.HasValue && confirmedCount >= eventEntity.MaxAttendees.Value;
-        EventAttendeeStatus newStatus = isFull ? EventAttendeeStatus.Waitlisted : EventAttendeeStatus.Confirmed;
-
-        if (existing != null)
-        {
-            existing.Status = newStatus;
-            existing.UpdatedAt = DateTime.UtcNow;
-        }
-        else
-        {
-            existing = new EventAttendee
-            {
-                EventId = eventId,
-                UserId = userId,
-                Status = newStatus,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-            _context.EventAttendees.Add(existing);
-        }
-
-        await _context.SaveChangesAsync();
-
-        User? user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
-
-        return (true, "RSVP successful", new EventAttendeeResponse
-        {
-            UserId = userId,
-            UserName = user?.Username,
-            Status = existing.Status.ToString(),
-            JoinedAt = existing.CreatedAt
-        });
-    }
-
-    public async Task<bool> CancelRsvpAsync(int eventId, int userId)
-    {
-        EventAttendee? attendee = await _context.EventAttendees
-            .Include(a => a.Event)
-            .FirstOrDefaultAsync(a => a.EventId == eventId && a.UserId == userId);
-
-        if (attendee == null || attendee.Status == EventAttendeeStatus.Cancelled)
-            return false;
-
-        bool wasConfirmed = attendee.Status == EventAttendeeStatus.Confirmed;
-        attendee.Status = EventAttendeeStatus.Cancelled;
-        attendee.UpdatedAt = DateTime.UtcNow;
-
-        if (wasConfirmed && attendee.Event != null)
-        {
-            EventAttendee? firstWaitlisted = await _context.EventAttendees
-                .Where(a => a.EventId == eventId && a.Status == EventAttendeeStatus.Waitlisted)
-                .OrderBy(a => a.CreatedAt)
-                .FirstOrDefaultAsync();
-
-            if (firstWaitlisted != null)
-            {
-                firstWaitlisted.Status = EventAttendeeStatus.Confirmed;
-                firstWaitlisted.UpdatedAt = DateTime.UtcNow;
-            }
-        }
-
-        await _context.SaveChangesAsync();
-        return true;
-    }
-
-    public async Task<IEnumerable<EventAttendeeResponse>> GetAttendeesAsync(int eventId)
-    {
-        return await _context.EventAttendees
-            .AsNoTracking()
-            .Include(a => a.User)
-            .Where(a => a.EventId == eventId && a.Status != EventAttendeeStatus.Cancelled)
-            .OrderBy(a => a.CreatedAt)
-            .Select(a => new EventAttendeeResponse
-            {
-                UserId = a.UserId,
-                UserName = a.User != null ? a.User.Username : null,
-                Status = a.Status.ToString(),
-                JoinedAt = a.CreatedAt
-            })
-            .ToListAsync();
     }
 }

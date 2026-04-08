@@ -26,15 +26,14 @@ public class AppDbContext : DbContext
     public DbSet<Comment> Comments { get; set; }
     public DbSet<CommentVote> CommentVotes { get; set; }
     public DbSet<Event> Events { get; set; }
-    public DbSet<EventAttendee> EventAttendees { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        
 
-        
+
+
 
         // Tag unique name constraint
         modelBuilder.Entity<Tag>()
@@ -56,7 +55,7 @@ public class AppDbContext : DbContext
             .HasIndex(u => u.Username)
             .IsUnique();
 
-        
+
 
         // Post - User relationship
         modelBuilder.Entity<Post>()
@@ -207,25 +206,6 @@ public class AppDbContext : DbContext
             .WithMany(t => t.Events)
             .UsingEntity(j => j.ToTable("EventTags"));
 
-        // EventAttendee - Event relationship
-        modelBuilder.Entity<EventAttendee>()
-            .HasOne(a => a.Event)
-            .WithMany(e => e.Attendees)
-            .HasForeignKey(a => a.EventId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        // EventAttendee - User relationship
-        modelBuilder.Entity<EventAttendee>()
-            .HasOne(a => a.User)
-            .WithMany()
-            .HasForeignKey(a => a.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        // One RSVP per user per event
-        modelBuilder.Entity<EventAttendee>()
-            .HasIndex(a => new { a.EventId, a.UserId })
-            .IsUnique();
-
         // Event performance indexes
         modelBuilder.Entity<Event>()
             .HasIndex(e => e.ScheduledAt)
@@ -242,10 +222,6 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Event>()
             .HasIndex(e => e.Status)
             .HasDatabaseName("IX_Events_Status");
-
-        modelBuilder.Entity<EventAttendee>()
-            .HasIndex(a => a.UserId)
-            .HasDatabaseName("IX_EventAttendees_UserId");
 
         // Seed database with communities, communities, and tags
         DatabaseSeeder.SeedData(modelBuilder);

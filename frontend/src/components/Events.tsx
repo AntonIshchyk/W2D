@@ -1,8 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Calendar, Users, Plus, X,
+  Calendar, Plus, X,
   ChevronsUpDown, Check,
   Search, Loader2, MapPin
 } from 'lucide-react'
@@ -18,43 +18,15 @@ import { PageLayout } from './Navbar'
 import { EventsMap } from './EventsMap'
 import { cn } from '../lib/utils'
 import { useCurrentUser } from '../hooks/useCurrentUser'
-import { cancelRsvp, fetchCommunities, fetchEvents, rsvpEvent, searchCities } from '../features/events/api'
+import { fetchCommunities, fetchEvents, searchCities } from '../features/events/api'
 import type { Event, EventQueryBounds } from '../types/events'
 
 // ── EventCard ─────────────────────────────────────────────────────────────────
 
-function EventCard({ event, currentUserId }: { event: Event; currentUserId?: number }) {
-  const queryClient = useQueryClient()
-  const navigate    = useNavigate()
+function EventCard({ event }: { event: Event }) {
+  const navigate = useNavigate()
 
-  const rsvpMutation = useMutation({
-    mutationFn: () => rsvpEvent(event.id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['events'] })
-      queryClient.invalidateQueries({ queryKey: ['event', event.id] })
-      toast.success('You\'re in!')
-    },
-    onError: (err: Error) => toast.error(err.message),
-  })
-
-  const cancelMutation = useMutation({
-    mutationFn: () => cancelRsvp(event.id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['events'] })
-      queryClient.invalidateQueries({ queryKey: ['event', event.id] })
-      toast.success('RSVP cancelled')
-    },
-    onError: (err: Error) => toast.error(err.message),
-  })
-
-  const isPast     = new Date(event.scheduledAt) < new Date()
-  const isOrganizer = currentUserId === event.organizerId
-  const hasRsvp     = event.currentUserRsvp === 'Confirmed' || event.currentUserRsvp === 'Waitlisted'
-
-  const spotsLeft =
-    event.maxAttendees != null
-      ? Math.max(0, event.maxAttendees - event.attendeeCount)
-      : null
+  const isPast = new Date(event.scheduledAt) < new Date()
 
   return (
     <Card
@@ -66,14 +38,6 @@ function EventCard({ event, currentUserId }: { event: Event; currentUserId?: num
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-base leading-snug line-clamp-2">{event.title}</CardTitle>
-          <div className="flex flex-col items-end gap-1 shrink-0">
-            {event.currentUserRsvp === 'Confirmed' && (
-              <Badge variant="default" className="text-xs bg-green-600">Going</Badge>
-            )}
-            {event.currentUserRsvp === 'Waitlisted' && (
-              <Badge variant="secondary" className="text-xs">Waitlisted</Badge>
-            )}
-          </div>
         </div>
         <CardDescription className="line-clamp-2 text-xs mt-1">{event.description}</CardDescription>
       </CardHeader>
@@ -90,15 +54,6 @@ function EventCard({ event, currentUserId }: { event: Event; currentUserId?: num
 
         {/* Attendees & community */}
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <Users className="h-3.5 w-3.5" />
-            {event.attendeeCount} going
-            {spotsLeft !== null && (
-              <span className={cn(spotsLeft === 0 ? 'text-destructive' : 'text-muted-foreground')}>
-                {' '}· {spotsLeft} spot{spotsLeft !== 1 ? 's' : ''} left
-              </span>
-            )}
-          </span>
           {event.communityName && (
             <span className="text-muted-foreground">
               {event.communityName}
@@ -119,40 +74,6 @@ function EventCard({ event, currentUserId }: { event: Event; currentUserId?: num
                 +{event.tags.length - 3}
               </Badge>
             )}
-          </div>
-        )}
-
-        {/* RSVP button */}
-        {!isOrganizer && currentUserId && (
-          <div
-            className="pt-2 border-t"
-            onClick={e => e.stopPropagation()}
-          >
-            {hasRsvp ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full text-xs"
-                disabled={cancelMutation.isPending}
-                onClick={() => cancelMutation.mutate()}
-              >
-                {event.currentUserRsvp === 'Waitlisted' ? 'Leave waitlist' : 'Cancel RSVP'}
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                className="w-full text-xs"
-                disabled={rsvpMutation.isPending || (spotsLeft === 0 && !isPast)}
-                onClick={() => rsvpMutation.mutate()}
-              >
-                {spotsLeft === 0 ? 'Join waitlist' : 'RSVP'}
-              </Button>
-            )}
-          </div>
-        )}
-        {isOrganizer && (
-          <div className="pt-2 border-t">
-            <span className="text-xs text-muted-foreground italic">You're organising this</span>
           </div>
         )}
       </CardContent>
@@ -425,7 +346,7 @@ export function Events() {
               <X className="h-4 w-4" />
             </Button>
             <div className="flex-1 overflow-y-auto p-3 sm:p-4">
-              <EventCard event={selectedEvent} currentUserId={currentUser?.userId} />
+              <EventCard event={selectedEvent} />
             </div>
           </div>
         )}

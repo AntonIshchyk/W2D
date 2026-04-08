@@ -73,29 +73,4 @@ public class EventsController : ControllerBase
         if (!deleted) return NotFound(new { message = "Event not found or you are not the organizer" });
         return NoContent();
     }
-
-    [HttpPost("{id}/rsvp")]
-    public async Task<ActionResult<EventAttendeeResponse>> Rsvp(int id)
-    {
-        int userId = User.GetUserId();
-        (bool success, string message, EventAttendeeResponse? attendee) = await _eventService.RsvpAsync(id, userId);
-        if (!success) return BadRequest(new { message });
-        return Ok(attendee);
-    }
-
-    [HttpDelete("{id}/rsvp")]
-    public async Task<ActionResult> CancelRsvp(int id)
-    {
-        int userId = User.GetUserId();
-        bool cancelled = await _eventService.CancelRsvpAsync(id, userId);
-        if (!cancelled) return NotFound(new { message = "RSVP not found or already cancelled" });
-        return NoContent();
-    }
-
-    [HttpGet("{id}/attendees")]
-    public async Task<ActionResult<IEnumerable<EventAttendeeResponse>>> GetAttendees(int id)
-    {
-        IEnumerable<EventAttendeeResponse> attendees = await _eventService.GetAttendeesAsync(id);
-        return Ok(attendees);
-    }
 }

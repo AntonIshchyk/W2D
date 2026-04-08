@@ -2,8 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
-  Calendar, Users, ArrowLeft,
-  Edit2, Trash2, Clock
+  Calendar, ArrowLeft,
+  Edit2, Trash2
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
@@ -20,11 +20,8 @@ import {
 } from './ui/dialog'
 import { PageLayout } from './Navbar'
 import {
-  cancelRsvp,
   deleteEvent,
-  fetchAttendees,
   fetchEvent,
-  rsvpEvent,
   updateEvent,
 } from '../features/events/api'
 import { cn } from '../lib/utils'
@@ -40,9 +37,6 @@ function EditEventDialog({ event, onClose }: { event: Event; onClose: () => void
   const [scheduledAt, setScheduledAt] = useState(
     // Convert ISO to datetime-local format
     event.scheduledAt ? format(new Date(event.scheduledAt), "yyyy-MM-dd'T'HH:mm") : ''
-  )
-  const [maxAttendees, setMaxAttendees] = useState<string>(
-    event.maxAttendees != null ? String(event.maxAttendees) : ''
   )
 
   const mutation = useMutation({
@@ -62,14 +56,11 @@ function EditEventDialog({ event, onClose }: { event: Event; onClose: () => void
       toast.error('Title, description, and date are required')
       return
     }
-    const parsedMaxAttendees = maxAttendees ? parseInt(maxAttendees, 10) : null
-    const safeMaxAttendees = parsedMaxAttendees && parsedMaxAttendees > 0 ? parsedMaxAttendees : null
 
     mutation.mutate({
       title: title.trim(),
       description: description.trim(),
       scheduledAt: new Date(scheduledAt).toISOString(),
-      maxAttendees: safeMaxAttendees,
     })
   }
 
@@ -91,10 +82,6 @@ function EditEventDialog({ event, onClose }: { event: Event; onClose: () => void
           <div className="space-y-1.5">
             <Label htmlFor="edit-date">Date & time *</Label>
             <Input id="edit-date" type="datetime-local" value={scheduledAt} onChange={e => setScheduledAt(e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-max">Max attendees</Label>
-            <Input id="edit-max" type="number" min={1} placeholder="Unlimited" value={maxAttendees} onChange={e => setMaxAttendees(e.target.value)} />
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
@@ -130,7 +117,7 @@ function DeleteConfirmDialog({ eventId, onClose }: { eventId: number; onClose: (
         <DialogHeader>
           <DialogTitle>Delete event</DialogTitle>
           <DialogDescription>
-            This will permanently delete the event and all RSVPs. This cannot be undone.
+            This will permanently delete the event. This cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -163,34 +150,6 @@ export function EventDetail() {
     retry: false,
   })
 
-  const { data: attendees } = useQuery({
-    queryKey: ['event-attendees', eventId],
-    queryFn: () => fetchAttendees(eventId),
-    enabled: !isNaN(eventId),
-  })
-
-  const rsvpMutation = useMutation({
-    mutationFn: () => rsvpEvent(eventId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['event', eventId] })
-      queryClient.invalidateQueries({ queryKey: ['event-attendees', eventId] })
-      queryClient.invalidateQueries({ queryKey: ['events'] })
-      toast.success('You\'re in!')
-    },
-    onError: (err: Error) => toast.error(err.message),
-  })
-
-  const cancelMutation = useMutation({
-    mutationFn: () => cancelRsvp(eventId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['event', eventId] })
-      queryClient.invalidateQueries({ queryKey: ['event-attendees', eventId] })
-      queryClient.invalidateQueries({ queryKey: ['events'] })
-      toast.success('RSVP cancelled')
-    },
-    onError: (err: Error) => toast.error(err.message),
-  })
-
   if (isLoading) {
     return (
       <PageLayout>
@@ -218,15 +177,8 @@ export function EventDetail() {
   }
 
   const isPast      = new Date(event.scheduledAt) < new Date()
-    const isCancelled = event.status === 'Cancelled'
-    const isOrganizer = currentUser?.userId === event.organizerId
-    const hasRsvp     = event.currentUserRsvp === 'Confirmed' || event.currentUserRsvp === 'Waitlisted'
-    const spotsLeft   = event.maxAttendees != null
-      ? Math.max(0, event.maxAttendees - event.attendeeCount)
-      : null
-    const isFull      = spotsLeft === 0
-  const confirmed  = attendees?.filter(a => a.status === 'Confirmed')  ?? []
-  const waitlisted = attendees?.filter(a => a.status === 'Waitlisted') ?? []
+  const isCancelled = event.status === 'Cancelled'
+  const isOrganizer = currentUser?.userId === event.organizerId
 
   return (
     <PageLayout>
@@ -288,24 +240,6 @@ export function EventDetail() {
               </span>
               {isPast && <span className="text-xs text-muted-foreground">(past)</span>}
             </div>
-
-            {/* Attendees */}
-            <div className="flex items-center gap-2 text-sm">
-              <Users className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span>
-                <span className="font-medium">{event.attendeeCount}</span> going
-                {spotsLeft !== null && (
-                  <span className={cn('ml-1', spotsLeft === 0 ? 'text-destructive' : 'text-muted-foreground')}>
-                    · {spotsLeft} spot{spotsLeft !== 1 ? 's' : ''} left
-                  </span>
-                )}
-                {waitlisted.length > 0 && (
-                  <span className="ml-1 text-muted-foreground">
-                    · {waitlisted.length} waitlisted
-                  </span>
-                )}
-              </span>
-            </div>
           </CardContent>
         </Card>
 
@@ -320,89 +254,9 @@ export function EventDetail() {
           </div>
         )}
 
-        {/* RSVP section */}
-        {!isCancelled && currentUser && !isOrganizer && (
-          <div className="mb-8">
-            {event.currentUserRsvp === 'Confirmed' && (
-              <div className="flex items-center gap-3">
-                <Badge variant="default" className="bg-green-600 text-sm px-3 py-1">You're going!</Badge>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={cancelMutation.isPending}
-                  onClick={() => cancelMutation.mutate()}
-                >
-                  Cancel RSVP
-                </Button>
-              </div>
-            )}
-            {event.currentUserRsvp === 'Waitlisted' && (
-              <div className="flex items-center gap-3">
-                <Badge variant="secondary" className="text-sm px-3 py-1">You're on the waitlist</Badge>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={cancelMutation.isPending}
-                  onClick={() => cancelMutation.mutate()}
-                >
-                  Leave waitlist
-                </Button>
-              </div>
-            )}
-            {!hasRsvp && (
-              <Button
-                size="sm"
-                disabled={rsvpMutation.isPending || (isFull && spotsLeft === 0) || isPast}
-                onClick={() => rsvpMutation.mutate()}
-              >
-                {isFull ? 'Join waitlist' : 'RSVP to this event'}
-              </Button>
-            )}
-          </div>
-        )}
-        {isOrganizer && (
-          <p className="text-sm text-muted-foreground italic mb-8">You are organising this event.</p>
-        )}
-
-        {/* Attendees list */}
-        {(confirmed.length > 0 || waitlisted.length > 0) && (
-          <div className="space-y-4">
-            {confirmed.length > 0 && (
-              <div>
-                <h2 className="text-sm font-semibold mb-2 flex items-center gap-1.5">
-                  <Users className="h-4 w-4" />
-                  Attendees ({confirmed.length})
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {confirmed.map(a => (
-                    <div key={a.userId} className="flex items-center gap-1.5 text-xs bg-muted rounded-full px-3 py-1">
-                      {a.userName ?? 'Anonymous'}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            {waitlisted.length > 0 && (
-              <div>
-                <h2 className="text-sm font-semibold mb-2 flex items-center gap-1.5 text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  Waitlist ({waitlisted.length})
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {waitlisted.map(a => (
-                    <div key={a.userId} className="flex items-center gap-1.5 text-xs bg-muted/50 rounded-full px-3 py-1 text-muted-foreground">
-                      {a.userName ?? 'Anonymous'}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        {showEdit && <EditEventDialog event={event} onClose={() => setShowEdit(false)} />}
+        {showDelete && <DeleteConfirmDialog eventId={event.id} onClose={() => setShowDelete(false)} />}
       </div>
-
-      {showEdit && <EditEventDialog event={event} onClose={() => setShowEdit(false)} />}
-      {showDelete && <DeleteConfirmDialog eventId={event.id} onClose={() => setShowDelete(false)} />}
     </PageLayout>
   )
 }

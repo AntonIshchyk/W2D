@@ -23,10 +23,4 @@ public interface IEventService
     Task<EventResponse?> UpdateEventAsync(int id, int organizerId, UpdateEventRequest request);
 
     Task<bool> DeleteEventAsync(int id, int organizerId);
-
-    Task<(bool success, string message, EventAttendeeResponse? attendee)> RsvpAsync(int eventId, int userId);
-
-    Task<bool> CancelRsvpAsync(int eventId, int userId);
-
-    Task<IEnumerable<EventAttendeeResponse>> GetAttendeesAsync(int eventId);
 }

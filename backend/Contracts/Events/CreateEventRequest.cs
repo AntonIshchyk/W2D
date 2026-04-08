@@ -19,9 +19,6 @@ public class CreateEventRequest
     [Required]
     public DateTime ScheduledAt { get; set; }
 
-    [Range(1, int.MaxValue, ErrorMessage = "MaxAttendees must be a positive number.")]
-    public int? MaxAttendees { get; set; }
-
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
 
