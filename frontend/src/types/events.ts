@@ -37,13 +37,6 @@ export interface Attendee {
   joinedAt: string
 }
 
-export interface ScrollResult<T> {
-  items: T[]
-  nextCursor: number | null
-  hasMore: boolean
-  totalCount: number
-}
-
 export interface EventQueryBounds {
   minLat: number
   maxLat: number

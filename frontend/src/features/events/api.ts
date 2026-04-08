@@ -7,7 +7,6 @@ import type {
   CreateEventRequest,
   Event,
   EventQueryBounds,
-  ScrollResult,
   Tag,
   UpdateEventRequest,
 } from '../../types/events'
