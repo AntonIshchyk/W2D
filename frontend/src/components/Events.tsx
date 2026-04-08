@@ -52,7 +52,7 @@ function EventCard({ event }: { event: Event }) {
           {isPast && <span className="text-muted-foreground/60">(past)</span>}
         </div>
 
-        {/* Attendees & community */}
+        {/* Community */}
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
           {event.communityName && (
             <span className="text-muted-foreground">

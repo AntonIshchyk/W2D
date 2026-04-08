@@ -75,7 +75,6 @@ namespace Backend.Migrations
                     OrganizerId = table.Column<int>(type: "INTEGER", nullable: false),
                     SpaceId = table.Column<int>(type: "INTEGER", nullable: true),
                     ScheduledAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    MaxAttendees = table.Column<int>(type: "INTEGER", nullable: true),
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
@@ -136,35 +135,6 @@ namespace Backend.Migrations
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Posts_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "EventAttendees",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    EventId = table.Column<int>(type: "INTEGER", nullable: false),
-                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Status = table.Column<int>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_EventAttendees", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_EventAttendees_Events_EventId",
-                        column: x => x.EventId,
-                        principalTable: "Events",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_EventAttendees_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -520,17 +490,6 @@ namespace Backend.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_EventAttendees_EventId_UserId",
-                table: "EventAttendees",
-                columns: new[] { "EventId", "UserId" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_EventAttendees_UserId",
-                table: "EventAttendees",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Events_OrganizerId",
                 table: "Events",
                 column: "OrganizerId");
@@ -615,9 +574,6 @@ namespace Backend.Migrations
         {
             migrationBuilder.DropTable(
                 name: "CommentVotes");
-
-            migrationBuilder.DropTable(
-                name: "EventAttendees");
 
             migrationBuilder.DropTable(
                 name: "EventTags");

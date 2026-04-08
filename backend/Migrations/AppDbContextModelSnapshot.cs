@@ -1344,9 +1344,6 @@ namespace Backend.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("MaxAttendees")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("OrganizerId")
                         .HasColumnType("INTEGER");
 
@@ -1382,38 +1379,6 @@ namespace Backend.Migrations
                         .HasDatabaseName("IX_Events_Status");
 
                     b.ToTable("Events", (string)null);
-                });
-
-            modelBuilder.Entity("Backend.Models.EventAttendee", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("EventId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_EventAttendees_UserId");
-
-                    b.HasIndex("EventId", "UserId")
-                        .IsUnique();
-
-                    b.ToTable("EventAttendees", (string)null);
                 });
 
             modelBuilder.Entity("Backend.Models.Post", b =>
@@ -1850,25 +1815,6 @@ namespace Backend.Migrations
                     b.Navigation("Organizer");
                 });
 
-            modelBuilder.Entity("Backend.Models.EventAttendee", b =>
-                {
-                    b.HasOne("Backend.Models.Event", "Event")
-                        .WithMany("Attendees")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Backend.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Event");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Backend.Models.Post", b =>
                 {
                     b.HasOne("Backend.Models.Community", null)
@@ -1938,10 +1884,7 @@ namespace Backend.Migrations
                     b.Navigation("Posts");
                 });
 
-            modelBuilder.Entity("Backend.Models.Event", b =>
-                {
-                    b.Navigation("Attendees");
-                });
+
 
             modelBuilder.Entity("Backend.Models.Post", b =>
                 {
