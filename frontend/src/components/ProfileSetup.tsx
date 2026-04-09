@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { setAuthToken } from '../hooks/useAuthSync'
 import { AvatarUpload } from './AvatarUpload'
+import { isValidImageUrl } from '../lib/utils/validation'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 
 
@@ -31,7 +32,7 @@ export function ProfileSetup() {
     setProfile({
       username: currentUser.profileSetupComplete ? (currentUser.username ?? '') : '',
       bio: currentUser.bio ?? '',
-      profilePhotoUrls: currentUser.profilePhotoUrl ? [currentUser.profilePhotoUrl] : [],
+      profilePhotoUrls: currentUser.profilePhotoUrl && isValidImageUrl(currentUser.profilePhotoUrl) ? [currentUser.profilePhotoUrl] : [],
     })
     setIsInitialized(true)
   }, [currentUser, isInitialized])

@@ -12,6 +12,7 @@ import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { formatRelativeTime } from '../lib/utils/date'
 import { Comments } from './Comments'
 import { cn } from '../lib/utils'
+import { isValidImageUrl } from '../lib/utils/validation'
 import { PostCarousel } from './PostCarousel'
 import { fetchPost, votePost, deletePost, POST_TYPE_LABELS, POST_TYPE_COLORS, POST_TYPE_ICONS } from '../features/posts/api'
 
@@ -104,7 +105,7 @@ export function PostDetail() {
             {/* ── Author row ── */}
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-3">
-                {post.author?.profilePhotoUrl ? (
+                {post.author?.profilePhotoUrl && isValidImageUrl(post.author.profilePhotoUrl) ? (
                   <img src={post.author.profilePhotoUrl} alt="User"
                     className="h-10 w-10 rounded-full object-cover border border-primary/20 shrink-0" />
                 ) : (

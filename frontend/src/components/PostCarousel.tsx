@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from './ui/dialog'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel"
 import { cn } from '../lib/utils'
+import { isValidImageUrl } from '../lib/utils/validation'
 
 interface PostCarouselProps {
   urls: string[]
@@ -13,13 +14,14 @@ export function PostCarousel({
   containerClassName = "mt-4 mb-6 md:px-0",
   imageContainerClassName = "h-96"
 }: PostCarouselProps) {
-  if (!urls || urls.length === 0) return null
+  const validUrls = urls.filter(isValidImageUrl)
+  if (!validUrls || validUrls.length === 0) return null
 
   return (
     <div className={cn("mt-4 mb-6 md:px-0", containerClassName)} onClick={(e) => e.preventDefault()}>
       <Carousel className="w-full">
         <CarouselContent>
-          {urls.map((url, i) => (
+          {validUrls.map((url, i) => (
             <CarouselItem key={i}>
               <Dialog>
                 <DialogTrigger asChild>
@@ -29,9 +31,9 @@ export function PostCarousel({
                       alt={`Attachment ${i + 1}`} 
                       className="max-w-full max-h-full object-contain"
                     />
-                    {urls.length > 1 && (
+                    {validUrls.length > 1 && (
                       <div className="absolute top-3 right-3 bg-black/60 text-white text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-md">
-                        {i + 1} / {urls.length}
+                        {i + 1} / {validUrls.length}
                       </div>
                     )}
                   </div>
@@ -46,7 +48,7 @@ export function PostCarousel({
             </CarouselItem>
           ))}
         </CarouselContent>
-        {urls.length > 1 && (
+        {validUrls.length > 1 && (
           <div className="absolute inset-y-0 left-2 right-2 flex items-center justify-between pointer-events-none">
             <CarouselPrevious className="relative inset-0 translate-x-0 translate-y-0 bg-black/50 text-white border-0 hover:bg-black/80 hover:text-white pointer-events-auto" />
             <CarouselNext className="relative inset-0 translate-x-0 translate-y-0 bg-black/50 text-white border-0 hover:bg-black/80 hover:text-white pointer-events-auto" />

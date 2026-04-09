@@ -2,20 +2,10 @@ import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { formatRelativeTime } from '../lib/utils/date'
+import { isValidImageUrl } from '../lib/utils/validation'
 import type { Comment } from '../types/posts'
 import { PhotoUpload } from './PhotoUpload'
 import { fetchComments, createComment, deleteComment, voteComment } from '../features/comments/api'
-
-// ── URL Validation ─────────────────────────────────────────────────────────────
-
-function isValidImageUrl(url: string): boolean {
-  try {
-    const parsed = new URL(url)
-    return ['http:', 'https:'].includes(parsed.protocol) && /\.(jpg|jpeg|png|gif|webp)$/i.test(parsed.pathname)
-  } catch {
-    return false
-  }
-}
 
 // ── CommentNode ───────────────────────────────────────────────────────────────
 
@@ -335,8 +325,6 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
 
       {isLoading ? (
         <p className="text-xs text-gray-400">Loading comments…</p>
-      ) : comments.length === 0 ? (
-        <p className="text-xs text-gray-400">No comments yet. Be the first.</p>
       ) : (
         <div className="space-y-4">
           {comments.map(comment => (

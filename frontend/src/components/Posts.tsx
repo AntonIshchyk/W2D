@@ -20,6 +20,7 @@ import { LoadingSpinner } from './ui/loading-spinner'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { cn } from '../lib/utils'
+import { isValidImageUrl } from '../lib/utils/validation'
 import { fetchPosts, votePost, POST_TYPE_LABELS, POST_TYPE_COLORS, POST_TYPE_ICONS } from '../features/posts/api'
 import { fetchCommunities } from '../features/communities/api'
 import { PostCarousel } from './PostCarousel'
@@ -43,7 +44,7 @@ function PostCard({
       {/* Header Info */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          {post.author?.profilePhotoUrl ? (
+          {post.author?.profilePhotoUrl && isValidImageUrl(post.author.profilePhotoUrl) ? (
             <img src={post.author.profilePhotoUrl} alt="User" className="h-10 w-10 rounded-full object-cover border border-primary/20 shrink-0" />
           ) : (
             <div className="h-10 w-10 rounded-full bg-linear-to-br from-primary/20 to-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
