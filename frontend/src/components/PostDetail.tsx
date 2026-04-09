@@ -5,8 +5,6 @@ import {
   ArrowBigUp, ArrowBigDown, ChevronLeft,
   MapPin, Clock, Trash2
 } from 'lucide-react'
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from './ui/dialog'
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel"
 import { PageLayout } from './Navbar'
 import { PostType } from '../types/posts'
 import { useCurrentUser } from '../hooks/useCurrentUser'
@@ -14,54 +12,8 @@ import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { formatRelativeTime } from '../lib/utils/date'
 import { Comments } from './Comments'
 import { cn } from '../lib/utils'
+import { PostCarousel } from './PostCarousel'
 import { fetchPost, votePost, deletePost, POST_TYPE_LABELS, POST_TYPE_COLORS, POST_TYPE_ICONS } from '../features/posts/api'
-
-// ── Photo Carousel ──────────────────────────────────────────────
-
-function PostCarousel({ urls }: { urls: string[] }) {
-  if (!urls || urls.length === 0) return null
-
-  return (
-    <div className="mt-4 mb-6 md:px-0" onClick={(e) => e.preventDefault()}>
-      <Carousel className="w-full">
-        <CarouselContent>
-          {urls.map((url, i) => (
-            <CarouselItem key={i}>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <div className="relative w-full h-96 flex items-center justify-center bg-black/95 rounded-2xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity">
-                    <img 
-                      src={url} 
-                      alt={`Attachment ${i + 1}`} 
-                      className="max-w-full max-h-full object-contain"
-                    />
-                    {urls.length > 1 && (
-                      <div className="absolute top-3 right-3 bg-black/60 text-white text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-md">
-                        {i + 1} / {urls.length}
-                      </div>
-                    )}
-                  </div>
-                </DialogTrigger>
-                <DialogContent className="max-w-[95vw] sm:max-w-[90vw] md:max-w-[80vw] h-[90vh] p-0 border-0 bg-transparent flex flex-col justify-center shadow-none">
-                  <DialogTitle className="sr-only">Image View</DialogTitle>
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    <img src={url} className="max-w-full max-h-full object-contain" alt="Fullscreen view" />
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        {urls.length > 1 && (
-          <div className="absolute inset-y-0 left-2 right-2 flex items-center justify-between pointer-events-none">
-            <CarouselPrevious className="relative inset-0 translate-x-0 translate-y-0 bg-black/50 text-white border-0 hover:bg-black/80 hover:text-white pointer-events-auto" />
-            <CarouselNext className="relative inset-0 translate-x-0 translate-y-0 bg-black/50 text-white border-0 hover:bg-black/80 hover:text-white pointer-events-auto" />
-          </div>
-        )}
-      </Carousel>
-    </div>
-  )
-}
 
 export function PostDetail() {
   const { id } = useParams<{ id: string }>()
