@@ -199,7 +199,7 @@ public class PostService : IPostService
 
         Post post = _mapper.Map<Post>(request);
         post.UserId = userId;
-        post.Score = 0;
+        post.Score = 1;
         post.CommentCount = 0;
 
         _context.Posts.Add(post);
