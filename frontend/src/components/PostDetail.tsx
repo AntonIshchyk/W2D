@@ -1,11 +1,12 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
 import { toast } from 'sonner'
 import {
-  ArrowBigUp, ArrowBigDown, ChevronLeft, ChevronRight, X,
+  ArrowBigUp, ArrowBigDown, ChevronLeft,
   MapPin, Clock, Trash2
 } from 'lucide-react'
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from './ui/dialog'
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel"
 import { PageLayout } from './Navbar'
 import { PostType } from '../types/posts'
 import { useCurrentUser } from '../hooks/useCurrentUser'
@@ -15,137 +16,57 @@ import { Comments } from './Comments'
 import { cn } from '../lib/utils'
 import { fetchPost, votePost, deletePost, POST_TYPE_LABELS, POST_TYPE_COLORS, POST_TYPE_ICONS } from '../features/posts/api'
 
-// ── Lightbox ──────────────────────────────────────────────────────────────────
+// ── Photo Carousel ──────────────────────────────────────────────
 
-function Lightbox({ urls, initialIndex, onClose }: {
-  urls: string[]
-  initialIndex: number
-  onClose: () => void
-}) {
-  const [index, setIndex] = useState(initialIndex)
-  const prev = () => setIndex(i => (i - 1 + urls.length) % urls.length)
-  const next = () => setIndex(i => (i + 1) % urls.length)
+function PostCarousel({ urls }: { urls: string[] }) {
+  if (!urls || urls.length === 0) return null
 
   return (
-    <div
-      className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
-      onClick={onClose}
-      onKeyDown={e => {
-        if (e.key === 'ArrowLeft') prev()
-        if (e.key === 'ArrowRight') next()
-        if (e.key === 'Escape') onClose()
-      }}
-      tabIndex={0}
-      // eslint-disable-next-line jsx-a11y/no-autofocus
-      autoFocus
-    >
-      <button type="button" onClick={onClose}
-        className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors z-10">
-        <X className="w-5 h-5" />
-      </button>
-
-      {urls.length > 1 && (
-        <span className="absolute top-4 left-1/2 -translate-x-1/2 text-white/60 text-sm">
-          {index + 1} / {urls.length}
-        </span>
-      )}
-
-      {urls.length > 1 && (
-        <button type="button" onClick={e => { e.stopPropagation(); prev() }}
-          className="absolute left-4 text-white/60 hover:text-white transition-colors">
-          <ChevronLeft className="w-8 h-8" />
-        </button>
-      )}
-
-      <img
-        src={urls[index]}
-        alt=""
-        className="max-w-[90vw] max-h-[85vh] object-contain rounded-xl"
-        onClick={e => e.stopPropagation()}
-      />
-
-      {urls.length > 1 && (
-        <button type="button" onClick={e => { e.stopPropagation(); next() }}
-          className="absolute right-4 text-white/60 hover:text-white transition-colors">
-          <ChevronRight className="w-8 h-8" />
-        </button>
-      )}
-
-      {urls.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+    <div className="mt-4 mb-6 md:px-0" onClick={(e) => e.preventDefault()}>
+      <Carousel className="w-full">
+        <CarouselContent>
           {urls.map((url, i) => (
-            <button key={i} type="button" onClick={e => { e.stopPropagation(); setIndex(i) }}
-              className={cn(
-                'w-12 h-12 rounded-lg overflow-hidden border-2 transition-all',
-                i === index ? 'border-white opacity-100' : 'border-transparent opacity-40 hover:opacity-70'
-              )}>
-              <img src={url} alt="" className="w-full h-full object-cover" />
-            </button>
+            <CarouselItem key={i}>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="relative w-full h-96 flex items-center justify-center bg-black/95 rounded-2xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity">
+                    <img 
+                      src={url} 
+                      alt={`Attachment ${i + 1}`} 
+                      className="max-w-full max-h-full object-contain"
+                    />
+                    {urls.length > 1 && (
+                      <div className="absolute top-3 right-3 bg-black/60 text-white text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-md">
+                        {i + 1} / {urls.length}
+                      </div>
+                    )}
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-[95vw] sm:max-w-[90vw] md:max-w-[80vw] h-[90vh] p-0 border-0 bg-transparent flex flex-col justify-center shadow-none">
+                  <DialogTitle className="sr-only">Image View</DialogTitle>
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    <img src={url} className="max-w-full max-h-full object-contain" alt="Fullscreen view" />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </CarouselItem>
           ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ── Photo gallery ─────────────────────────────────────────────────────────────
-
-function PhotoGallery({ urls, onOpen }: { urls: string[]; onOpen: (i: number) => void }) {
-  if (urls.length === 0) return null
-
-  if (urls.length === 1) return (
-    <div className="mb-6 rounded-2xl overflow-hidden cursor-pointer" onClick={() => onOpen(0)}>
-      <img src={urls[0]} alt="" className="w-full max-h-112 object-cover" />
-    </div>
-  )
-
-  if (urls.length === 2) return (
-    <div className="mb-6 grid grid-cols-2 gap-1 rounded-2xl overflow-hidden">
-      {urls.map((url, i) => (
-        <img key={i} src={url} alt="" className="w-full h-64 object-cover cursor-pointer" onClick={() => onOpen(i)} />
-      ))}
-    </div>
-  )
-
-  if (urls.length === 3) return (
-    <div className="mb-6 rounded-2xl overflow-hidden" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 4, height: 260 }}>
-      <img src={urls[0]} alt="" className="w-full h-full object-cover cursor-pointer" onClick={() => onOpen(0)} />
-      <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: 4 }}>
-        <img src={urls[1]} alt="" className="w-full h-full object-cover cursor-pointer" onClick={() => onOpen(1)} />
-        <img src={urls[2]} alt="" className="w-full h-full object-cover cursor-pointer" onClick={() => onOpen(2)} />
-      </div>
-    </div>
-  )
-
-  return (
-    <div className="mb-6 rounded-2xl overflow-hidden space-y-1">
-      <div className="grid grid-cols-2 gap-1">
-        <img src={urls[0]} alt="" className="w-full h-56 object-cover cursor-pointer" onClick={() => onOpen(0)} />
-        <img src={urls[1]} alt="" className="w-full h-56 object-cover cursor-pointer" onClick={() => onOpen(1)} />
-      </div>
-      <div className={cn('grid gap-1', urls.length === 4 ? 'grid-cols-2' : 'grid-cols-3')}>
-        {urls.slice(2, 5).map((url, i) => (
-          <div key={i} className="relative cursor-pointer" onClick={() => onOpen(i + 2)}>
-            <img src={url} alt="" className="w-full h-32 object-cover" />
-            {i === 2 && urls.length > 5 && (
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                <span className="text-white text-lg font-bold">+{urls.length - 5}</span>
-              </div>
-            )}
+        </CarouselContent>
+        {urls.length > 1 && (
+          <div className="absolute inset-y-0 left-2 right-2 flex items-center justify-between pointer-events-none">
+            <CarouselPrevious className="relative inset-0 translate-x-0 translate-y-0 bg-black/50 text-white border-0 hover:bg-black/80 hover:text-white pointer-events-auto" />
+            <CarouselNext className="relative inset-0 translate-x-0 translate-y-0 bg-black/50 text-white border-0 hover:bg-black/80 hover:text-white pointer-events-auto" />
           </div>
-        ))}
-      </div>
+        )}
+      </Carousel>
     </div>
   )
 }
-
-// ── Main ──────────────────────────────────────────────────────────────────────
 
 export function PostDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   const { data: currentUser, isError: userError, error: userQueryError } = useCurrentUser()
 
@@ -215,13 +136,8 @@ export function PostDetail() {
   const photos      = post.photoUrls ?? []
 
   return (
-    <>
-      {lightboxIndex !== null && (
-        <Lightbox urls={photos} initialIndex={lightboxIndex} onClose={() => setLightboxIndex(null)} />
-      )}
-
-      <PageLayout>
-        <div className="max-w-3xl mx-auto">
+    <PageLayout>
+      <div className="max-w-3xl mx-auto">
 
           {/* Back */}
           <button type="button" onClick={() => navigate('/posts')}
@@ -287,7 +203,7 @@ export function PostDetail() {
             </h1>
 
             {/* ── Photos ── */}
-            {photos.length > 0 && <PhotoGallery urls={photos} onOpen={setLightboxIndex} />}
+            {photos.length > 0 && <PostCarousel urls={photos} />}
 
             {/* ── Body ── */}
             {post.description && (
@@ -346,18 +262,15 @@ export function PostDetail() {
                 </button>
               </div>
 
-              {/* Time */}
               <div className="flex items-center gap-1.5 text-sm font-bold text-muted-foreground bg-muted/40 px-3 py-2 rounded-full border border-border/50">
                 <Clock className="w-4 h-4 opacity-70" />
                 <span>{formatRelativeTime(post.createdAt)}</span>
               </div>
             </div>
 
-            {/* ── Comments ── */}
             <Comments postId={post.id} currentUserId={currentUser?.userId} />
           </article>
         </div>
       </PageLayout>
-    </>
   )
 }
