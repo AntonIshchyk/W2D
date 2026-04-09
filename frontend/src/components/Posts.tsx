@@ -266,6 +266,17 @@ export function Posts() {
 
           <div className="h-8 w-px bg-border/50 mx-1 shrink-0"></div>
 
+          {(selectedCommunity !== undefined || selectedType !== undefined || sortBy !== 'new') && (
+            <Button 
+              variant="outline"
+              size="sm"
+              className="rounded-full h-10 px-3 text-destructive border-destructive/30 hover:bg-destructive/10 hover:border-destructive/50 shrink-0"
+              onClick={() => { setSelectedCommunity(undefined); setSelectedType(undefined); setSortBy('new') }}
+            >
+              ✕ Reset
+            </Button>
+          )}
+
           <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" className="rounded-full h-10 gap-2 shrink-0 border-border/60 hover:border-primary/50 transition-colors">
@@ -319,16 +330,6 @@ export function Posts() {
               })}
             </SelectContent>
           </Select>
-
-          {(selectedCommunity !== undefined || selectedType !== undefined || sortBy !== 'new') && (
-            <Button 
-              variant="ghost" 
-              className="rounded-full h-10 px-4 text-muted-foreground hover:text-destructive shrink-0"
-              onClick={() => { setSelectedCommunity(undefined); setSelectedType(undefined); setSortBy('new') }}
-            >
-              Reset
-            </Button>
-          )}
         </div>
 
         {currentUser && (
