@@ -20,7 +20,6 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<Community> Communities { get; set; }
-    public DbSet<Tag> Tags { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<PostVote> PostVotes { get; set; }
     public DbSet<Comment> Comments { get; set; }
@@ -30,15 +29,6 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
-
-
-
-
-        // Tag unique name constraint
-        modelBuilder.Entity<Tag>()
-            .HasIndex(t => t.Name)
-            .IsUnique();
 
         // Community unique name constraint
         modelBuilder.Entity<Community>()
@@ -54,8 +44,6 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Username)
             .IsUnique();
-
-
 
         // Post - User relationship
         modelBuilder.Entity<Post>()
@@ -200,12 +188,6 @@ public class AppDbContext : DbContext
             .HasForeignKey(e => e.SpaceId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        // Event - Tag many-to-many
-        modelBuilder.Entity<Event>()
-            .HasMany(e => e.Tags)
-            .WithMany(t => t.Events)
-            .UsingEntity(j => j.ToTable("EventTags"));
-
         // Event performance indexes
         modelBuilder.Entity<Event>()
             .HasIndex(e => e.ScheduledAt)
@@ -223,7 +205,7 @@ public class AppDbContext : DbContext
             .HasIndex(e => e.Status)
             .HasDatabaseName("IX_Events_Status");
 
-        // Seed database with communities, communities, and tags
+        // Seed database with communities, communities
         DatabaseSeeder.SeedData(modelBuilder);
     }
 }

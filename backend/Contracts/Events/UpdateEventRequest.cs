@@ -13,8 +13,6 @@ public class UpdateEventRequest
 
     public int? TopicId { get; set; }
 
-    public List<int>? TagIds { get; set; }
-
     public DateTime? ScheduledAt { get; set; }
 
     public EventStatus? Status { get; set; }

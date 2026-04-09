@@ -6,6 +6,17 @@ import type { Comment } from '../types/posts'
 import { PhotoUpload } from './PhotoUpload'
 import { fetchComments, createComment, deleteComment, voteComment } from '../features/comments/api'
 
+// ── URL Validation ─────────────────────────────────────────────────────────────
+
+function isValidImageUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    return ['http:', 'https:'].includes(parsed.protocol) && /\.(jpg|jpeg|png|gif|webp)$/i.test(parsed.pathname)
+  } catch {
+    return false
+  }
+}
+
 // ── CommentNode ───────────────────────────────────────────────────────────────
 
 interface CommentNodeProps {
@@ -86,7 +97,13 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
             )}
             {comment.photoUrl && (
               <div className="rounded-lg overflow-hidden max-w-xs cursor-pointer"
-                onClick={() => window.open(comment.photoUrl, '_blank')}>
+                onClick={() => {
+                  if (comment.photoUrl && isValidImageUrl(comment.photoUrl)) {
+                    window.open(comment.photoUrl, 'noopener,noreferrer')
+                  } else {
+                    toast.error('Invalid image URL')
+                  }
+                }}>
                 <img src={comment.photoUrl} alt="" className="w-full object-cover max-h-64" />
               </div>
             )}

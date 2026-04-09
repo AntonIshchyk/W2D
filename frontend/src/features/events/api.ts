@@ -6,7 +6,6 @@ import type {
   CreateEventRequest,
   Event,
   EventQueryBounds,
-  Tag,
   UpdateEventRequest,
 } from '../../types/events'
 
@@ -56,12 +55,6 @@ export async function fetchCommunities(): Promise<Community[]> {
 
   const json = await response.json()
   return Array.isArray(json) ? json : (json.items ?? [])
-}
-
-export async function fetchTags(): Promise<Tag[]> {
-  const response = await fetch(API_ENDPOINTS.tags.base, { headers: getAuthHeaders() })
-  if (!response.ok) throw new Error('Failed to fetch tags')
-  return response.json()
 }
 
 export async function createEvent(data: CreateEventRequest): Promise<Event> {

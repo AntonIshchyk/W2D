@@ -22,8 +22,6 @@ public class Event : BaseModel
     public int? SpaceId { get; set; }
     public Community? Community { get; set; }
 
-    public List<Tag> Tags { get; set; } = new();
-
     [Required]
     public DateTime ScheduledAt { get; set; }
 

@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { PageLayout } from './Navbar'
 import { LocationPickerMap } from './LocationPickerMap'
-import { createEvent, fetchCommunities, fetchTags } from '../features/events/api'
+import { createEvent, fetchCommunities } from '../features/events/api'
 import { cn } from '../lib/utils'
 
 export function CreateEvent() {
@@ -20,15 +20,12 @@ export function CreateEvent() {
   const navigate = useNavigate()
   
   const { data: communities = [] } = useQuery({ queryKey: ['communities-list'], queryFn: fetchCommunities })
-  const { data: tags = [] } = useQuery({ queryKey: ['tags'], queryFn: fetchTags })
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [scheduledAt, setScheduledAt] = useState('')
   const [topicId, setCommunityId] = useState<number | null>(null)
   const [communityOpen, setCommunityOpen] = useState(false)
-  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([])
-  const [tagsOpen, setTagsOpen] = useState(false)
   const [location, setLocation] = useState<{lat: number, lng: number} | null>(null)
   const [locationName, setLocationName] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -54,7 +51,6 @@ export function CreateEvent() {
       description,
       scheduledAt: new Date(scheduledAt).toISOString(),
       topicId: topicId || null,
-      tagIds: selectedTagIds,
       latitude: location?.lat,
       longitude: location?.lng,
       locationName: locationName || undefined
@@ -62,7 +58,6 @@ export function CreateEvent() {
   }
 
   const selectedCommunity = communities.find(c => c.id === topicId)
-  const selectedTags = tags.filter(t => selectedTagIds.includes(t.id))
 
   return (
     <PageLayout>
@@ -147,59 +142,6 @@ export function CreateEvent() {
                               {c.name}
                             </CommandItem>
                           ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Tags</Label>
-                <Popover open={tagsOpen} onOpenChange={setTagsOpen}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-between font-normal">
-                      <div className="flex flex-wrap gap-1 truncate">
-                        {selectedTags.length > 0 ? (
-                          selectedTags.map(t => (
-                            <span key={t.id} className="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-xs">
-                              {t.name}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-muted-foreground">Select tags...</span>
-                        )}
-                      </div>
-                      <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0" align="start">
-                    <Command>
-                      <CommandInput placeholder="Search tags..." />
-                      <CommandList>
-                        <CommandEmpty>No tags found.</CommandEmpty>
-                        <CommandGroup>
-                          {tags.map((t) => {
-                            const isSelected = selectedTagIds.includes(t.id)
-                            return (
-                              <CommandItem
-                                key={t.id}
-                                value={t.name}
-                                onSelect={() => {
-                                  if (isSelected) {
-                                    setSelectedTagIds(prev => prev.filter(id => id !== t.id))
-                                  } else {
-                                    setSelectedTagIds(prev => [...prev, t.id])
-                                  }
-                                }}
-                              >
-                                <Check
-                                  className={cn("mr-2 h-4 w-4", isSelected ? "opacity-100" : "opacity-0")}
-                                />
-                                {t.name}
-                              </CommandItem>
-                            )
-                          })}
                         </CommandGroup>
                       </CommandList>
                     </Command>

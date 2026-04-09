@@ -14,8 +14,6 @@ public class CreateEventRequest
 
     public int? TopicId { get; set; }
 
-    public List<int> TagIds { get; set; } = new();
-
     [Required]
     public DateTime ScheduledAt { get; set; }
 

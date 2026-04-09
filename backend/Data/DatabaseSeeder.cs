@@ -7,40 +7,6 @@ public static class DatabaseSeeder
 {
     public static void SeedData(ModelBuilder modelBuilder)
     {
-
-
-        // Seed Tags
-        Tag[] tags = new[]
-        {
-            new Tag { Id = 1, Name = "Team" },
-            new Tag { Id = 2, Name = "Individual" },
-            new Tag { Id = 3, Name = "Competitive" },
-            new Tag { Id = 4, Name = "Casual" },
-            new Tag { Id = 5, Name = "Cardio" },
-            new Tag { Id = 6, Name = "Strength" },
-            new Tag { Id = 7, Name = "Flexibility" },
-            new Tag { Id = 8, Name = "Artistic" },
-            new Tag { Id = 9, Name = "Mindful" },
-            new Tag { Id = 10, Name = "Adventure" },
-            new Tag { Id = 11, Name = "Nature" },
-            new Tag { Id = 12, Name = "Indoor" },
-            new Tag { Id = 13, Name = "Outdoor" },
-            new Tag { Id = 14, Name = "Family-Friendly" },
-            new Tag { Id = 15, Name = "Beginner-Friendly" },
-            new Tag { Id = 16, Name = "Water" },
-            new Tag { Id = 17, Name = "Ball Sports" },
-            new Tag { Id = 18, Name = "Racket Sports" },
-            new Tag { Id = 19, Name = "Winter" },
-            new Tag { Id = 20, Name = "Summer" },
-            new Tag { Id = 21, Name = "Creative" },
-            new Tag { Id = 22, Name = "Technical" },
-            new Tag { Id = 23, Name = "Social" },
-            new Tag { Id = 24, Name = "Extreme" },
-            new Tag { Id = 25, Name = "Educational" }
-        };
-        modelBuilder.Entity<Tag>().HasData(tags);
-
-        // Seed Communities (using CreatedByUserId = 1, assuming admin will exist)
         List<Community> communities = new List<Community>
         {
             // Ball Sports (10 communities)
@@ -231,6 +197,5 @@ public static class DatabaseSeeder
         };
 
         modelBuilder.Entity<Community>().HasData(communities);
-
     }
 }

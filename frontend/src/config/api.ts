@@ -9,9 +9,6 @@ export const API_ENDPOINTS = {
   communities: {
     base: `${API_BASE_URL}/api/communities`,
   },
-  tags: {
-    base: `${API_BASE_URL}/api/tags`,
-  },
   events: {
     base: `${API_BASE_URL}/api/events`,
     byId: (id: number) => `${API_BASE_URL}/api/events/${id}`,

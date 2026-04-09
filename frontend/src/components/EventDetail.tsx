@@ -8,7 +8,6 @@ import {
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { Card, CardContent } from './ui/card'
-import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Textarea } from './ui/textarea'
@@ -35,7 +34,6 @@ function EditEventDialog({ event, onClose }: { event: Event; onClose: () => void
   const [title, setTitle]           = useState(event.title)
   const [description, setDescription] = useState(event.description)
   const [scheduledAt, setScheduledAt] = useState(
-    // Convert ISO to datetime-local format
     event.scheduledAt ? format(new Date(event.scheduledAt), "yyyy-MM-dd'T'HH:mm") : ''
   )
 
@@ -137,12 +135,10 @@ export function EventDetail() {
   const { id } = useParams<{ id: string }>()
   const eventId = parseInt(id ?? '', 10)
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const [showEdit, setShowEdit]     = useState(false)
   const [showDelete, setShowDelete] = useState(false)
 
   const { data: currentUser } = useCurrentUser()
-
   const { data: event, isLoading, isError } = useQuery({
     queryKey: ['event', eventId],
     queryFn: () => fetchEvent(eventId),
@@ -177,7 +173,6 @@ export function EventDetail() {
   }
 
   const isPast      = new Date(event.scheduledAt) < new Date()
-  const isCancelled = event.status === 'Cancelled'
   const isOrganizer = currentUser?.userId === event.organizerId
 
   return (
@@ -243,21 +238,9 @@ export function EventDetail() {
           </CardContent>
         </Card>
 
-        {/* Tags */}
-        {event.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-6">
-            {event.tags.map(tag => (
-              <Badge key={tag.id} variant="outline" className="text-xs font-normal">
-                {tag.name}
-              </Badge>
-            ))}
-          </div>
-        )}
-
         {showEdit && <EditEventDialog event={event} onClose={() => setShowEdit(false)} />}
         {showDelete && <DeleteConfirmDialog eventId={event.id} onClose={() => setShowDelete(false)} />}
       </div>
     </PageLayout>
   )
 }
-

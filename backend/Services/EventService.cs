@@ -20,8 +20,7 @@ public class EventService : IEventService
     {
         return query
             .Include(e => e.Organizer)
-            .Include(e => e.Community)
-            .Include(e => e.Tags);
+            .Include(e => e.Community);
     }
 
     private static EventResponse MapToResponse(Event e, int? currentUserId = null)
@@ -35,7 +34,6 @@ public class EventService : IEventService
             OrganizerName = e.Organizer?.Username,
             SpaceId = e.SpaceId,
             CommunityName = e.Community?.Name,
-            Tags = e.Tags.Select(t => new TagDto { Id = t.Id, Name = t.Name }).ToList(),
             ScheduledAt = e.ScheduledAt,
             Status = e.Status.ToString(),
             Latitude = e.Latitude,
@@ -109,14 +107,6 @@ public class EventService : IEventService
             UpdatedAt = DateTime.UtcNow
         };
 
-        if (request.TagIds.Count > 0)
-        {
-            List<Tag> tags = await _context.Tags
-                .Where(t => request.TagIds.Contains(t.Id))
-                .ToListAsync();
-            eventEntity.Tags = tags;
-        }
-
         _context.Events.Add(eventEntity);
         await _context.SaveChangesAsync();
 
@@ -138,14 +128,6 @@ public class EventService : IEventService
         if (request.TopicId.HasValue) eventEntity.SpaceId = request.TopicId;
         if (request.ScheduledAt.HasValue) eventEntity.ScheduledAt = request.ScheduledAt.Value;
         if (request.Status.HasValue) eventEntity.Status = request.Status.Value;
-
-        if (request.TagIds != null)
-        {
-            List<Tag> tags = await _context.Tags
-                .Where(t => request.TagIds.Contains(t.Id))
-                .ToListAsync();
-            eventEntity.Tags = tags;
-        }
 
         eventEntity.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();

@@ -9,7 +9,6 @@ import {
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card'
-import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
@@ -60,22 +59,6 @@ function EventCard({ event }: { event: Event }) {
             </span>
           )}
         </div>
-
-        {/* Tags */}
-        {event.tags.length > 0 && (
-          <div className="flex gap-1 flex-wrap pt-1 border-t">
-            {event.tags.slice(0, 3).map(tag => (
-              <Badge key={tag.id} variant="outline" className="text-xs font-normal">
-                {tag.name}
-              </Badge>
-            ))}
-            {event.tags.length > 3 && (
-              <Badge variant="outline" className="text-xs text-muted-foreground">
-                +{event.tags.length - 3}
-              </Badge>
-            )}
-          </div>
-        )}
       </CardContent>
     </Card>
   )
@@ -158,7 +141,7 @@ export function Events() {
 
   const { data: communities } = useQuery({ queryKey: ['communities-list'], queryFn: fetchCommunities })
 
-  const { data: allEvents = [] } = useQuery({
+  const { data: allEvents = [], isLoading: eventsLoading } = useQuery({
     queryKey: ['events', selectedCommunity, upcomingOnly, bounds],
     queryFn: () => fetchEvents(selectedCommunity, upcomingOnly, bounds),
   })
@@ -197,7 +180,7 @@ export function Events() {
         toast.success('Map centered to your location')
         setIsGettingLocation(false)
       },
-      (err) => {
+      () => {
         toast.error('Unable to retrieve location')
         setIsGettingLocation(false)
       },
@@ -212,7 +195,7 @@ export function Events() {
 
   return (
     <PageLayout fullWidth>
-      <div className="relative w-full h-[100dvh] flex flex-col overflow-hidden">
+      <div className="relative w-full h-dvh flex flex-col overflow-hidden">
         {/* Floating UI Container */}
         <div className="absolute top-0 left-0 right-0 z-10 p-4 pointer-events-none flex flex-col gap-2">
           {/* Top Bar */}
@@ -221,7 +204,7 @@ export function Events() {
               <div>
                 <h1 className="text-xl font-bold leading-none">Events</h1>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {totalCount > 0 ? `${totalCount} event${totalCount !== 1 ? 's' : ''}` : 'Loading...'}
+                  {eventsLoading ? 'Loading...' : `${totalCount} event${totalCount !== 1 ? 's' : ''}`}
                 </p>
               </div>
               

@@ -1,8 +1,3 @@
-export interface Tag {
-  id: number
-  name: string
-}
-
 export interface Community {
   id: number
   name: string
@@ -16,7 +11,6 @@ export interface Event {
   organizerName: string
   topicId: number | null
   communityName: string | null
-  tags: Tag[]
   scheduledAt: string
   status: string
   latitude?: number
@@ -39,7 +33,6 @@ export interface CreateEventRequest {
   description: string
   scheduledAt: string
   topicId?: number | null
-  tagIds?: number[]
   latitude?: number
   longitude?: number
   locationName?: string
