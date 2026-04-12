@@ -312,7 +312,7 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
               disabled={!canSubmit}
               className="px-4 py-1.5 bg-primary text-primary-foreground text-xs rounded-lg hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              {createMutation.isPending ? 'Posting...' : 'Post comment'}
+              {createMutation.isPending ? 'Posting...' : 'Comment'}
             </button>
           </div>
           {createMutation.isError && (
