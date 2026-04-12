@@ -48,4 +48,14 @@ export interface CitySearchResult {
   lat: string
   lon: string
   display_name: string
+  boundingbox?: string[]
+}
+
+export type ViewMode = 'map' | 'list'
+
+export type SearchLocation = {
+  name: string
+  lat: number
+  lon: number
+  bounds: EventQueryBounds
 }

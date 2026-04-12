@@ -4,12 +4,14 @@ import { useNavigate } from 'react-router-dom'
 import {
   Calendar, Plus, X,
   ChevronsUpDown, Check,
-  Search, Loader2, MapPin
+  Search, Loader2, MapPin,
+  Map, List,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card'
 import { Button } from './ui/button'
+import { Badge } from './ui/badge'
 import { Input } from './ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
@@ -18,44 +20,29 @@ import { EventsMap } from './EventsMap'
 import { cn } from '../lib/utils'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { fetchCommunities, fetchEvents, searchCities } from '../features/events/api'
-import type { Event, EventQueryBounds } from '../types/events'
-
-// ── EventCard ─────────────────────────────────────────────────────────────────
+import { loadMapState, DEFAULT_CENTER, DEFAULT_ZOOM } from '../utils/events'
+import type { Event, EventQueryBounds, SearchLocation, ViewMode } from '../types/events'
 
 function EventCard({ event }: { event: Event }) {
   const navigate = useNavigate()
 
   return (
     <Card
-      className={cn(
-        'flex flex-col h-full hover:shadow-sm transition-shadow cursor-pointer'
-      )}
+      className="flex flex-col h-full hover:shadow-sm transition-shadow cursor-pointer"
       onClick={() => navigate(`/events/${event.id}`)}
     >
       <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-base leading-snug line-clamp-2">{event.title}</CardTitle>
-        </div>
+        <CardTitle className="text-base leading-snug line-clamp-2">{event.title}</CardTitle>
         <CardDescription className="line-clamp-2 text-xs mt-1">{event.description}</CardDescription>
       </CardHeader>
-
       <CardContent className="flex-1 space-y-3 pb-3">
-        {/* Date & time */}
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Calendar className="h-3.5 w-3.5 shrink-0" />
-          <span>
-            {format(new Date(event.scheduledAt), 'EEE, MMM d · h:mm a')}
-          </span>
+          <span>{format(new Date(event.scheduledAt), 'EEE, MMM d · h:mm a')}</span>
         </div>
-
-        {/* Community */}
-        <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          {event.communityName && (
-            <span className="text-muted-foreground">
-              {event.communityName}
-            </span>
-          )}
-        </div>
+        {event.communityName && (
+          <span className="text-xs text-muted-foreground">{event.communityName}</span>
+        )}
       </CardContent>
     </Card>
   )
@@ -65,79 +52,44 @@ export function Events() {
   const navigate = useNavigate()
   const [selectedCommunity, setSelectedCommunity] = useState<number | undefined>(undefined)
   const [communityOpen, setCommunityOpen]         = useState(false)
-  const [bounds, setBounds] = useState<EventQueryBounds | undefined>()
+  const [viewMode, setViewMode]                   = useState<ViewMode>('map')
+  const [mapCenter, setMapCenter] = useState<[number, number]>(() => loadMapState().center)
+  const [mapZoom, setMapZoom]     = useState<number>(() => loadMapState().zoom)
+  const [bounds, setBounds]               = useState<EventQueryBounds | undefined>()
   const [debouncedBounds, setDebouncedBounds] = useState<EventQueryBounds | undefined>()
   const boundsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [searchLocation, setSearchLocation] = useState<{ name: string; lat: number; lon: number } | null>(null)
-  const defaultCenter: [number, number] = [20, 0]
-  const defaultZoom = 2
-
-  const [mapCenter, setMapCenter] = useState<[number, number]>(() => {
-    try {
-      const raw = localStorage.getItem('events.mapState')
-      if (raw) {
-        const parsed = JSON.parse(raw)
-        if (Array.isArray(parsed.center) && typeof parsed.zoom === 'number') {
-          return [Number(parsed.center[0]), Number(parsed.center[1])]
-        }
-      }
-    } catch {
-    }
-    return defaultCenter
-  })
-
-  const [mapZoom, setMapZoom] = useState<number>(() => {
-    try {
-      const raw = localStorage.getItem('events.mapState')
-      if (raw) {
-        const parsed = JSON.parse(raw)
-        if (typeof parsed.zoom === 'number') return parsed.zoom
-      }
-    } catch {
-    }
-    return defaultZoom
-  })
-
-  // Persist map state to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem('events.mapState', JSON.stringify({ center: mapCenter, zoom: mapZoom }))
-    } catch {
-    }
-  }, [mapCenter, mapZoom])
-
-  // Debounce bounds changes to avoid too many queries while panning/zooming
-  useEffect(() => {
-    if (boundsTimeoutRef.current) {
-      clearTimeout(boundsTimeoutRef.current)
-    }
-    boundsTimeoutRef.current = setTimeout(() => {
-      setDebouncedBounds(bounds)
-    }, 500)
-    return () => {
-      if (boundsTimeoutRef.current) {
-        clearTimeout(boundsTimeoutRef.current)
-      }
-    }
-  }, [bounds])
-
+  const [searchLocation, setSearchLocation] = useState<SearchLocation | null>(null)
   const [isGettingLocation, setIsGettingLocation] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [isSearchingCity, setIsSearchingCity] = useState(false)
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
+  const [searchQuery, setSearchQuery]             = useState('')
+  const [isSearchingCity, setIsSearchingCity]     = useState(false)
+  const [selectedEvent, setSelectedEvent]         = useState<Event | null>(null)
 
   const { data: currentUser } = useCurrentUser()
-  const { data: communities } = useQuery({ queryKey: ['communities-list'], queryFn: fetchCommunities })
+  const { data: communities } = useQuery({
+    queryKey: ['communities-list'],
+    queryFn: fetchCommunities,
+  })
 
-  // Use searchLocation bounds if available, otherwise use debounced map bounds
-  const effectiveBounds = searchLocation 
-    ? { minLat: searchLocation.lat - 1, maxLat: searchLocation.lat + 1, minLng: searchLocation.lon - 1, maxLng: searchLocation.lon + 1 }
+  const effectiveBounds: EventQueryBounds | undefined = searchLocation
+    ? searchLocation.bounds
     : debouncedBounds
 
   const { data: allEvents = [], isLoading: eventsLoading } = useQuery({
-    queryKey: ['events', selectedCommunity, searchLocation, debouncedBounds],
-    queryFn: () => fetchEvents(selectedCommunity, true, effectiveBounds),
+    queryKey: ['events', selectedCommunity, effectiveBounds],
+    queryFn:  () => fetchEvents(selectedCommunity, effectiveBounds),
   })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('events.mapState', JSON.stringify({ center: mapCenter, zoom: mapZoom }))
+    } catch {}
+  }, [mapCenter, mapZoom])
+
+  // Debounce bounds changes to avoid hammering the server while panning (fix #6: cleanup is sufficient)
+  useEffect(() => {
+    boundsTimeoutRef.current = setTimeout(() => setDebouncedBounds(bounds), 500)
+    return () => { if (boundsTimeoutRef.current) clearTimeout(boundsTimeoutRef.current) }
+  }, [bounds])
 
   async function handleSearchCity(e: React.FormEvent) {
     e.preventDefault()
@@ -145,13 +97,30 @@ export function Events() {
     setIsSearchingCity(true)
     try {
       const results = await searchCities(searchQuery)
-      if (results && results.length > 0) {
-        const cityName = results[0].display_name.split(',')[0]
-        const lat = parseFloat(results[0].lat)
-        const lon = parseFloat(results[0].lon)
-        
-        setSearchLocation({ name: cityName, lat, lon })
-        setMapCenter([lat, lon])
+      if (results?.length) {
+        const result = results[0]
+        // Use the bounding box from Nominatim if available, otherwise calculate a 1° radius
+        const bounds: EventQueryBounds = result.boundingbox
+          ? {
+              minLat: parseFloat(result.boundingbox[0]),
+              maxLat: parseFloat(result.boundingbox[1]),
+              minLng: parseFloat(result.boundingbox[2]),
+              maxLng: parseFloat(result.boundingbox[3]),
+            }
+          : {
+              minLat: parseFloat(result.lat) - 1,
+              maxLat: parseFloat(result.lat) + 1,
+              minLng: parseFloat(result.lon) - 1,
+              maxLng: parseFloat(result.lon) + 1,
+            }
+
+        setSearchLocation({
+          name: result.display_name.split(',')[0],
+          lat:  parseFloat(result.lat),
+          lon:  parseFloat(result.lon),
+          bounds,
+        })
+        setMapCenter([parseFloat(result.lat), parseFloat(result.lon)])
         setMapZoom(12)
         setSearchQuery('')
       } else {
@@ -169,45 +138,54 @@ export function Events() {
       toast.error('Please enable geolocation in your browser')
       return
     }
-
     setIsGettingLocation(true)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setMapCenter([pos.coords.latitude, pos.coords.longitude])
         setMapZoom(12)
+        setSearchLocation(null) // Fix #5: clear city filter when switching to geolocation
         setIsGettingLocation(false)
       },
       () => {
+        toast.error('Could not get your location')
         setIsGettingLocation(false)
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 10000 },
     )
   }
 
-  const totalCount = allEvents?.length ?? 0
-  const selectedCommunityName = communities?.find(a => a.id === selectedCommunity)?.name
+  // Fix #9: explicit clear action for the location chip
+  function clearSearchLocation() {
+    setSearchLocation(null)
+    setMapCenter(DEFAULT_CENTER)
+    setMapZoom(DEFAULT_ZOOM)
+  }
+
+  // ── Derived ────────────────────────────────────────────────────────────────
+
+  const totalCount = allEvents.length
+  const selectedCommunityName = communities?.find(c => c.id === selectedCommunity)?.name
 
   return (
     <PageLayout fullWidth>
       <div className="relative w-full h-dvh flex flex-col overflow-hidden">
-        {/* Floating UI Container */}
         <div className="absolute top-0 left-0 right-0 z-10 p-4 pointer-events-none flex flex-col gap-2">
-          {/* Top Bar */}
           <div className="pointer-events-auto flex flex-col xl:flex-row xl:items-center justify-between bg-card/95 backdrop-blur shadow-sm border rounded-xl p-3 gap-3">
             <div className="flex flex-wrap items-center gap-3 xl:gap-6">
+              {/* Title + count */}
               <div>
                 <h1 className="text-xl font-bold leading-none">Events</h1>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {eventsLoading ? 'Loading...' : `${totalCount} event${totalCount !== 1 ? 's' : ''}`}
+                  {eventsLoading ? 'Loading…' : `${totalCount} event${totalCount !== 1 ? 's' : ''}`}
                 </p>
               </div>
-              
-              {/* Search */}
+
+              {/* City search */}
               <form onSubmit={handleSearchCity} className="flex gap-2">
                 <div className="relative">
                   <Input
                     type="text"
-                    placeholder="Search city..."
+                    placeholder="Search city…"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-8 h-9 text-sm w-40 sm:w-48 bg-background"
@@ -215,27 +193,48 @@ export function Events() {
                   />
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 </div>
-                <Button type="submit" size="sm" className="h-9" disabled={isSearchingCity || !searchQuery.trim()}>
-                  {isSearchingCity ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="h-9"
+                  disabled={isSearchingCity || !searchQuery.trim()}
+                >
+                  {isSearchingCity ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Go'}
                 </Button>
                 <Button
                   type="button"
                   size="sm"
-                  className="h-9"
                   variant="outline"
+                  className="h-9"
                   onClick={handleUseMyLocation}
                   disabled={isGettingLocation}
-                  title="My location"
+                  title="Use my location"
                 >
                   {isGettingLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
                 </Button>
               </form>
 
-              {/* Filters */}
+              {/* Fix #9 + #10: show the active city as a dismissable chip */}
+              {searchLocation && (
+                <Badge variant="secondary" className="gap-1.5 pl-2 pr-1 h-7 text-xs font-normal">
+                  <MapPin className="h-3 w-3 shrink-0" />
+                  {searchLocation.name}
+                  <button
+                    type="button"
+                    onClick={clearSearchLocation}
+                    className="ml-0.5 rounded-full p-0.5 hover:bg-foreground/10 transition-colors"
+                    aria-label={`Clear location filter: ${searchLocation.name}`}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )}
+
+              {/* Community filter */}
               <div className="flex items-center gap-2 flex-wrap">
                 <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-9 text-xs gap-1 group">
+                    <Button variant="outline" size="sm" className="h-9 text-xs gap-1">
                       {selectedCommunityName ?? 'All Communities'}
                       <ChevronsUpDown className="h-3 w-3 shrink-0 opacity-50" />
                     </Button>
@@ -253,14 +252,14 @@ export function Events() {
                             <Check className={cn('mr-2 h-4 w-4', !selectedCommunity ? 'opacity-100' : 'opacity-0')} />
                             All communities
                           </CommandItem>
-                          {(communities ?? []).map(a => (
+                          {(communities ?? []).map(c => (
                             <CommandItem
-                              key={a.id}
-                              value={a.name}
-                              onSelect={() => { setSelectedCommunity(a.id); setCommunityOpen(false) }}
+                              key={c.id}
+                              value={c.name}
+                              onSelect={() => { setSelectedCommunity(c.id); setCommunityOpen(false) }}
                             >
-                              <Check className={cn('mr-2 h-4 w-4', selectedCommunity === a.id ? 'opacity-100' : 'opacity-0')} />
-                              {a.name}
+                              <Check className={cn('mr-2 h-4 w-4', selectedCommunity === c.id ? 'opacity-100' : 'opacity-0')} />
+                              {c.name}
                             </CommandItem>
                           ))}
                         </CommandGroup>
@@ -268,7 +267,6 @@ export function Events() {
                     </Command>
                   </PopoverContent>
                 </Popover>
-
                 {selectedCommunity && (
                   <Button
                     variant="ghost"
@@ -283,8 +281,31 @@ export function Events() {
               </div>
             </div>
 
-            {/* Right Side Tools */}
+            {/* Right side */}
             <div className="flex items-center gap-3">
+              {/* Fix #11: map / list toggle */}
+              <div className="flex rounded-lg border overflow-hidden h-9">
+                <Button
+                  variant={viewMode === 'map' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="h-9 rounded-none border-0 px-3"
+                  onClick={() => setViewMode('map')}
+                  title="Map view"
+                >
+                  <Map className="h-4 w-4" />
+                </Button>
+                <div className="w-px bg-border" />
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="h-9 rounded-none border-0 px-3"
+                  onClick={() => setViewMode('list')}
+                  title="List view"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+
               {currentUser && (
                 <Button onClick={() => navigate('/events/create')} size="sm" className="h-9">
                   <Plus className="h-4 w-4 mr-1 sm:mr-2" />
@@ -295,37 +316,64 @@ export function Events() {
             </div>
           </div>
         </div>
-
-        {/* Map Layer */}
-        <div className="flex-1 w-full h-full relative z-0">
-          <EventsMap 
-            events={allEvents} 
-            onBoundsChange={setBounds} 
+        <div className={cn('flex-1 w-full h-full relative z-0', viewMode !== 'map' && 'hidden')}>
+          <EventsMap
+            events={allEvents}
+            onBoundsChange={setBounds}
             center={mapCenter}
             zoom={mapZoom}
             onEventClick={setSelectedEvent}
             selectedEventId={selectedEvent?.id}
           />
         </div>
-
-        {/* Floating Selected Event Drawer */}
-        {selectedEvent && (
-          <div className="absolute top-28 sm:top-24 right-4 sm:bottom-4 w-[calc(100vw-2rem)] sm:w-80 max-h-[60vh] sm:max-h-none z-20 pointer-events-auto bg-card border shadow-2xl rounded-xl overflow-hidden flex flex-col animate-in slide-in-from-right-8 duration-300">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 right-2 z-30 w-8 h-8 rounded-full bg-background/80 hover:bg-background shadow-sm"
-              onClick={() => setSelectedEvent(null)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-            <div className="flex-1 overflow-y-auto p-3 sm:p-4">
-              <EventCard event={selectedEvent} />
-            </div>
+        {viewMode === 'list' && (
+          <div className="flex-1 overflow-y-auto pt-28 sm:pt-24 px-4 pb-6">
+            {eventsLoading ? (
+              <div className="flex items-center justify-center gap-2 py-16 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading events…
+              </div>
+            ) : allEvents.length === 0 ? (
+              <div className="flex items-center justify-center py-16 text-sm text-muted-foreground">
+                No events found
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {allEvents.map(event => (
+                  <EventCard key={event.id} event={event} />
+                ))}
+              </div>
+            )}
           </div>
         )}
+        <div
+          className={cn(
+            'absolute top-28 sm:top-24 right-4 w-[calc(100vw-2rem)] sm:w-80 max-h-[60vh] z-20',
+            'bg-card border shadow-2xl rounded-xl overflow-hidden flex flex-col',
+            'transition-all duration-300 ease-in-out',
+            selectedEvent && viewMode === 'map'
+              ? 'opacity-100 translate-x-0 pointer-events-auto'
+              : 'opacity-0 translate-x-6 pointer-events-none',
+          )}
+          aria-hidden={!selectedEvent || viewMode !== 'map'}
+        >
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-2 right-2 z-30 w-9 h-9 rounded-full bg-background/80 hover:bg-background shadow-sm"
+            onClick={(e) => { e.stopPropagation(); setSelectedEvent(null) }}
+            tabIndex={selectedEvent ? 0 : -1}
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close event preview</span>
+          </Button>
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+            {selectedEvent && <EventCard event={selectedEvent} />}
+          </div>
+        </div>
+
       </div>
     </PageLayout>
+    
   )
 }
-

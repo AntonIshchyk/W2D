@@ -9,7 +9,6 @@ public interface IEventService
     Task<IEnumerable<EventResponse>> GetEventsAsync(
         int? topicId = null,
         EventStatus? status = null,
-        bool upcomingOnly = true,
         int? currentUserId = null,
         double? minLat = null,
         double? maxLat = null,

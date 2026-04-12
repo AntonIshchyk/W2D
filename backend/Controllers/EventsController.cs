@@ -27,7 +27,6 @@ public class EventsController : ControllerBase
     public async Task<ActionResult<IEnumerable<EventResponse>>> GetEvents(
         [FromQuery] int? topicId = null,
         [FromQuery] EventStatus? status = null,
-        [FromQuery] bool upcomingOnly = true,
         [FromQuery] double? minLat = null,
         [FromQuery] double? maxLat = null,
         [FromQuery] double? minLng = null,
@@ -35,7 +34,7 @@ public class EventsController : ControllerBase
     {
         int currentUserId = User.GetUserId();
         IEnumerable<EventResponse> result = await _eventService.GetEventsAsync(
-            topicId, status, upcomingOnly, currentUserId, minLat, maxLat, minLng, maxLng);
+            topicId, status, currentUserId, minLat, maxLat, minLng, maxLng);
         return Ok(result);
     }
 

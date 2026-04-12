@@ -21,13 +21,11 @@ function getErrorMessage(fallback: string, payload: unknown): string {
 
 export async function fetchEvents(
   topicId?: number,
-  upcomingOnly: boolean = true,
   bounds?: EventQueryBounds
 ): Promise<Event[]> {
   const params = new URLSearchParams()
 
   if (topicId) params.append('topicId', topicId.toString())
-  if (upcomingOnly) params.append('upcomingOnly', 'true')
 
   if (bounds) {
     params.append('minLat', bounds.minLat.toString())

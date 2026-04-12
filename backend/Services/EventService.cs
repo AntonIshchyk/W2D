@@ -48,7 +48,6 @@ public class EventService : IEventService
     public async Task<IEnumerable<EventResponse>> GetEventsAsync(
         int? topicId = null,
         EventStatus? status = null,
-        bool upcomingOnly = true,
         int? currentUserId = null,
         double? minLat = null,
         double? maxLat = null,
@@ -65,8 +64,8 @@ public class EventService : IEventService
         else
             query = query.Where(e => e.Status == EventStatus.Open);
 
-        if (upcomingOnly)
-            query = query.Where(e => e.ScheduledAt >= DateTime.UtcNow);
+        // Always filter for upcoming events
+        query = query.Where(e => e.ScheduledAt >= DateTime.UtcNow);
 
         if (minLat.HasValue) query = query.Where(e => e.Latitude >= minLat.Value);
         if (maxLat.HasValue) query = query.Where(e => e.Latitude <= maxLat.Value);
