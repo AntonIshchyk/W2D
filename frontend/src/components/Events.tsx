@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Calendar, Plus, X,
@@ -66,6 +66,9 @@ export function Events() {
   const [selectedCommunity, setSelectedCommunity] = useState<number | undefined>(undefined)
   const [communityOpen, setCommunityOpen]         = useState(false)
   const [bounds, setBounds] = useState<EventQueryBounds | undefined>()
+  const [debouncedBounds, setDebouncedBounds] = useState<EventQueryBounds | undefined>()
+  const boundsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [searchLocation, setSearchLocation] = useState<{ name: string; lat: number; lon: number } | null>(null)
   const defaultCenter: [number, number] = [20, 0]
   const defaultZoom = 2
 
@@ -79,7 +82,6 @@ export function Events() {
         }
       }
     } catch {
-      // ignore parse errors
     }
     return defaultCenter
   })
@@ -92,54 +94,49 @@ export function Events() {
         if (typeof parsed.zoom === 'number') return parsed.zoom
       }
     } catch {
-      // ignore
     }
     return defaultZoom
   })
 
+  // Persist map state to localStorage
   useEffect(() => {
     try {
       localStorage.setItem('events.mapState', JSON.stringify({ center: mapCenter, zoom: mapZoom }))
     } catch {
-      // ignore storage errors
     }
   }, [mapCenter, mapZoom])
+
+  // Debounce bounds changes to avoid too many queries while panning/zooming
+  useEffect(() => {
+    if (boundsTimeoutRef.current) {
+      clearTimeout(boundsTimeoutRef.current)
+    }
+    boundsTimeoutRef.current = setTimeout(() => {
+      setDebouncedBounds(bounds)
+    }, 500)
+    return () => {
+      if (boundsTimeoutRef.current) {
+        clearTimeout(boundsTimeoutRef.current)
+      }
+    }
+  }, [bounds])
 
   const [isGettingLocation, setIsGettingLocation] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchingCity, setIsSearchingCity] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
-  
-  // Auto-fetch location on mount if permission granted
-  useEffect(() => {
-    if (!('geolocation' in navigator) || !navigator.permissions) return
-    
-    let isMounted = true
-    navigator.permissions.query({ name: 'geolocation' }).then(result => {
-      if (result.state === 'granted' && isMounted) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            if (isMounted) {
-              setMapCenter([pos.coords.latitude, pos.coords.longitude])
-              // We won't automatically zoom in too tight on initial auto-load, just center
-              if (mapZoom < 10) setMapZoom(10)
-            }
-          },
-          () => {} // silence errors on auto-fetch
-        )
-      }
-    }).catch(() => {}) // Some browsers throw on query
-    
-    return () => { isMounted = false }
-  }, [])
 
   const { data: currentUser } = useCurrentUser()
-
   const { data: communities } = useQuery({ queryKey: ['communities-list'], queryFn: fetchCommunities })
 
+  // Use searchLocation bounds if available, otherwise use debounced map bounds
+  const effectiveBounds = searchLocation 
+    ? { minLat: searchLocation.lat - 1, maxLat: searchLocation.lat + 1, minLng: searchLocation.lon - 1, maxLng: searchLocation.lon + 1 }
+    : debouncedBounds
+
   const { data: allEvents = [], isLoading: eventsLoading } = useQuery({
-    queryKey: ['events', selectedCommunity, bounds],
-    queryFn: () => fetchEvents(selectedCommunity, true, bounds),
+    queryKey: ['events', selectedCommunity, searchLocation, debouncedBounds],
+    queryFn: () => fetchEvents(selectedCommunity, true, effectiveBounds),
   })
 
   async function handleSearchCity(e: React.FormEvent) {
@@ -149,9 +146,14 @@ export function Events() {
     try {
       const results = await searchCities(searchQuery)
       if (results && results.length > 0) {
-        setMapCenter([parseFloat(results[0].lat), parseFloat(results[0].lon)])
+        const cityName = results[0].display_name.split(',')[0]
+        const lat = parseFloat(results[0].lat)
+        const lon = parseFloat(results[0].lon)
+        
+        setSearchLocation({ name: cityName, lat, lon })
+        setMapCenter([lat, lon])
         setMapZoom(12)
-        toast.success(`Showing events near ${results[0].display_name.split(',')[0]}`)
+        setSearchQuery('')
       } else {
         toast.error('Place not found')
       }
@@ -164,7 +166,7 @@ export function Events() {
 
   function handleUseMyLocation() {
     if (!('geolocation' in navigator)) {
-      toast.error('Geolocation is not supported by your browser')
+      toast.error('Please enable geolocation in your browser')
       return
     }
 
@@ -183,8 +185,6 @@ export function Events() {
   }
 
   const totalCount = allEvents?.length ?? 0
-  const hasFilters = !!selectedCommunity
-
   const selectedCommunityName = communities?.find(a => a.id === selectedCommunity)?.name
 
   return (
@@ -232,10 +232,10 @@ export function Events() {
               </form>
 
               {/* Filters */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-9 text-xs gap-1">
+                    <Button variant="outline" size="sm" className="h-9 text-xs gap-1 group">
                       {selectedCommunityName ?? 'All Communities'}
                       <ChevronsUpDown className="h-3 w-3 shrink-0 opacity-50" />
                     </Button>
@@ -269,17 +269,15 @@ export function Events() {
                   </PopoverContent>
                 </Popover>
 
-                {hasFilters && (
+                {selectedCommunity && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-9 text-xs"
-                    onClick={() => {
-                      setSelectedCommunity(undefined)
-                    }}
+                    className="h-9 w-9 p-0"
+                    onClick={() => setSelectedCommunity(undefined)}
+                    title="Clear community filter"
                   >
-                    <X className="h-3.5 w-3.5 mr-1" />
-                    Clear
+                    <X className="h-4 w-4" />
                   </Button>
                 )}
               </div>
