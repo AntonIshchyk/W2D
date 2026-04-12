@@ -25,8 +25,6 @@ import type { Event, EventQueryBounds } from '../types/events'
 function EventCard({ event }: { event: Event }) {
   const navigate = useNavigate()
 
-  const isPast = new Date(event.scheduledAt) < new Date()
-
   return (
     <Card
       className={cn(
@@ -45,10 +43,9 @@ function EventCard({ event }: { event: Event }) {
         {/* Date & time */}
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Calendar className="h-3.5 w-3.5 shrink-0" />
-          <span className={cn(isPast && 'line-through')}>
+          <span>
             {format(new Date(event.scheduledAt), 'EEE, MMM d · h:mm a')}
           </span>
-          {isPast && <span className="text-muted-foreground/60">(past)</span>}
         </div>
 
         {/* Community */}
@@ -67,7 +64,6 @@ function EventCard({ event }: { event: Event }) {
 export function Events() {
   const navigate = useNavigate()
   const [selectedCommunity, setSelectedCommunity] = useState<number | undefined>(undefined)
-  const [upcomingOnly, setUpcomingOnly]         = useState(true)
   const [communityOpen, setCommunityOpen]         = useState(false)
   const [bounds, setBounds] = useState<EventQueryBounds | undefined>()
   const defaultCenter: [number, number] = [20, 0]
@@ -142,8 +138,8 @@ export function Events() {
   const { data: communities } = useQuery({ queryKey: ['communities-list'], queryFn: fetchCommunities })
 
   const { data: allEvents = [], isLoading: eventsLoading } = useQuery({
-    queryKey: ['events', selectedCommunity, upcomingOnly, bounds],
-    queryFn: () => fetchEvents(selectedCommunity, upcomingOnly, bounds),
+    queryKey: ['events', selectedCommunity, bounds],
+    queryFn: () => fetchEvents(selectedCommunity, true, bounds),
   })
 
   async function handleSearchCity(e: React.FormEvent) {
@@ -187,7 +183,7 @@ export function Events() {
   }
 
   const totalCount = allEvents?.length ?? 0
-  const hasFilters = !!(selectedCommunity || !upcomingOnly)
+  const hasFilters = !!selectedCommunity
 
   const selectedCommunityName = communities?.find(a => a.id === selectedCommunity)?.name
 
@@ -280,7 +276,6 @@ export function Events() {
                     className="h-9 text-xs"
                     onClick={() => {
                       setSelectedCommunity(undefined)
-                      setUpcomingOnly(true)
                     }}
                   >
                     <X className="h-3.5 w-3.5 mr-1" />
