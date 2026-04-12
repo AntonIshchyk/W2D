@@ -157,7 +157,7 @@ export function Events() {
         setMapZoom(12)
         toast.success(`Showing events near ${results[0].display_name.split(',')[0]}`)
       } else {
-        toast.error('City not found')
+        toast.error('Place not found')
       }
     } catch {
       toast.error('Search failed')
@@ -177,11 +177,9 @@ export function Events() {
       (pos) => {
         setMapCenter([pos.coords.latitude, pos.coords.longitude])
         setMapZoom(12)
-        toast.success('Map centered to your location')
         setIsGettingLocation(false)
       },
       () => {
-        toast.error('Unable to retrieve location')
         setIsGettingLocation(false)
       },
       { enableHighAccuracy: true, timeout: 10000 }
