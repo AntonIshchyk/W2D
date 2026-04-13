@@ -85,7 +85,6 @@ export function Events() {
     } catch {}
   }, [mapCenter, mapZoom])
 
-  // Debounce bounds changes to avoid hammering the server while panning (fix #6: cleanup is sufficient)
   useEffect(() => {
     boundsTimeoutRef.current = setTimeout(() => setDebouncedBounds(bounds), 500)
     return () => { if (boundsTimeoutRef.current) clearTimeout(boundsTimeoutRef.current) }
@@ -99,7 +98,6 @@ export function Events() {
       const results = await searchCities(searchQuery)
       if (results?.length) {
         const result = results[0]
-        // Use the bounding box from Nominatim if available, otherwise calculate a 1° radius
         const bounds: EventQueryBounds = result.boundingbox
           ? {
               minLat: parseFloat(result.boundingbox[0]),
@@ -143,7 +141,7 @@ export function Events() {
       (pos) => {
         setMapCenter([pos.coords.latitude, pos.coords.longitude])
         setMapZoom(12)
-        setSearchLocation(null) // Fix #5: clear city filter when switching to geolocation
+        setSearchLocation(null)
         setIsGettingLocation(false)
       },
       () => {
@@ -154,7 +152,6 @@ export function Events() {
     )
   }
 
-  // Fix #9: explicit clear action for the location chip
   function clearSearchLocation() {
     setSearchLocation(null)
     setMapCenter(DEFAULT_CENTER)
@@ -211,7 +208,6 @@ export function Events() {
                 </Button>
               </form>
 
-              {/* Fix #9 + #10: show the active city as a dismissable chip */}
               {searchLocation && (
                 <Badge variant="secondary" className="gap-1.5 pl-2 pr-1 h-7 text-xs font-normal">
                   <MapPin className="h-3 w-3 shrink-0" />
@@ -280,7 +276,6 @@ export function Events() {
 
             {/* Right side */}
             <div className="flex items-center gap-3">
-              {/* Fix #11: map / list toggle */}
               <div className="flex rounded-lg border overflow-hidden h-9">
                 <Button
                   variant={viewMode === 'map' ? 'default' : 'ghost'}
@@ -368,9 +363,7 @@ export function Events() {
             {selectedEvent && <EventCard event={selectedEvent} />}
           </div>
         </div>
-
       </div>
     </PageLayout>
-    
   )
 }
