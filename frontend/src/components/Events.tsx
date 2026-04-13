@@ -173,12 +173,9 @@ export function Events() {
           <div className="pointer-events-auto flex flex-col xl:flex-row xl:items-center justify-between bg-card/95 backdrop-blur shadow-sm border rounded-xl p-3 gap-3">
             <div className="flex flex-wrap items-center gap-3 xl:gap-6">
               {/* Title + count */}
-              <div>
-                <h1 className="text-xl font-bold leading-none">Events</h1>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {eventsLoading ? 'Loading…' : `${totalCount} event${totalCount !== 1 ? 's' : ''}`}
-                </p>
-              </div>
+              <h1 className="text-xl font-bold leading-none">
+                Events ({totalCount})
+              </h1>
 
               {/* City search */}
               <form onSubmit={handleSearchCity} className="flex gap-2">
@@ -199,7 +196,7 @@ export function Events() {
                   className="h-9"
                   disabled={isSearchingCity || !searchQuery.trim()}
                 >
-                  {isSearchingCity ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Go'}
+                  {isSearchingCity ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
                 </Button>
                 <Button
                   type="button"
