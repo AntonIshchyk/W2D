@@ -71,7 +71,7 @@ function PostCard({
 
         <div className="flex items-center gap-2">
           {post.communityName && (
-            <span className="px-3 py-1 rounded-full text-xs font-bold border bg-primary text-primary-foreground border-primary cursor-pointer hover:bg-primary/90 transition-colors">
+            <span className="px-3 py-1 rounded-full text-xs font-bold border bg-primary text-primary-foreground border-primary">
               {post.communityName}
             </span>
           )}

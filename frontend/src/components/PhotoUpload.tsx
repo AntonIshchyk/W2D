@@ -49,12 +49,7 @@ export function PhotoUpload({
   disabled = false,
 }: PhotoUploadProps) {
   const [uploading, setUploading] = useState<UploadingFile[]>([])
-  const [isDragging, setIsDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-
-  // A ref that always holds the latest confirmed URLs.
-  // This prevents concurrent uploads from reading a stale `value` closure
-  // and overwriting each other — each upload appends to the ref, not to `value`.
   const confirmedRef = useRef<string[]>(value)
   confirmedRef.current = value
 
@@ -79,8 +74,6 @@ export function PhotoUpload({
       const { uploadUrl, publicUrl } = await getPresignedUrl(file)
       await uploadToR2(uploadUrl, file)
 
-      // Append via the ref so sibling concurrent uploads each see the
-      // accumulated list rather than the same stale snapshot of `value`.
       confirmedRef.current = [...confirmedRef.current, publicUrl]
       onChange(confirmedRef.current)
 
@@ -100,11 +93,6 @@ export function PhotoUpload({
     Array.from(files).slice(0, remaining).forEach(processFile)
   }, [processFile, value.length, maxPhotos])
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-    if (!disabled && canAddMore) handleFiles(e.dataTransfer.files)
-  }, [disabled, canAddMore, handleFiles])
 
   const removePhoto = (url: string) => {
     const next = value.filter(u => u !== url)

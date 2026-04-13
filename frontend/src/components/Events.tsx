@@ -16,16 +16,17 @@ import { Input } from './ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { PageLayout } from './Navbar'
-import { EventsMap } from './EventsMap'
+import { EventsMap, type FlyToTarget } from './EventsMap'
 import { cn } from '../lib/utils'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { fetchCommunities, fetchEvents, searchCities } from '../features/events/api'
 import { loadMapState, DEFAULT_CENTER, DEFAULT_ZOOM } from '../utils/events'
-import type { Event, EventQueryBounds, SearchLocation, ViewMode } from '../types/events'
+import type { Event, EventQueryBounds, ViewMode } from '../types/events'
+
+// ─── EventCard ─────────────────────────────────────────────────────────────────
 
 function EventCard({ event }: { event: Event }) {
   const navigate = useNavigate()
-
   return (
     <Card
       className="flex flex-col h-full hover:shadow-sm transition-shadow cursor-pointer"
@@ -48,66 +49,68 @@ function EventCard({ event }: { event: Event }) {
   )
 }
 
+// ─── Events ────────────────────────────────────────────────────────────────────
+
 export function Events() {
   const navigate = useNavigate()
-  const [selectedCommunity, setSelectedCommunity] = useState<number | undefined>(undefined)
-  const [communityOpen, setCommunityOpen]         = useState(false)
-  const [viewMode, setViewMode]                   = useState<ViewMode>('map')
-  const [mapCenter, setMapCenter] = useState<[number, number]>(() => loadMapState().center)
-  const [mapZoom, setMapZoom]     = useState<number>(() => loadMapState().zoom)
-  const [bounds, setBounds]               = useState<EventQueryBounds | undefined>()
-  const [debouncedBounds, setDebouncedBounds] = useState<EventQueryBounds | undefined>()
-  const boundsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [searchLocation, setSearchLocation] = useState<SearchLocation | null>(null)
-  const [isGettingLocation, setIsGettingLocation] = useState(false)
-  const [searchQuery, setSearchQuery]             = useState('')
-  const [isSearchingCity, setIsSearchingCity]     = useState(false)
-  const [autocompleteResults, setAutocompleteResults] = useState<any[]>([])
-  const [showAutocomplete, setShowAutocomplete] = useState(false)
-  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [selectedEvent, setSelectedEvent]         = useState<Event | null>(null)
 
+  // ── UI state ────────────────────────────────────────────────────────────────
+  const [viewMode, setViewMode]           = useState<ViewMode>('map')
+  const [selectedCommunity, setSelectedCommunity] = useState<number | undefined>()
+  const [communityOpen, setCommunityOpen] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
+  const flyToIdRef = useRef(0)
+  const [flyToTarget, setFlyToTarget] = useState<FlyToTarget | null>(null)
+  const [initialMapState] = useState(() => loadMapState())
+  const [rawBounds, setRawBounds]           = useState<EventQueryBounds | undefined>()
+  const [debouncedBounds, setDebouncedBounds] = useState<EventQueryBounds | undefined>()
+  const [searchBounds, setSearchBounds]     = useState<EventQueryBounds | null>(null)
+  const [searchLocationName, setSearchLocationName] = useState<string | null>(null)
+  const boundsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // ── City search UI ──────────────────────────────────────────────────────────
+  const [searchQuery, setSearchQuery]               = useState('')
+  const [autocompleteResults, setAutocompleteResults] = useState<any[]>([])
+  const [showAutocomplete, setShowAutocomplete]     = useState(false)
+  const [isSearchingCity, setIsSearchingCity]       = useState(false)
+  const [isGettingLocation, setIsGettingLocation]   = useState(false)
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // ── Data ────────────────────────────────────────────────────────────────────
   const { data: currentUser } = useCurrentUser()
   const { data: communities } = useQuery({
     queryKey: ['communities-list'],
     queryFn: fetchCommunities,
   })
 
-  const effectiveBounds: EventQueryBounds | undefined = searchLocation
-    ? searchLocation.bounds
-    : debouncedBounds
-
+  const effectiveBounds = searchBounds ?? debouncedBounds
   const { data: allEvents = [], isLoading: eventsLoading } = useQuery({
     queryKey: ['events', selectedCommunity, effectiveBounds],
-    queryFn:  () => fetchEvents(selectedCommunity, effectiveBounds),
+    queryFn: () => fetchEvents(selectedCommunity, effectiveBounds),
   })
 
+  // ── Effects ─────────────────────────────────────────────────────────────────
   useEffect(() => {
-    try {
-      localStorage.setItem('events.mapState', JSON.stringify({ center: mapCenter, zoom: mapZoom }))
-    } catch {}
-  }, [mapCenter, mapZoom])
+    if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current)
+    boundsDebounceRef.current = setTimeout(() => setDebouncedBounds(rawBounds), 500)
+    return () => { if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current) }
+  }, [rawBounds])
 
   useEffect(() => {
-    boundsTimeoutRef.current = setTimeout(() => setDebouncedBounds(bounds), 500)
-    return () => { if (boundsTimeoutRef.current) clearTimeout(boundsTimeoutRef.current) }
-  }, [bounds])
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
 
-  // Debounced autocomplete search
-  useEffect(() => {
     if (!searchQuery.trim()) {
       setAutocompleteResults([])
       setShowAutocomplete(false)
+      setIsSearchingCity(false)
       return
     }
 
-    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
     setIsSearchingCity(true)
-
-    searchTimeoutRef.current = setTimeout(async () => {
+    searchDebounceRef.current = setTimeout(async () => {
       try {
         const results = await searchCities(searchQuery)
-        setAutocompleteResults(results)
+        setAutocompleteResults(results ?? [])
         setShowAutocomplete(true)
       } catch {
         toast.error('Search failed')
@@ -117,47 +120,54 @@ export function Events() {
       }
     }, 400)
 
-    return () => {
-      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
-    }
+    return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current) }
   }, [searchQuery])
 
-  function selectAutocompleteResult(result: any) {
-    const bounds: EventQueryBounds = result.boundingbox
-      ? {
-          minLat: parseFloat(result.boundingbox[0]),
-          maxLat: parseFloat(result.boundingbox[1]),
-          minLng: parseFloat(result.boundingbox[2]),
-          maxLng: parseFloat(result.boundingbox[3]),
-        }
-      : {
-          minLat: parseFloat(result.lat) - 1,
-          maxLat: parseFloat(result.lat) + 1,
-          minLng: parseFloat(result.lon) - 1,
-          maxLng: parseFloat(result.lon) + 1,
-        }
+  // ── Handlers ─────────────────────────────────────────────────────────────────
 
-    setSearchLocation({
-      name: result.display_name.split(',')[0],
-      lat: parseFloat(result.lat),
-      lon: parseFloat(result.lon),
-      bounds,
-    })
-    setMapCenter([parseFloat(result.lat), parseFloat(result.lon)])
-    setMapZoom(12)
+  function flyTo(center: [number, number], zoom: number) {
+    flyToIdRef.current += 1
+    setFlyToTarget({ center, zoom, id: flyToIdRef.current })
+  }
+
+  function boundsFromResult(result: any): EventQueryBounds {
+    if (result.boundingbox) {
+      return {
+        minLat: parseFloat(result.boundingbox[0]),
+        maxLat: parseFloat(result.boundingbox[1]),
+        minLng: parseFloat(result.boundingbox[2]),
+        maxLng: parseFloat(result.boundingbox[3]),
+      }
+    }
+    const lat = parseFloat(result.lat)
+    const lon = parseFloat(result.lon)
+    return { minLat: lat - 1, maxLat: lat + 1, minLng: lon - 1, maxLng: lon + 1 }
+  }
+
+  function applySearchResult(result: any) {
+    const center: [number, number] = [parseFloat(result.lat), parseFloat(result.lon)]
+    setSearchBounds(boundsFromResult(result))
+    setSearchLocationName(result.display_name.split(',')[0])
+    flyTo(center, 12)
     setSearchQuery('')
     setShowAutocomplete(false)
     setAutocompleteResults([])
   }
 
-  async function handleSearchCity(e: React.FormEvent) {
+  function clearSearchLocation() {
+    setSearchBounds(null)
+    setSearchLocationName(null)
+    flyTo(DEFAULT_CENTER, DEFAULT_ZOOM)
+  }
+
+  async function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!searchQuery.trim()) return
     setIsSearchingCity(true)
     try {
       const results = await searchCities(searchQuery)
       if (results?.length) {
-        selectAutocompleteResult(results[0])
+        applySearchResult(results[0])
       } else {
         toast.error('Place not found')
       }
@@ -176,58 +186,61 @@ export function Events() {
     setIsGettingLocation(true)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setMapCenter([pos.coords.latitude, pos.coords.longitude])
-        setMapZoom(12)
-        setSearchLocation(null)
+        setSearchBounds(null)
+        setSearchLocationName(null)
+        flyTo([pos.coords.latitude, pos.coords.longitude], 12)
         setIsGettingLocation(false)
       },
       () => {
         toast.error('Could not get your location')
         setIsGettingLocation(false)
       },
-      { enableHighAccuracy: true, timeout: 10000 },
+      { enableHighAccuracy: true, timeout: 10_000 },
     )
   }
 
-  function clearSearchLocation() {
-    setSearchLocation(null)
-    setMapCenter(DEFAULT_CENTER)
-    setMapZoom(DEFAULT_ZOOM)
+  function handleViewChange(center: [number, number], zoom: number) {
+    try {
+      localStorage.setItem('events.mapState', JSON.stringify({ center, zoom }))
+    } catch {}
   }
 
-  // ── Derived ────────────────────────────────────────────────────────────────
-
-  const totalCount = allEvents.length
+  // ── Derived ──────────────────────────────────────────────────────────────────
   const selectedCommunityName = communities?.find(c => c.id === selectedCommunity)?.name
 
   return (
     <PageLayout fullWidth>
       <div className="relative w-full h-dvh flex flex-col overflow-hidden">
+
+        {/* ── Toolbar ── */}
         <div className="absolute top-0 left-0 right-0 z-10 p-4 pointer-events-none flex flex-col gap-2">
           <div className="pointer-events-auto flex flex-col xl:flex-row xl:items-center justify-between bg-card/95 backdrop-blur shadow-sm border rounded-xl p-3 gap-3">
             <div className="flex flex-wrap items-center gap-3 xl:gap-6">
+
               {/* Title + count */}
               <h1 className="text-xl font-bold leading-none">
-                Events ({totalCount})
+                Events ({allEvents.length})
               </h1>
 
               {/* City search */}
               <div className="relative flex gap-2 flex-wrap sm:flex-nowrap items-start sm:items-center">
-                <div className="relative w-40 sm:w-48">
+                <form onSubmit={handleSearchSubmit} className="relative w-40 sm:w-48">
                   <Input
                     type="text"
                     placeholder="Search city…"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    onBlur={() => setTimeout(() => setShowAutocomplete(false), 100)}
-                    onFocus={() => searchQuery.trim() && setShowAutocomplete(true)}
+                    onBlur={() => setTimeout(() => setShowAutocomplete(false), 150)}
+                    onFocus={() => autocompleteResults.length > 0 && setShowAutocomplete(true)}
                     className="pl-8 h-9 text-sm w-full bg-background"
                     disabled={isGettingLocation}
                     autoComplete="off"
                   />
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  
-                  {/* Autocomplete dropdown */}
+                  {isSearchingCity
+                    ? <Loader2 className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground animate-spin" />
+                    : <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  }
+
                   {showAutocomplete && autocompleteResults.length > 0 && (
                     <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg z-50">
                       {autocompleteResults.slice(0, 8).map((result, idx) => (
@@ -237,7 +250,7 @@ export function Events() {
                           className="w-full px-3 py-2 text-left text-sm hover:bg-accent transition-colors border-b last:border-b-0 flex items-start gap-2"
                           onMouseDown={(e) => {
                             e.preventDefault()
-                            selectAutocompleteResult(result)
+                            applySearchResult(result)
                           }}
                         >
                           <MapPin className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground" />
@@ -246,7 +259,8 @@ export function Events() {
                       ))}
                     </div>
                   )}
-                </div>
+                </form>
+
                 <Button
                   type="button"
                   size="sm"
@@ -256,19 +270,22 @@ export function Events() {
                   disabled={isGettingLocation}
                   title="Use my location"
                 >
-                  {isGettingLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
+                  {isGettingLocation
+                    ? <Loader2 className="h-4 w-4 animate-spin" />
+                    : <MapPin className="h-4 w-4" />
+                  }
                 </Button>
               </div>
 
-              {searchLocation && (
+              {searchLocationName && (
                 <Badge variant="secondary" className="gap-1.5 pl-2 pr-1 h-7 text-xs font-normal">
                   <MapPin className="h-3 w-3 shrink-0" />
-                  {searchLocation.name}
+                  {searchLocationName}
                   <button
                     type="button"
                     onClick={clearSearchLocation}
                     className="ml-0.5 rounded-full p-0.5 hover:bg-foreground/10 transition-colors"
-                    aria-label={`Clear location filter: ${searchLocation.name}`}
+                    aria-label={`Clear location filter: ${searchLocationName}`}
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -326,7 +343,7 @@ export function Events() {
               </div>
             </div>
 
-            {/* Right side */}
+            {/* Right side: view toggle + create */}
             <div className="flex items-center gap-3">
               <div className="flex rounded-lg border overflow-hidden h-9">
                 <Button
@@ -349,7 +366,6 @@ export function Events() {
                   <List className="h-4 w-4" />
                 </Button>
               </div>
-
               {currentUser && (
                 <Button onClick={() => navigate('/events/create')} size="sm" className="h-9">
                   <Plus className="h-4 w-4 mr-1 sm:mr-2" />
@@ -360,16 +376,22 @@ export function Events() {
             </div>
           </div>
         </div>
+
+        {/* ── Map view ── */}
         <div className={cn('flex-1 w-full h-full relative z-0', viewMode !== 'map' && 'hidden')}>
           <EventsMap
             events={allEvents}
-            onBoundsChange={setBounds}
-            center={mapCenter}
-            zoom={mapZoom}
-            onEventClick={setSelectedEvent}
+            onBoundsChange={setRawBounds}
+            onViewChange={handleViewChange}
+            flyToTarget={flyToTarget}
+            initialCenter={initialMapState.center}
+            initialZoom={initialMapState.zoom}
             selectedEventId={selectedEvent?.id}
+            onEventClick={setSelectedEvent}
           />
         </div>
+
+        {/* ── List view ── */}
         {viewMode === 'list' && (
           <div className="flex-1 overflow-y-auto pt-28 sm:pt-24 px-4 pb-6">
             {eventsLoading ? (
@@ -390,6 +412,8 @@ export function Events() {
             )}
           </div>
         )}
+
+        {/* ── Selected event panel (map view only) ── */}
         <div
           className={cn(
             'absolute top-28 sm:top-24 right-4 w-[calc(100vw-2rem)] sm:w-80 max-h-[60vh] z-20',
@@ -415,6 +439,7 @@ export function Events() {
             {selectedEvent && <EventCard event={selectedEvent} />}
           </div>
         </div>
+
       </div>
     </PageLayout>
   )

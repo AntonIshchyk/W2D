@@ -1,67 +1,95 @@
-﻿import { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap, ZoomControl } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import { ensureLeafletDefaultIcon } from '../utils/leafletIcon';
-import type { Event, EventQueryBounds } from '../types/events';
+﻿import { useEffect, useRef } from 'react'
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  ZoomControl,
+  useMap,
+  useMapEvents,
+} from 'react-leaflet'
+import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
+import { ensureLeafletDefaultIcon } from '../utils/leafletIcon'
+import type { Event, EventQueryBounds } from '../types/events'
 
-ensureLeafletDefaultIcon();
+ensureLeafletDefaultIcon()
+
+export interface FlyToTarget {
+  center: [number, number]
+  zoom: number
+  id: number
+}
 
 interface EventsMapProps {
-  events: Event[];
-  onBoundsChange: (bounds: EventQueryBounds) => void;
-  center?: [number, number];
-  zoom?: number;
-  selectedEventId?: number | null;
-  onEventClick?: (event: Event | null) => void;
+  events: Event[]
+  onBoundsChange: (bounds: EventQueryBounds) => void
+  onViewChange?: (center: [number, number], zoom: number) => void
+  flyToTarget?: FlyToTarget | null
+  selectedEventId?: number | null
+  onEventClick?: (event: Event | null) => void
+  initialCenter?: [number, number]
+  initialZoom?: number
 }
 
-// Sub-component to handle map bounds detection, clicks, and update parent
-function MapBoundsHandler({ onBoundsChange, onMapClick }: { onBoundsChange: (b: EventQueryBounds) => void, onMapClick?: () => void }) {
+interface ControllerProps {
+  onBoundsChange: (b: EventQueryBounds) => void
+  onViewChange?: (center: [number, number], zoom: number) => void
+  onMapClick: () => void
+  flyToTarget?: FlyToTarget | null
+}
+
+function MapController({
+  onBoundsChange,
+  onViewChange,
+  onMapClick,
+  flyToTarget,
+}: ControllerProps) {
+  const map = useMap()
+  const handledFlyIdRef = useRef<number | null>(null)
+
   useMapEvents({
-    moveend: (e) => {
-      const bounds = e.target.getBounds() as L.LatLngBounds;
+    moveend: () => {
+      const b = map.getBounds()
       onBoundsChange({
-        minLat: bounds.getSouth(),
-        maxLat: bounds.getNorth(),
-        minLng: bounds.getWest(),
-        maxLng: bounds.getEast(),
-      });
+        minLat: b.getSouth(),
+        maxLat: b.getNorth(),
+        minLng: b.getWest(),
+        maxLng: b.getEast(),
+      })
+      const c = map.getCenter()
+      onViewChange?.([c.lat, c.lng], map.getZoom())
     },
-    click: () => {
-      onMapClick?.();
-    }
-  });
-  return null;
-}
-
-// Sub-component to pan the map programmatically when a user searches for a city
-function MapUpdater({ center, zoom, selectedEventId }: { center: [number, number]; zoom: number; selectedEventId?: number | null }) {
-  const map = useMap();
-  useEffect(() => {
-    map.flyTo(center, zoom);
-  }, [center, zoom, map]);
+    click: () => onMapClick(),
+  })
 
   useEffect(() => {
-    // When the selected event changes, the container width might change
-    // We need to invalidate the map size so it renders fully to the new bounds
-    const timeout = setTimeout(() => {
-      map.invalidateSize({ animate: true });
-    }, 300); // 300ms matches the CSS transition duration
-    
-    return () => clearTimeout(timeout);
-  }, [selectedEventId, map]);
+    if (!flyToTarget) return
+    if (flyToTarget.id === handledFlyIdRef.current) return
+    handledFlyIdRef.current = flyToTarget.id
+    map.flyTo(flyToTarget.center, flyToTarget.zoom, { duration: 1.2 })
+  }, [flyToTarget, map])
 
-  return null;
+  return null
 }
 
-export function EventsMap({ events, onBoundsChange, center = [20, 0], zoom = 2, onEventClick, selectedEventId }: EventsMapProps) {
+// ─── Public component ──────────────────────────────────────────────────────────
+
+export function EventsMap({
+  events,
+  onBoundsChange,
+  onViewChange,
+  flyToTarget,
+  selectedEventId,
+  onEventClick,
+  initialCenter = [20, 0],
+  initialZoom = 2,
+}: EventsMapProps) {
   return (
     <div className="w-full h-full relative z-0">
       <MapContainer
-        center={center}
-        zoom={zoom}
-        scrollWheelZoom={true}
+        center={initialCenter}
+        zoom={initialZoom}
+        scrollWheelZoom
         zoomControl={false}
         style={{ height: '100%', width: '100%', zIndex: 0 }}
       >
@@ -70,31 +98,30 @@ export function EventsMap({ events, onBoundsChange, center = [20, 0], zoom = 2, 
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <MapBoundsHandler onBoundsChange={onBoundsChange} onMapClick={() => onEventClick?.(null)} />
-        <MapUpdater center={center} zoom={zoom} selectedEventId={selectedEventId} />
-
+        <MapController
+          onBoundsChange={onBoundsChange}
+          onViewChange={onViewChange}
+          onMapClick={() => onEventClick?.(null)}
+          flyToTarget={flyToTarget}
+        />
         {events.map((event) => {
-          if (event.latitude == null || event.longitude == null) return null;
-          
-          const isSelected = selectedEventId === event.id;
-          
-          // Optionally we could change the icon for selected items, but for now we adjust opacity or similar
-          // Alternatively, let's keep the marker standard
+          if (event.latitude == null || event.longitude == null) return null
+          const isSelected = selectedEventId === event.id
           return (
             <Marker
               key={event.id}
               position={[event.latitude, event.longitude]}
-              opacity={selectedEventId ? (isSelected ? 1 : 0.5) : 1}
+              opacity={selectedEventId != null ? (isSelected ? 1 : 0.45) : 1}
               eventHandlers={{
                 click: (e) => {
                   L.DomEvent.stopPropagation(e)
                   onEventClick?.(event)
-                }
+                },
               }}
             />
-          );
+          )
         })}
       </MapContainer>
     </div>
-  );
+  )
 }
