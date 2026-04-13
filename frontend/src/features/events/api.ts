@@ -1,5 +1,6 @@
 import { API_ENDPOINTS, getAuthHeaders } from '../../config/api'
 import { PAGINATION } from '../../config/constants'
+import { ensureResponseOk } from '../../lib/utils/http'
 import type {
   CitySearchResult,
   Community,
@@ -8,16 +9,6 @@ import type {
   EventQueryBounds,
   UpdateEventRequest,
 } from '../../types/events'
-
-function getErrorMessage(fallback: string, payload: unknown): string {
-  if (payload && typeof payload === 'object' && 'message' in payload) {
-    const maybeMessage = (payload as { message?: unknown }).message
-    if (typeof maybeMessage === 'string' && maybeMessage.trim()) {
-      return maybeMessage
-    }
-  }
-  return fallback
-}
 
 export async function fetchEvents(
   topicId?: number,
@@ -38,7 +29,7 @@ export async function fetchEvents(
     headers: getAuthHeaders(),
   })
 
-  if (!response.ok) throw new Error('Failed to fetch events')
+  await ensureResponseOk(response, 'Failed to fetch events')
 
   return response.json()
 }
@@ -49,7 +40,7 @@ export async function fetchCommunities(): Promise<Community[]> {
     { headers: getAuthHeaders() }
   )
 
-  if (!response.ok) throw new Error('Failed to fetch communities')
+  await ensureResponseOk(response, 'Failed to fetch communities')
 
   const json = await response.json()
   return Array.isArray(json) ? json : (json.items ?? [])
@@ -62,15 +53,7 @@ export async function createEvent(data: CreateEventRequest): Promise<Event> {
     body: JSON.stringify(data),
   })
 
-  if (!response.ok) {
-    let msg = 'Failed to create event'
-    try {
-      msg = getErrorMessage(msg, await response.json())
-    } catch {
-      // Keep fallback message.
-    }
-    throw new Error(msg)
-  }
+  await ensureResponseOk(response, 'Failed to create event')
 
   return response.json()
 }
@@ -80,7 +63,7 @@ export async function fetchEvent(id: number): Promise<Event> {
     headers: getAuthHeaders(),
   })
 
-  if (!response.ok) throw new Error('Event not found')
+  await ensureResponseOk(response, 'Event not found')
 
   return response.json()
 }
@@ -92,15 +75,7 @@ export async function updateEvent(id: number, data: UpdateEventRequest): Promise
     body: JSON.stringify(data),
   })
 
-  if (!response.ok) {
-    let msg = 'Failed to update event'
-    try {
-      msg = getErrorMessage(msg, await response.json())
-    } catch {
-      // Keep fallback message.
-    }
-    throw new Error(msg)
-  }
+  await ensureResponseOk(response, 'Failed to update event')
 
   return response.json()
 }
@@ -111,7 +86,7 @@ export async function deleteEvent(id: number): Promise<void> {
     headers: getAuthHeaders(),
   })
 
-  if (!response.ok) throw new Error('Failed to delete event')
+  await ensureResponseOk(response, 'Failed to delete event')
 }
 
 export async function searchCities(query: string): Promise<CitySearchResult[]> {
@@ -119,7 +94,7 @@ export async function searchCities(query: string): Promise<CitySearchResult[]> {
     `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
   )
 
-  if (!response.ok) throw new Error('Search failed')
+  await ensureResponseOk(response, 'Search failed')
 
   return response.json()
 }

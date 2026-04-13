@@ -4,6 +4,7 @@ import { GoogleLogin } from '@react-oauth/google'
 import { toast } from 'sonner'
 import { API_ENDPOINTS } from '../config/api'
 import { setAuthToken } from '../hooks/useAuthSync'
+import { ensureResponseOk } from '../lib/utils/http'
 
 interface LoginResponse {
   token: string
@@ -20,11 +21,7 @@ export function Login() {
         body: JSON.stringify({ credential }),
       })
 
-      if (!response.ok) {
-        let errorMsg = 'Google login failed'
-        try { const body = await response.json(); errorMsg = body.message || errorMsg } catch {}
-        throw new Error(errorMsg)
-      }
+      await ensureResponseOk(response, 'Google login failed')
 
       return await response.json() as LoginResponse
     },

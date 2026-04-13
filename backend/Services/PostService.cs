@@ -85,8 +85,7 @@ public class PostService : IPostService
         // Sort based on sortBy parameter
         query = sortMode switch
         {
-            "hot" => query.OrderByDescending(p => p.Score).ThenByDescending(p => p.Id),
-            "top" => query.OrderByDescending(p => p.Score).ThenByDescending(p => p.Id),
+            "hot" or "top" => query.OrderByDescending(p => p.Score).ThenByDescending(p => p.Id),
             _ => query.OrderByDescending(p => p.Id) // "new" or default - newest first
         };
 
