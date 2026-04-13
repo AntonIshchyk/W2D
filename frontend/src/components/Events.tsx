@@ -62,6 +62,9 @@ export function Events() {
   const [isGettingLocation, setIsGettingLocation] = useState(false)
   const [searchQuery, setSearchQuery]             = useState('')
   const [isSearchingCity, setIsSearchingCity]     = useState(false)
+  const [autocompleteResults, setAutocompleteResults] = useState<any[]>([])
+  const [showAutocomplete, setShowAutocomplete] = useState(false)
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [selectedEvent, setSelectedEvent]         = useState<Event | null>(null)
 
   const { data: currentUser } = useCurrentUser()
@@ -90,6 +93,63 @@ export function Events() {
     return () => { if (boundsTimeoutRef.current) clearTimeout(boundsTimeoutRef.current) }
   }, [bounds])
 
+  // Debounced autocomplete search
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setAutocompleteResults([])
+      setShowAutocomplete(false)
+      return
+    }
+
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
+    setIsSearchingCity(true)
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const results = await searchCities(searchQuery)
+        setAutocompleteResults(results)
+        setShowAutocomplete(true)
+      } catch {
+        toast.error('Search failed')
+        setAutocompleteResults([])
+      } finally {
+        setIsSearchingCity(false)
+      }
+    }, 400)
+
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
+    }
+  }, [searchQuery])
+
+  function selectAutocompleteResult(result: any) {
+    const bounds: EventQueryBounds = result.boundingbox
+      ? {
+          minLat: parseFloat(result.boundingbox[0]),
+          maxLat: parseFloat(result.boundingbox[1]),
+          minLng: parseFloat(result.boundingbox[2]),
+          maxLng: parseFloat(result.boundingbox[3]),
+        }
+      : {
+          minLat: parseFloat(result.lat) - 1,
+          maxLat: parseFloat(result.lat) + 1,
+          minLng: parseFloat(result.lon) - 1,
+          maxLng: parseFloat(result.lon) + 1,
+        }
+
+    setSearchLocation({
+      name: result.display_name.split(',')[0],
+      lat: parseFloat(result.lat),
+      lon: parseFloat(result.lon),
+      bounds,
+    })
+    setMapCenter([parseFloat(result.lat), parseFloat(result.lon)])
+    setMapZoom(12)
+    setSearchQuery('')
+    setShowAutocomplete(false)
+    setAutocompleteResults([])
+  }
+
   async function handleSearchCity(e: React.FormEvent) {
     e.preventDefault()
     if (!searchQuery.trim()) return
@@ -97,30 +157,7 @@ export function Events() {
     try {
       const results = await searchCities(searchQuery)
       if (results?.length) {
-        const result = results[0]
-        const bounds: EventQueryBounds = result.boundingbox
-          ? {
-              minLat: parseFloat(result.boundingbox[0]),
-              maxLat: parseFloat(result.boundingbox[1]),
-              minLng: parseFloat(result.boundingbox[2]),
-              maxLng: parseFloat(result.boundingbox[3]),
-            }
-          : {
-              minLat: parseFloat(result.lat) - 1,
-              maxLat: parseFloat(result.lat) + 1,
-              minLng: parseFloat(result.lon) - 1,
-              maxLng: parseFloat(result.lon) + 1,
-            }
-
-        setSearchLocation({
-          name: result.display_name.split(',')[0],
-          lat:  parseFloat(result.lat),
-          lon:  parseFloat(result.lon),
-          bounds,
-        })
-        setMapCenter([parseFloat(result.lat), parseFloat(result.lon)])
-        setMapZoom(12)
-        setSearchQuery('')
+        selectAutocompleteResult(results[0])
       } else {
         toast.error('Place not found')
       }
@@ -175,26 +212,41 @@ export function Events() {
               </h1>
 
               {/* City search */}
-              <form onSubmit={handleSearchCity} className="flex gap-2">
-                <div className="relative">
+              <div className="relative flex gap-2 flex-wrap sm:flex-nowrap items-start sm:items-center">
+                <div className="relative w-40 sm:w-48">
                   <Input
                     type="text"
                     placeholder="Search city…"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-8 h-9 text-sm w-40 sm:w-48 bg-background"
-                    disabled={isSearchingCity}
+                    onBlur={() => setTimeout(() => setShowAutocomplete(false), 100)}
+                    onFocus={() => searchQuery.trim() && setShowAutocomplete(true)}
+                    className="pl-8 h-9 text-sm w-full bg-background"
+                    disabled={isGettingLocation}
+                    autoComplete="off"
                   />
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  
+                  {/* Autocomplete dropdown */}
+                  {showAutocomplete && autocompleteResults.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg z-50">
+                      {autocompleteResults.slice(0, 8).map((result, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-accent transition-colors border-b last:border-b-0 flex items-start gap-2"
+                          onMouseDown={(e) => {
+                            e.preventDefault()
+                            selectAutocompleteResult(result)
+                          }}
+                        >
+                          <MapPin className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground" />
+                          <span className="line-clamp-1">{result.display_name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <Button
-                  type="submit"
-                  size="sm"
-                  className="h-9"
-                  disabled={isSearchingCity || !searchQuery.trim()}
-                >
-                  {isSearchingCity ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
-                </Button>
                 <Button
                   type="button"
                   size="sm"
@@ -206,7 +258,7 @@ export function Events() {
                 >
                   {isGettingLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
                 </Button>
-              </form>
+              </div>
 
               {searchLocation && (
                 <Badge variant="secondary" className="gap-1.5 pl-2 pr-1 h-7 text-xs font-normal">
