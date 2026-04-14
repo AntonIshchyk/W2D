@@ -31,8 +31,7 @@ public class PostService : IPostService
         IQueryable<Post> query = _context.Posts
             .AsNoTracking()
             .Include(p => p.User)
-            .Include(p => p.Community)
-            .AsQueryable();
+            .Include(p => p.Community);
 
         if (topicId.HasValue)
         {
@@ -93,7 +92,7 @@ public class PostService : IPostService
         int? nextCursor = items.Any() ? items.Last().Id : (int?)null;
 
         Dictionary<int, int> userVotes = new();
-        if (currentUserId.HasValue)
+        if (currentUserId.HasValue && items.Count > 0)
         {
             List<int> postIds = items.Select(p => p.Id).ToList();
             userVotes = await _context.PostVotes
@@ -107,6 +106,7 @@ public class PostService : IPostService
             int? vote = currentUserId.HasValue
                 ? (userVotes.TryGetValue(p.Id, out int voteValue) ? voteValue : 0)
                 : null;
+
             PostResponse response = _mapper.Map<PostResponse>(p);
             response.CurrentUserVote = vote;
             return response;
@@ -121,7 +121,7 @@ public class PostService : IPostService
         };
     }
 
-    public async Task<PostResponse?> GetPostByIdAsync(int id, int? currentUserId = null)
+    public async Task<Result<PostResponse>> GetPostByIdAsync(int id, int? currentUserId = null)
     {
         Post? post = await _context.Posts
             .AsNoTracking()
@@ -131,7 +131,7 @@ public class PostService : IPostService
 
         if (post == null)
         {
-            return null;
+            return Result<PostResponse>.NotFound("Post not found.");
         }
 
         int? currentUserVote = null;
@@ -145,40 +145,25 @@ public class PostService : IPostService
 
         PostResponse response = _mapper.Map<PostResponse>(post);
         response.CurrentUserVote = currentUserVote;
-        return response;
+        return Result<PostResponse>.Success(response);
     }
 
-    private void ValidateLocationPairing(double? latitude, double? longitude)
+    public async Task<Result<PostResponse>> CreatePostAsync(CreatePostRequest request, int userId)
     {
-        if (latitude.HasValue != longitude.HasValue)
+        if (request.Latitude.HasValue != request.Longitude.HasValue)
         {
-            throw new InvalidOperationException("Latitude and Longitude must both be provided or both be omitted.");
+            return Result<PostResponse>.Invalid("Latitude and Longitude must both be provided or both be omitted.");
         }
-    }
 
-    private void ValidatePhotoUrls(List<string>? photoUrls)
-    {
-        if (photoUrls != null && photoUrls.Any())
+        if (!ValidatePhotoUrls(request.PhotoUrls, out string? urlError))
         {
-            foreach (string url in photoUrls)
-            {
-                if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri) ||
-                    (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
-                {
-                    throw new InvalidOperationException($"Invalid URL in PhotoUrls: {url}");
-                }
-            }
+            return Result<PostResponse>.Invalid(urlError!);
         }
-    }
 
-    public async Task<Post> CreatePostAsync(CreatePostRequest request, int userId)
-    {
-        ValidateLocationPairing(request.Latitude, request.Longitude);
-        ValidatePhotoUrls(request.PhotoUrls);
-
-        if (!await CommunityExistsAsync(request.TopicId))
+        bool communityExists = await _context.Communities.AnyAsync(c => c.Id == request.TopicId);
+        if (!communityExists)
         {
-            throw new InvalidOperationException("Invalid TopicId. Community does not exist.");
+            return Result<PostResponse>.Invalid("Community does not exist.");
         }
 
         Post post = _mapper.Map<Post>(request);
@@ -189,53 +174,71 @@ public class PostService : IPostService
         _context.Posts.Add(post);
         await _context.SaveChangesAsync();
 
-        return post;
+        return await GetPostByIdAsync(post.Id, userId);
     }
 
-    public async Task<Post?> UpdatePostAsync(int id, UpdatePostRequest request, int userId)
+    public async Task<Result<PostResponse>> UpdatePostAsync(int id, UpdatePostRequest request, int userId)
     {
         Post? existingPost = await _context.Posts
-            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+            .FirstOrDefaultAsync(p => p.Id == id);
 
         if (existingPost == null)
         {
-            return null;
+            return Result<PostResponse>.NotFound("Post not found.");
+        }
+
+        if (existingPost.UserId != userId)
+        {
+            return Result<PostResponse>.Unauthorized("You do not have permission to edit this post.");
         }
 
         double? finalLat = request.Latitude ?? existingPost.Latitude;
         double? finalLng = request.Longitude ?? existingPost.Longitude;
-        ValidateLocationPairing(finalLat, finalLng);
-        ValidatePhotoUrls(request.PhotoUrls);
+
+        if (finalLat.HasValue != finalLng.HasValue)
+        {
+            return Result<PostResponse>.Invalid("Latitude and Longitude must both be provided or both be omitted.");
+        }
+
+        if (!ValidatePhotoUrls(request.PhotoUrls, out string? urlError))
+        {
+            return Result<PostResponse>.Invalid(urlError!);
+        }
 
         _mapper.Map(request, existingPost);
         existingPost.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
 
-        return existingPost;
+        return await GetPostByIdAsync(id, userId);
     }
 
-    public async Task<bool> DeletePostAsync(int id, int userId)
+    public async Task<Result<bool>> DeletePostAsync(int id, int userId)
     {
         Post? post = await _context.Posts
-            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+            .FirstOrDefaultAsync(p => p.Id == id);
 
         if (post == null)
         {
-            return false;
+            return Result<bool>.NotFound("Post not found.");
+        }
+
+        if (post.UserId != userId)
+        {
+            return Result<bool>.Unauthorized("You do not have permission to delete this post.");
         }
 
         _context.Posts.Remove(post);
         await _context.SaveChangesAsync();
 
-        return true;
+        return Result<bool>.Success(true);
     }
 
-    public async Task<bool> VotePostAsync(int postId, int userId, int value)
+    public async Task<Result<bool>> VotePostAsync(int postId, int userId, int value)
     {
         if (value is not (-1 or 0 or 1))
         {
-            throw new ArgumentException("Vote value must be -1, 0, or 1");
+            return Result<bool>.Invalid("Vote value must be -1, 0, or 1.");
         }
 
         bool postExists = await _context.Posts
@@ -243,7 +246,7 @@ public class PostService : IPostService
 
         if (!postExists)
         {
-            return false;
+            return Result<bool>.NotFound("Post not found.");
         }
 
         using var transaction = await _context.Database.BeginTransactionAsync();
@@ -293,7 +296,7 @@ public class PostService : IPostService
             }
 
             await transaction.CommitAsync();
-            return true;
+            return Result<bool>.Success(true);
         }
         catch
         {
@@ -302,8 +305,25 @@ public class PostService : IPostService
         }
     }
 
-    public async Task<bool> CommunityExistsAsync(int topicId)
+    private static bool ValidatePhotoUrls(List<string>? photoUrls, out string? error)
     {
-        return await _context.Communities.AnyAsync(a => a.Id == topicId);
+        error = null;
+
+        if (photoUrls == null || photoUrls.Count == 0)
+        {
+            return true;
+        }
+
+        foreach (string url in photoUrls)
+        {
+            if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri) ||
+                (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            {
+                error = $"Invalid URL in PhotoUrls: {url}";
+                return false;
+            }
+        }
+
+        return true;
     }
 }

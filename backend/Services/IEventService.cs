@@ -14,11 +14,11 @@ public interface IEventService
         double? minLng = null,
         double? maxLng = null);
 
-    Task<EventResponse?> GetEventByIdAsync(int id);
+    Task<Result<EventResponse>> GetEventByIdAsync(int id);
 
-    Task<EventResponse> CreateEventAsync(int organizerId, CreateEventRequest request);
+    Task<Result<EventResponse>> CreateEventAsync(int organizerId, CreateEventRequest request);
 
-    Task<EventResponse?> UpdateEventAsync(int id, int organizerId, UpdateEventRequest request);
+    Task<Result<EventResponse>> UpdateEventAsync(int id, int organizerId, UpdateEventRequest request);
 
-    Task<bool> DeleteEventAsync(int id, int organizerId);
+    Task<Result<bool>> DeleteEventAsync(int id, int organizerId);
 }

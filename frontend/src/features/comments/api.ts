@@ -2,15 +2,27 @@ import { API_ENDPOINTS, getAuthHeaders } from '../../config/api'
 import { ensureResponseOk, sendVoteRequest } from '../../lib/utils/http'
 import type { Comment } from '../../types/posts'
 
+export interface CreateCommentParams {
+  postId: number
+  content?: string
+  photoUrl?: string
+  parentCommentId?: number
+}
+
 export async function fetchComments(postId: number): Promise<Comment[]> {
   const response = await fetch(API_ENDPOINTS.posts.comments(postId), { headers: getAuthHeaders() })
   await ensureResponseOk(response, 'Failed to fetch comments')
   return response.json()
 }
 
-export async function createComment(postId: number, content: string, photoUrl?: string, parentCommentId?: number): Promise<Comment> {
+export async function createComment({
+  postId,
+  content,
+  photoUrl,
+  parentCommentId,
+}: CreateCommentParams): Promise<Comment> {
   const body: Record<string, unknown> = {}
-  if (content.trim()) body.content = content.trim()
+  if (content?.trim()) body.content = content.trim()
   if (photoUrl) body.photoUrl = photoUrl
   if (parentCommentId !== undefined) body.parentCommentId = parentCommentId
 

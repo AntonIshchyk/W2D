@@ -33,6 +33,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<ICommunityService, CommunityService>();
 builder.Services.AddScoped<IR2UploadService, R2UploadService>();
 
 // Configure AutoMapper

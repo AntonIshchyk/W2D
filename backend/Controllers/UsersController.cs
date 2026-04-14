@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Backend.Contracts.Auth;
+using Backend.Contracts.Common;
 using Backend.Models;
 using Backend.Services;
 using Backend.Extensions;
@@ -54,26 +55,8 @@ public class UsersController : ControllerBase
     {
         int userId = User.GetUserId();
 
-        User? currentUser = await _userService.GetUserByIdAsync(userId);
-
-        if (currentUser == null)
-        {
-            return Unauthorized(new { message = "User not found for the current token" });
-        }
-
-        string requestedUsername = request.Username.Trim();
-
-        if (!string.Equals(currentUser.Username, requestedUsername, StringComparison.OrdinalIgnoreCase)
-            && await _userService.IsUsernameTakenAsync(requestedUsername))
-        {
-            return Conflict(new { message = "Username is already taken" });
-        }
-
-        User updatedUser = await _userService.UpdateUserProfileAsync(userId, request);
-
-        LoginResponse response = _userService.GenerateTokenForUser(updatedUser);
-
-        return Ok(response);
+        Result<LoginResponse> result = await _userService.UpdateUserProfileAsync(userId, request);
+        return result.ToActionResult(this);
     }
 
     [HttpPost("google-login")]
@@ -108,14 +91,8 @@ public class UsersController : ControllerBase
                 return Ok(loginResponse);
             }
 
-            LoginResponse? result = await _userService.RegisterUserAsync(payload.Email);
-
-            if (result == null)
-            {
-                return BadRequest(new { message = "Failed to create user" });
-            }
-
-            return Ok(result);
+            Result<LoginResponse> result = await _userService.RegisterUserAsync(payload.Email);
+            return result.ToActionResult(this);
         }
         catch (Exception)
         {

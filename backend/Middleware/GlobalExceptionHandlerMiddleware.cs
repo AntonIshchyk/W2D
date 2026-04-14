@@ -1,6 +1,3 @@
-using System.Net;
-using System.Text.Json;
-
 namespace Backend.Middleware;
 
 public class GlobalExceptionHandlerMiddleware
@@ -22,30 +19,20 @@ public class GlobalExceptionHandlerMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception occurred: {Message}", ex.Message);
-            await HandleExceptionAsync(context, ex);
+            _logger.LogError(
+                ex,
+                "Unhandled exception for {Method} {Path}",
+                context.Request.Method,
+                context.Request.Path);
+
+            if (context.Response.HasStarted)
+            {
+                return;
+            }
+
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(new { message = "An unexpected error occurred." });
         }
-    }
-
-    private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
-    {
-        if (context.Response.HasStarted)
-        {
-            return;
-        }
-
-        context.Response.ContentType = "application/json";
-        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-        var response = new
-        {
-            message = "An internal server error occurred. Please try again later.",
-            details = context.RequestServices.GetRequiredService<IWebHostEnvironment>().IsDevelopment()
-                ? exception.Message
-                : null
-        };
-
-        var json = JsonSerializer.Serialize(response);
-        await context.Response.WriteAsync(json);
     }
 }

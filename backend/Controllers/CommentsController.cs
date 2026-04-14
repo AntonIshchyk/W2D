@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Backend.Contracts.Comments;
+using Backend.Contracts.Common;
 using Backend.Services;
 using Backend.Extensions;
 
@@ -31,27 +32,27 @@ public class CommentsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<CommentResponse>> CreateComment(int postId, CreateCommentRequest request)
     {
-        // Require either non-empty content or a photo URL
-        if (string.IsNullOrWhiteSpace(request.Content) && string.IsNullOrWhiteSpace(request.PhotoUrl))
-            return BadRequest(new { message = "Content or PhotoUrl is required" });
-
         int userId = User.GetUserId();
-        var comment = await _commentService.CreateCommentAsync(postId, request, userId);
+        Result<CommentResponse> result = await _commentService.CreateCommentAsync(postId, request, userId);
 
-        if (comment == null)
-            return NotFound(new { message = "Post or parent comment not found" });
+        if (!result.IsSuccess || result.Value == null)
+        {
+            return result.ToActionResult(this);
+        }
 
-        return Created($"api/posts/{postId}/comments/{comment.Id}", comment);
+        return Created($"api/posts/{postId}/comments/{result.Value.Id}", result.Value);
     }
 
     [HttpDelete("{commentId}")]
     public async Task<ActionResult> DeleteComment(int postId, int commentId)
     {
         int userId = User.GetUserId();
-        bool deleted = await _commentService.DeleteCommentAsync(postId, commentId, userId);
+        Result<bool> result = await _commentService.DeleteCommentAsync(postId, commentId, userId);
 
-        if (!deleted)
-            return NotFound(new { message = "Comment not found or unauthorized" });
+        if (!result.IsSuccess)
+        {
+            return result.ToActionResult(this);
+        }
 
         return NoContent();
     }
@@ -60,11 +61,13 @@ public class CommentsController : ControllerBase
     public async Task<ActionResult> VoteComment(int postId, int commentId, VoteCommentRequest request)
     {
         int userId = User.GetUserId();
-        bool success = await _commentService.VoteCommentAsync(postId, commentId, userId, request.Value);
+        Result<bool> result = await _commentService.VoteCommentAsync(postId, commentId, userId, request.Value);
 
-        if (!success)
-            return NotFound(new { message = "Comment not found" });
+        if (!result.IsSuccess)
+        {
+            return result.ToActionResult(this);
+        }
 
-        return Ok(new { message = "Vote recorded successfully" });
+        return Ok(new { message = "Vote recorded." });
     }
 }

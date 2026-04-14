@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Backend.Services;
+using Backend.Extensions;
 
 namespace Backend.Controllers;
 
@@ -50,7 +51,7 @@ public class UploadsController : ControllerBase
         if (!IsValidFileName(request.FileName))
             return BadRequest(new { message = "Invalid filename format. Only alphanumeric characters, dots, hyphens, and underscores are allowed" });
 
-        int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+        int userId = User.GetUserId();
         string sanitized = $"{userId}/{DateTime.UtcNow:yyyyMMdd_HHmmss}_{System.IO.Path.GetFileName(request.FileName)}";
 
         var result = await _uploadService.GetPresignedUploadUrlAsync(sanitized, request.ContentType);

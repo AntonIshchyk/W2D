@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Backend.Data;
 using Backend.Models;
 using Backend.Contracts.Events;
+using Backend.Contracts.Common;
 
 namespace Backend.Services;
 
@@ -21,7 +22,7 @@ public class EventService : IEventService
             .Include(e => e.Community);
     }
 
-    private static EventResponse MapToResponse(Event e, int? currentUserId = null)
+    private static EventResponse MapToResponse(Event e)
     {
         return new EventResponse
         {
@@ -75,16 +76,35 @@ public class EventService : IEventService
         return items.Select(e => MapToResponse(e));
     }
 
-    public async Task<EventResponse?> GetEventByIdAsync(int id)
+    public async Task<Result<EventResponse>> GetEventByIdAsync(int id)
     {
         Event? e = await IncludeDetails(_context.Events.AsNoTracking())
             .FirstOrDefaultAsync(e => e.Id == id);
 
-        return e == null ? null : MapToResponse(e);
+        if (e == null)
+        {
+            return Result<EventResponse>.NotFound("Event not found.");
+        }
+
+        return Result<EventResponse>.Success(MapToResponse(e));
     }
 
-    public async Task<EventResponse> CreateEventAsync(int organizerId, CreateEventRequest request)
+    public async Task<Result<EventResponse>> CreateEventAsync(int organizerId, CreateEventRequest request)
     {
+        if (request.Latitude.HasValue != request.Longitude.HasValue)
+        {
+            return Result<EventResponse>.Invalid("Latitude and Longitude must both be provided or both be omitted.");
+        }
+
+        if (request.TopicId.HasValue)
+        {
+            bool communityExists = await _context.Communities.AnyAsync(c => c.Id == request.TopicId.Value);
+            if (!communityExists)
+            {
+                return Result<EventResponse>.Invalid("Community does not exist.");
+            }
+        }
+
         Event eventEntity = new Event
         {
             Title = request.Title,
@@ -106,15 +126,32 @@ public class EventService : IEventService
         Event created = await IncludeDetails(_context.Events.AsNoTracking())
             .FirstAsync(e => e.Id == eventEntity.Id);
 
-        return MapToResponse(created, organizerId);
+        return Result<EventResponse>.Success(MapToResponse(created));
     }
 
-    public async Task<EventResponse?> UpdateEventAsync(int id, int organizerId, UpdateEventRequest request)
+    public async Task<Result<EventResponse>> UpdateEventAsync(int id, int organizerId, UpdateEventRequest request)
     {
-        Event? eventEntity = await IncludeDetails(_context.Events)
-            .FirstOrDefaultAsync(e => e.Id == id && e.OrganizerId == organizerId);
+        Event? eventEntity = await _context.Events
+            .FirstOrDefaultAsync(e => e.Id == id);
 
-        if (eventEntity == null) return null;
+        if (eventEntity == null)
+        {
+            return Result<EventResponse>.NotFound("Event not found.");
+        }
+
+        if (eventEntity.OrganizerId != organizerId)
+        {
+            return Result<EventResponse>.Unauthorized("You do not have permission to edit this event.");
+        }
+
+        if (request.TopicId.HasValue)
+        {
+            bool communityExists = await _context.Communities.AnyAsync(c => c.Id == request.TopicId.Value);
+            if (!communityExists)
+            {
+                return Result<EventResponse>.Invalid("Community does not exist.");
+            }
+        }
 
         if (request.Title != null) eventEntity.Title = request.Title;
         if (request.Description != null) eventEntity.Description = request.Description;
@@ -125,18 +162,30 @@ public class EventService : IEventService
         eventEntity.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
-        return MapToResponse(eventEntity, organizerId);
+        Event updated = await IncludeDetails(_context.Events.AsNoTracking())
+            .FirstAsync(e => e.Id == eventEntity.Id);
+
+        return Result<EventResponse>.Success(MapToResponse(updated));
     }
 
-    public async Task<bool> DeleteEventAsync(int id, int organizerId)
+    public async Task<Result<bool>> DeleteEventAsync(int id, int organizerId)
     {
         Event? eventEntity = await _context.Events
-            .FirstOrDefaultAsync(e => e.Id == id && e.OrganizerId == organizerId);
+            .FirstOrDefaultAsync(e => e.Id == id);
 
-        if (eventEntity == null) return false;
+        if (eventEntity == null)
+        {
+            return Result<bool>.NotFound("Event not found.");
+        }
+
+        if (eventEntity.OrganizerId != organizerId)
+        {
+            return Result<bool>.Unauthorized("You do not have permission to delete this event.");
+        }
 
         _context.Events.Remove(eventEntity);
         await _context.SaveChangesAsync();
-        return true;
+
+        return Result<bool>.Success(true);
     }
 }

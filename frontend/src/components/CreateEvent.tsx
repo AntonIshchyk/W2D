@@ -46,14 +46,19 @@ export function CreateEvent() {
   function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     setIsSubmitting(true)
-    mutation.mutate({
+
+    const payload = {
       title,
       description,
       scheduledAt: new Date(scheduledAt).toISOString(),
-      topicId: topicId || null,
+      ...(topicId !== null ? { topicId } : {}),
       latitude: location?.lat,
       longitude: location?.lng,
-      locationName: locationName || undefined
+      locationName: locationName || undefined,
+    }
+
+    mutation.mutate({
+      ...payload
     })
   }
 

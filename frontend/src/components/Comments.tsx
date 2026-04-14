@@ -194,7 +194,7 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
   const createMutation = useMutation({
     mutationFn: ({ content, photoUrl, parentCommentId }: {
       content: string; photoUrl?: string; parentCommentId?: number
-    }) => createComment(postId, content, photoUrl, parentCommentId),
+    }) => createComment({ postId, content, photoUrl, parentCommentId }),
     onSuccess: () => {
       setNewComment('')
       setNewPhoto(null)

@@ -123,7 +123,12 @@ export function Posts() {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
     queryKey: ['posts', selectedCommunity, selectedType, sortBy],
-    queryFn: ({ pageParam }) => fetchPosts(pageParam, selectedCommunity, undefined, selectedType, sortBy),
+    queryFn: ({ pageParam }) => fetchPosts({
+      cursor: pageParam,
+      topicId: selectedCommunity,
+      type: selectedType,
+      sortBy,
+    }),
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
     initialPageParam: null as number | null,
     retry: false,

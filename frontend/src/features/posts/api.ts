@@ -5,12 +5,16 @@ import { ensureResponseOk, sendVoteRequest } from '../../lib/utils/http'
 import { PostType } from '../../types/posts'
 import type { Post, ScrollResult } from '../../types/posts'
 
-export async function fetchPosts(
-  cursor: number | null,
-  topicId?: number,
-  userId?: number,
-  type?: number,
+export interface FetchPostsParams {
+  cursor: number | null
+  topicId?: number
+  userId?: number
+  type?: number
   sortBy?: string
+}
+
+export async function fetchPosts(
+  { cursor, topicId, userId, type, sortBy }: FetchPostsParams
 ): Promise<ScrollResult<Post>> {
   const params = new URLSearchParams({ limit: PAGINATION.DEFAULT_PAGE_SIZE.toString() })
   if (cursor !== null) params.append('cursor', cursor.toString())
