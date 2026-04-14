@@ -32,17 +32,15 @@ public class EventsController : ControllerBase
         [FromQuery] double? minLng = null,
         [FromQuery] double? maxLng = null)
     {
-        int currentUserId = User.GetUserId();
         IEnumerable<EventResponse> result = await _eventService.GetEventsAsync(
-            topicId, status, currentUserId, minLat, maxLat, minLng, maxLng);
+            topicId, status, minLat, maxLat, minLng, maxLng);
         return Ok(result);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<EventResponse>> GetEvent(int id)
     {
-        int currentUserId = User.GetUserId();
-        EventResponse? e = await _eventService.GetEventByIdAsync(id, currentUserId);
+        EventResponse? e = await _eventService.GetEventByIdAsync(id);
         if (e == null) return NotFound(new { message = "Event not found" });
         return Ok(e);
     }

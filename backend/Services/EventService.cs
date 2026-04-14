@@ -2,8 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Backend.Data;
 using Backend.Models;
 using Backend.Contracts.Events;
-using Backend.Contracts.Common;
-using Backend.Constants;
 
 namespace Backend.Services;
 
@@ -48,7 +46,6 @@ public class EventService : IEventService
     public async Task<IEnumerable<EventResponse>> GetEventsAsync(
         int? topicId = null,
         EventStatus? status = null,
-        int? currentUserId = null,
         double? minLat = null,
         double? maxLat = null,
         double? minLng = null,
@@ -64,7 +61,6 @@ public class EventService : IEventService
         else
             query = query.Where(e => e.Status == EventStatus.Open);
 
-        // Always filter for upcoming events
         query = query.Where(e => e.ScheduledAt >= DateTime.UtcNow);
 
         if (minLat.HasValue) query = query.Where(e => e.Latitude >= minLat.Value);
@@ -76,15 +72,15 @@ public class EventService : IEventService
 
         List<Event> items = await query.ToListAsync();
 
-        return items.Select(e => MapToResponse(e, currentUserId));
+        return items.Select(e => MapToResponse(e));
     }
 
-    public async Task<EventResponse?> GetEventByIdAsync(int id, int? currentUserId = null)
+    public async Task<EventResponse?> GetEventByIdAsync(int id)
     {
         Event? e = await IncludeDetails(_context.Events.AsNoTracking())
             .FirstOrDefaultAsync(e => e.Id == id);
 
-        return e == null ? null : MapToResponse(e, currentUserId);
+        return e == null ? null : MapToResponse(e);
     }
 
     public async Task<EventResponse> CreateEventAsync(int organizerId, CreateEventRequest request)

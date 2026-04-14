@@ -9,13 +9,12 @@ public interface IEventService
     Task<IEnumerable<EventResponse>> GetEventsAsync(
         int? topicId = null,
         EventStatus? status = null,
-        int? currentUserId = null,
         double? minLat = null,
         double? maxLat = null,
         double? minLng = null,
         double? maxLng = null);
 
-    Task<EventResponse?> GetEventByIdAsync(int id, int? currentUserId = null);
+    Task<EventResponse?> GetEventByIdAsync(int id);
 
     Task<EventResponse> CreateEventAsync(int organizerId, CreateEventRequest request);
 
