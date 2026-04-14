@@ -5,6 +5,7 @@ import { formatRelativeTime } from '../lib/utils/date'
 import { isValidImageUrl } from '../lib/utils/validation'
 import type { Comment } from '../types/posts'
 import { PhotoUpload } from './PhotoUpload'
+import { VoteButtons } from './VoteButtons'
 import { fetchComments, createComment, deleteComment, voteComment } from '../features/comments/api'
 
 // ── CommentNode ───────────────────────────────────────────────────────────────
@@ -39,32 +40,14 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
   return (
     <div className={`flex gap-3 ${depth > 0 ? 'pl-5 border-l border-gray-100' : ''}`}>
       {/* Vote column */}
-      <div className="flex flex-col items-center gap-0.5 pt-0.5 shrink-0">
-        <button type="button" onClick={() => onVote(comment, 1)}
+      <div className="flex flex-col items-center pt-0.5 shrink-0">
+        <VoteButtons
+          score={comment.score}
+          currentUserVote={comment.currentUserVote}
+          onVote={(val) => onVote(comment, val)}
           disabled={!currentUserId || comment.isDeleted}
-          aria-label="Upvote comment"
-          className={`p-1 rounded transition-colors ${
-            comment.currentUserVote === 1 ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400 hover:bg-orange-50'
-          } disabled:cursor-not-allowed disabled:opacity-40`}>
-          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" />
-          </svg>
-        </button>
-
-        <span className={`text-xs font-medium tabular-nums ${
-          comment.score > 0 ? 'text-orange-500' : comment.score < 0 ? 'text-blue-500' : 'text-gray-400'
-        }`}>{comment.score}</span>
-
-        <button type="button" onClick={() => onVote(comment, -1)}
-          disabled={!currentUserId || comment.isDeleted}
-          aria-label="Downvote comment"
-          className={`p-1 rounded transition-colors ${
-            comment.currentUserVote === -1 ? 'text-blue-500' : 'text-gray-300 hover:text-blue-400 hover:bg-blue-50'
-          } disabled:cursor-not-allowed disabled:opacity-40`}>
-          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" />
-          </svg>
-        </button>
+          className="flex-col px-1 py-1.5 min-w-10 bg-transparent border-transparent gap-0.5"
+        />
       </div>
 
       {/* Content */}

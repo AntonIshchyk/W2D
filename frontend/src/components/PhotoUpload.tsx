@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback } from 'react'
 import { X, ImagePlus, Loader2 } from 'lucide-react'
-import { getAuthHeaders } from '../config/api'
-import { API_ENDPOINTS } from '../config/api'
 import { toast } from 'sonner'
+
+import { getPresignedUrl, uploadToR2 } from '../features/uploads/api'
 
 interface PhotoUploadProps {
   value: string[]
@@ -15,28 +15,6 @@ interface UploadingFile {
   id: string
   previewUrl: string
   progress: 'uploading' | 'done' | 'error'
-}
-
-export async function getPresignedUrl(file: File): Promise<{ uploadUrl: string; publicUrl: string }> {
-  const res = await fetch(API_ENDPOINTS.uploads.presign, {
-    method: 'POST',
-    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fileName: file.name, contentType: file.type }),
-  })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    throw new Error(err.message ?? 'Failed to get upload URL')
-  }
-  return res.json()
-}
-
-export async function uploadToR2(uploadUrl: string, file: File): Promise<void> {
-  const res = await fetch(uploadUrl, {
-    method: 'PUT',
-    headers: { 'Content-Type': file.type },
-    body: file,
-  })
-  if (!res.ok) throw new Error('Upload to storage failed')
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024
