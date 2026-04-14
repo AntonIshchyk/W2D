@@ -70,16 +70,8 @@ public class PostsController : ControllerBase
     public async Task<ActionResult<Post>> CreatePost(CreatePostRequest request)
     {
         int userId = User.GetUserId();
-
-        try
-        {
-            Post createdPost = await _postService.CreatePostAsync(request, userId);
-            return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPost);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        Post createdPost = await _postService.CreatePostAsync(request, userId);
+        return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPost);
     }
 
     [HttpPut("{id}")]
@@ -87,21 +79,14 @@ public class PostsController : ControllerBase
     {
         int userId = User.GetUserId();
 
-        try
-        {
-            Post? updatedPost = await _postService.UpdatePostAsync(id, request, userId);
+        Post? updatedPost = await _postService.UpdatePostAsync(id, request, userId);
 
-            if (updatedPost == null)
-            {
-                return NotFound(new { message = "Post not found or unauthorized" });
-            }
-
-            return Ok(updatedPost);
-        }
-        catch (InvalidOperationException ex)
+        if (updatedPost == null)
         {
-            return BadRequest(new { message = ex.Message });
+            return NotFound(new { message = "Post not found or unauthorized" });
         }
+
+        return Ok(updatedPost);
     }
 
     [HttpDelete("{id}")]
