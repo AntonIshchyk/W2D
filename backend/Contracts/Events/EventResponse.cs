@@ -8,7 +8,7 @@ public class EventResponse : BaseModel
     public string Description { get; set; } = string.Empty;
     public int OrganizerId { get; set; }
     public string? OrganizerName { get; set; }
-    public int? SpaceId { get; set; }
+    public int? CommunityId { get; set; }
     public string? CommunityName { get; set; }
     public DateTime ScheduledAt { get; set; }
     public string Status { get; set; } = string.Empty;

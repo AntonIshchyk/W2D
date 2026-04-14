@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace Backend.Models;
 
@@ -16,10 +15,9 @@ public class Event : BaseModel
     [Required]
     public int OrganizerId { get; set; }
 
-    [JsonIgnore]
     public User? Organizer { get; set; }
 
-    public int? SpaceId { get; set; }
+    public int? CommunityId { get; set; }
     public Community? Community { get; set; }
 
     [Required]

@@ -7,7 +7,7 @@ namespace Backend.Services;
 public interface IEventService
 {
     Task<IEnumerable<EventResponse>> GetEventsAsync(
-        int? topicId = null,
+        int? communityId = null,
         EventStatus? status = null,
         double? minLat = null,
         double? maxLat = null,

@@ -11,7 +11,7 @@ public class UpdateEventRequest
     [MaxLength(1000)]
     public string? Description { get; set; }
 
-    public int? TopicId { get; set; }
+    public int? CommunityId { get; set; }
 
     public DateTime? ScheduledAt { get; set; }
 

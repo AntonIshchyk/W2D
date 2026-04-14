@@ -25,7 +25,7 @@ public class EventsController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<EventResponse>>> GetEvents(
-        [FromQuery] int? topicId = null,
+        [FromQuery] int? communityId = null,
         [FromQuery] EventStatus? status = null,
         [FromQuery] double? minLat = null,
         [FromQuery] double? maxLat = null,
@@ -33,7 +33,7 @@ public class EventsController : ControllerBase
         [FromQuery] double? maxLng = null)
     {
         IEnumerable<EventResponse> result = await _eventService.GetEventsAsync(
-            topicId, status, minLat, maxLat, minLng, maxLng);
+            communityId, status, minLat, maxLat, minLng, maxLng);
         return Ok(result);
     }
 

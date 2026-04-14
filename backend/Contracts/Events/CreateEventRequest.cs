@@ -12,7 +12,7 @@ public class CreateEventRequest
     [MaxLength(1000)]
     public string Description { get; set; } = null!;
 
-    public int? TopicId { get; set; }
+    public int? CommunityId { get; set; }
 
     [Required]
     public DateTime ScheduledAt { get; set; }

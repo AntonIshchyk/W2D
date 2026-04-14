@@ -3,6 +3,7 @@ using Backend.Data;
 using Backend.Models;
 using Backend.Contracts.Events;
 using Backend.Contracts.Common;
+using System.Linq.Expressions;
 
 namespace Backend.Services;
 
@@ -15,47 +16,37 @@ public class EventService : IEventService
         _context = context;
     }
 
-    private static IQueryable<Event> IncludeDetails(IQueryable<Event> query)
+    private static readonly Expression<Func<Event, EventResponse>> ProjectEvent = e => new EventResponse
     {
-        return query
-            .Include(e => e.Organizer)
-            .Include(e => e.Community);
-    }
-
-    private static EventResponse MapToResponse(Event e)
-    {
-        return new EventResponse
-        {
-            Id = e.Id,
-            Title = e.Title,
-            Description = e.Description,
-            OrganizerId = e.OrganizerId,
-            OrganizerName = e.Organizer?.Username,
-            SpaceId = e.SpaceId,
-            CommunityName = e.Community?.Name,
-            ScheduledAt = e.ScheduledAt,
-            Status = e.Status.ToString(),
-            Latitude = e.Latitude,
-            Longitude = e.Longitude,
-            LocationName = e.LocationName,
-            PlaceId = e.PlaceId,
-            CreatedAt = e.CreatedAt,
-            UpdatedAt = e.UpdatedAt
-        };
-    }
+        Id = e.Id,
+        Title = e.Title,
+        Description = e.Description,
+        OrganizerId = e.OrganizerId,
+        OrganizerName = e.Organizer != null ? e.Organizer.Username : null,
+        CommunityId = e.CommunityId,
+        CommunityName = e.Community != null ? e.Community.Name : null,
+        ScheduledAt = e.ScheduledAt,
+        Status = e.Status.ToString(),
+        Latitude = e.Latitude,
+        Longitude = e.Longitude,
+        LocationName = e.LocationName,
+        PlaceId = e.PlaceId,
+        CreatedAt = e.CreatedAt,
+        UpdatedAt = e.UpdatedAt
+    };
 
     public async Task<IEnumerable<EventResponse>> GetEventsAsync(
-        int? topicId = null,
+        int? communityId = null,
         EventStatus? status = null,
         double? minLat = null,
         double? maxLat = null,
         double? minLng = null,
         double? maxLng = null)
     {
-        IQueryable<Event> query = IncludeDetails(_context.Events.AsNoTracking());
+        IQueryable<Event> query = _context.Events.AsNoTracking();
 
-        if (topicId.HasValue)
-            query = query.Where(e => e.SpaceId == topicId.Value);
+        if (communityId.HasValue)
+            query = query.Where(e => e.CommunityId == communityId.Value);
 
         if (status.HasValue)
             query = query.Where(e => e.Status == status.Value);
@@ -69,16 +60,19 @@ public class EventService : IEventService
         if (minLng.HasValue) query = query.Where(e => e.Longitude >= minLng.Value);
         if (maxLng.HasValue) query = query.Where(e => e.Longitude <= maxLng.Value);
 
-        query = query.OrderBy(e => e.ScheduledAt).ThenBy(e => e.Id).Take(500);
-
-        List<Event> items = await query.ToListAsync();
-
-        return items.Select(e => MapToResponse(e));
+        return await query
+            .OrderBy(e => e.ScheduledAt)
+            .ThenBy(e => e.Id)
+            .Take(500)
+            .Select(ProjectEvent)
+            .ToListAsync();
     }
 
     public async Task<Result<EventResponse>> GetEventByIdAsync(int id)
     {
-        Event? e = await IncludeDetails(_context.Events.AsNoTracking())
+        EventResponse? e = await _context.Events
+            .AsNoTracking()
+            .Select(ProjectEvent)
             .FirstOrDefaultAsync(e => e.Id == id);
 
         if (e == null)
@@ -86,7 +80,7 @@ public class EventService : IEventService
             return Result<EventResponse>.NotFound("Event not found.");
         }
 
-        return Result<EventResponse>.Success(MapToResponse(e));
+        return Result<EventResponse>.Success(e);
     }
 
     public async Task<Result<EventResponse>> CreateEventAsync(int organizerId, CreateEventRequest request)
@@ -96,9 +90,9 @@ public class EventService : IEventService
             return Result<EventResponse>.Invalid("Latitude and Longitude must both be provided or both be omitted.");
         }
 
-        if (request.TopicId.HasValue)
+        if (request.CommunityId.HasValue)
         {
-            bool communityExists = await _context.Communities.AnyAsync(c => c.Id == request.TopicId.Value);
+            bool communityExists = await _context.Communities.AnyAsync(c => c.Id == request.CommunityId.Value);
             if (!communityExists)
             {
                 return Result<EventResponse>.Invalid("Community does not exist.");
@@ -110,7 +104,7 @@ public class EventService : IEventService
             Title = request.Title,
             Description = request.Description,
             OrganizerId = organizerId,
-            SpaceId = request.TopicId,
+            CommunityId = request.CommunityId,
             ScheduledAt = request.ScheduledAt,
             Latitude = request.Latitude,
             Longitude = request.Longitude,
@@ -123,10 +117,12 @@ public class EventService : IEventService
         _context.Events.Add(eventEntity);
         await _context.SaveChangesAsync();
 
-        Event created = await IncludeDetails(_context.Events.AsNoTracking())
+        EventResponse created = await _context.Events
+            .AsNoTracking()
+            .Select(ProjectEvent)
             .FirstAsync(e => e.Id == eventEntity.Id);
 
-        return Result<EventResponse>.Success(MapToResponse(created));
+        return Result<EventResponse>.Success(created);
     }
 
     public async Task<Result<EventResponse>> UpdateEventAsync(int id, int organizerId, UpdateEventRequest request)
@@ -144,9 +140,9 @@ public class EventService : IEventService
             return Result<EventResponse>.Unauthorized("You do not have permission to edit this event.");
         }
 
-        if (request.TopicId.HasValue)
+        if (request.CommunityId.HasValue)
         {
-            bool communityExists = await _context.Communities.AnyAsync(c => c.Id == request.TopicId.Value);
+            bool communityExists = await _context.Communities.AnyAsync(c => c.Id == request.CommunityId.Value);
             if (!communityExists)
             {
                 return Result<EventResponse>.Invalid("Community does not exist.");
@@ -155,17 +151,19 @@ public class EventService : IEventService
 
         if (request.Title != null) eventEntity.Title = request.Title;
         if (request.Description != null) eventEntity.Description = request.Description;
-        if (request.TopicId.HasValue) eventEntity.SpaceId = request.TopicId;
+        if (request.CommunityId.HasValue) eventEntity.CommunityId = request.CommunityId;
         if (request.ScheduledAt.HasValue) eventEntity.ScheduledAt = request.ScheduledAt.Value;
         if (request.Status.HasValue) eventEntity.Status = request.Status.Value;
 
         eventEntity.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
-        Event updated = await IncludeDetails(_context.Events.AsNoTracking())
+        EventResponse updated = await _context.Events
+            .AsNoTracking()
+            .Select(ProjectEvent)
             .FirstAsync(e => e.Id == eventEntity.Id);
 
-        return Result<EventResponse>.Success(MapToResponse(updated));
+        return Result<EventResponse>.Success(updated);
     }
 
     public async Task<Result<bool>> DeleteEventAsync(int id, int organizerId)
