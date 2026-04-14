@@ -25,9 +25,9 @@ export async function sendVoteRequest(
   errorMessage: string
 ): Promise<void> {
   const response = await fetch(url, {
-    method: value === 0 ? 'DELETE' : 'POST',
+    method: 'POST',
     headers,
-    body: value === 0 ? undefined : JSON.stringify({ value }),
+    body: JSON.stringify({ value }),
   })
 
   await ensureResponseOk(response, errorMessage)
