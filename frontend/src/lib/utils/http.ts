@@ -20,7 +20,7 @@ export async function ensureResponseOk(response: Response, errorMessage: string)
  */
 export async function sendVoteRequest(
   url: string,
-  headers: Record<string, string>,
+  headers: HeadersInit,
   value: number,
   errorMessage: string
 ): Promise<void> {

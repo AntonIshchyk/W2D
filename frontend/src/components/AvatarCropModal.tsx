@@ -15,7 +15,7 @@ export function AvatarCropModal({ imageSrc, onClose, onCropComplete }: AvatarCro
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null)
   const [isProcessing, setIsProcessing] = useState(false)
 
-  const onCropCompleteHandler = useCallback((croppedArea: any, croppedAreaPixels: any) => {
+  const onCropCompleteHandler = useCallback((_croppedArea: any, croppedAreaPixels: any) => {
     setCroppedAreaPixels(croppedAreaPixels)
   }, [])
 
