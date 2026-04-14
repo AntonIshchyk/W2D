@@ -72,8 +72,6 @@ public class EventService : IEventService
         if (minLng.HasValue) query = query.Where(e => e.Longitude >= minLng.Value);
         if (maxLng.HasValue) query = query.Where(e => e.Longitude <= maxLng.Value);
 
-        // Fetch up to reasonably large limit instead of unbounded for a map, 
-        // e.g., 500 points for performance. Adjust as needed.
         query = query.OrderBy(e => e.ScheduledAt).ThenBy(e => e.Id).Take(500);
 
         List<Event> items = await query.ToListAsync();

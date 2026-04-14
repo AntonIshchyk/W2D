@@ -90,7 +90,7 @@ public class UsersController : ControllerBase
 
             GoogleJsonWebSignature.ValidationSettings settings = new GoogleJsonWebSignature.ValidationSettings
             {
-                Audience = new[] { clientId }
+                Audience = [clientId]
             };
 
             GoogleJsonWebSignature.Payload? payload = await GoogleJsonWebSignature.ValidateAsync(request.Credential, settings);
@@ -100,17 +100,14 @@ public class UsersController : ControllerBase
                 return Unauthorized(new { message = "Invalid Google token" });
             }
 
-            // Try to find existing user by email
             User? existingUser = await _userService.GetUserByEmailAsync(payload.Email);
 
             if (existingUser != null)
             {
-                // User exists, just login
                 LoginResponse loginResponse = _userService.GenerateTokenForUser(existingUser);
                 return Ok(loginResponse);
             }
 
-            // New user, create account
             LoginResponse? result = await _userService.RegisterUserAsync(payload.Email);
 
             if (result == null)

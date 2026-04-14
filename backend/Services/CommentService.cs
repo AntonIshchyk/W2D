@@ -141,7 +141,6 @@ public class CommentService : ICommentService
         comment.IsDeleted = true;
         comment.UpdatedAt = DateTime.UtcNow;
 
-        // Decrement CommentCount on the related post
         await _context.Posts
             .Where(p => p.Id == comment.PostId)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.CommentCount, x => x.CommentCount - 1));

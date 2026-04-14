@@ -10,8 +10,8 @@ public interface IR2UploadService
 
 public class PresignedUploadResult
 {
-    public string UploadUrl { get; set; } = null!;   // PUT to this from browser
-    public string PublicUrl { get; set; } = null!;   // final URL to store in DB
+    public string UploadUrl { get; set; } = null!;
+    public string PublicUrl { get; set; } = null!;
     public string Key { get; set; } = null!;
 }
 
@@ -30,7 +30,6 @@ public class R2UploadService : IR2UploadService
 
     public async Task<PresignedUploadResult> GetPresignedUploadUrlAsync(string fileName, string contentType)
     {
-        // Sanitize filename and make it unique
         string ext = Path.GetExtension(fileName).ToLowerInvariant();
         string key = $"posts/{Guid.NewGuid()}{ext}";
 

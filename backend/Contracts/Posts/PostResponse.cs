@@ -1,10 +1,10 @@
+using Backend.Models;
 using Backend.Contracts.Users;
 
 namespace Backend.Contracts.Posts;
 
-public class PostResponse
+public class PostResponse : BaseModel
 {
-    public int Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int Type { get; set; }
@@ -19,7 +19,5 @@ public class PostResponse
     public DateTime? CompletedAt { get; set; }
     public List<string> PhotoUrls { get; set; } = new();
     public int CommentCount { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
-    public int? CurrentUserVote { get; set; } // -1, 0 (no vote), or +1
+    public int? CurrentUserVote { get; set; }
 }

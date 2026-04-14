@@ -34,42 +34,35 @@ public class PostService : IPostService
             .Include(p => p.Community)
             .AsQueryable();
 
-        // Filter by community if provided
         if (topicId.HasValue)
         {
             query = query.Where(p => p.SpaceId == topicId.Value);
         }
 
-        // Filter by user if provided
         if (userId.HasValue)
         {
             query = query.Where(p => p.UserId == userId.Value);
         }
 
-        // Filter by type if provided
         if (type.HasValue)
         {
             query = query.Where(p => (int)p.Type == type.Value);
         }
 
-        // Get total count AFTER applying filters
         int totalCount = await query.CountAsync();
 
         string sortMode = sortBy?.ToLower() ?? "new";
 
-        // Apply cursor based on sort mode
         if (cursor.HasValue)
         {
             if (sortMode == "hot" || sortMode == "top")
             {
-                // For score-based sorting, get the cursor post's score and apply composite cursor
                 Post? cursorPost = await _context.Posts
                     .AsNoTracking()
                     .FirstOrDefaultAsync(p => p.Id == cursor.Value);
 
                 if (cursorPost != null)
                 {
-                    // Filter: Score < cursorScore OR (Score == cursorScore AND Id < cursorId)
                     query = query.Where(p =>
                         p.Score < cursorPost.Score ||
                         (p.Score == cursorPost.Score && p.Id < cursor.Value));
@@ -77,19 +70,16 @@ public class PostService : IPostService
             }
             else
             {
-                // For "new" mode, use simple Id-based cursor
                 query = query.Where(p => p.Id < cursor.Value);
             }
         }
 
-        // Sort based on sortBy parameter
         query = sortMode switch
         {
             "hot" or "top" => query.OrderByDescending(p => p.Score).ThenByDescending(p => p.Id),
-            _ => query.OrderByDescending(p => p.Id) // "new" or default - newest first
+            _ => query.OrderByDescending(p => p.Id)
         };
 
-        // Fetch one extra item to determine if there are more results
         List<Post> items = await query
             .Take(limit + 1)
             .ToListAsync();
@@ -102,7 +92,6 @@ public class PostService : IPostService
 
         int? nextCursor = items.Any() ? items.Last().Id : (int?)null;
 
-        // Get current user votes if user is logged in
         Dictionary<int, int> userVotes = new();
         if (currentUserId.HasValue)
         {
@@ -113,7 +102,6 @@ public class PostService : IPostService
                 .ToDictionaryAsync(v => v.PostId, v => v.Value);
         }
 
-        // Map to PostResponse
         List<PostResponse> postResponses = items.Select(p =>
         {
             int? vote = currentUserId.HasValue
@@ -146,7 +134,6 @@ public class PostService : IPostService
             return null;
         }
 
-        // Get current user vote if user is logged in
         int? currentUserVote = null;
         if (currentUserId.HasValue)
         {
@@ -186,11 +173,9 @@ public class PostService : IPostService
 
     public async Task<Post> CreatePostAsync(CreatePostRequest request, int userId)
     {
-        // Validate business rules
         ValidateLocationPairing(request.Latitude, request.Longitude);
         ValidatePhotoUrls(request.PhotoUrls);
 
-        // Validate TopicId exists
         if (!await CommunityExistsAsync(request.TopicId))
         {
             throw new InvalidOperationException("Invalid TopicId. Community does not exist.");
@@ -217,14 +202,11 @@ public class PostService : IPostService
             return null;
         }
 
-        // Validate business rules against final entity state (merge request into existing)
         double? finalLat = request.Latitude ?? existingPost.Latitude;
         double? finalLng = request.Longitude ?? existingPost.Longitude;
         ValidateLocationPairing(finalLat, finalLng);
-
         ValidatePhotoUrls(request.PhotoUrls);
 
-        // Map only non-null properties from request to existing post
         _mapper.Map(request, existingPost);
         existingPost.UpdatedAt = DateTime.UtcNow;
 
@@ -251,13 +233,11 @@ public class PostService : IPostService
 
     public async Task<bool> VotePostAsync(int postId, int userId, int value)
     {
-        // Validate vote value in service layer
         if (value is not (-1 or 0 or 1))
         {
             throw new ArgumentException("Vote value must be -1, 0, or 1");
         }
 
-        // Verify post exists
         bool postExists = await _context.Posts
             .AnyAsync(p => p.Id == postId);
 
@@ -266,7 +246,6 @@ public class PostService : IPostService
             return false;
         }
 
-        // Wrap in transaction to prevent score corruption
         using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
@@ -277,7 +256,6 @@ public class PostService : IPostService
 
             if (value == 0)
             {
-                // Remove vote
                 if (existingVote != null)
                 {
                     scoreDelta = -existingVote.Value;
@@ -288,14 +266,12 @@ public class PostService : IPostService
             {
                 if (existingVote != null)
                 {
-                    // Update existing vote
                     scoreDelta = value - existingVote.Value;
                     existingVote.Value = value;
                     existingVote.UpdatedAt = DateTime.UtcNow;
                 }
                 else
                 {
-                    // Create new vote
                     scoreDelta = value;
                     PostVote newVote = new()
                     {
@@ -307,10 +283,8 @@ public class PostService : IPostService
                 }
             }
 
-            // Save vote record first
             await _context.SaveChangesAsync();
 
-            // Then atomically update score
             if (scoreDelta != 0)
             {
                 await _context.Posts
