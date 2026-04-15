@@ -27,7 +27,6 @@ export interface Post {
   locationName?: string
   latitude?: number
   longitude?: number
-  completedAt?: string
   photoUrls: string[]
   commentCount: number
   createdAt: string
@@ -44,7 +43,6 @@ export interface CreatePostRequest {
   latitude?: number
   longitude?: number
   photoUrl?: string
-  completedAt?: string
   photoUrls?: string[]
 }
 
@@ -56,7 +54,6 @@ export interface UpdatePostRequest {
   latitude?: number
   longitude?: number
   photoUrl?: string
-  completedAt?: string
   photoUrls?: string[]
 }
 

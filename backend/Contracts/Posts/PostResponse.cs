@@ -15,7 +15,6 @@ public class PostResponse : BaseModel
     public string? LocationName { get; set; }
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
-    public DateTime? CompletedAt { get; set; }
     public List<string> PhotoUrls { get; set; } = new();
     public int CommentCount { get; set; }
     public int? CurrentUserVote { get; set; }

@@ -22,7 +22,5 @@ public class UpdatePostRequest
     [Range(-180, 180, ErrorMessage = "Longitude must be between -180 and 180")]
     public double? Longitude { get; set; }
 
-    public DateTime? CompletedAt { get; set; }
-
     public List<string>? PhotoUrls { get; set; }
 }
