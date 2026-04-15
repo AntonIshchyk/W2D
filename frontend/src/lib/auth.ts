@@ -1,5 +1,6 @@
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { clearAuthToken } from '../hooks/useAuthSync'
+import { getAuthToken } from './authToken'
 
 export interface UserInfo {
   userId: number
@@ -31,7 +32,7 @@ export function isTokenExpired(token: string): boolean {
 }
 
 export async function fetchCurrentUser(): Promise<UserInfo> {
-  const token = localStorage.getItem('token')
+  const token = getAuthToken()
   
   if (!token) {
     throw new ApiError('No token', 401)

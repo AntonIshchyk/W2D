@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { clearAuthTokenStorage, getAuthToken, setAuthTokenStorage } from '../lib/authToken'
 
 /**
  * Hook that clears React Query cache whenever the authentication token changes.
@@ -10,7 +11,7 @@ export function useAuthSync() {
   const queryClient = useQueryClient()
 
   const syncToken = useCallback(() => {
-    const currentToken = localStorage.getItem('token')
+    const currentToken = getAuthToken()
     const lastToken = sessionStorage.getItem('lastToken')
 
     if (currentToken !== lastToken) {
@@ -49,11 +50,11 @@ export function useAuthSync() {
  * Use this instead of raw localStorage calls for login/logout.
  */
 export function setAuthToken(token: string) {
-  localStorage.setItem('token', token)
+  setAuthTokenStorage(token)
   window.dispatchEvent(new Event('token-changed'))
 }
 
 export function clearAuthToken() {
-  localStorage.removeItem('token')
+  clearAuthTokenStorage()
   window.dispatchEvent(new Event('token-changed'))
 }

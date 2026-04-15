@@ -2,29 +2,14 @@ import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import { toast } from 'sonner'
-import { API_ENDPOINTS } from '../config/api'
 import { setAuthToken } from '../hooks/useAuthSync'
-import { ensureResponseOk } from '../lib/utils/http'
-
-interface LoginResponse {
-  token: string
-}
+import { googleLogin } from '../features/users/api'
 
 export function Login() {
   const navigate = useNavigate()
 
   const googleMutation = useMutation({
-    mutationFn: async (credential: string) => {
-      const response = await fetch(API_ENDPOINTS.users.googleLogin, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential }),
-      })
-
-      await ensureResponseOk(response, 'Google login failed')
-
-      return await response.json() as LoginResponse
-    },
+    mutationFn: googleLogin,
     onSuccess: (data) => {
       setAuthToken(data.token)
       navigate('/')

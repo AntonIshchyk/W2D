@@ -1,3 +1,5 @@
+import { getAuthToken } from '../lib/authToken'
+
 // Centralized API configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5207';
 
@@ -27,7 +29,7 @@ export const API_ENDPOINTS = {
 } as const;
 
 export function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem('token');
+  const token = getAuthToken();
   return {
     'Content-Type': 'application/json',
     ...(token && { Authorization: `Bearer ${token}` }),

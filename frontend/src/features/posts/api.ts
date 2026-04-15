@@ -3,7 +3,7 @@ import { API_ENDPOINTS, getAuthHeaders } from '../../config/api'
 import { PAGINATION } from '../../config/constants'
 import { ensureResponseOk, sendVoteRequest } from '../../lib/utils/http'
 import { PostType } from '../../types/posts'
-import type { Post, ScrollResult } from '../../types/posts'
+import type { CreatePostRequest, Post, ScrollResult } from '../../types/posts'
 
 export interface FetchPostsParams {
   cursor: number | null
@@ -31,6 +31,16 @@ export async function fetchPost(id: number): Promise<Post> {
   const response = await fetch(API_ENDPOINTS.posts.byId(id), { headers: getAuthHeaders() })
   await ensureResponseOk(response, 'Failed to fetch post')
   return response.json()
+}
+
+export async function createPost(data: CreatePostRequest): Promise<void> {
+  const response = await fetch(API_ENDPOINTS.posts.base, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data)
+  })
+
+  await ensureResponseOk(response, 'Failed to create post')
 }
 
 export async function votePost(postId: number, value: number): Promise<void> {
@@ -68,7 +78,7 @@ export const POST_TYPE_COLORS: Record<PostType, { bg: string; text: string, bord
   [PostType.Challenge]:       { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
 }
 
-export const POST_TYPE_ICONS: Record<PostType, any> = {
+export const POST_TYPE_ICONS: Record<PostType, typeof BookOpen> = {
   [PostType.ExperienceShare]: BookOpen,
   [PostType.Guide]: Map,
   [PostType.Question]: HelpCircle,

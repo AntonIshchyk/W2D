@@ -3,12 +3,12 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { isTokenExpired } from '../lib/auth'
 import { clearAuthToken } from '../hooks/useAuthSync'
 import { useCurrentUser } from '../hooks/useCurrentUser'
+import { getAuthToken } from '../lib/authToken'
 
 export const ProtectedRoute = React.memo(({ children }: { children: React.ReactNode }) => {
   const location = useLocation()
   
-  // Cache localStorage reads
-  const token = localStorage.getItem('token')
+  const token = getAuthToken()
   
   // Use server-side profile setup state
   const { data: currentUser } = useCurrentUser()

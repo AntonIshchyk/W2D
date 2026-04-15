@@ -2,11 +2,11 @@ import { useEffect, useState, useCallback } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { setAuthToken } from '../hooks/useAuthSync'
 import { AvatarUpload } from './AvatarUpload'
 import { isValidImageUrl } from '../lib/utils/validation'
 import { useCurrentUser } from '../hooks/useCurrentUser'
+import { updateCurrentUserProfile } from '../features/users/api'
 
 
 export function ProfileSetup() {
@@ -46,24 +46,11 @@ export function ProfileSetup() {
 
   // Mutation to update user profile
   const completeMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch(API_ENDPOINTS.users.me, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          username: profile.username,
-          bio: profile.bio,
-          profilePhotoUrl: profile.profilePhotoUrls[0] ?? null,
-        }),
-      })
-
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}))
-        throw new Error(body.message ?? 'Failed to update profile')
-      }
-
-      return response.json()
-    },
+    mutationFn: () => updateCurrentUserProfile({
+      username: profile.username,
+      bio: profile.bio,
+      profilePhotoUrl: profile.profilePhotoUrls[0] ?? null,
+    }),
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: ['currentUser'] })
       setAuthToken(data.token)

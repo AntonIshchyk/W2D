@@ -12,11 +12,12 @@ import { CreatePost } from './components/CreatePost'
 import { PostDetail } from './components/PostDetail'
 import { useAuthSync } from './hooks/useAuthSync'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { hasAuthToken } from './lib/authToken'
 
 function App() {
   // Automatically clear cache when auth token changes
   useAuthSync()
-  const isLoggedIn = !!localStorage.getItem('token')
+  const isLoggedIn = hasAuthToken()
 
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>

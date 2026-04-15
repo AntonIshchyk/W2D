@@ -16,7 +16,6 @@ import { Textarea } from './ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { PageLayout } from './Navbar'
 import { Label } from '@/components/ui/label'
-import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { PostType } from '../types/posts'
 import type { CreatePostRequest } from '../types/posts'
 import { useCurrentUser } from '../hooks/useCurrentUser'
@@ -25,19 +24,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { cn } from '../lib/utils'
-import { ensureResponseOk } from '../lib/utils/http'
 import { PhotoUpload } from './PhotoUpload'
 import { fetchCommunities } from '../features/communities/api'
-
-async function createPost(data: CreatePostRequest): Promise<void> {
-  const response = await fetch(API_ENDPOINTS.posts.base, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(data)
-  })
-
-  await ensureResponseOk(response, 'Failed to create post')
-}
+import { createPost } from '../features/posts/api'
 
 /* ---------- Field wrapper ---------- */
 
@@ -160,9 +149,7 @@ export function CreatePost() {
                       {Object.values(PostType)
                         .filter(v => typeof v === 'number')
                         .map(v => {
-                          const label = Object.keys(PostType).find(
-                            key => (PostType as any)[key] === v
-                          )
+                          const label = Object.entries(PostType).find(([, value]) => value === v)?.[0]
                           return (
                             <SelectItem key={v} value={String(v)}>
                               {label}
