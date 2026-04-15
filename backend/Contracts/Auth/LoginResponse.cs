@@ -8,6 +8,5 @@ public class LoginResponse
     public string? Bio { get; set; }
     public string? ProfilePhotoUrl { get; set; }
     public bool ProfileSetupComplete { get; set; }
-    public bool IsAdmin { get; set; }
     public string Token { get; set; } = null!;
 }

@@ -20,14 +20,4 @@ public static class ClaimsPrincipalExtensions
         return userId;
     }
 
-    public static bool IsAdmin(this ClaimsPrincipal? user)
-    {
-        if (user == null)
-        {
-            return false;
-        }
-
-        return user.FindFirst(ClaimTypes.Role)?.Value == "Admin";
-    }
-
 }

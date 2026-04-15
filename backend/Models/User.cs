@@ -21,6 +21,4 @@ public class User : BaseModel
     [EmailAddress]
     [MaxLength(255)]
     public string Email { get; set; } = null!;
-
-    public bool IsAdmin { get; set; } = false;
 }
