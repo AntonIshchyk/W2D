@@ -9,7 +9,7 @@ public class CreateEventRequest
     public string Title { get; set; } = null!;
 
     [Required]
-    [MaxLength(1000)]
+    [MaxLength(500)]
     public string Description { get; set; } = null!;
 
     public int? CommunityId { get; set; }
@@ -22,4 +22,6 @@ public class CreateEventRequest
 
     [MaxLength(255)]
     public string? LocationName { get; set; }
+
+    public string? ImageUrl { get; set; }
 }

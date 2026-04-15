@@ -9,7 +9,7 @@ public class Event : BaseModel
     public string Title { get; set; } = null!;
 
     [Required]
-    [MaxLength(1000)]
+    [MaxLength(500)]
     public string Description { get; set; } = null!;
 
     [Required]
@@ -28,4 +28,6 @@ public class Event : BaseModel
 
     [MaxLength(255)]
     public string? LocationName { get; set; }
+
+    public string? ImageUrl { get; set; }
 }

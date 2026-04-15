@@ -13,5 +13,5 @@ public class PostVote : BaseModel
     public Post Post { get; set; } = null!;
 
     [Required]
-    public int Value { get; set; } // -1 for downvote, +1 for upvote
+    public int Value { get; set; }
 }

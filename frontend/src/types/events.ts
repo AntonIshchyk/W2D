@@ -15,6 +15,7 @@ export interface Event {
   latitude?: number
   longitude?: number
   locationName?: string
+  imageUrl?: string
   createdAt: string
   updatedAt: string
 }
@@ -34,6 +35,7 @@ export interface CreateEventRequest {
   latitude?: number
   longitude?: number
   locationName?: string
+  imageUrl?: string
 }
 
 export interface UpdateEventRequest {

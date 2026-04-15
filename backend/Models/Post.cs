@@ -9,7 +9,7 @@ public class Post : BaseModel
     public string Title { get; set; } = string.Empty;
 
     [Required]
-    [StringLength(1000)]
+    [StringLength(500)]
     public string Description { get; set; } = string.Empty;
 
     [Required]

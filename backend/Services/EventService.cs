@@ -29,6 +29,7 @@ public class EventService : IEventService
         Latitude = e.Latitude,
         Longitude = e.Longitude,
         LocationName = e.LocationName,
+        ImageUrl = e.ImageUrl,
         CreatedAt = e.CreatedAt,
         UpdatedAt = e.UpdatedAt
     };
@@ -101,6 +102,7 @@ public class EventService : IEventService
             Latitude = request.Latitude,
             Longitude = request.Longitude,
             LocationName = request.LocationName,
+            ImageUrl = request.ImageUrl,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -144,6 +146,7 @@ public class EventService : IEventService
         if (request.Description != null) eventEntity.Description = request.Description;
         if (request.CommunityId.HasValue) eventEntity.CommunityId = request.CommunityId;
         if (request.ScheduledAt.HasValue) eventEntity.ScheduledAt = request.ScheduledAt.Value;
+        if (request.ImageUrl != null) eventEntity.ImageUrl = request.ImageUrl;
 
         eventEntity.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();

@@ -8,10 +8,12 @@ public class UpdateEventRequest
     [MaxLength(120)]
     public string? Title { get; set; }
 
-    [MaxLength(1000)]
+    [MaxLength(500)]
     public string? Description { get; set; }
 
     public int? CommunityId { get; set; }
 
     public DateTime? ScheduledAt { get; set; }
+
+    public string? ImageUrl { get; set; }
 }

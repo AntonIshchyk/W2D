@@ -4,7 +4,7 @@ namespace Backend.Contracts.Comments;
 
 public class CreateCommentRequest
 {
-    [StringLength(1000)]
+    [StringLength(300)]
     public string? Content { get; set; }
 
     public int? ParentCommentId { get; set; }

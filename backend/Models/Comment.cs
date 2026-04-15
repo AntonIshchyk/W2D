@@ -4,7 +4,7 @@ namespace Backend.Models;
 
 public class Comment : BaseModel
 {
-    [StringLength(1000)]
+    [StringLength(300)]
     public string? Content { get; set; }
 
     [Required]

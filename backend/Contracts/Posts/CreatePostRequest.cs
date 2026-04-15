@@ -9,7 +9,7 @@ public class CreatePostRequest
     public string Title { get; set; } = string.Empty;
 
     [Required]
-    [StringLength(1000, MinimumLength = 10)]
+    [StringLength(500, MinimumLength = 10)]
     public string Description { get; set; } = string.Empty;
 
     [Required]
