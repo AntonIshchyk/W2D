@@ -11,7 +11,6 @@ public class EventResponse : BaseModel
     public int? CommunityId { get; set; }
     public string? CommunityName { get; set; }
     public DateTime ScheduledAt { get; set; }
-    public string Status { get; set; } = string.Empty;
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
     public string? LocationName { get; set; }

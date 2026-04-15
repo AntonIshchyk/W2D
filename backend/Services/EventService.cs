@@ -26,7 +26,6 @@ public class EventService : IEventService
         CommunityId = e.CommunityId,
         CommunityName = e.Community != null ? e.Community.Name : null,
         ScheduledAt = e.ScheduledAt,
-        Status = e.Status.ToString(),
         Latitude = e.Latitude,
         Longitude = e.Longitude,
         LocationName = e.LocationName,
@@ -36,7 +35,6 @@ public class EventService : IEventService
 
     public async Task<IEnumerable<EventResponse>> GetEventsAsync(
         int? communityId = null,
-        EventStatus? status = null,
         double? minLat = null,
         double? maxLat = null,
         double? minLng = null,
@@ -46,11 +44,6 @@ public class EventService : IEventService
 
         if (communityId.HasValue)
             query = query.Where(e => e.CommunityId == communityId.Value);
-
-        if (status.HasValue)
-            query = query.Where(e => e.Status == status.Value);
-        else
-            query = query.Where(e => e.Status == EventStatus.Open);
 
         query = query.Where(e => e.ScheduledAt >= DateTime.UtcNow);
 
@@ -108,7 +101,6 @@ public class EventService : IEventService
             Latitude = request.Latitude,
             Longitude = request.Longitude,
             LocationName = request.LocationName,
-            Status = EventStatus.Open,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -152,7 +144,6 @@ public class EventService : IEventService
         if (request.Description != null) eventEntity.Description = request.Description;
         if (request.CommunityId.HasValue) eventEntity.CommunityId = request.CommunityId;
         if (request.ScheduledAt.HasValue) eventEntity.ScheduledAt = request.ScheduledAt.Value;
-        if (request.Status.HasValue) eventEntity.Status = request.Status.Value;
 
         eventEntity.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();

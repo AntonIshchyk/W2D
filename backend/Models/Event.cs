@@ -28,6 +28,4 @@ public class Event : BaseModel
 
     [MaxLength(255)]
     public string? LocationName { get; set; }
-
-    public EventStatus Status { get; set; } = EventStatus.Open;
 }

@@ -125,7 +125,7 @@ export function Posts() {
     queryKey: ['posts', selectedCommunity, selectedType, sortBy],
     queryFn: ({ pageParam }) => fetchPosts({
       cursor: pageParam,
-      topicId: selectedCommunity,
+      communityId: selectedCommunity,
       type: selectedType,
       sortBy,
     }),

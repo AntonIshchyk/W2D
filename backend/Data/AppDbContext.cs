@@ -56,12 +56,12 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Post>()
             .HasOne(p => p.Community)
             .WithMany()
-            .HasForeignKey(p => p.SpaceId)
+            .HasForeignKey(p => p.CommunityId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Post indexes for performance
         modelBuilder.Entity<Post>()
-            .HasIndex(p => p.SpaceId);
+            .HasIndex(p => p.CommunityId);
 
         modelBuilder.Entity<Post>()
             .HasIndex(p => p.UserId);
@@ -144,13 +144,8 @@ public class AppDbContext : DbContext
             .HasIndex(c => new { c.PostId, c.ParentCommentId })
             .HasDatabaseName("IX_Comments_PostId_ParentCommentId");
 
-        // Ensure Version is configured as a concurrency token
-        modelBuilder.Entity<Comment>()
-            .Property(c => c.Version)
-            .IsConcurrencyToken();
-
-        // Soft delete global query filter (optional, for queries)
-        // modelBuilder.Entity<Comment>().HasQueryFilter(c => !c.IsDeleted);
+        // Soft delete global query filter
+        modelBuilder.Entity<Comment>().HasQueryFilter(c => !c.IsDeleted);
 
         // CommentVote - User relationship
         modelBuilder.Entity<CommentVote>()
@@ -200,10 +195,6 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Event>()
             .HasIndex(e => e.CommunityId)
             .HasDatabaseName("IX_Events_CommunityId");
-
-        modelBuilder.Entity<Event>()
-            .HasIndex(e => e.Status)
-            .HasDatabaseName("IX_Events_Status");
 
         // Seed database with communities, communities
         DatabaseSeeder.SeedData(modelBuilder);

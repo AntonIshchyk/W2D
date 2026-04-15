@@ -22,7 +22,7 @@ public class PostService : IPostService
     public async Task<ScrollResult<PostResponse>> GetPostsAsync(
         int? cursor = null,
         int limit = PaginationConstants.DefaultPageSize,
-        int? topicId = null,
+        int? communityId = null,
         int? userId = null,
         int? type = null,
         string? sortBy = null,
@@ -33,9 +33,9 @@ public class PostService : IPostService
             .Include(p => p.User)
             .Include(p => p.Community);
 
-        if (topicId.HasValue)
+        if (communityId.HasValue)
         {
-            query = query.Where(p => p.SpaceId == topicId.Value);
+            query = query.Where(p => p.CommunityId == communityId.Value);
         }
 
         if (userId.HasValue)
@@ -160,7 +160,7 @@ public class PostService : IPostService
             return Result<PostResponse>.Invalid(urlError!);
         }
 
-        bool communityExists = await _context.Communities.AnyAsync(c => c.Id == request.TopicId);
+        bool communityExists = await _context.Communities.AnyAsync(c => c.Id == request.CommunityId);
         if (!communityExists)
         {
             return Result<PostResponse>.Invalid("Community does not exist.");

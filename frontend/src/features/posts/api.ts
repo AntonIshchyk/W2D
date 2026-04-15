@@ -7,18 +7,18 @@ import type { Post, ScrollResult } from '../../types/posts'
 
 export interface FetchPostsParams {
   cursor: number | null
-  topicId?: number
+  communityId?: number
   userId?: number
   type?: number
   sortBy?: string
 }
 
 export async function fetchPosts(
-  { cursor, topicId, userId, type, sortBy }: FetchPostsParams
+  { cursor, communityId, userId, type, sortBy }: FetchPostsParams
 ): Promise<ScrollResult<Post>> {
   const params = new URLSearchParams({ limit: PAGINATION.DEFAULT_PAGE_SIZE.toString() })
   if (cursor !== null) params.append('cursor', cursor.toString())
-  if (topicId) params.append('topicId', topicId.toString())
+  if (communityId) params.append('communityId', communityId.toString())
   if (userId) params.append('userId', userId.toString())
   if (type) params.append('type', type.toString())
   if (sortBy) params.append('sortBy', sortBy)

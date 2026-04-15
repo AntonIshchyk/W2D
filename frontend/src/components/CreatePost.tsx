@@ -70,7 +70,7 @@ export function CreatePost() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [type, setType] = useState<number>(PostType.ExperienceShare)
-  const [topicId, setCommunityId] = useState<number | ''>('')
+  const [communityId, setCommunityId] = useState<number | ''>('')
 
   const [communityOpen, setCommunityOpen] = useState(false)
   const [locationName, setLocationName] = useState('')
@@ -86,8 +86,8 @@ export function CreatePost() {
   useAuthErrorHandler(isError, userError)
 
   const selectedCommunity = useMemo(
-    () => communities?.find(a => a.id === topicId),
-    [communities, topicId]
+    () => communities?.find(a => a.id === communityId),
+    [communities, communityId]
   )
 
   const createMutation = useMutation({
@@ -106,7 +106,7 @@ export function CreatePost() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!topicId) {
+    if (!communityId) {
       toast.error('Select a community')
       return
     }
@@ -115,7 +115,7 @@ export function CreatePost() {
       title,
       description,
       type,
-      topicId: Number(topicId),
+      communityId: Number(communityId),
       locationName: locationName || undefined,
       photoUrls
     }
@@ -126,7 +126,7 @@ export function CreatePost() {
   const isValid =
     title.length >= 3 &&
     description.length >= 10 &&
-    topicId !== ''
+    communityId !== ''
 
   return (
     <PageLayout>
@@ -201,7 +201,7 @@ export function CreatePost() {
                                 <Check
                                   className={cn(
                                     "mr-2 h-4 w-4",
-                                    topicId === c.id ? "opacity-100" : "opacity-0"
+                                    communityId === c.id ? "opacity-100" : "opacity-0"
                                   )}
                                 />
                                 {c.name}

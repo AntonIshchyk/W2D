@@ -21,7 +21,7 @@ export interface Post {
   description: string
   type: PostType
   author?: UserSummary
-  topicId: number
+  communityId: number
   communityName?: string
   score: number
   locationName?: string
@@ -38,7 +38,7 @@ export interface CreatePostRequest {
   title: string
   description: string
   type: number
-  topicId: number
+  communityId: number
   locationName?: string
   latitude?: number
   longitude?: number

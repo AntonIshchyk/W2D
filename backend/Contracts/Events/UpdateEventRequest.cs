@@ -14,6 +14,4 @@ public class UpdateEventRequest
     public int? CommunityId { get; set; }
 
     public DateTime? ScheduledAt { get; set; }
-
-    public EventStatus? Status { get; set; }
 }

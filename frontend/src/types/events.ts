@@ -12,7 +12,6 @@ export interface Event {
   communityId: number | null
   communityName: string | null
   scheduledAt: string
-  status: string
   latitude?: number
   longitude?: number
   locationName?: string

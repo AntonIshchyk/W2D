@@ -8,7 +8,6 @@ public interface IEventService
 {
     Task<IEnumerable<EventResponse>> GetEventsAsync(
         int? communityId = null,
-        EventStatus? status = null,
         double? minLat = null,
         double? maxLat = null,
         double? minLng = null,

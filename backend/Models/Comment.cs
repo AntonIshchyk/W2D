@@ -19,8 +19,6 @@ public class Comment : BaseModel
 
     public string? PhotoUrl { get; set; }
 
-    [ConcurrencyCheck]
-    public uint Version { get; set; }
     public int? ParentCommentId { get; set; }
     public Comment? ParentComment { get; set; }
     public ICollection<Comment> Replies { get; set; } = new List<Comment>();
