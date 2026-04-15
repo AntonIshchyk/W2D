@@ -29,8 +29,5 @@ public class Event : BaseModel
     [MaxLength(255)]
     public string? LocationName { get; set; }
 
-    [MaxLength(255)]
-    public string? PlaceId { get; set; }
-
     public EventStatus Status { get; set; } = EventStatus.Open;
 }

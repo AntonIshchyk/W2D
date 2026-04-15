@@ -31,9 +31,6 @@ public class Post : BaseModel
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
 
-    [StringLength(200)]
-    public string? PlaceId { get; set; }
-
     public DateTime? CompletedAt { get; set; }
 
     public List<string> PhotoUrls { get; set; } = new();

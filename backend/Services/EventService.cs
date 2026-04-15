@@ -30,7 +30,6 @@ public class EventService : IEventService
         Latitude = e.Latitude,
         Longitude = e.Longitude,
         LocationName = e.LocationName,
-        PlaceId = e.PlaceId,
         CreatedAt = e.CreatedAt,
         UpdatedAt = e.UpdatedAt
     };

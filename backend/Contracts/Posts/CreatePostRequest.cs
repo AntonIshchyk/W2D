@@ -28,9 +28,6 @@ public class CreatePostRequest
     [Range(-180, 180, ErrorMessage = "Longitude must be between -180 and 180")]
     public double? Longitude { get; set; }
 
-    [StringLength(200)]
-    public string? PlaceId { get; set; }
-
     public DateTime? CompletedAt { get; set; }
 
     public List<string> PhotoUrls { get; set; } = new();
