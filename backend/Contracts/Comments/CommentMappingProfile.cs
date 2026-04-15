@@ -20,7 +20,6 @@ public class CommentMappingProfile : Profile
             .ForMember(dest => dest.Post, opt => opt.Ignore())
             .ForMember(dest => dest.Score, opt => opt.Ignore())
             .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
-            .ForMember(dest => dest.Version, opt => opt.Ignore())
             .ForMember(dest => dest.ParentComment, opt => opt.Ignore())
             .ForMember(dest => dest.Replies, opt => opt.Ignore())
             .ForMember(dest => dest.Votes, opt => opt.Ignore())
