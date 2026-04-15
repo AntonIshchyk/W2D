@@ -24,7 +24,7 @@ export function CreateEvent() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [scheduledAt, setScheduledAt] = useState('')
-  const [topicId, setCommunityId] = useState<number | null>(null)
+  const [communityId, setCommunityId] = useState<number | null>(null)
   const [communityOpen, setCommunityOpen] = useState(false)
   const [location, setLocation] = useState<{lat: number, lng: number} | null>(null)
   const [locationName, setLocationName] = useState('')
@@ -46,18 +46,23 @@ export function CreateEvent() {
   function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     setIsSubmitting(true)
-    mutation.mutate({
+
+    const payload = {
       title,
       description,
       scheduledAt: new Date(scheduledAt).toISOString(),
-      topicId: topicId || null,
+      ...(communityId !== null ? { communityId } : {}),
       latitude: location?.lat,
       longitude: location?.lng,
-      locationName: locationName || undefined
+      locationName: locationName || undefined,
+    }
+
+    mutation.mutate({
+      ...payload
     })
   }
 
-  const selectedCommunity = communities.find(c => c.id === topicId)
+  const selectedCommunity = communities.find(c => c.id === communityId)
 
   return (
     <PageLayout>
@@ -129,14 +134,14 @@ export function CreateEvent() {
                               key={c.id}
                               value={c.name}
                               onSelect={() => {
-                                setCommunityId(c.id === topicId ? null : c.id)
+                                setCommunityId(c.id === communityId ? null : c.id)
                                 setCommunityOpen(false)
                               }}
                             >
                               <Check
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  topicId === c.id ? "opacity-100" : "opacity-0"
+                                  communityId === c.id ? "opacity-100" : "opacity-0"
                                 )}
                               />
                               {c.name}

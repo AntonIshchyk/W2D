@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
-  ArrowBigUp, ArrowBigDown, MessageSquare,
+  MessageSquare,
   Plus, Check, ChevronsUpDown, ImageIcon, Flame, Clock, TrendingUp
 } from 'lucide-react'
 import { Button } from './ui/button'
@@ -20,10 +20,12 @@ import { LoadingSpinner } from './ui/loading-spinner'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { cn } from '../lib/utils'
-import { isValidImageUrl } from '../lib/utils/validation'
-import { fetchPosts, votePost, POST_TYPE_LABELS, POST_TYPE_COLORS, POST_TYPE_ICONS } from '../features/posts/api'
+import { fetchPosts, votePost, POST_TYPE_LABELS, POST_TYPE_ICONS } from '../features/posts/api'
 import { fetchCommunities } from '../features/communities/api'
 import { PostCarousel } from './PostCarousel'
+
+import { PostAuthorInfo } from './PostAuthorInfo'
+import { VoteButtons } from './VoteButtons'
 
 // ── Modern Post Card ────────────────────────────────────────────────────────
 
@@ -36,42 +38,16 @@ function PostCard({
   currentUser: any
   onVote: (postId: number, currentVote: number | undefined, newValue: number) => void
 }) {
-  const typeStyle = POST_TYPE_COLORS[post.type as PostType]
-
   return (
     <article className="group bg-card border border-border/50 rounded-3xl p-5 md:p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 flex flex-col">
       
       {/* Header Info */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          {post.author?.profilePhotoUrl && isValidImageUrl(post.author.profilePhotoUrl) ? (
-            <img src={post.author.profilePhotoUrl} alt="User" className="h-10 w-10 rounded-full object-cover border border-primary/20 shrink-0" />
-          ) : (
-            <div className="h-10 w-10 rounded-full bg-linear-to-br from-primary/20 to-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
-              <span className="text-primary font-bold text-sm">
-                {post.author?.username ? post.author.username.substring(0, 2).toUpperCase() : 'AN'}
-              </span>
-            </div>
-          )}
-          <div>
-            <p className="text-sm font-semibold text-foreground/90 leading-tight">
-              {post.author?.username || 'Anonymous'}
-            </p>
-            {typeStyle && (() => {
-              const Icon = POST_TYPE_ICONS[post.type as PostType]
-              return (
-                <div className={cn("flex items-center gap-1 mt-0.5 text-xs font-medium", typeStyle.text)}>
-                  {Icon && <Icon className="w-3.5 h-3.5" />}
-                  <span>{POST_TYPE_LABELS[post.type as PostType]}</span>
-                </div>
-              )
-            })()}
-          </div>
-        </div>
+        <PostAuthorInfo author={post.author as any} type={post.type as PostType} />
 
         <div className="flex items-center gap-2">
           {post.communityName && (
-            <span className="px-3 py-1 rounded-full text-xs font-bold border bg-primary text-primary-foreground border-primary cursor-pointer hover:bg-primary/90 transition-colors">
+            <span className="px-3 py-1 rounded-full text-xs font-bold border bg-primary text-primary-foreground border-primary">
               {post.communityName}
             </span>
           )}
@@ -99,36 +75,12 @@ function PostCard({
       <div className="flex items-center justify-between mt-5 pt-4 border-t border-border/40">
         <div className="flex items-center gap-3">
           {/* Upvotes */}
-          <div className="flex items-center gap-1 bg-muted/40 rounded-full p-1 border border-border/50">
-            <button
-              onClick={() => onVote(post.id, post.currentUserVote, 1)}
-              disabled={!currentUser}
-              className={cn(
-                "p-1.5 rounded-full transition-colors flex items-center justify-center",
-                post.currentUserVote === 1 ? "bg-orange-100 text-orange-600 dark:bg-orange-900/30" : "hover:bg-muted text-muted-foreground"
-              )}
-            >
-              <ArrowBigUp className="w-5 h-5" fill={post.currentUserVote === 1 ? "currentColor" : "none"} />
-            </button>
-            
-            <span className={cn(
-              "text-sm font-bold min-w-[2ch] text-center",
-              post.score > 0 ? "text-orange-600" : post.score < 0 ? "text-blue-600" : "text-foreground"
-            )}>
-              {post.score}
-            </span>
-
-            <button
-              onClick={() => onVote(post.id, post.currentUserVote, -1)}
-              disabled={!currentUser}
-              className={cn(
-                "p-1.5 rounded-full transition-colors flex items-center justify-center",
-                post.currentUserVote === -1 ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30" : "hover:bg-muted text-muted-foreground"
-              )}
-            >
-              <ArrowBigDown className="w-5 h-5" fill={post.currentUserVote === -1 ? "currentColor" : "none"} />
-            </button>
-          </div>
+          <VoteButtons
+            score={post.score}
+            currentUserVote={post.currentUserVote}
+            onVote={(value) => onVote(post.id, post.currentUserVote, value)}
+            disabled={!currentUser}
+          />
 
           {/* Comments */}
           <Link
@@ -171,7 +123,12 @@ export function Posts() {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
     queryKey: ['posts', selectedCommunity, selectedType, sortBy],
-    queryFn: ({ pageParam }) => fetchPosts(pageParam, selectedCommunity, undefined, selectedType, sortBy),
+    queryFn: ({ pageParam }) => fetchPosts({
+      cursor: pageParam,
+      topicId: selectedCommunity,
+      type: selectedType,
+      sortBy,
+    }),
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
     initialPageParam: null as number | null,
     retry: false,

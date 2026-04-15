@@ -25,51 +25,58 @@ public class EventsController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<EventResponse>>> GetEvents(
-        [FromQuery] int? topicId = null,
+        [FromQuery] int? communityId = null,
         [FromQuery] EventStatus? status = null,
         [FromQuery] double? minLat = null,
         [FromQuery] double? maxLat = null,
         [FromQuery] double? minLng = null,
         [FromQuery] double? maxLng = null)
     {
-        int currentUserId = User.GetUserId();
         IEnumerable<EventResponse> result = await _eventService.GetEventsAsync(
-            topicId, status, currentUserId, minLat, maxLat, minLng, maxLng);
+            communityId, status, minLat, maxLat, minLng, maxLng);
         return Ok(result);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<EventResponse>> GetEvent(int id)
     {
-        int currentUserId = User.GetUserId();
-        EventResponse? e = await _eventService.GetEventByIdAsync(id, currentUserId);
-        if (e == null) return NotFound(new { message = "Event not found" });
-        return Ok(e);
+        Result<EventResponse> result = await _eventService.GetEventByIdAsync(id);
+        return result.ToActionResult(this);
     }
 
     [HttpPost]
     public async Task<ActionResult<EventResponse>> CreateEvent(CreateEventRequest request)
     {
         int userId = User.GetUserId();
-        EventResponse created = await _eventService.CreateEventAsync(userId, request);
-        return CreatedAtAction(nameof(GetEvent), new { id = created.Id }, created);
+        Result<EventResponse> result = await _eventService.CreateEventAsync(userId, request);
+
+        if (!result.IsSuccess || result.Value == null)
+        {
+            return result.ToActionResult(this);
+        }
+
+        return CreatedAtAction(nameof(GetEvent), new { id = result.Value.Id }, result.Value);
     }
 
     [HttpPut("{id}")]
     public async Task<ActionResult<EventResponse>> UpdateEvent(int id, UpdateEventRequest request)
     {
         int userId = User.GetUserId();
-        EventResponse? updated = await _eventService.UpdateEventAsync(id, userId, request);
-        if (updated == null) return NotFound(new { message = "Event not found or you are not the organizer" });
-        return Ok(updated);
+        Result<EventResponse> result = await _eventService.UpdateEventAsync(id, userId, request);
+        return result.ToActionResult(this);
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteEvent(int id)
     {
         int userId = User.GetUserId();
-        bool deleted = await _eventService.DeleteEventAsync(id, userId);
-        if (!deleted) return NotFound(new { message = "Event not found or you are not the organizer" });
+        Result<bool> result = await _eventService.DeleteEventAsync(id, userId);
+
+        if (!result.IsSuccess)
+        {
+            return result.ToActionResult(this);
+        }
+
         return NoContent();
     }
 }

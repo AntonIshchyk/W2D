@@ -185,7 +185,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Event>()
             .HasOne(e => e.Community)
             .WithMany()
-            .HasForeignKey(e => e.SpaceId)
+            .HasForeignKey(e => e.CommunityId)
             .OnDelete(DeleteBehavior.SetNull);
 
         // Event performance indexes
@@ -198,8 +198,8 @@ public class AppDbContext : DbContext
             .HasDatabaseName("IX_Events_OrganizerId");
 
         modelBuilder.Entity<Event>()
-            .HasIndex(e => e.SpaceId)
-            .HasDatabaseName("IX_Events_SpaceId");
+            .HasIndex(e => e.CommunityId)
+            .HasDatabaseName("IX_Events_CommunityId");
 
         modelBuilder.Entity<Event>()
             .HasIndex(e => e.Status)

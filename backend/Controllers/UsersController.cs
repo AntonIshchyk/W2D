@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Backend.Contracts.Auth;
+using Backend.Contracts.Common;
 using Backend.Models;
 using Backend.Services;
 using Backend.Extensions;
@@ -54,26 +55,8 @@ public class UsersController : ControllerBase
     {
         int userId = User.GetUserId();
 
-        User? currentUser = await _userService.GetUserByIdAsync(userId);
-
-        if (currentUser == null)
-        {
-            return Unauthorized(new { message = "User not found for the current token" });
-        }
-
-        string requestedUsername = request.Username.Trim();
-
-        if (!string.Equals(currentUser.Username, requestedUsername, StringComparison.OrdinalIgnoreCase)
-            && await _userService.IsUsernameTakenAsync(requestedUsername))
-        {
-            return Conflict(new { message = "Username is already taken" });
-        }
-
-        User updatedUser = await _userService.UpdateUserProfileAsync(userId, request);
-
-        LoginResponse response = _userService.GenerateTokenForUser(updatedUser);
-
-        return Ok(response);
+        Result<LoginResponse> result = await _userService.UpdateUserProfileAsync(userId, request);
+        return result.ToActionResult(this);
     }
 
     [HttpPost("google-login")]
@@ -90,7 +73,7 @@ public class UsersController : ControllerBase
 
             GoogleJsonWebSignature.ValidationSettings settings = new GoogleJsonWebSignature.ValidationSettings
             {
-                Audience = new[] { clientId }
+                Audience = [clientId]
             };
 
             GoogleJsonWebSignature.Payload? payload = await GoogleJsonWebSignature.ValidateAsync(request.Credential, settings);
@@ -100,25 +83,16 @@ public class UsersController : ControllerBase
                 return Unauthorized(new { message = "Invalid Google token" });
             }
 
-            // Try to find existing user by email
             User? existingUser = await _userService.GetUserByEmailAsync(payload.Email);
 
             if (existingUser != null)
             {
-                // User exists, just login
                 LoginResponse loginResponse = _userService.GenerateTokenForUser(existingUser);
                 return Ok(loginResponse);
             }
 
-            // New user, create account
-            LoginResponse? result = await _userService.RegisterUserAsync(payload.Email);
-
-            if (result == null)
-            {
-                return BadRequest(new { message = "Failed to create user" });
-            }
-
-            return Ok(result);
+            Result<LoginResponse> result = await _userService.RegisterUserAsync(payload.Email);
+            return result.ToActionResult(this);
         }
         catch (Exception)
         {

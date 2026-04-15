@@ -25,6 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { cn } from '../lib/utils'
+import { ensureResponseOk } from '../lib/utils/http'
 import { PhotoUpload } from './PhotoUpload'
 import { fetchCommunities } from '../features/communities/api'
 
@@ -35,11 +36,7 @@ async function createPost(data: CreatePostRequest): Promise<void> {
     body: JSON.stringify(data)
   })
 
-  if (!response.ok) {
-    let msg = 'Failed to create post'
-    try { msg = (await response.json()).message || msg } catch {}
-    throw new Error(msg)
-  }
+  await ensureResponseOk(response, 'Failed to create post')
 }
 
 /* ---------- Field wrapper ---------- */

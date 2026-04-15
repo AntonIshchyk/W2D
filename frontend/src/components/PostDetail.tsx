@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
-  ArrowBigUp, ArrowBigDown, ChevronLeft,
+  ChevronLeft,
   MapPin, Clock, Trash2
 } from 'lucide-react'
 import { PageLayout } from './Navbar'
@@ -11,10 +11,10 @@ import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { formatRelativeTime } from '../lib/utils/date'
 import { Comments } from './Comments'
-import { cn } from '../lib/utils'
-import { isValidImageUrl } from '../lib/utils/validation'
 import { PostCarousel } from './PostCarousel'
-import { fetchPost, votePost, deletePost, POST_TYPE_LABELS, POST_TYPE_COLORS, POST_TYPE_ICONS } from '../features/posts/api'
+import { fetchPost, votePost, deletePost } from '../features/posts/api'
+import { PostAuthorInfo } from './PostAuthorInfo'
+import { VoteButtons } from './VoteButtons'
 
 export function PostDetail() {
   const { id } = useParams<{ id: string }>()
@@ -83,8 +83,6 @@ export function PostDetail() {
     </PageLayout>
   )
 
-  const typeStyle   = POST_TYPE_COLORS[post.type as PostType]
-  const TypeIcon    = POST_TYPE_ICONS[post.type as PostType]
   const isOwner     = currentUser?.userId === post.author?.id
   const photos      = post.photoUrls ?? []
 
@@ -104,29 +102,7 @@ export function PostDetail() {
 
             {/* ── Author row ── */}
             <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-3">
-                {post.author?.profilePhotoUrl && isValidImageUrl(post.author.profilePhotoUrl) ? (
-                  <img src={post.author.profilePhotoUrl} alt="User"
-                    className="h-10 w-10 rounded-full object-cover border border-primary/20 shrink-0" />
-                ) : (
-                  <div className="h-10 w-10 rounded-full bg-linear-to-br from-primary/20 to-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
-                    <span className="text-primary font-bold text-sm">
-                      {post.author?.username ? post.author.username.substring(0, 2).toUpperCase() : 'AN'}
-                    </span>
-                  </div>
-                )}
-                <div>
-                  <p className="text-sm font-semibold text-foreground leading-tight">
-                    {post.author?.username || 'Anonymous'}
-                  </p>
-                  {typeStyle && (
-                    <div className={cn('flex items-center gap-1 mt-0.5 text-xs font-medium', typeStyle.text)}>
-                      {TypeIcon && <TypeIcon className="w-3.5 h-3.5" />}
-                      <span>{POST_TYPE_LABELS[post.type as PostType]}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <PostAuthorInfo author={post.author as any} type={post.type as PostType} />
 
               <div className="flex items-center gap-2">
                 {post.communityName && (
@@ -176,44 +152,12 @@ export function PostDetail() {
             {/* ── Footer: vote + time ── */}
             <div className="flex items-center gap-3 pt-5 border-t border-border/40 mb-8">
               {/* Vote pill */}
-              <div className="flex items-center gap-1 bg-muted/40 rounded-full p-1 border border-border/50">
-                <button
-                  onClick={() => handleVote(post.currentUserVote, 1)}
-                  disabled={!currentUser || voteMutation.isPending}
-                  className={cn(
-                    'p-1.5 rounded-full transition-colors flex items-center justify-center',
-                    post.currentUserVote === 1
-                      ? 'bg-orange-100 text-orange-600 dark:bg-orange-900/30'
-                      : 'hover:bg-muted text-muted-foreground',
-                    'disabled:opacity-40 disabled:cursor-not-allowed'
-                  )}
-                  aria-label="Upvote"
-                >
-                  <ArrowBigUp className="w-5 h-5" fill={post.currentUserVote === 1 ? 'currentColor' : 'none'} />
-                </button>
-
-                <span className={cn(
-                  'text-sm font-bold min-w-[2ch] text-center',
-                  post.score > 0 ? 'text-orange-600' : post.score < 0 ? 'text-blue-600' : 'text-foreground'
-                )}>
-                  {post.score}
-                </span>
-
-                <button
-                  onClick={() => handleVote(post.currentUserVote, -1)}
-                  disabled={!currentUser || voteMutation.isPending}
-                  className={cn(
-                    'p-1.5 rounded-full transition-colors flex items-center justify-center',
-                    post.currentUserVote === -1
-                      ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30'
-                      : 'hover:bg-muted text-muted-foreground',
-                    'disabled:opacity-40 disabled:cursor-not-allowed'
-                  )}
-                  aria-label="Downvote"
-                >
-                  <ArrowBigDown className="w-5 h-5" fill={post.currentUserVote === -1 ? 'currentColor' : 'none'} />
-                </button>
-              </div>
+              <VoteButtons
+                score={post.score}
+                currentUserVote={post.currentUserVote}
+                onVote={(val) => handleVote(post.currentUserVote, val)}
+                disabled={!currentUser || voteMutation.isPending}
+              />
 
               <div className="flex items-center gap-1.5 text-sm font-bold text-muted-foreground bg-muted/40 px-3 py-2 rounded-full border border-border/50">
                 <Clock className="w-4 h-4 opacity-70" />

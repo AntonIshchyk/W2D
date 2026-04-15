@@ -31,45 +31,37 @@ public class PostService : IPostService
         IQueryable<Post> query = _context.Posts
             .AsNoTracking()
             .Include(p => p.User)
-            .Include(p => p.Community)
-            .AsQueryable();
+            .Include(p => p.Community);
 
-        // Filter by community if provided
         if (topicId.HasValue)
         {
             query = query.Where(p => p.SpaceId == topicId.Value);
         }
 
-        // Filter by user if provided
         if (userId.HasValue)
         {
             query = query.Where(p => p.UserId == userId.Value);
         }
 
-        // Filter by type if provided
         if (type.HasValue)
         {
             query = query.Where(p => (int)p.Type == type.Value);
         }
 
-        // Get total count AFTER applying filters
         int totalCount = await query.CountAsync();
 
         string sortMode = sortBy?.ToLower() ?? "new";
 
-        // Apply cursor based on sort mode
         if (cursor.HasValue)
         {
             if (sortMode == "hot" || sortMode == "top")
             {
-                // For score-based sorting, get the cursor post's score and apply composite cursor
                 Post? cursorPost = await _context.Posts
                     .AsNoTracking()
                     .FirstOrDefaultAsync(p => p.Id == cursor.Value);
 
                 if (cursorPost != null)
                 {
-                    // Filter: Score < cursorScore OR (Score == cursorScore AND Id < cursorId)
                     query = query.Where(p =>
                         p.Score < cursorPost.Score ||
                         (p.Score == cursorPost.Score && p.Id < cursor.Value));
@@ -77,20 +69,16 @@ public class PostService : IPostService
             }
             else
             {
-                // For "new" mode, use simple Id-based cursor
                 query = query.Where(p => p.Id < cursor.Value);
             }
         }
 
-        // Sort based on sortBy parameter
         query = sortMode switch
         {
-            "hot" => query.OrderByDescending(p => p.Score).ThenByDescending(p => p.Id),
-            "top" => query.OrderByDescending(p => p.Score).ThenByDescending(p => p.Id),
-            _ => query.OrderByDescending(p => p.Id) // "new" or default - newest first
+            "hot" or "top" => query.OrderByDescending(p => p.Score).ThenByDescending(p => p.Id),
+            _ => query.OrderByDescending(p => p.Id)
         };
 
-        // Fetch one extra item to determine if there are more results
         List<Post> items = await query
             .Take(limit + 1)
             .ToListAsync();
@@ -103,9 +91,8 @@ public class PostService : IPostService
 
         int? nextCursor = items.Any() ? items.Last().Id : (int?)null;
 
-        // Get current user votes if user is logged in
         Dictionary<int, int> userVotes = new();
-        if (currentUserId.HasValue)
+        if (currentUserId.HasValue && items.Count > 0)
         {
             List<int> postIds = items.Select(p => p.Id).ToList();
             userVotes = await _context.PostVotes
@@ -114,12 +101,12 @@ public class PostService : IPostService
                 .ToDictionaryAsync(v => v.PostId, v => v.Value);
         }
 
-        // Map to PostResponse
         List<PostResponse> postResponses = items.Select(p =>
         {
             int? vote = currentUserId.HasValue
                 ? (userVotes.TryGetValue(p.Id, out int voteValue) ? voteValue : 0)
                 : null;
+
             PostResponse response = _mapper.Map<PostResponse>(p);
             response.CurrentUserVote = vote;
             return response;
@@ -134,7 +121,7 @@ public class PostService : IPostService
         };
     }
 
-    public async Task<PostResponse?> GetPostByIdAsync(int id, int? currentUserId = null)
+    public async Task<Result<PostResponse>> GetPostByIdAsync(int id, int? currentUserId = null)
     {
         Post? post = await _context.Posts
             .AsNoTracking()
@@ -144,10 +131,9 @@ public class PostService : IPostService
 
         if (post == null)
         {
-            return null;
+            return Result<PostResponse>.NotFound("Post not found.");
         }
 
-        // Get current user vote if user is logged in
         int? currentUserVote = null;
         if (currentUserId.HasValue)
         {
@@ -159,42 +145,25 @@ public class PostService : IPostService
 
         PostResponse response = _mapper.Map<PostResponse>(post);
         response.CurrentUserVote = currentUserVote;
-        return response;
+        return Result<PostResponse>.Success(response);
     }
 
-    private void ValidateLocationPairing(double? latitude, double? longitude)
+    public async Task<Result<PostResponse>> CreatePostAsync(CreatePostRequest request, int userId)
     {
-        if (latitude.HasValue != longitude.HasValue)
+        if (request.Latitude.HasValue != request.Longitude.HasValue)
         {
-            throw new InvalidOperationException("Latitude and Longitude must both be provided or both be omitted.");
+            return Result<PostResponse>.Invalid("Latitude and Longitude must both be provided or both be omitted.");
         }
-    }
 
-    private void ValidatePhotoUrls(List<string>? photoUrls)
-    {
-        if (photoUrls != null && photoUrls.Any())
+        if (!ValidatePhotoUrls(request.PhotoUrls, out string? urlError))
         {
-            foreach (string url in photoUrls)
-            {
-                if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri) ||
-                    (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
-                {
-                    throw new InvalidOperationException($"Invalid URL in PhotoUrls: {url}");
-                }
-            }
+            return Result<PostResponse>.Invalid(urlError!);
         }
-    }
 
-    public async Task<Post> CreatePostAsync(CreatePostRequest request, int userId)
-    {
-        // Validate business rules
-        ValidateLocationPairing(request.Latitude, request.Longitude);
-        ValidatePhotoUrls(request.PhotoUrls);
-
-        // Validate TopicId exists
-        if (!await CommunityExistsAsync(request.TopicId))
+        bool communityExists = await _context.Communities.AnyAsync(c => c.Id == request.TopicId);
+        if (!communityExists)
         {
-            throw new InvalidOperationException("Invalid TopicId. Community does not exist.");
+            return Result<PostResponse>.Invalid("Community does not exist.");
         }
 
         Post post = _mapper.Map<Post>(request);
@@ -205,69 +174,81 @@ public class PostService : IPostService
         _context.Posts.Add(post);
         await _context.SaveChangesAsync();
 
-        return post;
+        return await GetPostByIdAsync(post.Id, userId);
     }
 
-    public async Task<Post?> UpdatePostAsync(int id, UpdatePostRequest request, int userId)
+    public async Task<Result<PostResponse>> UpdatePostAsync(int id, UpdatePostRequest request, int userId)
     {
         Post? existingPost = await _context.Posts
-            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+            .FirstOrDefaultAsync(p => p.Id == id);
 
         if (existingPost == null)
         {
-            return null;
+            return Result<PostResponse>.NotFound("Post not found.");
         }
 
-        // Validate business rules against final entity state (merge request into existing)
+        if (existingPost.UserId != userId)
+        {
+            return Result<PostResponse>.Unauthorized("You do not have permission to edit this post.");
+        }
+
         double? finalLat = request.Latitude ?? existingPost.Latitude;
         double? finalLng = request.Longitude ?? existingPost.Longitude;
-        ValidateLocationPairing(finalLat, finalLng);
 
-        ValidatePhotoUrls(request.PhotoUrls);
+        if (finalLat.HasValue != finalLng.HasValue)
+        {
+            return Result<PostResponse>.Invalid("Latitude and Longitude must both be provided or both be omitted.");
+        }
 
-        // Map only non-null properties from request to existing post
+        if (!ValidatePhotoUrls(request.PhotoUrls, out string? urlError))
+        {
+            return Result<PostResponse>.Invalid(urlError!);
+        }
+
         _mapper.Map(request, existingPost);
         existingPost.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
 
-        return existingPost;
+        return await GetPostByIdAsync(id, userId);
     }
 
-    public async Task<bool> DeletePostAsync(int id, int userId)
+    public async Task<Result<bool>> DeletePostAsync(int id, int userId)
     {
         Post? post = await _context.Posts
-            .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+            .FirstOrDefaultAsync(p => p.Id == id);
 
         if (post == null)
         {
-            return false;
+            return Result<bool>.NotFound("Post not found.");
+        }
+
+        if (post.UserId != userId)
+        {
+            return Result<bool>.Unauthorized("You do not have permission to delete this post.");
         }
 
         _context.Posts.Remove(post);
         await _context.SaveChangesAsync();
 
-        return true;
+        return Result<bool>.Success(true);
     }
 
-    public async Task<bool> VotePostAsync(int postId, int userId, int value)
+    public async Task<Result<bool>> VotePostAsync(int postId, int userId, int value)
     {
-        // Validate vote value in service layer
         if (value is not (-1 or 0 or 1))
         {
-            throw new ArgumentException("Vote value must be -1, 0, or 1");
+            return Result<bool>.Invalid("Vote value must be -1, 0, or 1.");
         }
 
-        // Verify post exists
         bool postExists = await _context.Posts
             .AnyAsync(p => p.Id == postId);
 
         if (!postExists)
         {
-            return false;
+            return Result<bool>.NotFound("Post not found.");
         }
 
-        // Wrap in transaction to prevent score corruption
         using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
@@ -278,7 +259,6 @@ public class PostService : IPostService
 
             if (value == 0)
             {
-                // Remove vote
                 if (existingVote != null)
                 {
                     scoreDelta = -existingVote.Value;
@@ -289,14 +269,12 @@ public class PostService : IPostService
             {
                 if (existingVote != null)
                 {
-                    // Update existing vote
                     scoreDelta = value - existingVote.Value;
                     existingVote.Value = value;
                     existingVote.UpdatedAt = DateTime.UtcNow;
                 }
                 else
                 {
-                    // Create new vote
                     scoreDelta = value;
                     PostVote newVote = new()
                     {
@@ -308,10 +286,8 @@ public class PostService : IPostService
                 }
             }
 
-            // Save vote record first
             await _context.SaveChangesAsync();
 
-            // Then atomically update score
             if (scoreDelta != 0)
             {
                 await _context.Posts
@@ -320,7 +296,7 @@ public class PostService : IPostService
             }
 
             await transaction.CommitAsync();
-            return true;
+            return Result<bool>.Success(true);
         }
         catch
         {
@@ -329,8 +305,25 @@ public class PostService : IPostService
         }
     }
 
-    public async Task<bool> CommunityExistsAsync(int topicId)
+    private static bool ValidatePhotoUrls(List<string>? photoUrls, out string? error)
     {
-        return await _context.Communities.AnyAsync(a => a.Id == topicId);
+        error = null;
+
+        if (photoUrls == null || photoUrls.Count == 0)
+        {
+            return true;
+        }
+
+        foreach (string url in photoUrls)
+        {
+            if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri) ||
+                (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            {
+                error = $"Invalid URL in PhotoUrls: {url}";
+                return false;
+            }
+        }
+
+        return true;
     }
 }

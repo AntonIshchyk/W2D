@@ -9,7 +9,7 @@ export interface Event {
   description: string
   organizerId: number
   organizerName: string
-  topicId: number | null
+  communityId: number | null
   communityName: string | null
   scheduledAt: string
   status: string
@@ -32,7 +32,7 @@ export interface CreateEventRequest {
   title: string
   description: string
   scheduledAt: string
-  topicId?: number | null
+  communityId?: number | null
   latitude?: number
   longitude?: number
   locationName?: string

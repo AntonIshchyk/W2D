@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback } from 'react'
 import { X, ImagePlus, Loader2 } from 'lucide-react'
-import { getAuthHeaders } from '../config/api'
-import { API_ENDPOINTS } from '../config/api'
 import { toast } from 'sonner'
+
+import { getPresignedUrl, uploadToR2 } from '../features/uploads/api'
 
 interface PhotoUploadProps {
   value: string[]
@@ -17,28 +17,6 @@ interface UploadingFile {
   progress: 'uploading' | 'done' | 'error'
 }
 
-export async function getPresignedUrl(file: File): Promise<{ uploadUrl: string; publicUrl: string }> {
-  const res = await fetch(API_ENDPOINTS.uploads.presign, {
-    method: 'POST',
-    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fileName: file.name, contentType: file.type }),
-  })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    throw new Error(err.message ?? 'Failed to get upload URL')
-  }
-  return res.json()
-}
-
-export async function uploadToR2(uploadUrl: string, file: File): Promise<void> {
-  const res = await fetch(uploadUrl, {
-    method: 'PUT',
-    headers: { 'Content-Type': file.type },
-    body: file,
-  })
-  if (!res.ok) throw new Error('Upload to storage failed')
-}
-
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
 
@@ -49,12 +27,7 @@ export function PhotoUpload({
   disabled = false,
 }: PhotoUploadProps) {
   const [uploading, setUploading] = useState<UploadingFile[]>([])
-  const [isDragging, setIsDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-
-  // A ref that always holds the latest confirmed URLs.
-  // This prevents concurrent uploads from reading a stale `value` closure
-  // and overwriting each other — each upload appends to the ref, not to `value`.
   const confirmedRef = useRef<string[]>(value)
   confirmedRef.current = value
 
@@ -79,8 +52,6 @@ export function PhotoUpload({
       const { uploadUrl, publicUrl } = await getPresignedUrl(file)
       await uploadToR2(uploadUrl, file)
 
-      // Append via the ref so sibling concurrent uploads each see the
-      // accumulated list rather than the same stale snapshot of `value`.
       confirmedRef.current = [...confirmedRef.current, publicUrl]
       onChange(confirmedRef.current)
 
@@ -100,11 +71,6 @@ export function PhotoUpload({
     Array.from(files).slice(0, remaining).forEach(processFile)
   }, [processFile, value.length, maxPhotos])
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-    if (!disabled && canAddMore) handleFiles(e.dataTransfer.files)
-  }, [disabled, canAddMore, handleFiles])
 
   const removePhoto = (url: string) => {
     const next = value.filter(u => u !== url)

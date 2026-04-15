@@ -4,6 +4,7 @@ using Backend.Data;
 using Backend.Models;
 using Backend.Contracts.Auth;
 using Backend.Contracts.Users;
+using Backend.Contracts.Common;
 
 namespace Backend.Services;
 
@@ -41,27 +42,64 @@ public class UserService : IUserService
             .AnyAsync(u => u.Username == username.Trim());
     }
 
-    public async Task<LoginResponse?> RegisterUserAsync(string email)
+    public async Task<Result<LoginResponse>> RegisterUserAsync(string email)
     {
-        string username = email.Split('@')[0].ToLowerInvariant();
+        string normalizedEmail = email.Trim();
+
+        if (string.IsNullOrWhiteSpace(normalizedEmail))
+        {
+            return Result<LoginResponse>.Invalid("Email is required.");
+        }
+
+        string baseUsername = normalizedEmail.Split('@')[0].ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(baseUsername))
+        {
+            baseUsername = "user";
+        }
+
+        string username = baseUsername;
+        int suffix = 1;
+        while (await _context.Users.AnyAsync(u => u.Username == username))
+        {
+            username = $"{baseUsername}{suffix}";
+            suffix++;
+        }
 
         var user = new User
         {
-            Email = email,
+            Email = normalizedEmail,
             Username = username,
         };
 
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
 
-        return GenerateTokenForUser(user);
+        return Result<LoginResponse>.Success(GenerateTokenForUser(user));
     }
 
-    public async Task<User> UpdateUserProfileAsync(int userId, UpdateUserProfileRequest request)
+    public async Task<Result<LoginResponse>> UpdateUserProfileAsync(int userId, UpdateUserProfileRequest request)
     {
-        User user = await _context.Users.FirstAsync(u => u.Id == userId);
+        User? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user == null)
+        {
+            return Result<LoginResponse>.NotFound("User not found.");
+        }
 
         string trimmedUsername = request.Username.Trim();
+
+        if (string.IsNullOrWhiteSpace(trimmedUsername))
+        {
+            return Result<LoginResponse>.Invalid("Username is required.");
+        }
+
+        bool usernameTaken = await _context.Users
+            .AnyAsync(u => u.Id != userId && u.Username == trimmedUsername);
+
+        if (usernameTaken)
+        {
+            return Result<LoginResponse>.Invalid("Username is already taken.");
+        }
 
         user.Username = trimmedUsername;
         user.Bio = string.IsNullOrWhiteSpace(request.Bio) ? null : request.Bio.Trim();
@@ -69,7 +107,8 @@ public class UserService : IUserService
         user.ProfileSetupComplete = true;
 
         await _context.SaveChangesAsync();
-        return user;
+
+        return Result<LoginResponse>.Success(GenerateTokenForUser(user));
     }
 
     public LoginResponse GenerateTokenForUser(User user)

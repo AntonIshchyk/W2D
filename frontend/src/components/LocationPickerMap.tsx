@@ -1,19 +1,19 @@
-import { useState } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import { ensureLeafletDefaultIcon } from '../utils/leafletIcon';
+import { useState } from 'react'
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
+import { ensureLeafletDefaultIcon } from '../utils/leafletIcon'
 
-ensureLeafletDefaultIcon();
+ensureLeafletDefaultIcon()
 
 interface LocationPickerProps {
-  onLocationSelect: (lat: number, lng: number) => void;
-  defaultLocation?: [number, number];
+  onLocationSelect: (lat: number, lng: number) => void
+  defaultLocation?: [number, number]
 }
 
 function LocationMarker({ onLocationSelect, defaultLocation }: LocationPickerProps) {
   const [position, setPosition] = useState<L.LatLng | null>(
-    defaultLocation ? new L.LatLng(defaultLocation[0], defaultLocation[1]) : null
+    defaultLocation ? new L.LatLng(defaultLocation[0], defaultLocation[1]) : null,
   )
 
   const map = useMapEvents({
@@ -24,18 +24,16 @@ function LocationMarker({ onLocationSelect, defaultLocation }: LocationPickerPro
     },
   })
 
-  return position === null ? null : (
-    <Marker position={position} />
-  )
+  return position ? <Marker position={position} /> : null
 }
 
 export function LocationPickerMap({ onLocationSelect, defaultLocation }: LocationPickerProps) {
   return (
-    <div className="w-full h-75 rounded-md overflow-hidden border">
-      <MapContainer 
-        center={defaultLocation || [20, 0]} 
-        zoom={13} 
-        scrollWheelZoom={true} 
+    <div className="w-full h-64 rounded-md overflow-hidden border">
+      <MapContainer
+        center={defaultLocation ?? [20, 0]}
+        zoom={defaultLocation ? 13 : 2}
+        scrollWheelZoom
         style={{ height: '100%', width: '100%' }}
       >
         <TileLayer
@@ -45,5 +43,5 @@ export function LocationPickerMap({ onLocationSelect, defaultLocation }: Locatio
         <LocationMarker onLocationSelect={onLocationSelect} defaultLocation={defaultLocation} />
       </MapContainer>
     </div>
-  );
+  )
 }

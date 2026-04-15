@@ -1,15 +1,20 @@
 import { BookOpen, HelpCircle, Map, Target, ThumbsUp, Trophy } from 'lucide-react'
 import { API_ENDPOINTS, getAuthHeaders } from '../../config/api'
 import { PAGINATION } from '../../config/constants'
+import { ensureResponseOk, sendVoteRequest } from '../../lib/utils/http'
 import { PostType } from '../../types/posts'
 import type { Post, ScrollResult } from '../../types/posts'
 
-export async function fetchPosts(
-  cursor: number | null,
-  topicId?: number,
-  userId?: number,
-  type?: number,
+export interface FetchPostsParams {
+  cursor: number | null
+  topicId?: number
+  userId?: number
+  type?: number
   sortBy?: string
+}
+
+export async function fetchPosts(
+  { cursor, topicId, userId, type, sortBy }: FetchPostsParams
 ): Promise<ScrollResult<Post>> {
   const params = new URLSearchParams({ limit: PAGINATION.DEFAULT_PAGE_SIZE.toString() })
   if (cursor !== null) params.append('cursor', cursor.toString())
@@ -18,23 +23,23 @@ export async function fetchPosts(
   if (type) params.append('type', type.toString())
   if (sortBy) params.append('sortBy', sortBy)
   const response = await fetch(`${API_ENDPOINTS.posts.base}?${params}`, { headers: getAuthHeaders() })
-  if (!response.ok) throw new Error('Failed to fetch posts')
+  await ensureResponseOk(response, 'Failed to fetch posts')
   return response.json()
 }
 
 export async function fetchPost(id: number): Promise<Post> {
   const response = await fetch(API_ENDPOINTS.posts.byId(id), { headers: getAuthHeaders() })
-  if (!response.ok) throw new Error('Failed to fetch post')
+  await ensureResponseOk(response, 'Failed to fetch post')
   return response.json()
 }
 
 export async function votePost(postId: number, value: number): Promise<void> {
-  const response = await fetch(API_ENDPOINTS.posts.vote(postId), {
-    method: 'POST',
-    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ value })
-  })
-  if (!response.ok) throw new Error('Failed to vote on post')
+  await sendVoteRequest(
+    API_ENDPOINTS.posts.vote(postId),
+    { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+    value,
+    'Failed to vote on post'
+  )
 }
 
 export async function deletePost(postId: number): Promise<void> {
@@ -42,7 +47,7 @@ export async function deletePost(postId: number): Promise<void> {
     method: 'DELETE',
     headers: getAuthHeaders(),
   })
-  if (!response.ok) throw new Error('Failed to delete post')
+  await ensureResponseOk(response, 'Failed to delete post')
 }
 
 export const POST_TYPE_LABELS: Record<PostType, string> = {

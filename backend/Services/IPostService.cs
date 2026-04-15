@@ -16,10 +16,9 @@ public interface IPostService
         string? sortBy = null,
         int? currentUserId = null);
 
-    Task<PostResponse?> GetPostByIdAsync(int id, int? currentUserId = null);
-    Task<Post> CreatePostAsync(CreatePostRequest request, int userId);
-    Task<Post?> UpdatePostAsync(int id, UpdatePostRequest request, int userId);
-    Task<bool> DeletePostAsync(int id, int userId);
-    Task<bool> VotePostAsync(int postId, int userId, int value);
-    Task<bool> CommunityExistsAsync(int topicId);
+    Task<Result<PostResponse>> GetPostByIdAsync(int id, int? currentUserId = null);
+    Task<Result<PostResponse>> CreatePostAsync(CreatePostRequest request, int userId);
+    Task<Result<PostResponse>> UpdatePostAsync(int id, UpdatePostRequest request, int userId);
+    Task<Result<bool>> DeletePostAsync(int id, int userId);
+    Task<Result<bool>> VotePostAsync(int postId, int userId, int value);
 }

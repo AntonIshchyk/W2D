@@ -1,4 +1,5 @@
 using Backend.Contracts.Comments;
+using Backend.Contracts.Common;
 
 namespace Backend.Services;
 
@@ -6,9 +7,9 @@ public interface ICommentService
 {
     Task<List<CommentResponse>> GetCommentsAsync(int postId, int? currentUserId = null);
 
-    Task<CommentResponse?> CreateCommentAsync(int postId, CreateCommentRequest request, int userId);
+    Task<Result<CommentResponse>> CreateCommentAsync(int postId, CreateCommentRequest request, int userId);
 
-    Task<bool> DeleteCommentAsync(int postId, int commentId, int userId);
+    Task<Result<bool>> DeleteCommentAsync(int postId, int commentId, int userId);
 
-    Task<bool> VoteCommentAsync(int postId, int commentId, int userId, int value);
+    Task<Result<bool>> VoteCommentAsync(int postId, int commentId, int userId, int value);
 }

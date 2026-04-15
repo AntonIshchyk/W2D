@@ -21,14 +21,14 @@ public class ClaimsPrincipalExtensionsTests
         ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(identity);
 
         // Act
-        int? userId = claimsPrincipal.GetUserId();
+        int userId = claimsPrincipal.GetUserId();
 
         // Assert
         userId.Should().Be(123);
     }
 
     [Fact]
-    public void GetUserId_MissingClaim_ReturnsNull()
+    public void GetUserId_MissingClaim_ThrowsInvalidOperationException()
     {
         // Arrange
         List<Claim> claims = new List<Claim>
@@ -39,14 +39,15 @@ public class ClaimsPrincipalExtensionsTests
         ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(identity);
 
         // Act
-        int? userId = claimsPrincipal.GetUserId();
+        Action action = () => claimsPrincipal.GetUserId();
 
         // Assert
-        userId.Should().BeNull();
+        action.Should().Throw<InvalidOperationException>()
+            .WithMessage("Authenticated user ID claim is missing.");
     }
 
     [Fact]
-    public void GetUserId_EmptyClaim_ReturnsNull()
+    public void GetUserId_EmptyClaim_ThrowsInvalidOperationException()
     {
         // Arrange
         List<Claim> claims = new List<Claim>
@@ -58,14 +59,15 @@ public class ClaimsPrincipalExtensionsTests
         ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(identity);
 
         // Act
-        int? userId = claimsPrincipal.GetUserId();
+        Action action = () => claimsPrincipal.GetUserId();
 
         // Assert
-        userId.Should().BeNull();
+        action.Should().Throw<InvalidOperationException>()
+            .WithMessage("Authenticated user ID claim is missing.");
     }
 
     [Fact]
-    public void GetUserId_InvalidFormat_ReturnsNull()
+    public void GetUserId_InvalidFormat_ThrowsInvalidOperationException()
     {
         // Arrange
         List<Claim> claims = new List<Claim>
@@ -77,24 +79,26 @@ public class ClaimsPrincipalExtensionsTests
         ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(identity);
 
         // Act
-        int? userId = claimsPrincipal.GetUserId();
+        Action action = () => claimsPrincipal.GetUserId();
 
         // Assert
-        userId.Should().BeNull();
+        action.Should().Throw<InvalidOperationException>()
+            .WithMessage("Authenticated user ID claim is invalid.");
     }
 
     [Fact]
-    public void GetUserId_NoClaims_ReturnsNull()
+    public void GetUserId_NoClaims_ThrowsInvalidOperationException()
     {
         // Arrange
         ClaimsIdentity identity = new ClaimsIdentity();
         ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(identity);
 
         // Act
-        int? userId = claimsPrincipal.GetUserId();
+        Action action = () => claimsPrincipal.GetUserId();
 
         // Assert
-        userId.Should().BeNull();
+        action.Should().Throw<InvalidOperationException>()
+            .WithMessage("Authenticated user ID claim is missing.");
     }
 
     #endregion

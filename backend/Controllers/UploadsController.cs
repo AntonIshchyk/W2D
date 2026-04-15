@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Backend.Services;
+using Backend.Extensions;
 
 namespace Backend.Controllers;
 
@@ -29,14 +30,11 @@ public class UploadsController : ControllerBase
         _uploadService = uploadService;
     }
 
-    // POST /api/uploads/presign
-    // Browser asks for a presigned URL, then PUTs the file directly to R2
     private static bool IsValidFileName(string fileName)
     {
-        // Reject path traversal and suspicious characters
         if (fileName.Contains("..") || fileName.StartsWith("/") || fileName.StartsWith("\\"))
             return false;
-        // Only allow alphanumeric, dots, hyphens, underscores
+
         return System.Text.RegularExpressions.Regex.IsMatch(
             fileName, @"^[\w\-\.]+$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
     }
@@ -53,8 +51,7 @@ public class UploadsController : ControllerBase
         if (!IsValidFileName(request.FileName))
             return BadRequest(new { message = "Invalid filename format. Only alphanumeric characters, dots, hyphens, and underscores are allowed" });
 
-        // Sanitize: prefix with user ID + timestamp to guarantee uniqueness and prevent path traversal
-        int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+        int userId = User.GetUserId();
         string sanitized = $"{userId}/{DateTime.UtcNow:yyyyMMdd_HHmmss}_{System.IO.Path.GetFileName(request.FileName)}";
 
         var result = await _uploadService.GetPresignedUploadUrlAsync(sanitized, request.ContentType);

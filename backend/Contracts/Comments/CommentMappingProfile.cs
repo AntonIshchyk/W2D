@@ -7,14 +7,11 @@ public class CommentMappingProfile : Profile
 {
     public CommentMappingProfile()
     {
-        // Comment -> CommentResponse
         CreateMap<Comment, CommentResponse>()
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.Username : null))
             .ForMember(dest => dest.CurrentUserVote, opt => opt.Ignore())
             .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => src.PhotoUrl));
-        // Set manually in service
 
-        // CreateCommentRequest -> Comment
         CreateMap<CreateCommentRequest, Comment>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.UserId, opt => opt.Ignore())

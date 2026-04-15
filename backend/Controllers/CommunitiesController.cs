@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.EntityFrameworkCore;
-using Backend.Data;
-using Backend.Models;
+using Backend.Contracts.Common;
+using Backend.Contracts.Communities;
+using Backend.Extensions;
+using Backend.Services;
 
 namespace Backend.Controllers;
 
@@ -13,25 +14,24 @@ namespace Backend.Controllers;
 [Authorize]
 public class CommunitiesController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly ICommunityService _communityService;
 
-    public CommunitiesController(AppDbContext context)
+    public CommunitiesController(ICommunityService communityService)
     {
-        _context = context;
+        _communityService = communityService;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Community>>> GetCommunities()
+    public async Task<ActionResult<IEnumerable<CommunityResponse>>> GetCommunities()
     {
-        var communities = await _context.Communities.OrderBy(s => s.Name).ToListAsync();
+        List<CommunityResponse> communities = await _communityService.GetCommunitiesAsync();
         return Ok(communities);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Community>> GetCommunity(int id)
+    public async Task<ActionResult<CommunityResponse>> GetCommunity(int id)
     {
-        var community = await _context.Communities.FirstOrDefaultAsync(s => s.Id == id);
-        if (community == null) return NotFound(new { message = "Community not found" });
-        return Ok(community);
+        Result<CommunityResponse> result = await _communityService.GetCommunityByIdAsync(id);
+        return result.ToActionResult(this);
     }
 }

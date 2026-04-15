@@ -10,15 +10,13 @@ public class PostMappingProfile : Profile
     {
         CreateMap<User, UserSummary>();
 
-        // Post -> PostResponse
         CreateMap<Post, PostResponse>()
             .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (int)src.Type))
             .ForMember(dest => dest.TopicId, opt => opt.MapFrom(src => src.SpaceId))
             .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.User))
             .ForMember(dest => dest.CommunityName, opt => opt.MapFrom(src => src.Community != null ? src.Community.Name : null))
-            .ForMember(dest => dest.CurrentUserVote, opt => opt.Ignore()); // Set manually in service
+            .ForMember(dest => dest.CurrentUserVote, opt => opt.Ignore());
 
-        // CreatePostRequest -> Post
         CreateMap<CreatePostRequest, Post>()
             .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (PostType)src.Type))
             .ForMember(dest => dest.SpaceId, opt => opt.MapFrom(src => src.TopicId))
@@ -33,7 +31,6 @@ public class PostMappingProfile : Profile
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
 
-        // UpdatePostRequest -> Post (for updating existing entity)
         CreateMap<UpdatePostRequest, Post>()
             .ForMember(dest => dest.Type, opt => opt.MapFrom((src, dest) =>
                 src.Type.HasValue ? (PostType)src.Type.Value : dest.Type))

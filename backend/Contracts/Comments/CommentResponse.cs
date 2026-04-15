@@ -1,8 +1,9 @@
+using Backend.Models;
+
 namespace Backend.Contracts.Comments;
 
-public class CommentResponse
+public class CommentResponse : BaseModel
 {
-    public int Id { get; set; }
     public string Content { get; set; } = string.Empty;
     public int UserId { get; set; }
     public string? UserName { get; set; }
@@ -18,7 +19,4 @@ public class CommentResponse
     public int? ParentCommentId { get; set; }
 
     public List<CommentResponse> Replies { get; set; } = new();
-
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
 }

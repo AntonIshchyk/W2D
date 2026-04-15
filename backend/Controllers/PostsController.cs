@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
-using Backend.Models;
 using Backend.Contracts.Posts;
 using Backend.Contracts.Common;
 using Backend.Services;
@@ -56,52 +55,30 @@ public class PostsController : ControllerBase
     {
         int currentUserId = User.GetUserId();
 
-        PostResponse? post = await _postService.GetPostByIdAsync(id, currentUserId);
-
-        if (post == null)
-        {
-            return NotFound(new { message = "Post not found" });
-        }
-
-        return Ok(post);
+        Result<PostResponse> result = await _postService.GetPostByIdAsync(id, currentUserId);
+        return result.ToActionResult(this);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Post>> CreatePost(CreatePostRequest request)
+    public async Task<ActionResult<PostResponse>> CreatePost(CreatePostRequest request)
     {
         int userId = User.GetUserId();
+        Result<PostResponse> result = await _postService.CreatePostAsync(request, userId);
 
-        try
+        if (!result.IsSuccess || result.Value == null)
         {
-            Post createdPost = await _postService.CreatePostAsync(request, userId);
-            return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPost);
+            return result.ToActionResult(this);
         }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+
+        return CreatedAtAction(nameof(GetPost), new { id = result.Value.Id }, result.Value);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<Post>> UpdatePost(int id, UpdatePostRequest request)
+    public async Task<ActionResult<PostResponse>> UpdatePost(int id, UpdatePostRequest request)
     {
         int userId = User.GetUserId();
-
-        try
-        {
-            Post? updatedPost = await _postService.UpdatePostAsync(id, request, userId);
-
-            if (updatedPost == null)
-            {
-                return NotFound(new { message = "Post not found or unauthorized" });
-            }
-
-            return Ok(updatedPost);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        Result<PostResponse> result = await _postService.UpdatePostAsync(id, request, userId);
+        return result.ToActionResult(this);
     }
 
     [HttpDelete("{id}")]
@@ -109,11 +86,11 @@ public class PostsController : ControllerBase
     {
         int userId = User.GetUserId();
 
-        bool deleted = await _postService.DeletePostAsync(id, userId);
+        Result<bool> result = await _postService.DeletePostAsync(id, userId);
 
-        if (!deleted)
+        if (!result.IsSuccess)
         {
-            return NotFound(new { message = "Post not found or unauthorized" });
+            return result.ToActionResult(this);
         }
 
         return NoContent();
@@ -124,13 +101,13 @@ public class PostsController : ControllerBase
     {
         int userId = User.GetUserId();
 
-        bool success = await _postService.VotePostAsync(id, userId, request.Value);
+        Result<bool> result = await _postService.VotePostAsync(id, userId, request.Value);
 
-        if (!success)
+        if (!result.IsSuccess)
         {
-            return NotFound(new { message = "Post not found" });
+            return result.ToActionResult(this);
         }
 
-        return Ok(new { message = "Vote recorded successfully" });
+        return Ok(new { message = "Vote recorded." });
     }
 }
