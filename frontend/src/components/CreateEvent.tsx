@@ -219,34 +219,25 @@ export function CreateEvent() {
                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div>
                     <p className="text-4xl font-bold tracking-tight text-foreground">Where's it at?</p>
-                    <p className="mt-2 text-lg text-muted-foreground">Click the map to drop a pin, or skip if it's online.</p>
                   </div>
 
-                  <div className="rounded-2xl overflow-hidden border bg-card h-112.5">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      Location Name <span className="normal-case font-normal text-muted-foreground/70">(optional)</span>
+                    </label>
+                    <Input
+                      value={locationName}
+                      onChange={e => setLocationName(e.target.value)}
+                      placeholder="Location name…"
+                      className="bg-card border-border text-foreground placeholder:text-muted-foreground h-14 text-lg focus-visible:ring-primary focus-visible:border-primary"
+                    />
+                  </div>
+
+                  <div className="rounded-2xl overflow-hidden border bg-card h-[600px]">
                     <LocationPickerMap
                       onLocationSelect={(lat, lng) => setLocation({ lat, lng })}
                     />
                   </div>
-
-                  {location && (
-                    <div className="space-y-4 animate-in fade-in duration-200">
-                      <div className="flex items-center gap-2 text-base text-primary">
-                        <MapPin className="h-5 w-5" />
-                        <span className="font-mono">{location.lat.toFixed(5)}, {location.lng.toFixed(5)}</span>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                          Location Name <span className="normal-case font-normal text-muted-foreground/70">(optional)</span>
-                        </label>
-                        <Input
-                          value={locationName}
-                          onChange={e => setLocationName(e.target.value)}
-                          placeholder="Central Park, Main Stage, Room 4B…"
-                          className="bg-card border-border text-foreground placeholder:text-muted-foreground h-14 text-lg focus-visible:ring-primary focus-visible:border-primary"
-                        />
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
@@ -324,11 +315,20 @@ export function CreateEvent() {
                   <div className="flex items-center gap-3 text-base">
                     <MapPin className="h-5 w-5 text-primary shrink-0" />
                     <span className={locationName || location ? 'text-foreground/90' : 'text-muted-foreground/60 italic'}>
-                      {locationName || (location ? `${location.lat.toFixed(3)}, ${location.lng.toFixed(3)}` : 'No location')}
+                      {locationName || (location ? 'Location selected' : 'No location')}
                     </span>
                   </div>
                 </div>
               </div>
+              {location && (
+                <div className="h-[200px] w-full border-t border-border">
+                  <LocationPickerMap
+                    key={`${location.lat}-${location.lng}`}
+                    onLocationSelect={() => {}}
+                    defaultLocation={[location.lat, location.lng]}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -29,12 +29,12 @@ function LocationMarker({ onLocationSelect, defaultLocation }: LocationPickerPro
 
 export function LocationPickerMap({ onLocationSelect, defaultLocation }: LocationPickerProps) {
   return (
-    <div className="w-full h-64 rounded-md overflow-hidden border">
+    <div className="w-full h-full min-h-full rounded-md overflow-hidden border">
       <MapContainer
         center={defaultLocation ?? [20, 0]}
         zoom={defaultLocation ? 13 : 2}
         scrollWheelZoom
-        style={{ height: '100%', width: '100%' }}
+        style={{ height: '100%', width: '100%', minHeight: '100%' }}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
