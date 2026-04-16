@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Check, ChevronsUpDown, Loader2, MapPin, Calendar, Users, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react'
+import { Check, ChevronsUpDown, Loader2, MapPin, Calendar, Users, ArrowLeft, ArrowRight, Info, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
@@ -14,7 +14,7 @@ import { createEvent, fetchCommunities } from '../features/events/api'
 import { cn } from '../lib/utils'
 
 const STEPS = [
-  { id: 1, label: 'Details',  icon: Sparkles },
+  { id: 1, label: 'Details',  icon: Info },
   { id: 2, label: 'When',     icon: Calendar },
   { id: 3, label: 'Location', icon: MapPin   },
 ]
@@ -88,7 +88,6 @@ export function CreateEvent() {
             <div className="flex items-center gap-0">
               {STEPS.map((s, i) => {
                 const Icon = s.icon
-                const done    = step > s.id
                 const current = step === s.id
                 
                 return (
@@ -102,10 +101,7 @@ export function CreateEvent() {
                         !current && 'text-primary hover:bg-accent hover:text-accent-foreground cursor-pointer',
                       )}
                     >
-                      {done
-                        ? <Check className="h-4 w-4" />
-                        : <Icon  className="h-4 w-4" />
-                      }
+                      <Icon className="h-4 w-4" />
                       {s.label}
                     </button>
                     {i < STEPS.length - 1 && (
@@ -127,7 +123,6 @@ export function CreateEvent() {
                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div>
                     <p className="text-4xl font-bold tracking-tight text-foreground">What's the event?</p>
-                    <p className="mt-2 text-lg text-muted-foreground">Give it a name people will remember.</p>
                   </div>
 
                   <div className="space-y-2">
@@ -168,7 +163,7 @@ export function CreateEvent() {
                       type="datetime-local"
                       value={scheduledAt}
                       onChange={e => setScheduledAt(e.target.value)}
-                      className="bg-card border-border text-foreground h-14 text-lg focus-visible:ring-primary focus-visible:border-primary [color-scheme:dark]"
+                      className="bg-card border-border text-foreground h-14 text-lg focus-visible:ring-primary focus-visible:border-primary scheme-dark"
                     />
                   </div>
 
@@ -227,7 +222,7 @@ export function CreateEvent() {
                     <p className="mt-2 text-lg text-muted-foreground">Click the map to drop a pin, or skip if it's online.</p>
                   </div>
 
-                  <div className="rounded-2xl overflow-hidden border bg-card h-[450px]">
+                  <div className="rounded-2xl overflow-hidden border bg-card h-112.5">
                     <LocationPickerMap
                       onLocationSelect={(lat, lng) => setLocation({ lat, lng })}
                     />
@@ -280,7 +275,7 @@ export function CreateEvent() {
                 <Button
                   onClick={handleSubmit}
                   disabled={mutation.isPending}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold gap-2 text-base h-12 px-8 min-w-[160px]"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold gap-2 text-base h-12 px-8 min-w-40"
                 >
                   {mutation.isPending
                     ? <><Loader2 className="h-5 w-5 animate-spin" /> Creating…</>
@@ -295,19 +290,16 @@ export function CreateEvent() {
           <div className="hidden lg:block sticky top-24">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">Preview</p>
             <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
-              {/* Header stripe (could stay gradient or use primary) */}
-              <div className="h-2 bg-gradient-to-r from-primary via-primary/80 to-primary/50" />
-
               <div className="p-6 space-y-5">
                 <div>
                   <h3 className={cn(
-                    'font-bold text-xl leading-snug transition-all break-words',
+                    'font-bold text-xl leading-snug transition-all wrap-break-word',
                     title ? 'text-foreground' : 'text-muted-foreground italic',
                   )}>
                     {title || 'Your event title…'}
                   </h3>
                   <p className={cn(
-                    'mt-2 text-base leading-relaxed line-clamp-4 transition-all break-words',
+                    'mt-2 text-base leading-relaxed line-clamp-4 transition-all wrap-break-word',
                     description ? 'text-muted-foreground/90' : 'text-muted-foreground/60 italic',
                   )}>
                     {description || 'Description will appear here…'}
@@ -338,28 +330,7 @@ export function CreateEvent() {
                 </div>
               </div>
             </div>
-
-            {/* Step hints */}
-            <div className="mt-8 space-y-3">
-              {STEPS.map(s => (
-                <div key={s.id} className={cn(
-                  'flex items-center gap-3 text-base transition-all duration-200',
-                  step === s.id ? 'text-foreground font-medium' : step > s.id ? 'text-primary' : 'text-muted-foreground/60',
-                )}>
-                  <div className={cn(
-                    'h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all',
-                    step === s.id ? 'bg-primary text-primary-foreground' :
-                    step > s.id  ? 'bg-primary/20 text-primary' :
-                    'bg-accent text-muted-foreground',
-                  )}>
-                    {step > s.id ? <Check className="h-3.5 w-3.5" /> : s.id}
-                  </div>
-                  {s.label}
-                </div>
-              ))}
-            </div>
           </div>
-
         </div>
       </div>
     </PageLayout>
