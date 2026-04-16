@@ -55,7 +55,7 @@ public class AppDbContext : DbContext
         // Post - Community relationship
         modelBuilder.Entity<Post>()
             .HasOne(p => p.Community)
-            .WithMany()
+            .WithMany(c => c.Posts)
             .HasForeignKey(p => p.CommunityId)
             .OnDelete(DeleteBehavior.Restrict);
 
@@ -154,12 +154,16 @@ public class AppDbContext : DbContext
             .HasForeignKey(v => v.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // CommentVote - Comment relationship
+        // CommentVote - Comment relationship (optional to handle soft-deleted comments)
         modelBuilder.Entity<CommentVote>()
             .HasOne(v => v.Comment)
             .WithMany(c => c.Votes)
             .HasForeignKey(v => v.CommentId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // CommentVote query filter to exclude votes for soft-deleted comments
+        modelBuilder.Entity<CommentVote>()
+            .HasQueryFilter(v => v.Comment == null || !v.Comment.IsDeleted);
 
         // One vote per user per comment
         modelBuilder.Entity<CommentVote>()

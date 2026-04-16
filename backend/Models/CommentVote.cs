@@ -10,7 +10,7 @@ public class CommentVote : BaseModel
 
     [Required]
     public int CommentId { get; set; }
-    public Comment Comment { get; set; } = null!;
+    public Comment? Comment { get; set; }
 
     [Required]
     public int Value { get; set; }
