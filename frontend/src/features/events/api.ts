@@ -97,11 +97,19 @@ export async function searchCities(query: string): Promise<CitySearchResult[]> {
   await ensureResponseOk(response, 'Search failed')
 
   const data = await response.json()
-  return data.features.map((f: any) => {
+  
+  const results: CitySearchResult[] = []
+  const seenNames = new Set<string>()
+
+  for (const f of data.features) {
     const props = f.properties
     const coords = f.geometry.coordinates
     const nameParts = [props.name, props.city, props.state, props.country].filter(Boolean)
     const uniqueNameParts = Array.from(new Set(nameParts))
+    const displayName = uniqueNameParts.join(', ')
+
+    if (seenNames.has(displayName)) continue
+    seenNames.add(displayName)
 
     let boundingbox: string[] | undefined = undefined
     if (props.extent) {
@@ -112,11 +120,13 @@ export async function searchCities(query: string): Promise<CitySearchResult[]> {
       boundingbox = [minLat, maxLat, minLon, maxLon]
     }
 
-    return {
+    results.push({
       lat: coords[1].toString(),
       lon: coords[0].toString(),
-      display_name: uniqueNameParts.join(', '),
+      display_name: displayName,
       boundingbox,
-    }
-  })
+    })
+  }
+
+  return results
 }

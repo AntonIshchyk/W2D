@@ -163,18 +163,11 @@ export function Events() {
   async function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!searchQuery.trim()) return
-    setIsSearchingCity(true)
-    try {
-      const results = await searchCities(searchQuery)
-      if (results?.length) {
-        applySearchResult(results[0])
-      } else {
-        toast.error('Place not found')
-      }
-    } catch {
-      toast.error('Search failed')
-    } finally {
-      setIsSearchingCity(false)
+    
+    if (autocompleteResults.length > 0) {
+      applySearchResult(autocompleteResults[0])
+    } else {
+      toast.error('Place not found')
     }
   }
 
