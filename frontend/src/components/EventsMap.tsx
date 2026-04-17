@@ -66,7 +66,7 @@ function MapController({
     if (!flyToTarget) return
     if (flyToTarget.id === handledFlyIdRef.current) return
     handledFlyIdRef.current = flyToTarget.id
-    map.flyTo(flyToTarget.center, flyToTarget.zoom, { duration: 1.2 })
+    map.flyTo(flyToTarget.center, flyToTarget.zoom, { duration: 1.8 })
   }, [flyToTarget, map])
 
   return null
