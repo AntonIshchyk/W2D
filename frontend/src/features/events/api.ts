@@ -91,10 +91,32 @@ export async function deleteEvent(id: number): Promise<void> {
 
 export async function searchCities(query: string): Promise<CitySearchResult[]> {
   const response = await fetch(
-    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
+    `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=8`
   )
 
   await ensureResponseOk(response, 'Search failed')
 
-  return response.json()
+  const data = await response.json()
+  return data.features.map((f: any) => {
+    const props = f.properties
+    const coords = f.geometry.coordinates
+    const nameParts = [props.name, props.city, props.state, props.country].filter(Boolean)
+    const uniqueNameParts = Array.from(new Set(nameParts))
+
+    let boundingbox: string[] | undefined = undefined
+    if (props.extent) {
+      const minLon = Math.min(props.extent[0], props.extent[2]).toString()
+      const maxLon = Math.max(props.extent[0], props.extent[2]).toString()
+      const minLat = Math.min(props.extent[1], props.extent[3]).toString()
+      const maxLat = Math.max(props.extent[1], props.extent[3]).toString()
+      boundingbox = [minLat, maxLat, minLon, maxLon]
+    }
+
+    return {
+      lat: coords[1].toString(),
+      lon: coords[0].toString(),
+      display_name: uniqueNameParts.join(', '),
+      boundingbox,
+    }
+  })
 }
