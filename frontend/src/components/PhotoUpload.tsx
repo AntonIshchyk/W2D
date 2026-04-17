@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react'
 import { X, ImagePlus, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { getPresignedUrl, uploadToR2 } from '../features/uploads/api'
+import { getPresignedUrl, uploadToR2 } from '../api/uploads'
 
 interface PhotoUploadProps {
   value: string[]

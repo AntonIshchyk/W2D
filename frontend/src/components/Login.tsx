@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import { toast } from 'sonner'
 import { setAuthToken } from '../hooks/useAuthSync'
-import { googleLogin } from '../features/users/api'
+import { googleLogin } from '../api/users'
 
 export function Login() {
   const navigate = useNavigate()

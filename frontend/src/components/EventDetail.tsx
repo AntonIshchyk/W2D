@@ -22,7 +22,7 @@ import {
   deleteEvent,
   fetchEvent,
   updateEvent,
-} from '../features/events/api'
+} from '../api/events'
 import { cn } from '../lib/utils'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import type { Event, UpdateEventRequest } from '../types/events'

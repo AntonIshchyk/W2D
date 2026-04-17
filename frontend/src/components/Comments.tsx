@@ -6,7 +6,7 @@ import { isValidImageUrl } from '../lib/utils/validation'
 import type { Comment } from '../types/posts'
 import { PhotoUpload } from './PhotoUpload'
 import { VoteButtons } from './VoteButtons'
-import { fetchComments, createComment, deleteComment, voteComment } from '../features/comments/api'
+import { fetchComments, createComment, deleteComment, voteComment } from '../api/comments'
 
 // ── CommentNode ───────────────────────────────────────────────────────────────
 

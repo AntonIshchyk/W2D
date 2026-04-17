@@ -25,8 +25,8 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { cn } from '../lib/utils'
 import { PhotoUpload } from './PhotoUpload'
-import { fetchCommunities } from '../features/communities/api'
-import { createPost } from '../features/posts/api'
+import { fetchCommunities } from '../api/communities'
+import { createPost } from '../api/posts'
 
 /* ---------- Field wrapper ---------- */
 

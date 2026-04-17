@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { PageLayout } from './Navbar'
 import { LocationPickerMap } from './LocationPickerMap'
-import { createEvent, fetchCommunities } from '../features/events/api'
+import { createEvent, fetchCommunities } from '../api/events'
 import { cn } from '../lib/utils'
 
 const STEPS = [

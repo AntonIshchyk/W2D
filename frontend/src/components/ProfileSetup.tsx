@@ -6,7 +6,7 @@ import { setAuthToken } from '../hooks/useAuthSync'
 import { AvatarUpload } from './AvatarUpload'
 import { isValidImageUrl } from '../lib/utils/validation'
 import { useCurrentUser } from '../hooks/useCurrentUser'
-import { updateCurrentUserProfile } from '../features/users/api'
+import { updateCurrentUserProfile } from '../api/users'
 
 
 export function ProfileSetup() {

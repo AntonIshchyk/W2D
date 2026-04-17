@@ -1,5 +1,5 @@
-import { API_ENDPOINTS, getAuthHeaders } from '../../config/api'
-import { ensureResponseOk } from '../../lib/utils/http'
+import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
+import { ensureResponseOk } from '../lib/utils/http'
 
 export interface LoginResponse {
   token: string

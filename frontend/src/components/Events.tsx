@@ -19,7 +19,7 @@ import { PageLayout } from './Navbar'
 import { EventsMap, type FlyToTarget } from './EventsMap'
 import { cn } from '../lib/utils'
 import { useCurrentUser } from '../hooks/useCurrentUser'
-import { fetchCommunities, fetchEvents, searchCities } from '../features/events/api'
+import { fetchCommunities, fetchEvents, searchCities } from '../api/events'
 import { loadMapState, DEFAULT_CENTER, DEFAULT_ZOOM } from '../utils/events'
 import type { Event, EventQueryBounds, ViewMode } from '../types/events'
 

@@ -1,9 +1,9 @@
 import { BookOpen, HelpCircle, Map, Target, ThumbsUp, Trophy } from 'lucide-react'
-import { API_ENDPOINTS, getAuthHeaders } from '../../config/api'
-import { PAGINATION } from '../../config/constants'
-import { ensureResponseOk, sendVoteRequest } from '../../lib/utils/http'
-import { PostType } from '../../types/posts'
-import type { CreatePostRequest, Post, ScrollResult } from '../../types/posts'
+import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
+import { PAGINATION } from '../config/constants'
+import { ensureResponseOk, sendVoteRequest } from '../lib/utils/http'
+import { PostType } from '../types/posts'
+import type { CreatePostRequest, Post, ScrollResult } from '../types/posts'
 
 export interface FetchPostsParams {
   cursor: number | null

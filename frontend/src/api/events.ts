@@ -1,6 +1,6 @@
-import { API_ENDPOINTS, getAuthHeaders } from '../../config/api'
-import { PAGINATION } from '../../config/constants'
-import { ensureResponseOk } from '../../lib/utils/http'
+import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
+import { PAGINATION } from '../config/constants'
+import { ensureResponseOk } from '../lib/utils/http'
 import type {
   CitySearchResult,
   Community,
@@ -8,7 +8,7 @@ import type {
   Event,
   EventQueryBounds,
   UpdateEventRequest,
-} from '../../types/events'
+} from '../types/events'
 
 export async function fetchEvents(
   communityId?: number,

@@ -1,5 +1,5 @@
-import { getAuthHeaders } from '../../config/api'
-import { API_ENDPOINTS } from '../../config/api'
+import { getAuthHeaders } from '../config/api'
+import { API_ENDPOINTS } from '../config/api'
 
 export async function getPresignedUrl(file: File): Promise<{ uploadUrl: string; publicUrl: string }> {
   const res = await fetch(API_ENDPOINTS.uploads.presign, {

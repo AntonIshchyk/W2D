@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import {
   MapContainer,
   TileLayer,
@@ -72,7 +72,7 @@ function MapController({
   return null
 }
 
-// ─── Public component ──────────────────────────────────────────────────────────
+// --- Public component ----------------------------------------------------------
 
 export function EventsMap({
   events,

@@ -1,4 +1,4 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 
 @plugin "tailwindcss-animate";
 
@@ -36,7 +36,7 @@
 
 @layer base {
   :root {
-    /* Sage & Stone â€” grounded, warm, human */
+    /* Sage & Stone — grounded, warm, human */
     --background: hsl(40 18% 95%);
     --foreground: hsl(0 0% 0%); /* black for better readability */
     --card: hsl(0 0% 100%); /* pure white */

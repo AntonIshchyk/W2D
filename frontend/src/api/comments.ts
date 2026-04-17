@@ -1,6 +1,6 @@
-import { API_ENDPOINTS, getAuthHeaders } from '../../config/api'
-import { ensureResponseOk, sendVoteRequest } from '../../lib/utils/http'
-import type { Comment } from '../../types/posts'
+import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
+import { ensureResponseOk, sendVoteRequest } from '../lib/utils/http'
+import type { Comment } from '../types/posts'
 
 export interface CreateCommentParams {
   postId: number

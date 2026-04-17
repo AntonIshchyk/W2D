@@ -1,5 +1,5 @@
 import { PostType } from '../types/posts'
-import { POST_TYPE_LABELS, POST_TYPE_COLORS, POST_TYPE_ICONS } from '../features/posts/api'
+import { POST_TYPE_LABELS, POST_TYPE_COLORS, POST_TYPE_ICONS } from '../api/posts'
 import { UserAvatar } from './UserAvatar'
 import { cn } from '../lib/utils'
 

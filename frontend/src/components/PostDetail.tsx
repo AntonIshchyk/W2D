@@ -12,7 +12,7 @@ import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { formatRelativeTime } from '../lib/utils/date'
 import { Comments } from './Comments'
 import { PostCarousel } from './PostCarousel'
-import { fetchPost, votePost, deletePost } from '../features/posts/api'
+import { fetchPost, votePost, deletePost } from '../api/posts'
 import { PostAuthorInfo } from './PostAuthorInfo'
 import { VoteButtons } from './VoteButtons'
 
