@@ -37,6 +37,27 @@ export function CreateEvent() {
   const [communityOpen, setCommunityOpen] = useState(false)
   const [location,     setLocation]     = useState<{ lat: number; lng: number } | null>(null)
   const [locationName, setLocationName] = useState('')
+  const [isFetchingLocation, setIsFetchingLocation] = useState(false)
+
+  const handleLocationSelect = async (lat: number, lng: number) => {
+    setLocation({ lat, lng })
+    setIsFetchingLocation(true)
+    try {
+      const res = await fetch(`https://photon.komoot.io/reverse?lon=${lng}&lat=${lat}`)
+      const data = await res.json()
+      if (data.features && data.features.length > 0) {
+        const props = data.features[0].properties
+        const nameParts = [props.name, props.city, props.state, props.country].filter(Boolean)
+        const uniqueNameParts = Array.from(new Set(nameParts))
+        const displayName = uniqueNameParts.join(', ')
+        if (displayName) setLocationName(displayName)
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsFetchingLocation(false)
+    }
+  }
 
   const mutation = useMutation({
     mutationFn: createEvent,
@@ -222,9 +243,12 @@ export function CreateEvent() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                      Location Name <span className="normal-case font-normal text-muted-foreground/70">(optional)</span>
-                    </label>
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                        Location Name
+                      </label>
+                      {isFetchingLocation && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+                    </div>
                     <Input
                       value={locationName}
                       onChange={e => setLocationName(e.target.value)}
@@ -233,9 +257,9 @@ export function CreateEvent() {
                     />
                   </div>
 
-                  <div className="rounded-2xl overflow-hidden border bg-card h-[600px]">
+                  <div className="rounded-2xl overflow-hidden border bg-card h-150 relative">
                     <LocationPickerMap
-                      onLocationSelect={(lat, lng) => setLocation({ lat, lng })}
+                      onLocationSelect={handleLocationSelect}
                     />
                   </div>
                 </div>
@@ -321,7 +345,7 @@ export function CreateEvent() {
                 </div>
               </div>
               {location && (
-                <div className="h-[200px] w-full border-t border-border">
+                <div className="h-50 w-full border-t border-border">
                   <LocationPickerMap
                     key={`${location.lat}-${location.lng}`}
                     onLocationSelect={() => {}}
