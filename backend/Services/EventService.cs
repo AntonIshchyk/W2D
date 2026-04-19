@@ -78,6 +78,11 @@ public class EventService : IEventService
 
     public async Task<Result<EventResponse>> CreateEventAsync(int organizerId, CreateEventRequest request)
     {
+        if (request.ScheduledAt < DateTime.UtcNow)
+        {
+            return Result<EventResponse>.Invalid("Event cannot be scheduled in the past.");
+        }
+
         if (request.Latitude.HasValue != request.Longitude.HasValue)
         {
             return Result<EventResponse>.Invalid("Latitude and Longitude must both be provided or both be omitted.");
