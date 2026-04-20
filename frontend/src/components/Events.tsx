@@ -131,17 +131,19 @@ export function Events() {
   }
 
   function boundsFromResult(result: any): EventQueryBounds {
-    if (result.boundingbox) {
-      return {
-        minLat: parseFloat(result.boundingbox[0]),
-        maxLat: parseFloat(result.boundingbox[1]),
-        minLng: parseFloat(result.boundingbox[2]),
-        maxLng: parseFloat(result.boundingbox[3]),
-      }
-    }
     const lat = parseFloat(result.lat)
     const lon = parseFloat(result.lon)
-    return { minLat: lat - 1, maxLat: lat + 1, minLng: lon - 1, maxLng: lon + 1 }
+    const radiusKm = 30
+    const degreesPerKmLat = 1 / 111.32
+    const latOffset = radiusKm * degreesPerKmLat
+    const lonOffset = radiusKm * degreesPerKmLat / Math.max(Math.cos((lat * Math.PI) / 180), 0.1)
+
+    return {
+      minLat: lat - latOffset,
+      maxLat: lat + latOffset,
+      minLng: lon - lonOffset,
+      maxLng: lon + lonOffset,
+    }
   }
 
   function applySearchResult(result: any) {
