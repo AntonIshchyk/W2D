@@ -338,21 +338,12 @@ export function CreateEvent() {
 
                   <div className="flex items-center gap-3 text-base">
                     <MapPin className="h-5 w-5 text-primary shrink-0" />
-                    <span className={locationName || location ? 'text-foreground/90' : 'text-muted-foreground/60 italic'}>
-                      {locationName || (location ? 'Location selected' : 'No location')}
+                    <span className={locationName ? 'text-foreground/90' : 'text-muted-foreground/60 italic'}>
+                      {locationName || 'No location'}
                     </span>
                   </div>
                 </div>
               </div>
-              {location && (
-                <div className="h-50 w-full border-t border-border">
-                  <LocationPickerMap
-                    key={`${location.lat}-${location.lng}`}
-                    onLocationSelect={() => {}}
-                    defaultLocation={[location.lat, location.lng]}
-                  />
-                </div>
-              )}
             </div>
           </div>
         </div>
