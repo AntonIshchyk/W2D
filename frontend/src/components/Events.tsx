@@ -1,10 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Calendar, Plus, X,
-  ChevronsUpDown, Check,
-  Search, Loader2, MapPin,
+  Calendar,
+  Plus,
+  X,
+  ChevronsUpDown,
+  Check,
+  Search,
+  Loader2,
+  MapPin,
   Map, List,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -56,25 +61,25 @@ export function Events() {
   const navigate = useNavigate()
 
   // ── UI state ────────────────────────────────────────────────────────────────
-  const [viewMode, setViewMode]           = useState<ViewMode>('map')
+  const [viewMode, setViewMode] = useState<ViewMode>('map')
   const [selectedCommunities, setSelectedCommunities] = useState<number[]>([])
   const [communityOpen, setCommunityOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const flyToIdRef = useRef(0)
   const [flyToTarget, setFlyToTarget] = useState<FlyToTarget | null>(null)
   const [initialMapState] = useState(() => loadMapState())
-  const [rawBounds, setRawBounds]           = useState<EventQueryBounds | undefined>()
+  const [rawBounds, setRawBounds] = useState<EventQueryBounds | undefined>()
   const [debouncedBounds, setDebouncedBounds] = useState<EventQueryBounds | undefined>()
-  const [searchBounds, setSearchBounds]     = useState<EventQueryBounds | null>(null)
+  const [searchBounds, setSearchBounds] = useState<EventQueryBounds | null>(null)
   const [searchLocationName, setSearchLocationName] = useState<string | null>(null)
   const boundsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // ── City search UI ──────────────────────────────────────────────────────────
-  const [searchQuery, setSearchQuery]               = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
   const [autocompleteResults, setAutocompleteResults] = useState<CitySearchResult[]>([])
-  const [showAutocomplete, setShowAutocomplete]     = useState(false)
-  const [isSearchingCity, setIsSearchingCity]       = useState(false)
-  const [isGettingLocation, setIsGettingLocation]   = useState(false)
+  const [showAutocomplete, setShowAutocomplete] = useState(false)
+  const [isSearchingCity, setIsSearchingCity] = useState(false)
+  const [isGettingLocation, setIsGettingLocation] = useState(false)
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // ── Data ────────────────────────────────────────────────────────────────────
@@ -94,7 +99,9 @@ export function Events() {
   useEffect(() => {
     if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current)
     boundsDebounceRef.current = setTimeout(() => setDebouncedBounds(rawBounds), 500)
-    return () => { if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current) }
+    return () => {
+      if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current)
+    }
   }, [rawBounds])
 
   useEffect(() => {
@@ -121,7 +128,9 @@ export function Events() {
       }
     }, 400)
 
-    return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current) }
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
+    }
   }, [searchQuery])
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
@@ -166,7 +175,7 @@ export function Events() {
   async function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!searchQuery.trim()) return
-    
+
     if (autocompleteResults.length > 0) {
       applySearchResult(autocompleteResults[0])
     } else {
@@ -185,16 +194,19 @@ export function Events() {
         const lat = pos.coords.latitude
         const lng = pos.coords.longitude
         
-        const bounds = boundsFromResult({ lat: lat.toString(), lon: lng.toString() })
+        const bounds = boundsFromResult({
+          lat: lat.toString(),
+          lon: lng.toString(),
+        })
         setSearchBounds(bounds)
-        
+
         try {
           const displayName = await reverseGeocode(lat, lng)
           setSearchLocationName(displayName?.split(',')[0] ?? 'Your Location')
         } catch {
           setSearchLocationName('Your Location')
         }
-        
+
         flyTo([lat, lng], 12)
         setIsGettingLocation(false)
       },
@@ -330,7 +342,7 @@ export function Events() {
                             <Check className={cn('mr-2 h-4 w-4', selectedCommunities.length === 0 ? 'opacity-100' : 'opacity-0')} />
                             All communities
                           </CommandItem>
-                          {(communities ?? []).map(c => (
+                          {(communities ?? []).map((c) => (
                             <CommandItem
                               key={c.id}
                               value={c.name}
@@ -427,7 +439,7 @@ export function Events() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {allEvents.map(event => (
+                {allEvents.map((event) => (
                   <EventCard key={event.id} event={event} />
                 ))}
               </div>
@@ -451,7 +463,10 @@ export function Events() {
             variant="ghost"
             size="icon"
             className="absolute top-2 right-2 z-30 w-9 h-9 rounded-full bg-background/80 hover:bg-background shadow-sm"
-            onClick={(e) => { e.stopPropagation(); setSelectedEvent(null) }}
+            onClick={(e) => {
+              e.stopPropagation()
+              setSelectedEvent(null)
+            }}
             tabIndex={selectedEvent ? 0 : -1}
           >
             <X className="h-4 w-4" />

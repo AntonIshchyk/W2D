@@ -1,7 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Check, ChevronsUpDown, Loader2, MapPin, Calendar, Users, ArrowLeft, ArrowRight, Info, Sparkles } from 'lucide-react'
+import {
+  Check,
+  ChevronsUpDown,
+  Loader2,
+  MapPin,
+  Calendar,
+  Users,
+  ArrowLeft,
+  ArrowRight,
+  Info,
+  Sparkles,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
@@ -15,9 +26,9 @@ import { fetchCommunities } from '../api/communities'
 import { cn } from '../lib/utils'
 
 const STEPS = [
-  { id: 1, label: 'Details',  icon: Info },
-  { id: 2, label: 'When',     icon: Calendar },
-  { id: 3, label: 'Location', icon: MapPin   },
+  { id: 1, label: 'Details', icon: Info },
+  { id: 2, label: 'When', icon: Calendar },
+  { id: 3, label: 'Location', icon: MapPin },
 ]
 
 export function CreateEvent() {
@@ -31,12 +42,12 @@ export function CreateEvent() {
 
   const [step, setStep] = useState(1)
 
-  const [title,        setTitle]        = useState('')
-  const [description,  setDescription]  = useState('')
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
   const [scheduledAt, setScheduledAt] = useState('')
-  const [communityId,  setCommunityId]  = useState<number | null>(null)
+  const [communityId, setCommunityId] = useState<number | null>(null)
   const [communityOpen, setCommunityOpen] = useState(false)
-  const [location,     setLocation]     = useState<{ lat: number; lng: number } | null>(null)
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [locationName, setLocationName] = useState('')
   const [isFetchingLocation, setIsFetchingLocation] = useState(false)
 
@@ -70,8 +81,11 @@ export function CreateEvent() {
 
   const formattedDate = scheduledAt
     ? new Date(scheduledAt).toLocaleDateString('en-US', {
-        weekday: 'short', month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit',
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
       })
     : null
 
@@ -81,16 +95,18 @@ export function CreateEvent() {
       description,
       scheduledAt: new Date(scheduledAt).toISOString(),
       ...(communityId !== null ? { communityId } : {}),
-      latitude:     location?.lat,
-      longitude:    location?.lng,
+      latitude: location?.lat,
+      longitude: location?.lng,
       locationName: locationName || undefined,
     })
   }
 
   const canProceed =
-    step === 1 ? title.trim().length > 0 && description.trim().length > 0 :
-    step === 2 ? scheduledAt.length > 0 :
-    true
+    step === 1
+      ? title.trim().length > 0 && description.trim().length > 0
+      : step === 2
+        ? scheduledAt.length > 0
+        : true
 
   return (
     <PageLayout>
@@ -265,7 +281,7 @@ export function CreateEvent() {
             <div className="flex items-center justify-between pt-6">
               <Button
                 variant="ghost"
-                onClick={() => step === 1 ? navigate('/events') : setStep(s => s - 1)}
+                onClick={() => (step === 1 ? navigate('/events') : setStep((s) => s - 1))}
                 className="text-muted-foreground hover:text-foreground hover:bg-accent gap-2 text-base h-12 px-6"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -274,7 +290,7 @@ export function CreateEvent() {
 
               {step < 3 ? (
                 <Button
-                  onClick={() => setStep(s => s + 1)}
+                  onClick={() => setStep((s) => s + 1)}
                   disabled={!canProceed}
                   className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold gap-2 text-base h-12 px-8 disabled:opacity-30"
                 >
@@ -288,8 +304,15 @@ export function CreateEvent() {
                   className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold gap-2 text-base h-12 px-8 min-w-40"
                 >
                   {mutation.isPending
-                    ? <><Loader2 className="h-5 w-5 animate-spin" /> Creating…</>
-                    : <><Sparkles className="h-5 w-5" /> Create Event</>
+                    ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" /> Creating…
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-5 w-5" /> Create Event
+                      </>
+                    )
                   }
                 </Button>
               )}
