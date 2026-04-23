@@ -11,12 +11,14 @@ import type {
 } from '../types/events'
 
 export async function fetchEvents(
-  communityId?: number,
+  communityIds?: number[],
   bounds?: EventQueryBounds
 ): Promise<Event[]> {
   const params = new URLSearchParams()
 
-  if (communityId) params.append('communityId', communityId.toString())
+  if (communityIds && communityIds.length > 0) {
+    communityIds.forEach((id) => params.append('communityId', id.toString()))
+  }
 
   if (bounds) {
     params.append('minLat', bounds.minLat.toString())

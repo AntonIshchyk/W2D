@@ -25,14 +25,14 @@ public class EventsController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<EventResponse>>> GetEvents(
-        [FromQuery] int? communityId = null,
+        [FromQuery(Name = "communityId")] int[]? communityIds = null,
         [FromQuery] double? minLat = null,
         [FromQuery] double? maxLat = null,
         [FromQuery] double? minLng = null,
         [FromQuery] double? maxLng = null)
     {
         IEnumerable<EventResponse> result = await _eventService.GetEventsAsync(
-            communityId, minLat, maxLat, minLng, maxLng);
+            communityIds, minLat, maxLat, minLng, maxLng);
         return Ok(result);
     }
 

@@ -56,7 +56,7 @@ export function Events() {
 
   // ── UI state ────────────────────────────────────────────────────────────────
   const [viewMode, setViewMode]           = useState<ViewMode>('map')
-  const [selectedCommunity, setSelectedCommunity] = useState<number | undefined>()
+  const [selectedCommunities, setSelectedCommunities] = useState<number[]>([])
   const [communityOpen, setCommunityOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const flyToIdRef = useRef(0)
@@ -85,8 +85,8 @@ export function Events() {
 
   const effectiveBounds = searchBounds ?? debouncedBounds
   const { data: allEvents = [], isLoading: eventsLoading } = useQuery({
-    queryKey: ['events', selectedCommunity, effectiveBounds],
-    queryFn: () => fetchEvents(selectedCommunity, effectiveBounds),
+    queryKey: ['events', selectedCommunities, effectiveBounds],
+    queryFn: () => fetchEvents(selectedCommunities, effectiveBounds),
   })
 
   // ── Effects ─────────────────────────────────────────────────────────────────
@@ -219,7 +219,16 @@ export function Events() {
   }
 
   // ── Derived ──────────────────────────────────────────────────────────────────
-  const selectedCommunityName = communities?.find(c => c.id === selectedCommunity)?.name
+  const selectedCommunityNames = (communities ?? [])
+    .filter((c) => selectedCommunities.includes(c.id))
+    .map((c) => c.name)
+
+  const communityFilterLabel =
+    selectedCommunities.length === 0
+      ? 'All Communities'
+      : selectedCommunities.length === 1
+        ? selectedCommunityNames[0] ?? '1 Community'
+        : `${selectedCommunities.length} Communities`
 
   return (
     <PageLayout fullWidth>
@@ -310,7 +319,7 @@ export function Events() {
                 <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
                   <PopoverTrigger asChild>
                     <Button variant="outline" size="sm" className="h-9 text-xs gap-1">
-                      {selectedCommunityName ?? 'All Communities'}
+                      {communityFilterLabel}
                       <ChevronsUpDown className="h-3 w-3 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
@@ -322,18 +331,24 @@ export function Events() {
                         <CommandGroup>
                           <CommandItem
                             value="__all__"
-                            onSelect={() => { setSelectedCommunity(undefined); setCommunityOpen(false) }}
+                            onSelect={() => setSelectedCommunities([])}
                           >
-                            <Check className={cn('mr-2 h-4 w-4', !selectedCommunity ? 'opacity-100' : 'opacity-0')} />
+                            <Check className={cn('mr-2 h-4 w-4', selectedCommunities.length === 0 ? 'opacity-100' : 'opacity-0')} />
                             All communities
                           </CommandItem>
                           {(communities ?? []).map(c => (
                             <CommandItem
                               key={c.id}
                               value={c.name}
-                              onSelect={() => { setSelectedCommunity(c.id); setCommunityOpen(false) }}
+                              onSelect={() => {
+                                setSelectedCommunities((prev) =>
+                                  prev.includes(c.id)
+                                    ? prev.filter((id) => id !== c.id)
+                                    : [...prev, c.id]
+                                )
+                              }}
                             >
-                              <Check className={cn('mr-2 h-4 w-4', selectedCommunity === c.id ? 'opacity-100' : 'opacity-0')} />
+                              <Check className={cn('mr-2 h-4 w-4', selectedCommunities.includes(c.id) ? 'opacity-100' : 'opacity-0')} />
                               {c.name}
                             </CommandItem>
                           ))}
@@ -342,12 +357,12 @@ export function Events() {
                     </Command>
                   </PopoverContent>
                 </Popover>
-                {selectedCommunity && (
+                {selectedCommunities.length > 0 && (
                   <Button
                     variant="ghost"
                     size="sm"
                     className="h-9 w-9 p-0"
-                    onClick={() => setSelectedCommunity(undefined)}
+                    onClick={() => setSelectedCommunities([])}
                     title="Clear community filter"
                   >
                     <X className="h-4 w-4" />

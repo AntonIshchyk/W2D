@@ -35,7 +35,7 @@ public class EventService : IEventService
     };
 
     public async Task<IEnumerable<EventResponse>> GetEventsAsync(
-        int? communityId = null,
+        IReadOnlyCollection<int>? communityIds = null,
         double? minLat = null,
         double? maxLat = null,
         double? minLng = null,
@@ -43,8 +43,8 @@ public class EventService : IEventService
     {
         IQueryable<Event> query = _context.Events.AsNoTracking();
 
-        if (communityId.HasValue)
-            query = query.Where(e => e.CommunityId == communityId.Value);
+        if (communityIds is { Count: > 0 })
+            query = query.Where(e => e.CommunityId.HasValue && communityIds.Contains(e.CommunityId.Value));
 
         query = query.Where(e => e.ScheduledAt >= DateTime.UtcNow);
 
