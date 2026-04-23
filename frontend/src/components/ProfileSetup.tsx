@@ -75,10 +75,8 @@ export function ProfileSetup() {
   }
 
   const handleSubmit = () => {
-    // Reset previous submit error
     setSubmitError(null)
 
-    // Validation only on submit
     const username = profile.username.trim()
     if (!username) {
       setSubmitError('Username is required.')
@@ -89,7 +87,6 @@ export function ProfileSetup() {
       return
     }
 
-    // If validation passes, run mutation
     completeMutation.mutate()
   }
 
@@ -97,14 +94,12 @@ export function ProfileSetup() {
     <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-xl space-y-10 rounded-[2rem] bg-background p-10 shadow-sm ring-1 ring-border sm:p-14">
         
-        {/* Header */}
         <div className="text-center">
           <h2 className="text-4xl font-black tracking-tight text-foreground">Complete your profile</h2>
           <p className="mt-3 text-base text-muted-foreground">Add a photo, pick a username, and write a short bio.</p>
         </div>
 
         <div className="mt-12 space-y-8">
-          {/* Avatar Upload (Centered prominently at the top) */}
           <div className="flex flex-col items-center justify-center space-y-4 pb-4 pt-2">
             <AvatarUpload
               value={profile.profilePhotoUrls[0] || ''}
@@ -115,7 +110,6 @@ export function ProfileSetup() {
           </div>
 
           <div className="space-y-6">
-            {/* Username */}
             <div>
               <label className="block text-sm font-bold tracking-wide uppercase text-foreground">Username *</label>
               <div className="relative mt-2.5">
@@ -134,7 +128,6 @@ export function ProfileSetup() {
               {submitError && <p className="mt-2 text-sm text-destructive">{submitError}</p>}
             </div>
 
-            {/* Bio */}
             <div>
               <label className="block text-sm font-bold tracking-wide uppercase text-foreground">Bio (Optional)</label>
               <textarea

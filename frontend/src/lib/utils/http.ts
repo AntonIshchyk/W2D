@@ -1,7 +1,3 @@
-/**
- * Ensures a fetch response is OK (status 200-299).
- * Throws an error with the provided message if the response is not OK.
- */
 export async function ensureResponseOk(response: Response, errorMessage: string): Promise<void> {
   if (!response.ok) {
     let detail = ''
@@ -15,9 +11,6 @@ export async function ensureResponseOk(response: Response, errorMessage: string)
   }
 }
 
-/**
- * Sends a vote request (typically POST/DELETE to a vote endpoint).
- */
 export async function sendVoteRequest(
   url: string,
   headers: HeadersInit,

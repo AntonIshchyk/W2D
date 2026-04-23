@@ -15,7 +15,6 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { hasAuthToken } from './lib/authToken'
 
 function App() {
-  // Automatically clear cache when auth token changes
   useAuthSync()
   const isLoggedIn = hasAuthToken()
 

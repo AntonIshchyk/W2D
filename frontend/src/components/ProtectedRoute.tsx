@@ -9,18 +9,15 @@ export const ProtectedRoute = React.memo(({ children }: { children: React.ReactN
   const location = useLocation()
   
   const token = getAuthToken()
-  
-  // Use server-side profile setup state
   const { data: currentUser } = useCurrentUser()
 
-  // Memoize navigation logic
   const navigationTarget = useMemo(() => {
     if (!token || isTokenExpired(token)) {
       if (token) clearAuthToken()
       return '/login'
     }
     
-    if (!currentUser) return null // Still loading user data
+    if (!currentUser) return null
     
     const isProfileSetup = location.pathname === '/profile-setup'
     const isSetupComplete = currentUser.profileSetupComplete
