@@ -1,9 +1,7 @@
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
-import { PAGINATION } from '../config/constants'
 import { ensureResponseOk } from '../lib/utils/http'
 import type {
   CitySearchResult,
-  Community,
   CreateEventRequest,
   Event,
   EventQueryBounds,
@@ -34,18 +32,6 @@ export async function fetchEvents(
   await ensureResponseOk(response, 'Failed to fetch events')
 
   return response.json()
-}
-
-export async function fetchCommunities(): Promise<Community[]> {
-  const response = await fetch(
-    `${API_ENDPOINTS.communities.base}?limit=${PAGINATION.COMMUNITIES_FETCH_SIZE}`,
-    { headers: getAuthHeaders() }
-  )
-
-  await ensureResponseOk(response, 'Failed to fetch communities')
-
-  const json = await response.json()
-  return Array.isArray(json) ? json : (json.items ?? [])
 }
 
 export async function createEvent(data: CreateEventRequest): Promise<Event> {
@@ -131,4 +117,19 @@ export async function searchCities(query: string): Promise<CitySearchResult[]> {
   }
 
   return results
+}
+
+export async function reverseGeocode(lat: number, lng: number): Promise<string | null> {
+  const response = await fetch(`https://photon.komoot.io/reverse?lon=${lng}&lat=${lat}`)
+  await ensureResponseOk(response, 'Reverse geocoding failed')
+
+  const data = await response.json()
+  if (!data.features || data.features.length === 0) {
+    return null
+  }
+
+  const props = data.features[0].properties
+  const nameParts = [props.name, props.city, props.state, props.country].filter(Boolean)
+  const uniqueNameParts = Array.from(new Set(nameParts))
+  return uniqueNameParts.join(', ') || null
 }

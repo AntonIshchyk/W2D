@@ -19,9 +19,10 @@ import { PageLayout } from './Navbar'
 import { EventsMap, type FlyToTarget } from './EventsMap'
 import { cn } from '../lib/utils'
 import { useCurrentUser } from '../hooks/useCurrentUser'
-import { fetchCommunities, fetchEvents, searchCities } from '../api/events'
+import { fetchEvents, reverseGeocode, searchCities } from '../api/events'
+import { fetchCommunities } from '../api/communities'
 import { loadMapState, DEFAULT_CENTER, DEFAULT_ZOOM } from '../utils/events'
-import type { Event, EventQueryBounds, ViewMode } from '../types/events'
+import type { CitySearchResult, Event, EventQueryBounds, ViewMode } from '../types/events'
 
 // ─── EventCard ─────────────────────────────────────────────────────────────────
 
@@ -70,7 +71,7 @@ export function Events() {
 
   // ── City search UI ──────────────────────────────────────────────────────────
   const [searchQuery, setSearchQuery]               = useState('')
-  const [autocompleteResults, setAutocompleteResults] = useState<any[]>([])
+  const [autocompleteResults, setAutocompleteResults] = useState<CitySearchResult[]>([])
   const [showAutocomplete, setShowAutocomplete]     = useState(false)
   const [isSearchingCity, setIsSearchingCity]       = useState(false)
   const [isGettingLocation, setIsGettingLocation]   = useState(false)
@@ -130,7 +131,7 @@ export function Events() {
     setFlyToTarget({ center, zoom, id: flyToIdRef.current })
   }
 
-  function boundsFromResult(result: any): EventQueryBounds {
+  function boundsFromResult(result: Pick<CitySearchResult, 'lat' | 'lon'>): EventQueryBounds {
     const lat = parseFloat(result.lat)
     const lon = parseFloat(result.lon)
     const radiusKm = 30
@@ -146,7 +147,7 @@ export function Events() {
     }
   }
 
-  function applySearchResult(result: any) {
+  function applySearchResult(result: CitySearchResult) {
     const center: [number, number] = [parseFloat(result.lat), parseFloat(result.lon)]
     setSearchBounds(boundsFromResult(result))
     setSearchLocationName(result.display_name.split(',')[0])
@@ -188,15 +189,8 @@ export function Events() {
         setSearchBounds(bounds)
         
         try {
-          const res = await fetch(`https://photon.komoot.io/reverse?lon=${lng}&lat=${lat}`)
-          const data = await res.json()
-          if (data.features && data.features.length > 0) {
-            const props = data.features[0].properties
-            const displayName = props.city || props.name || props.state || 'Your Location'
-            setSearchLocationName(displayName)
-          } else {
-            setSearchLocationName('Your Location')
-          }
+          const displayName = await reverseGeocode(lat, lng)
+          setSearchLocationName(displayName?.split(',')[0] ?? 'Your Location')
         } catch {
           setSearchLocationName('Your Location')
         }

@@ -10,7 +10,8 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { PageLayout } from './Navbar'
 import { LocationPickerMap } from './LocationPickerMap'
-import { createEvent, fetchCommunities } from '../api/events'
+import { createEvent, reverseGeocode } from '../api/events'
+import { fetchCommunities } from '../api/communities'
 import { cn } from '../lib/utils'
 
 const STEPS = [
@@ -43,15 +44,8 @@ export function CreateEvent() {
     setLocation({ lat, lng })
     setIsFetchingLocation(true)
     try {
-      const res = await fetch(`https://photon.komoot.io/reverse?lon=${lng}&lat=${lat}`)
-      const data = await res.json()
-      if (data.features && data.features.length > 0) {
-        const props = data.features[0].properties
-        const nameParts = [props.name, props.city, props.state, props.country].filter(Boolean)
-        const uniqueNameParts = Array.from(new Set(nameParts))
-        const displayName = uniqueNameParts.join(', ')
-        if (displayName) setLocationName(displayName)
-      }
+      const displayName = await reverseGeocode(lat, lng)
+      if (displayName) setLocationName(displayName)
     } catch (err) {
       console.error(err)
     } finally {
@@ -66,8 +60,9 @@ export function CreateEvent() {
       toast.success('Event created!')
       navigate('/events')
     },
-    onError: (err: any) => {
-      toast.error(err.message || 'Failed to create event')
+    onError: (err: unknown) => {
+      const message = err instanceof Error ? err.message : 'Failed to create event'
+      toast.error(message)
     },
   })
 

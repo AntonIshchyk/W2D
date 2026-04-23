@@ -1,4 +1,6 @@
 import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
+import { PAGINATION } from '../config/constants'
+import { ensureResponseOk } from '../lib/utils/http'
 
 export interface Community {
   id: number
@@ -6,7 +8,13 @@ export interface Community {
 }
 
 export async function fetchCommunities(): Promise<Community[]> {
-  const response = await fetch(API_ENDPOINTS.communities.base, { headers: getAuthHeaders() })
-  if (!response.ok) throw new Error('Failed to fetch communities')
-  return response.json()
+  const response = await fetch(
+    `${API_ENDPOINTS.communities.base}?limit=${PAGINATION.COMMUNITIES_FETCH_SIZE}`,
+    { headers: getAuthHeaders() }
+  )
+
+  await ensureResponseOk(response, 'Failed to fetch communities')
+
+  const json = await response.json()
+  return Array.isArray(json) ? json : (json.items ?? [])
 }
