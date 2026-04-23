@@ -180,10 +180,28 @@ export function Events() {
     }
     setIsGettingLocation(true)
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setSearchBounds(null)
-        setSearchLocationName(null)
-        flyTo([pos.coords.latitude, pos.coords.longitude], 12)
+      async (pos) => {
+        const lat = pos.coords.latitude
+        const lng = pos.coords.longitude
+        
+        const bounds = boundsFromResult({ lat: lat.toString(), lon: lng.toString() })
+        setSearchBounds(bounds)
+        
+        try {
+          const res = await fetch(`https://photon.komoot.io/reverse?lon=${lng}&lat=${lat}`)
+          const data = await res.json()
+          if (data.features && data.features.length > 0) {
+            const props = data.features[0].properties
+            const displayName = props.city || props.name || props.state || 'Your Location'
+            setSearchLocationName(displayName)
+          } else {
+            setSearchLocationName('Your Location')
+          }
+        } catch {
+          setSearchLocationName('Your Location')
+        }
+        
+        flyTo([lat, lng], 12)
         setIsGettingLocation(false)
       },
       () => {
