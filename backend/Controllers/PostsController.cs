@@ -26,7 +26,7 @@ public class PostsController : ControllerBase
     public async Task<ActionResult<ScrollResult<PostResponse>>> GetPosts(
         [FromQuery] int? cursor = null,
         [FromQuery] int limit = PaginationConstants.DefaultPageSize,
-        [FromQuery] int? communityId = null,
+        [FromQuery] int[]? communityIds = null,
         [FromQuery] int? userId = null,
         [FromQuery] int? type = null,
         [FromQuery] string? sortBy = null)
@@ -41,7 +41,7 @@ public class PostsController : ControllerBase
         ScrollResult<PostResponse> result = await _postService.GetPostsAsync(
             cursor,
             limit,
-            communityId,
+            communityIds,
             userId,
             type,
             sortBy,

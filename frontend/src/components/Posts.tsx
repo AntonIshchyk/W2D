@@ -106,7 +106,7 @@ function PostCard({
 
 export function Posts() {
   const navigate = useNavigate()
-  const [selectedCommunity, setSelectedCommunity] = useState<number | undefined>()
+  const [selectedCommunities, setSelectedCommunities] = useState<number[]>([])
   const [selectedType, setSelectedType]         = useState<number | undefined>()
   const [sortBy, setSortBy]                     = useState('new')
   const [communityOpen, setCommunityOpen]         = useState(false)
@@ -122,10 +122,10 @@ export function Posts() {
   })
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
-    queryKey: ['posts', selectedCommunity, selectedType, sortBy],
+    queryKey: ['posts', selectedCommunities, selectedType, sortBy],
     queryFn: ({ pageParam }) => fetchPosts({
       cursor: pageParam,
-      communityId: selectedCommunity,
+      communityIds: selectedCommunities.length > 0 ? selectedCommunities : undefined,
       type: selectedType,
       sortBy,
     }),
@@ -140,7 +140,7 @@ export function Posts() {
     mutationFn: ({ postId, value }: { postId: number; value: number }) => votePost(postId, value),
     onMutate: async ({ postId, value }) => {
       // Optmistic update code...
-      const key = ['posts', selectedCommunity, selectedType, sortBy]
+      const key = ['posts', selectedCommunities, selectedType, sortBy]
       await queryClient.cancelQueries({ queryKey: key })
       const previous = queryClient.getQueryData(key)
       queryClient.setQueryData(key, (data: any) => {
@@ -162,12 +162,12 @@ export function Posts() {
     },
     onError: (_err, context: any) => {
       if (context?.previous) {
-        queryClient.setQueryData(['posts', selectedCommunity, selectedType, sortBy], context.previous)
+        queryClient.setQueryData(['posts', selectedCommunities, selectedType, sortBy], context.previous)
       }
       toast.error('Failed to vote')
     },
     onSettled: (_data, _error, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['posts', selectedCommunity, selectedType, sortBy] })
+      queryClient.invalidateQueries({ queryKey: ['posts', selectedCommunities, selectedType, sortBy] })
       if (variables) queryClient.invalidateQueries({ queryKey: ['post', variables.postId.toString()] })
     }
   })
@@ -223,12 +223,12 @@ export function Posts() {
 
           <div className="h-8 w-px bg-border/50 mx-1 shrink-0"></div>
 
-          {(selectedCommunity !== undefined || selectedType !== undefined || sortBy !== 'new') && (
+          {(selectedCommunities.length > 0 || selectedType !== undefined || sortBy !== 'new') && (
             <Button 
               variant="outline"
               size="sm"
               className="rounded-full h-10 px-3 text-destructive border-destructive/30 hover:bg-destructive/10 hover:border-destructive/50 shrink-0"
-              onClick={() => { setSelectedCommunity(undefined); setSelectedType(undefined); setSortBy('new') }}
+              onClick={() => { setSelectedCommunities([]); setSelectedType(undefined); setSortBy('new') }}
             >
               ✕ Reset
             </Button>
@@ -237,9 +237,11 @@ export function Posts() {
           <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" className="rounded-full h-10 gap-2 shrink-0 border-border/60 hover:border-primary/50 transition-colors">
-                {selectedCommunity
-                  ? communities?.find(c => c.id === selectedCommunity)?.name
-                  : 'All Communities'}
+                {selectedCommunities.length === 0
+                  ? 'All Communities'
+                  : selectedCommunities.length === 1
+                    ? communities?.find(c => c.id === selectedCommunities[0])?.name
+                    : `${selectedCommunities.length} Communities`}
                 <ChevronsUpDown className="h-3 w-3 opacity-50 ml-1" />
               </Button>
             </PopoverTrigger>
@@ -249,13 +251,19 @@ export function Posts() {
                 <CommandList>
                   <CommandEmpty>No community found.</CommandEmpty>
                   <CommandGroup>
-                    <CommandItem value="all" onSelect={() => { setSelectedCommunity(undefined); setCommunityOpen(false) }}>
-                      <Check className={cn('mr-2 h-4 w-4', !selectedCommunity ? 'opacity-100' : 'opacity-0')} />
+                    <CommandItem value="all" onSelect={() => { setSelectedCommunities([]); setCommunityOpen(false) }}>
+                      <Check className={cn('mr-2 h-4 w-4', selectedCommunities.length === 0 ? 'opacity-100' : 'opacity-0')} />
                       All communities
                     </CommandItem>
                     {communities?.map(a => (
-                      <CommandItem key={a.id} value={a.name} onSelect={() => { setSelectedCommunity(a.id); setCommunityOpen(false) }}>
-                        <Check className={cn('mr-2 h-4 w-4', selectedCommunity === a.id ? 'opacity-100' : 'opacity-0')} />
+                      <CommandItem key={a.id} value={a.name} onSelect={() => {
+                        setSelectedCommunities(prev =>
+                          prev.includes(a.id)
+                            ? prev.filter(id => id !== a.id)
+                            : [...prev, a.id]
+                        )
+                      }}>
+                        <Check className={cn('mr-2 h-4 w-4', selectedCommunities.includes(a.id) ? 'opacity-100' : 'opacity-0')} />
                         {a.name}
                       </CommandItem>
                     ))}
@@ -322,7 +330,7 @@ export function Posts() {
               icon={ImageIcon}
               title="No posts found"
               description="There are no posts here yet."
-              action={currentUser && !selectedCommunity && !selectedType ? {
+              action={currentUser && selectedCommunities.length === 0 && !selectedType ? {
                 label: 'Create Post',
                 onClick: () => navigate('/posts/create')
               } : undefined}

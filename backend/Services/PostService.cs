@@ -22,7 +22,7 @@ public class PostService : IPostService
     public async Task<ScrollResult<PostResponse>> GetPostsAsync(
         int? cursor = null,
         int limit = PaginationConstants.DefaultPageSize,
-        int? communityId = null,
+        int[]? communityIds = null,
         int? userId = null,
         int? type = null,
         string? sortBy = null,
@@ -33,9 +33,9 @@ public class PostService : IPostService
             .Include(p => p.User)
             .Include(p => p.Community);
 
-        if (communityId.HasValue)
+        if (communityIds != null && communityIds.Length > 0)
         {
-            query = query.Where(p => p.CommunityId == communityId.Value);
+            query = query.Where(p => communityIds.Contains(p.CommunityId));
         }
 
         if (userId.HasValue)

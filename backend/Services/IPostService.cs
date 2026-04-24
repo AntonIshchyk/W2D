@@ -10,7 +10,7 @@ public interface IPostService
     Task<ScrollResult<PostResponse>> GetPostsAsync(
         int? cursor = null,
         int limit = PaginationConstants.DefaultPageSize,
-        int? communityId = null,
+        int[]? communityIds = null,
         int? userId = null,
         int? type = null,
         string? sortBy = null,
