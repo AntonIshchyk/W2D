@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
-  Plus, Check, ChevronsUpDown, ImageIcon, Flame, Clock, TrendingUp
+  Plus, Check, ChevronsUpDown, ImageIcon, Clock, TrendingUp
 } from 'lucide-react'
 import { Button } from './ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
@@ -120,19 +120,13 @@ export function Posts() {
             <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-full border border-border/50 shrink-0">
               <button
                 onClick={() => setSortBy('new')}
-                className={cn("px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2", sortBy === 'new' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}
+                className={cn("px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2", sortBy === 'new' ? "bg-background shadow-sm text-foreground" : "text-foreground hover:text-primary")}
               >
               <Clock className="w-4 h-4" /> New
             </button>
             <button
-              onClick={() => setSortBy('hot')}
-              className={cn("px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2", sortBy === 'hot' ? "bg-background shadow-sm text-orange-600" : "text-muted-foreground hover:text-foreground")}
-            >
-              <Flame className="w-4 h-4" /> Hot
-            </button>
-            <button
               onClick={() => setSortBy('top')}
-              className={cn("px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2", sortBy === 'top' ? "bg-background shadow-sm text-blue-600" : "text-muted-foreground hover:text-foreground")}
+              className={cn("px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2", sortBy === 'top' ? "bg-background shadow-sm text-blue-600" : "text-foreground hover:text-primary")}
             >
               <TrendingUp className="w-4 h-4" /> Top
             </button>

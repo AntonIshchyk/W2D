@@ -54,7 +54,7 @@ public class PostService : IPostService
 
         if (cursor.HasValue)
         {
-            if (sortMode == "hot" || sortMode == "top")
+            if (sortMode == "top")
             {
                 Post? cursorPost = await _context.Posts
                     .AsNoTracking()
@@ -75,7 +75,7 @@ public class PostService : IPostService
 
         query = sortMode switch
         {
-            "hot" or "top" => query.OrderByDescending(p => p.Score).ThenByDescending(p => p.Id),
+            "top" => query.OrderByDescending(p => p.Score).ThenByDescending(p => p.Id),
             _ => query.OrderByDescending(p => p.Id)
         };
 
