@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
-  Plus, Check, ChevronsUpDown, ImageIcon, Clock, TrendingUp
+  Plus, Check, ChevronsUpDown, ImageIcon, Clock, TrendingUp, X
 } from 'lucide-react'
 import { Button } from './ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
@@ -114,112 +114,110 @@ export function Posts() {
 
   return (
     <PageLayout>
-      <div className="flex flex-col md:flex-row items-center justify-center gap-4 pb-6 mb-6 mt-2">
-        <div className="flex items-center justify-center gap-3 overflow-x-auto no-scrollbar w-full md:w-auto">
-            
+      <div className="flex flex-col items-center justify-center gap-3 pb-6 mb-6 mt-2">
+        <div className="flex flex-col items-center gap-3 w-fit max-w-full">
+          <div className="flex items-center justify-center gap-3 overflow-x-auto no-scrollbar w-fit max-w-full">
             <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-full border border-border/50 shrink-0">
               <button
                 onClick={() => setSortBy('new')}
                 className={cn("px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2", sortBy === 'new' ? "bg-background shadow-sm text-foreground" : "text-foreground hover:text-primary")}
               >
-              <Clock className="w-4 h-4" /> New
-            </button>
-            <button
-              onClick={() => setSortBy('top')}
-              className={cn("px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2", sortBy === 'top' ? "bg-background shadow-sm text-blue-600" : "text-foreground hover:text-primary")}
+                <Clock className="w-4 h-4" /> New
+              </button>
+              <button
+                onClick={() => setSortBy('top')}
+                className={cn("px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2", sortBy === 'top' ? "bg-background shadow-sm text-foreground" : "text-foreground hover:text-primary")}
+              >
+                <TrendingUp className="w-4 h-4" /> Top
+              </button>
+            </div>
+
+            <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="rounded-full h-10 gap-2 shrink-0 border-border/60 hover:border-primary/50 transition-colors">
+                  {selectedCommunities.length === 0
+                    ? 'All Communities'
+                    : selectedCommunities.length === 1
+                      ? communities?.find(c => c.id === selectedCommunities[0])?.name
+                      : `${selectedCommunities.length} Communities`}
+                  <ChevronsUpDown className="h-3 w-3 opacity-50 ml-1" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-0 rounded-2xl" align="start">
+                <Command>
+                  <CommandInput placeholder="Search communities…" className="h-10" />
+                  <CommandList>
+                    <CommandEmpty>No community found.</CommandEmpty>
+                    <CommandGroup>
+                      <CommandItem value="all" onSelect={() => { setSelectedCommunities([]); setCommunityOpen(false) }}>
+                        <Check className={cn('mr-2 h-4 w-4', selectedCommunities.length === 0 ? 'opacity-100' : 'opacity-0')} />
+                        All communities
+                      </CommandItem>
+                      {communities?.map(a => (
+                        <CommandItem key={a.id} value={a.name} onSelect={() => {
+                          setSelectedCommunities(prev =>
+                            prev.includes(a.id)
+                              ? prev.filter(id => id !== a.id)
+                              : [...prev, a.id]
+                          )
+                        }}>
+                          <Check className={cn('mr-2 h-4 w-4', selectedCommunities.includes(a.id) ? 'opacity-100' : 'opacity-0')} />
+                          {a.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+
+            <Select
+              value={selectedType?.toString() ?? 'all'}
+              onValueChange={v => setSelectedType(v === 'all' ? undefined : Number(v))}
             >
-              <TrendingUp className="w-4 h-4" /> Top
-            </button>
+              <SelectTrigger className="h-10 rounded-full border-border/60 shrink-0 w-40 hover:border-primary/50 transition-colors">
+                <SelectValue placeholder="All types" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl">
+                <SelectItem value="all">All types</SelectItem>
+                {Object.entries(POST_TYPE_LABELS).map(([value, label]) => {
+                  const Icon = POST_TYPE_ICONS[Number(value) as PostType]
+                  return (
+                    <SelectItem key={value} value={value}>
+                      <div className="flex items-center gap-2">
+                        {Icon && <Icon className="w-4 h-4" />}
+                        <span>{label}</span>
+                      </div>
+                    </SelectItem>
+                  )
+                })}
+              </SelectContent>
+            </Select>
+
+            {currentUser && (
+              <Button
+                className="rounded-full shadow-sm hover:shadow-md transition-all px-6 shrink-0 flex items-center gap-2"
+                onClick={() => navigate('/posts/create')}
+              >
+                <Plus className="h-4 w-4" />
+                <span>Create Post</span>
+              </Button>
+            )}
           </div>
 
-          <div className="h-8 w-px bg-border/50 mx-1 shrink-0"></div>
-
           {(selectedCommunities.length > 0 || selectedType !== undefined || sortBy !== 'new') && (
-            <Button 
+            <Button
               variant="outline"
               size="sm"
-              className="rounded-full h-10 px-3 text-destructive border-destructive/30 hover:bg-destructive/10 hover:border-destructive/50 shrink-0"
+              className="rounded-full h-9 w-full text-destructive border-destructive/40 hover:bg-destructive hover:text-white hover:border-destructive transition-colors"
               onClick={() => { setSelectedCommunities([]); setSelectedType(undefined); setSortBy('new') }}
             >
-              ✕ Reset
+              <X/> Reset filters
             </Button>
           )}
-
-          <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="rounded-full h-10 gap-2 shrink-0 border-border/60 hover:border-primary/50 transition-colors">
-                {selectedCommunities.length === 0
-                  ? 'All Communities'
-                  : selectedCommunities.length === 1
-                    ? communities?.find(c => c.id === selectedCommunities[0])?.name
-                    : `${selectedCommunities.length} Communities`}
-                <ChevronsUpDown className="h-3 w-3 opacity-50 ml-1" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-56 p-0 rounded-2xl" align="start">
-              <Command>
-                <CommandInput placeholder="Search communities…" className="h-10" />
-                <CommandList>
-                  <CommandEmpty>No community found.</CommandEmpty>
-                  <CommandGroup>
-                    <CommandItem value="all" onSelect={() => { setSelectedCommunities([]); setCommunityOpen(false) }}>
-                      <Check className={cn('mr-2 h-4 w-4', selectedCommunities.length === 0 ? 'opacity-100' : 'opacity-0')} />
-                      All communities
-                    </CommandItem>
-                    {communities?.map(a => (
-                      <CommandItem key={a.id} value={a.name} onSelect={() => {
-                        setSelectedCommunities(prev =>
-                          prev.includes(a.id)
-                            ? prev.filter(id => id !== a.id)
-                            : [...prev, a.id]
-                        )
-                      }}>
-                        <Check className={cn('mr-2 h-4 w-4', selectedCommunities.includes(a.id) ? 'opacity-100' : 'opacity-0')} />
-                        {a.name}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-
-          <Select
-            value={selectedType?.toString() ?? 'all'}
-            onValueChange={v => setSelectedType(v === 'all' ? undefined : Number(v))}
-          >
-            <SelectTrigger className="h-10 rounded-full border-border/60 shrink-0 w-40 hover:border-primary/50 transition-colors">
-              <SelectValue placeholder="All types" />
-            </SelectTrigger>
-            <SelectContent className="rounded-2xl">
-              <SelectItem value="all">All types</SelectItem>
-              {Object.entries(POST_TYPE_LABELS).map(([value, label]) => {
-                const Icon = POST_TYPE_ICONS[Number(value) as PostType]
-                return (
-                  <SelectItem key={value} value={value}>
-                    <div className="flex items-center gap-2">
-                      {Icon && <Icon className="w-4 h-4" />}
-                      <span>{label}</span>
-                    </div>
-                  </SelectItem>
-                )
-              })}
-            </SelectContent>
-          </Select>
         </div>
-
-        {currentUser && (
-          <Button
-            className="rounded-full shadow-sm hover:shadow-md transition-all px-6 shrink-0 w-full md:w-auto flex items-center justify-center"
-            onClick={() => navigate('/posts/create')}
-          >
-            <Plus className="h-4 w-4" />
-            <span>Create Post</span>
-          </Button>
-        )}
       </div>
 
-      {/* Post Feed */}
       <div className="max-w-3xl mx-auto space-y-6">
         {isLoading ? (
           [...Array(3)].map((_, i) => (
