@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Calendar,
   Plus,
   X,
   ChevronsUpDown,
@@ -13,8 +12,6 @@ import {
   Map, List,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { format } from 'date-fns'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
 import { Input } from './ui/input'
@@ -22,6 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { PageLayout } from './Navbar'
 import { EventsMap, type FlyToTarget } from './EventsMap'
+import { EventCard } from './EventCard'
 import { cn } from '../lib/utils'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { fetchEvents, reverseGeocode, searchCities } from '../api/events'
@@ -29,38 +27,9 @@ import { fetchCommunities } from '../api/communities'
 import { loadMapState, DEFAULT_CENTER, DEFAULT_ZOOM } from '../utils/events'
 import type { CitySearchResult, Event, EventQueryBounds, ViewMode } from '../types/events'
 
-// ─── EventCard ─────────────────────────────────────────────────────────────────
-
-function EventCard({ event }: { event: Event }) {
-  const navigate = useNavigate()
-  return (
-    <Card
-      className="flex flex-col h-full hover:shadow-sm transition-shadow cursor-pointer"
-      onClick={() => navigate(`/events/${event.id}`)}
-    >
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base leading-snug line-clamp-2">{event.title}</CardTitle>
-        <CardDescription className="line-clamp-2 text-xs mt-1">{event.description}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex-1 space-y-3 pb-3">
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Calendar className="h-3.5 w-3.5 shrink-0" />
-          <span>{format(new Date(event.scheduledAt), 'EEE, MMM d · h:mm a')}</span>
-        </div>
-        {event.communityName && (
-          <span className="text-xs text-muted-foreground">{event.communityName}</span>
-        )}
-      </CardContent>
-    </Card>
-  )
-}
-
-// ─── Events ────────────────────────────────────────────────────────────────────
 
 export function Events() {
   const navigate = useNavigate()
-
-  // ── UI state ────────────────────────────────────────────────────────────────
   const [viewMode, setViewMode] = useState<ViewMode>('map')
   const [selectedCommunities, setSelectedCommunities] = useState<number[]>([])
   const [communityOpen, setCommunityOpen] = useState(false)
@@ -74,7 +43,6 @@ export function Events() {
   const [searchLocationName, setSearchLocationName] = useState<string | null>(null)
   const boundsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // ── City search UI ──────────────────────────────────────────────────────────
   const [searchQuery, setSearchQuery] = useState('')
   const [autocompleteResults, setAutocompleteResults] = useState<CitySearchResult[]>([])
   const [showAutocomplete, setShowAutocomplete] = useState(false)
@@ -82,7 +50,6 @@ export function Events() {
   const [isGettingLocation, setIsGettingLocation] = useState(false)
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // ── Data ────────────────────────────────────────────────────────────────────
   const { data: currentUser } = useCurrentUser()
   const { data: communities } = useQuery({
     queryKey: ['communities-list'],
@@ -95,7 +62,6 @@ export function Events() {
     queryFn: () => fetchEvents(selectedCommunities, effectiveBounds),
   })
 
-  // ── Effects ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current)
     boundsDebounceRef.current = setTimeout(() => setDebouncedBounds(rawBounds), 500)
@@ -133,7 +99,6 @@ export function Events() {
     }
   }, [searchQuery])
 
-  // ── Handlers ─────────────────────────────────────────────────────────────────
 
   function flyTo(center: [number, number], zoom: number) {
     flyToIdRef.current += 1
@@ -224,7 +189,6 @@ export function Events() {
     } catch {}
   }
 
-  // ── Derived ──────────────────────────────────────────────────────────────────
   const selectedCommunityNames = (communities ?? [])
     .filter((c) => selectedCommunities.includes(c.id))
     .map((c) => c.name)
@@ -239,18 +203,14 @@ export function Events() {
   return (
     <PageLayout fullWidth>
       <div className="relative w-full h-dvh flex flex-col overflow-hidden">
-
-        {/* ── Toolbar ── */}
         <div className="absolute top-0 left-0 right-0 z-10 p-4 pointer-events-none flex flex-col gap-2">
+          
           <div className="pointer-events-auto flex flex-col xl:flex-row xl:items-center justify-between bg-card/95 backdrop-blur shadow-sm border rounded-xl p-3 gap-3">
             <div className="flex flex-wrap items-center gap-3 xl:gap-6">
-
-              {/* Title + count */}
               <h1 className="text-xl font-bold leading-none">
                 Events ({allEvents.length})
               </h1>
 
-              {/* City search */}
               <div className="relative flex gap-2 flex-wrap sm:flex-nowrap items-start sm:items-center">
                 <form onSubmit={handleSearchSubmit} className="relative w-40 sm:w-48">
                   <Input
@@ -320,7 +280,6 @@ export function Events() {
                 </Badge>
               )}
 
-              {/* Community filter */}
               <div className="flex items-center gap-2 flex-wrap">
                 <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
                   <PopoverTrigger asChild>
@@ -377,7 +336,6 @@ export function Events() {
               </div>
             </div>
 
-            {/* Right side: view toggle + create */}
             <div className="flex items-center gap-3">
               <div className="flex rounded-lg border overflow-hidden h-9">
                 <Button
@@ -411,7 +369,6 @@ export function Events() {
           </div>
         </div>
 
-        {/* ── Map view ── */}
         <div className={cn('flex-1 w-full h-full relative z-0', viewMode !== 'map' && 'hidden')}>
           <EventsMap
             events={allEvents}
@@ -425,7 +382,6 @@ export function Events() {
           />
         </div>
 
-        {/* ── List view ── */}
         {viewMode === 'list' && (
           <div className="flex-1 overflow-y-auto pt-28 sm:pt-24 px-4 pb-6">
             {eventsLoading ? (
@@ -447,7 +403,6 @@ export function Events() {
           </div>
         )}
 
-        {/* ── Selected event panel (map view only) ── */}
         <div
           className={cn(
             'absolute top-28 sm:top-24 right-4 w-[calc(100vw-2rem)] sm:w-80 max-h-[60vh] z-20',

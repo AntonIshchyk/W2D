@@ -1,9 +1,8 @@
 import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
-  MessageSquare,
   Plus, Check, ChevronsUpDown, ImageIcon, Flame, Clock, TrendingUp
 } from 'lucide-react'
 import { Button } from './ui/button'
@@ -14,7 +13,6 @@ import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { PostType } from '../types/posts'
 import type { Post } from '../types/posts'
-import { formatRelativeTime } from '../lib/utils/date'
 import { EmptyState } from './ui/empty-state'
 import { LoadingSpinner } from './ui/loading-spinner'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
@@ -22,87 +20,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { cn } from '../lib/utils'
 import { fetchPosts, votePost, POST_TYPE_LABELS, POST_TYPE_ICONS } from '../api/posts'
 import { fetchCommunities } from '../api/communities'
-import { PostCarousel } from './PostCarousel'
-
-import { PostAuthorInfo } from './PostAuthorInfo'
-import { VoteButtons } from './VoteButtons'
-
-// ── Modern Post Card ────────────────────────────────────────────────────────
-
-function PostCard({
-  post,
-  currentUser,
-  onVote,
-}: {
-  post: Post
-  currentUser: any
-  onVote: (postId: number, currentVote: number | undefined, newValue: number) => void
-}) {
-  return (
-    <article className="group bg-card border border-border/50 rounded-3xl p-5 md:p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 flex flex-col">
-      
-      {/* Header Info */}
-      <div className="flex items-center justify-between mb-4">
-        <PostAuthorInfo author={post.author as any} type={post.type as PostType} />
-
-        <div className="flex items-center gap-2">
-          {post.communityName && (
-            <span className="px-3 py-1 rounded-full text-xs font-bold border bg-primary text-primary-foreground border-primary">
-              {post.communityName}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1">
-        <Link to={`/posts/${post.id}`}>
-          <h3 className="font-bold text-xl md:text-2xl text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
-            {post.title}
-          </h3>
-        </Link>
-        
-        {post.description && (
-          <p className="text-foreground text-sm md:text-base line-clamp-3 leading-relaxed">
-            {post.description}
-          </p>
-        )}
-
-        <PostCarousel urls={post.photoUrls || []} containerClassName="mt-4 mb-2 md:px-0" imageContainerClassName="h-75 md:h-112.5" />
-      </div>
-
-      {/* Footer Actions Minimal */}
-      <div className="flex items-center justify-between mt-5 pt-4 border-t border-border/40">
-        <div className="flex items-center gap-3">
-          {/* Upvotes */}
-          <VoteButtons
-            score={post.score}
-            currentUserVote={post.currentUserVote}
-            onVote={(value) => onVote(post.id, post.currentUserVote, value)}
-            disabled={!currentUser}
-          />
-
-          {/* Comments */}
-          <Link
-            to={`/posts/${post.id}`}
-            className="flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground hover:bg-muted/50 px-3 py-2 rounded-full transition-colors border border-transparent hover:border-border/50 bg-muted/40"
-          >
-            <MessageSquare className="w-4 h-4" />
-            <span>{post.commentCount}</span>
-          </Link>
-
-          {/* Time (Next to comments) */}
-          <div className="flex items-center gap-1.5 text-sm font-bold text-muted-foreground bg-muted/40 px-3 py-2 rounded-full border border-border/50">
-            <Clock className="w-4 h-4 opacity-70" />
-            <span>{formatRelativeTime(post.createdAt)}</span>
-          </div>
-        </div>
-      </div>
-    </article>
-  )
-}
-
-// ── Main Page Component ─────────────────────────────────────────────────────
+import { PostCard } from './PostCard'
 
 export function Posts() {
   const navigate = useNavigate()
@@ -139,7 +57,6 @@ export function Posts() {
   const voteMutation = useMutation({
     mutationFn: ({ postId, value }: { postId: number; value: number }) => votePost(postId, value),
     onMutate: async ({ postId, value }) => {
-      // Optmistic update code...
       const key = ['posts', selectedCommunities, selectedType, sortBy]
       await queryClient.cancelQueries({ queryKey: key })
       const previous = queryClient.getQueryData(key)

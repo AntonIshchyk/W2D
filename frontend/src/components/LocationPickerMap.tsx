@@ -1,30 +1,13 @@
-import { useState } from 'react'
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
-import L from 'leaflet'
 import { ensureLeafletDefaultIcon } from '../utils/leafletIcon'
+import { LocationMarker } from './LocationMarker'
 
 ensureLeafletDefaultIcon()
 
 interface LocationPickerProps {
   onLocationSelect: (lat: number, lng: number) => void
   defaultLocation?: [number, number]
-}
-
-function LocationMarker({ onLocationSelect, defaultLocation }: LocationPickerProps) {
-  const [position, setPosition] = useState<L.LatLng | null>(
-    defaultLocation ? new L.LatLng(defaultLocation[0], defaultLocation[1]) : null,
-  )
-
-  const map = useMapEvents({
-    click(e) {
-      setPosition(e.latlng)
-      onLocationSelect(e.latlng.lat, e.latlng.lng)
-      map.flyTo(e.latlng, map.getZoom())
-    },
-  })
-
-  return position ? <Marker position={position} /> : null
 }
 
 export function LocationPickerMap({ onLocationSelect, defaultLocation }: LocationPickerProps) {

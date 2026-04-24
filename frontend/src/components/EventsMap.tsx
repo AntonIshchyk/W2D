@@ -1,24 +1,16 @@
-import { useEffect, useRef } from 'react'
 import {
   MapContainer,
   TileLayer,
   Marker,
   ZoomControl,
-  useMap,
-  useMapEvents,
 } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { ensureLeafletDefaultIcon } from '../utils/leafletIcon'
+import { MapController, type FlyToTarget } from './MapController'
 import type { Event, EventQueryBounds } from '../types/events'
 
 ensureLeafletDefaultIcon()
-
-export interface FlyToTarget {
-  center: [number, number]
-  zoom: number
-  id: number
-}
 
 interface EventsMapProps {
   events: Event[]
@@ -30,49 +22,6 @@ interface EventsMapProps {
   initialCenter?: [number, number]
   initialZoom?: number
 }
-
-interface ControllerProps {
-  onBoundsChange: (b: EventQueryBounds) => void
-  onViewChange?: (center: [number, number], zoom: number) => void
-  onMapClick: () => void
-  flyToTarget?: FlyToTarget | null
-}
-
-function MapController({
-  onBoundsChange,
-  onViewChange,
-  onMapClick,
-  flyToTarget,
-}: ControllerProps) {
-  const map = useMap()
-  const handledFlyIdRef = useRef<number | null>(null)
-
-  useMapEvents({
-    moveend: () => {
-      const b = map.getBounds()
-      onBoundsChange({
-        minLat: b.getSouth(),
-        maxLat: b.getNorth(),
-        minLng: b.getWest(),
-        maxLng: b.getEast(),
-      })
-      const c = map.getCenter()
-      onViewChange?.([c.lat, c.lng], map.getZoom())
-    },
-    click: () => onMapClick(),
-  })
-
-  useEffect(() => {
-    if (!flyToTarget) return
-    if (flyToTarget.id === handledFlyIdRef.current) return
-    handledFlyIdRef.current = flyToTarget.id
-    map.flyTo(flyToTarget.center, flyToTarget.zoom, { duration: 1.8 })
-  }, [flyToTarget, map])
-
-  return null
-}
-
-// --- Public component ----------------------------------------------------------
 
 export function EventsMap({
   events,
@@ -125,3 +74,5 @@ export function EventsMap({
     </div>
   )
 }
+export type { FlyToTarget }
+

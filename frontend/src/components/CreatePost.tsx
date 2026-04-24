@@ -25,48 +25,21 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { cn } from '../lib/utils'
 import { PhotoUpload } from './PhotoUpload'
+import { FormField } from './FormField'
 import { fetchCommunities } from '../api/communities'
 import { createPost } from '../api/posts'
-
-/* ---------- Field wrapper ---------- */
-
-function Field({
-  label,
-  icon,
-  children
-}: {
-  label: string
-  icon?: React.ReactNode
-  children: React.ReactNode
-}) {
-  return (
-    <div className="space-y-2">
-      <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-        {icon}
-        {label}
-      </label>
-      {children}
-    </div>
-  )
-}
-
-/* ---------- Component ---------- */
 
 export function CreatePost() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [type, setType] = useState<number>(PostType.ExperienceShare)
   const [communityId, setCommunityId] = useState<number | ''>('')
-
   const [communityOpen, setCommunityOpen] = useState(false)
   const [locationName, setLocationName] = useState('')
   const [photoUrls, setPhotoUrls] = useState<string[]>([])
-
   const { data: currentUser, isError, error: userError } = useCurrentUser()
-
   const { data: communities, isLoading: communitiesLoading } = useQuery({
     queryKey: ['communities'],
     queryFn: fetchCommunities
@@ -137,10 +110,8 @@ export function CreatePost() {
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-8">
-
               <section className="space-y-6">
-
-                <Field label="Post Type">
+                <FormField label="Post Type">
                   <Select value={type.toString()} onValueChange={v => setType(Number(v))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
@@ -158,9 +129,9 @@ export function CreatePost() {
                         })}
                     </SelectContent>
                   </Select>
-                </Field>
+                </FormField>
 
-                <Field label="Community">
+                <FormField label="Community">
                   <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="justify-between w-full">
@@ -199,27 +170,27 @@ export function CreatePost() {
                       </Command>
                     </PopoverContent>
                   </Popover>
-                </Field>
+                </FormField>
 
-                <Field label="Title" icon={<FileText className="w-4 h-4" />}>
+                <FormField label="Title" icon={<FileText className="w-4 h-4" />}>
                   <Input value={title} onChange={e => setTitle(e.target.value)} maxLength={200} />
-                </Field>
+                </FormField>
 
-                <Field label="Description">
+                <FormField label="Description">
                   <Textarea
                     value={description}
                     onChange={e => setDescription(e.target.value)}
                     rows={6}
                     maxLength={1000}
                   />
-                </Field>
+                </FormField>
               </section>
 
               <section className="space-y-6">
 
-                <Field label="Location" icon={<MapPin className="w-4 h-4" />}>
+                <FormField label="Location" icon={<MapPin className="w-4 h-4" />}>
                   <Input value={locationName} onChange={e => setLocationName(e.target.value)} />
-                </Field>
+                </FormField>
 
               </section>
 
@@ -250,4 +221,3 @@ export function CreatePost() {
     </PageLayout>
   )
 }
-

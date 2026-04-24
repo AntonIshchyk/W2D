@@ -1,144 +1,23 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
   Calendar, ArrowLeft,
-  Edit2, Trash2
 } from 'lucide-react'
-import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { Card, CardContent } from './ui/card'
 import { Button } from './ui/button'
-import { Input } from './ui/input'
-import { Textarea } from './ui/textarea'
-import { Label } from './ui/label'
 import { Skeleton } from './ui/skeleton'
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
-  DialogDescription, DialogFooter
-} from './ui/dialog'
 import { PageLayout } from './Navbar'
 import {
-  deleteEvent,
   fetchEvent,
-  updateEvent,
 } from '../api/events'
 import { cn } from '../lib/utils'
-import { useCurrentUser } from '../hooks/useCurrentUser'
-import type { Event, UpdateEventRequest } from '../types/events'
-
-// ── EditEventDialog ───────────────────────────────────────────────────────────
-
-function EditEventDialog({ event, onClose }: { event: Event; onClose: () => void }) {
-  const queryClient = useQueryClient()
-  const [title, setTitle]           = useState(event.title)
-  const [description, setDescription] = useState(event.description)
-  const [scheduledAt, setScheduledAt] = useState(
-    event.scheduledAt ? format(new Date(event.scheduledAt), "yyyy-MM-dd'T'HH:mm") : ''
-  )
-
-  const mutation = useMutation({
-    mutationFn: (data: UpdateEventRequest) => updateEvent(event.id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['event', event.id] })
-      queryClient.invalidateQueries({ queryKey: ['events'] })
-      toast.success('Event updated')
-      onClose()
-    },
-    onError: (err: Error) => toast.error(err.message),
-  })
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!title.trim() || !description.trim() || !scheduledAt) {
-      toast.error('Title, description, and date are required')
-      return
-    }
-
-    mutation.mutate({
-      title: title.trim(),
-      description: description.trim(),
-      scheduledAt: new Date(scheduledAt).toISOString(),
-    })
-  }
-
-  return (
-    <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit event</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-title">Title *</Label>
-            <Input id="edit-title" value={title} onChange={e => setTitle(e.target.value)} maxLength={120} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-desc">Description *</Label>
-            <Textarea id="edit-desc" value={description} onChange={e => setDescription(e.target.value)} rows={3} maxLength={2000} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-date">Date & time *</Label>
-            <Input id="edit-date" type="datetime-local" value={scheduledAt} onChange={e => setScheduledAt(e.target.value)} />
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? 'Saving…' : 'Save changes'}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-// ── DeleteConfirmDialog ───────────────────────────────────────────────────────
-
-function DeleteConfirmDialog({ eventId, onClose }: { eventId: number; onClose: () => void }) {
-  const navigate    = useNavigate()
-  const queryClient = useQueryClient()
-
-  const mutation = useMutation({
-    mutationFn: () => deleteEvent(eventId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['events'] })
-      toast.success('Event deleted')
-      navigate('/events')
-    },
-    onError: (err: Error) => toast.error(err.message),
-  })
-
-  return (
-    <Dialog open onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Delete event</DialogTitle>
-          <DialogDescription>
-            This will permanently delete the event. This cannot be undone.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button variant="destructive" disabled={mutation.isPending} onClick={() => mutation.mutate()}>
-            {mutation.isPending ? 'Deleting…' : 'Delete'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-// ── Main component ────────────────────────────────────────────────────────────
 
 export function EventDetail() {
   const { id } = useParams<{ id: string }>()
   const eventId = parseInt(id ?? '', 10)
   const navigate = useNavigate()
-  const [showEdit, setShowEdit]     = useState(false)
-  const [showDelete, setShowDelete] = useState(false)
 
-  const { data: currentUser } = useCurrentUser()
   const { data: event, isLoading, isError } = useQuery({
     queryKey: ['event', eventId],
     queryFn: () => fetchEvent(eventId),
@@ -173,7 +52,6 @@ export function EventDetail() {
   }
 
   const isPast      = new Date(event.scheduledAt) < new Date()
-  const isOrganizer = currentUser?.userId === event.organizerId
 
   return (
     <PageLayout>
@@ -197,18 +75,6 @@ export function EventDetail() {
               Organised by{' '}
               <span className="font-medium text-foreground">{event.organizerName}</span>
             </p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            {isOrganizer && (
-              <>
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShowEdit(true)}>
-                  <Edit2 className="h-3.5 w-3.5" />
-                </Button>
-                <Button variant="outline" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setShowDelete(true)}>
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </>
-            )}
           </div>
         </div>
 
@@ -237,9 +103,6 @@ export function EventDetail() {
             </div>
           </CardContent>
         </Card>
-
-        {showEdit && <EditEventDialog event={event} onClose={() => setShowEdit(false)} />}
-        {showDelete && <DeleteConfirmDialog eventId={event.id} onClose={() => setShowDelete(false)} />}
       </div>
     </PageLayout>
   )
