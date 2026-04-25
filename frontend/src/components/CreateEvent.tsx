@@ -30,8 +30,8 @@ import type { CitySearchResult } from '../types/events'
 
 const STEPS = [
   { id: 1, label: 'Details', icon: Info },
-  { id: 2, label: 'Photos', icon: Image },
-  { id: 3, label: 'Location', icon: MapPin },
+  { id: 2, label: 'Location', icon:  MapPin },
+  { id: 3, label: 'Photos', icon: Image },
 ]
 
 export function CreateEvent() {
@@ -254,12 +254,6 @@ export function CreateEvent() {
 
               {step === 2 && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                  
-                </div>
-              )}
-
-              {step === 3 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="space-y-2 relative">
                     <div className="flex items-center gap-2">
                       <label className="text-xs font-semibold uppercase tracking-widest">
@@ -310,6 +304,12 @@ export function CreateEvent() {
                       location={location ? [location.lat, location.lng] : null}
                     />
                   </div>
+                </div>
+              )}
+
+              {step === 3 && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                  
                 </div>
               )}
             </div>
