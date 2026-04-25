@@ -22,6 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { PageLayout } from './Navbar'
 import { LocationPickerMap } from './LocationPickerMap'
+import { EventImageUpload } from './EventImageUpload'
 import { createEvent, reverseGeocode } from '../api/events'
 import { fetchCommunities } from '../api/communities'
 import { useCitySearch } from '../hooks/useCitySearch'
@@ -51,6 +52,7 @@ export function CreateEvent() {
   const [communityId, setCommunityId] = useState<number | null>(null)
   const [communityOpen, setCommunityOpen] = useState(false)
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [imageUrls, setImageUrls] = useState<string[]>([])
   const [isFetchingLocation, setIsFetchingLocation] = useState(false)
 
   const {
@@ -123,14 +125,15 @@ export function CreateEvent() {
       latitude: location?.lat,
       longitude: location?.lng,
       locationName: locationInput.trim() || undefined,
+      imageUrl: imageUrls[0] || undefined,
     })
   }
 
   const canProceed =
     step === 1
-      ? title.trim().length > 0 && description.trim().length > 0
+      ? title.trim().length > 0 && description.trim().length > 0 && scheduledAt.length > 0
       : step === 2
-        ? scheduledAt.length > 0
+        ? true
         : true
 
   return (
@@ -309,7 +312,17 @@ export function CreateEvent() {
 
               {step === 3 && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                  
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold uppercase tracking-widest">
+                      Event Image <span className="normal-case font-normal text-muted-foreground/70">(optional)</span>
+                    </label>
+                    <EventImageUpload
+                      value={imageUrls}
+                      onChange={setImageUrls}
+                      maxFiles={4}
+                      disabled={mutation.isPending}
+                    />
+                  </div>
                 </div>
               )}
             </div>
