@@ -20,9 +20,7 @@ export function PostDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-
   const { data: currentUser, isError: userError, error: userQueryError } = useCurrentUser()
-
   const { data: post, isLoading, isError } = useQuery({
     queryKey: ['post', id],
     queryFn: () => fetchPost(Number(id)),
@@ -83,24 +81,19 @@ export function PostDetail() {
     </PageLayout>
   )
 
-  const isOwner     = currentUser?.userId === post.author?.id
-  const photos      = post.photoUrls ?? []
+  const isOwner = currentUser?.userId === post.author?.id
+  const photos = post.photoUrls ?? []
 
   return (
     <PageLayout>
       <div className="max-w-3xl mx-auto">
-
-          {/* Back */}
           <button type="button" onClick={() => navigate('/posts')}
             className="group flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
             <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
             Back to posts
           </button>
 
-          {/* Card */}
           <article className="bg-card border border-border/50 rounded-3xl p-6 md:p-8">
-
-            {/* ── Author row ── */}
             <div className="flex items-center justify-between mb-5">
               <PostAuthorInfo author={post.author as any} type={post.type as PostType} />
 
@@ -126,22 +119,18 @@ export function PostDetail() {
               </div>
             </div>
 
-            {/* ── Title ── */}
             <h1 className="text-2xl md:text-3xl font-bold text-foreground leading-snug mb-4">
               {post.title}
             </h1>
 
-            {/* ── Photos ── */}
             {photos.length > 0 && <PostCarousel urls={photos} />}
 
-            {/* ── Body ── */}
             {post.description && (
               <p className="text-sm md:text-base text-foreground leading-relaxed whitespace-pre-wrap mb-6">
                 {post.description}
               </p>
             )}
 
-            {/* ── Location ── */}
             {post.locationName && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/40 border border-border/50 rounded-2xl px-4 py-3 mb-6 w-fit">
                 <MapPin className="w-4 h-4 shrink-0" />
@@ -149,9 +138,7 @@ export function PostDetail() {
               </div>
             )}
 
-            {/* ── Footer: vote + time ── */}
             <div className="flex items-center gap-3 pt-5 border-t border-border/40 mb-8">
-              {/* Vote pill */}
               <VoteButtons
                 score={post.score}
                 currentUserVote={post.currentUserVote}

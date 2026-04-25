@@ -13,7 +13,6 @@ export function ProfileSetup() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
-  // State grouped together
   const [profile, setProfile] = useState({
     username: '',
     bio: '',
@@ -25,7 +24,6 @@ export function ProfileSetup() {
 
   const { data: currentUser, isLoading: isUserLoading, isError } = useCurrentUser()
 
-  // Initialize state from user data
   useEffect(() => {
     if (!currentUser || isInitialized) return
 
@@ -44,7 +42,6 @@ export function ProfileSetup() {
     []
   )
 
-  // Mutation to update user profile
   const completeMutation = useMutation({
     mutationFn: () => updateCurrentUserProfile({
       username: profile.username,

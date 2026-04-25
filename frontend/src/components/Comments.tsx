@@ -8,8 +8,6 @@ import { PhotoUpload } from './PhotoUpload'
 import { VoteButtons } from './VoteButtons'
 import { fetchComments, createComment, deleteComment, voteComment } from '../api/comments'
 
-// ── CommentNode ───────────────────────────────────────────────────────────────
-
 interface CommentNodeProps {
   comment: Comment
   depth?: number
@@ -39,7 +37,6 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
 
   return (
     <div className={`flex gap-3 ${depth > 0 ? 'pl-5 border-l border-gray-100' : ''}`}>
-      {/* Vote column */}
       <div className="flex flex-col items-center pt-0.5 shrink-0">
         <VoteButtons
           score={comment.score}
@@ -50,7 +47,6 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
         />
       </div>
 
-      {/* Content */}
       <div className="flex-1 min-w-0 pb-4">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xs font-semibold text-gray-800">{comment.userName || 'Anonymous'}</span>
@@ -60,7 +56,6 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
           )}
         </div>
 
-        {/* Comment body — text and/or photo */}
         {comment.isDeleted ? (
           <p className="text-sm text-gray-400 italic">{comment.content}</p>
         ) : (
@@ -83,7 +78,6 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
           </div>
         )}
 
-        {/* Action row */}
         <div className="mt-1.5 flex items-center gap-3 text-xs">
           {currentUserId && !comment.isDeleted && (
             <button type="button" onClick={() => onReplyToggle(comment.id)}
@@ -105,7 +99,6 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
           )}
         </div>
 
-        {/* Reply box */}
         {activeReplyId === comment.id && currentUserId && (
           <div className="mt-3">
             <textarea
@@ -139,7 +132,6 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
           </div>
         )}
 
-        {/* Nested replies */}
         {showReplies && comment.replies && comment.replies.length > 0 && (
           <div className="mt-4 space-y-4">
             {comment.replies.map(r => (
@@ -170,8 +162,6 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
 })
 
 CommentNode.displayName = 'CommentNode'
-
-// ── Comments root ─────────────────────────────────────────────────────────────
 
 interface CommentsProps {
   postId: number
