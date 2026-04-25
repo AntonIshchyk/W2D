@@ -6,12 +6,12 @@ import {
   ChevronsUpDown,
   Loader2,
   MapPin,
-  Calendar,
   Users,
   ArrowLeft,
   ArrowRight,
   Info,
-  Sparkles,
+  Image,
+  Calendar
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from './ui/button'
@@ -27,7 +27,7 @@ import { cn } from '../lib/utils'
 
 const STEPS = [
   { id: 1, label: 'Details', icon: Info },
-  { id: 2, label: 'When', icon: Calendar },
+  { id: 2, label: 'Photos', icon: Image },
   { id: 3, label: 'Location', icon: MapPin },
 ]
 
@@ -112,11 +112,7 @@ export function CreateEvent() {
     <PageLayout>
       <div className="min-h-[calc(100vh-4rem)] bg-background text-foreground">
         <div className="max-w-6xl mx-auto px-6 py-14 grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-12 items-start">
-
-          {/* ── Left: Form ─────────────────────────────────────────── */}
           <div className="space-y-10">
-
-            {/* Step indicator */}
             <div className="flex items-center gap-0">
               {STEPS.map((s, i) => {
                 const Icon = s.icon
@@ -147,24 +143,17 @@ export function CreateEvent() {
               })}
             </div>
 
-            {/* Step panels */}
             <div className="relative">
-
-              {/* Step 1 — Details */}
               {step === 1 && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div>
-                    <p className="text-4xl font-bold tracking-tight text-foreground">What's the event?</p>
-                  </div>
-
                   <div className="space-y-2">
                     <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Title</label>
                     <Input
                       autoFocus
                       value={title}
                       onChange={e => setTitle(e.target.value)}
-                      placeholder="Movie night, Hackathon, Rooftop BBQ…"
-                      className="bg-card border-border text-foreground placeholder:text-muted-foreground h-14 text-lg focus-visible:ring-primary focus-visible:border-primary"
+                      placeholder="Title of the event"
+                      className="bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
                     />
                   </div>
 
@@ -173,29 +162,9 @@ export function CreateEvent() {
                     <Textarea
                       value={description}
                       onChange={e => setDescription(e.target.value)}
-                      placeholder="What should attendees know? What's the vibe?"
+                      placeholder="Share the plan, who it's for, what to bring, and what is imporant to know."
                       rows={6}
-                      className="bg-card border-border text-foreground placeholder:text-muted-foreground text-lg resize-none focus-visible:ring-primary focus-visible:border-primary"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Step 2 — When & Community */}
-              {step === 2 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div>
-                    <p className="text-4xl font-bold tracking-tight text-foreground">When is it?</p>
-                    <p className="mt-2 text-lg text-muted-foreground">Set the date and optionally link a community.</p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Date & Time</label>
-                    <Input
-                      type="datetime-local"
-                      value={scheduledAt}
-                      onChange={e => setScheduledAt(e.target.value)}
-                      className="bg-card border-border text-foreground h-14 text-lg focus-visible:ring-primary focus-visible:border-primary scheme-dark"
+                      className="bg-card border-border text-foreground placeholder:text-muted-foreground text-base resize-none focus-visible:ring-primary focus-visible:border-primary"
                     />
                   </div>
 
@@ -208,20 +177,20 @@ export function CreateEvent() {
                         <Button
                           variant="outline"
                           role="combobox"
-                          className="w-full justify-between h-14 bg-card border-border text-foreground hover:bg-accent hover:text-accent-foreground font-normal text-lg"
+                          className="w-full justify-between h-12 bg-card border-border text-foreground hover:bg-accent hover:text-accent-foreground font-normal text-base"
                         >
-                          {selectedCommunity ? selectedCommunity.name : 'Select a community…'}
+                          {selectedCommunity ? selectedCommunity.name : 'Pick a community (optional)'}
                           <ChevronsUpDown className="h-5 w-5 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-full p-0 bg-card border-border" align="start">
                         <Command className="bg-transparent">
                           <CommandInput
-                            placeholder="Search communities…"
+                            placeholder="Find a community..."
                             className="text-foreground placeholder:text-muted-foreground"
                           />
                           <CommandList>
-                            <CommandEmpty className="text-muted-foreground py-6 text-center text-base">No community found.</CommandEmpty>
+                            <CommandEmpty className="text-muted-foreground py-6 text-center text-sm">No community found.</CommandEmpty>
                             <CommandGroup>
                               {communities.map(c => (
                                 <CommandItem
@@ -243,16 +212,29 @@ export function CreateEvent() {
                       </PopoverContent>
                     </Popover>
                   </div>
+
+                 <div className="relative">
+                  <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    Date & Time
+                    </label>
+                  <Input
+                    type="datetime-local"
+                    value={scheduledAt}
+                    onChange={e => setScheduledAt(e.target.value)}
+                    className="pr-12 bg-card border-border text-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
+                  />
+                  </div>
                 </div>
               )}
 
-              {/* Step 3 — Location */}
+              {step === 2 && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                  
+                </div>
+              )}
+
               {step === 3 && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div>
-                    <p className="text-4xl font-bold tracking-tight text-foreground">Where's it at?</p>
-                  </div>
-
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
@@ -263,8 +245,8 @@ export function CreateEvent() {
                     <Input
                       value={locationName}
                       onChange={e => setLocationName(e.target.value)}
-                      placeholder="Location name…"
-                      className="bg-card border-border text-foreground placeholder:text-muted-foreground h-14 text-lg focus-visible:ring-primary focus-visible:border-primary"
+                      placeholder="Pin label (cafe, park gate, studio...)"
+                      className="bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
                     />
                   </div>
 
@@ -277,7 +259,6 @@ export function CreateEvent() {
               )}
             </div>
 
-            {/* Navigation */}
             <div className="flex items-center justify-between pt-6">
               <Button
                 variant="ghost"
@@ -310,7 +291,7 @@ export function CreateEvent() {
                       </>
                     ) : (
                       <>
-                        <Sparkles className="h-5 w-5" /> Create Event
+                        Create Event
                       </>
                     )
                   }
@@ -319,20 +300,19 @@ export function CreateEvent() {
             </div>
           </div>
 
-          {/* ── Right: Live Preview Card ─────────────────────────────── */}
           <div className="hidden lg:block sticky top-24">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">Preview</p>
             <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
               <div className="p-6 space-y-5">
                 <div>
                   <h3 className={cn(
-                    'font-bold text-xl leading-snug transition-all wrap-break-word',
+                    'font-bold text-lg leading-snug transition-all wrap-break-word',
                     title ? 'text-foreground' : 'text-muted-foreground italic',
                   )}>
                     {title || 'Your event title…'}
                   </h3>
                   <p className={cn(
-                    'mt-2 text-base leading-relaxed line-clamp-4 transition-all wrap-break-word',
+                    'mt-2 text-sm leading-relaxed line-clamp-4 transition-all wrap-break-word',
                     description ? 'text-muted-foreground/90' : 'text-muted-foreground/60 italic',
                   )}>
                     {description || 'Description will appear here…'}
@@ -343,21 +323,21 @@ export function CreateEvent() {
                   <div className="flex items-center gap-3 text-base">
                     <Calendar className="h-5 w-5 text-primary shrink-0" />
                     <span className={formattedDate ? 'text-foreground/90' : 'text-muted-foreground/60 italic'}>
-                      {formattedDate || 'Date not set'}
+                      {formattedDate || 'Pick a date and time'}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3 text-base">
                     <Users className="h-5 w-5 text-primary shrink-0" />
                     <span className={selectedCommunity ? 'text-foreground/90' : 'text-muted-foreground/60 italic'}>
-                      {selectedCommunity?.name || 'No community'}
+                      {selectedCommunity?.name || 'Open to everyone'}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3 text-base">
                     <MapPin className="h-5 w-5 text-primary shrink-0" />
                     <span className={locationName ? 'text-foreground/90' : 'text-muted-foreground/60 italic'}>
-                      {locationName || 'No location'}
+                      {locationName || 'Choose a spot on the map'}
                     </span>
                   </div>
                 </div>

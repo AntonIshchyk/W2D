@@ -1,5 +1,5 @@
 import { useNavigate, Link, useLocation } from 'react-router-dom'
-import { Home, Calendar, MessageCircle, User, LogOut } from 'lucide-react'
+import { Home, Map, MessageCircle, User, LogOut } from 'lucide-react'
 import { clearAuthToken } from '../hooks/useAuthSync'
 
 
@@ -25,8 +25,8 @@ export function Navbar() {
     },
     {
       path: '/events',
-      label: 'Events',
-      icon: <Calendar className="w-5 h-5" />,
+      label: 'Map',
+      icon: <Map className="w-5 h-5" />,
       active: isEventsActive
     },
     {

@@ -35,7 +35,6 @@ export function AvatarUpload({ value, onChange, disabled }: AvatarUploadProps) {
       setCropImageSrc(reader.result as string)
     }
     reader.readAsDataURL(file)
-    // Clear input so selecting the same file again works
     e.target.value = ''
   }
 
