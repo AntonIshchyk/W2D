@@ -8,6 +8,52 @@ import type {
   UpdateEventRequest,
 } from '../types/events'
 
+const COORDINATE_PAIR_REGEX =
+  /^\s*[-+]?\d+(?:\.\d+)?\s*,\s*[-+]?\d+(?:\.\d+)?\s*$/
+const NUMERIC_LABEL_REGEX = /^\s*[-+]?\d+(?:\.\d+)?\s*$/
+
+function normalizeLocationPart(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+
+  const trimmed = value.trim()
+  if (!trimmed) return null
+
+  // Drop noisy geocoder labels that are just coordinates or numeric fragments.
+  if (COORDINATE_PAIR_REGEX.test(trimmed) || NUMERIC_LABEL_REGEX.test(trimmed)) {
+    return null
+  }
+
+  return trimmed
+}
+
+function buildDisplayName(props: Record<string, unknown>): string | null {
+  const candidates = [
+    props.name,
+    props.street,
+    props.district,
+    props.city,
+    props.county,
+    props.state,
+    props.country,
+  ]
+
+  const uniqueParts: string[] = []
+  const seen = new Set<string>()
+
+  for (const part of candidates) {
+    const normalized = normalizeLocationPart(part)
+    if (!normalized) continue
+
+    const key = normalized.toLowerCase()
+    if (seen.has(key)) continue
+
+    seen.add(key)
+    uniqueParts.push(normalized)
+  }
+
+  return uniqueParts.length > 0 ? uniqueParts.join(', ') : null
+}
+
 export async function fetchEvents(
   communityIds?: number[],
   bounds?: EventQueryBounds
@@ -90,22 +136,30 @@ export async function searchCities(query: string): Promise<CitySearchResult[]> {
   const seenNames = new Set<string>()
 
   for (const f of data.features) {
-    const props = f.properties
+    const props = (f.properties ?? {}) as Record<string, unknown>
     const coords = f.geometry.coordinates
-    const nameParts = [props.name, props.city, props.state, props.country].filter(Boolean)
-    const uniqueNameParts = Array.from(new Set(nameParts))
-    const displayName = uniqueNameParts.join(', ')
+    const displayName = buildDisplayName(props)
+
+    if (!displayName) continue
 
     if (seenNames.has(displayName)) continue
     seenNames.add(displayName)
 
     let boundingbox: string[] | undefined = undefined
-    if (props.extent) {
-      const minLon = Math.min(props.extent[0], props.extent[2]).toString()
-      const maxLon = Math.max(props.extent[0], props.extent[2]).toString()
-      const minLat = Math.min(props.extent[1], props.extent[3]).toString()
-      const maxLat = Math.max(props.extent[1], props.extent[3]).toString()
-      boundingbox = [minLat, maxLat, minLon, maxLon]
+    const extent = Array.isArray(props.extent) ? props.extent : null
+    if (extent && extent.length >= 4) {
+      const e0 = Number(extent[0])
+      const e1 = Number(extent[1])
+      const e2 = Number(extent[2])
+      const e3 = Number(extent[3])
+
+      if ([e0, e1, e2, e3].every((n) => Number.isFinite(n))) {
+        const minLon = Math.min(e0, e2).toString()
+        const maxLon = Math.max(e0, e2).toString()
+        const minLat = Math.min(e1, e3).toString()
+        const maxLat = Math.max(e1, e3).toString()
+        boundingbox = [minLat, maxLat, minLon, maxLon]
+      }
     }
 
     results.push({
@@ -128,8 +182,6 @@ export async function reverseGeocode(lat: number, lng: number): Promise<string |
     return null
   }
 
-  const props = data.features[0].properties
-  const nameParts = [props.name, props.city, props.state, props.country].filter(Boolean)
-  const uniqueNameParts = Array.from(new Set(nameParts))
-  return uniqueNameParts.join(', ') || null
+  const props = (data.features[0].properties ?? {}) as Record<string, unknown>
+  return buildDisplayName(props)
 }
