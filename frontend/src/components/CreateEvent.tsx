@@ -275,7 +275,7 @@ export function CreateEvent() {
                         onChange={(e) => setLocationSearchQuery(e.target.value)}
                         onFocus={() => locationSearchResults.length > 0 && setShowLocationResults(true)}
                         onBlur={() => setTimeout(() => setShowLocationResults(false), 150)}
-                        placeholder="Use search or drop a pin on the map, change the name if needed."
+                        placeholder="Use search or drop a pin on the map"
                         className="pl-10 bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
                         autoComplete="off"
                       />
