@@ -10,6 +10,7 @@ type UseCitySearchOptions = {
 export function useCitySearch(options?: UseCitySearchOptions) {
   const debounceMs = options?.debounceMs ?? 350
   const onSearchErrorRef = useRef(options?.onSearchError)
+  const skipNextSearchRef = useRef(false)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<CitySearchResult[]>([])
   const [showResults, setShowResults] = useState(false)
@@ -22,6 +23,11 @@ export function useCitySearch(options?: UseCitySearchOptions) {
 
   useEffect(() => {
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
+
+    if (skipNextSearchRef.current) {
+      skipNextSearchRef.current = false
+      return
+    }
 
     if (!query.trim()) {
       setResults([])
@@ -56,9 +62,18 @@ export function useCitySearch(options?: UseCitySearchOptions) {
     setIsSearching(false)
   }
 
+  const setQuerySilently = (nextQuery: string) => {
+    skipNextSearchRef.current = true
+    setQuery(nextQuery)
+    setResults([])
+    setShowResults(false)
+    setIsSearching(false)
+  }
+
   return {
     query,
     setQuery,
+    setQuerySilently,
     results,
     isSearching,
     showResults,

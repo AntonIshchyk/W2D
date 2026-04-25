@@ -51,17 +51,16 @@ export function CreateEvent() {
   const [communityId, setCommunityId] = useState<number | null>(null)
   const [communityOpen, setCommunityOpen] = useState(false)
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
-  const [locationName, setLocationName] = useState('')
   const [isFetchingLocation, setIsFetchingLocation] = useState(false)
 
   const {
-    query: locationSearchQuery,
-    setQuery: setLocationSearchQuery,
+    query: locationInput,
+    setQuery: setLocationInput,
+    setQuerySilently: setLocationInputSilently,
     results: locationSearchResults,
     isSearching: isSearchingLocation,
     showResults: showLocationResults,
     setShowResults: setShowLocationResults,
-    clear: clearLocationSearch,
   } = useCitySearch({
     debounceMs: 350,
     onSearchError: () => toast.error('Location search failed'),
@@ -74,9 +73,7 @@ export function CreateEvent() {
     if (Number.isNaN(lat) || Number.isNaN(lng)) return
 
     setLocation({ lat, lng })
-    setLocationName(result.display_name)
-    setShowLocationResults(false)
-    clearLocationSearch()
+    setLocationInputSilently(result.display_name)
   }
 
   const handleLocationSelect = async (lat: number, lng: number) => {
@@ -84,7 +81,7 @@ export function CreateEvent() {
     setIsFetchingLocation(true)
     try {
       const displayName = await reverseGeocode(lat, lng)
-      if (displayName) setLocationName(displayName)
+      if (displayName) setLocationInputSilently(displayName)
     } catch (err) {
       console.error(err)
     } finally {
@@ -125,7 +122,7 @@ export function CreateEvent() {
       ...(communityId !== null ? { communityId } : {}),
       latitude: location?.lat,
       longitude: location?.lng,
-      locationName: locationName.trim() || undefined,
+      locationName: locationInput.trim() || undefined,
     })
   }
 
@@ -266,16 +263,17 @@ export function CreateEvent() {
                   <div className="space-y-2 relative">
                     <div className="flex items-center gap-2">
                       <label className="text-xs font-semibold uppercase tracking-widest">
-                        Search Location
+                        Location
                       </label>
+                      {isFetchingLocation && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
                     </div>
                     <div className="relative">
                       <Input
-                        value={locationSearchQuery}
-                        onChange={(e) => setLocationSearchQuery(e.target.value)}
+                        value={locationInput}
+                        onChange={(e) => setLocationInput(e.target.value)}
                         onFocus={() => locationSearchResults.length > 0 && setShowLocationResults(true)}
                         onBlur={() => setTimeout(() => setShowLocationResults(false), 150)}
-                        placeholder="Use search or drop a pin on the map"
+                        placeholder="Search a place or drop a pin, then tweak the name if needed"
                         className="pl-10 bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
                         autoComplete="off"
                       />
@@ -304,21 +302,6 @@ export function CreateEvent() {
                         ))}
                       </div>
                     )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <label className="text-xs font-semibold uppercase tracking-widest">
-                        Location Name
-                      </label>
-                      {isFetchingLocation && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
-                    </div>
-                    <Input
-                      value={locationName}
-                      onChange={e => setLocationName(e.target.value)}
-                      placeholder="Select location first, then you can edit the name"
-                      className="bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
-                    />
                   </div>
 
                   <div className="rounded-2xl overflow-hidden border bg-card h-150 relative">
@@ -408,8 +391,8 @@ export function CreateEvent() {
 
                   <div className="flex items-center gap-3 text-base">
                     <MapPin className="h-5 w-5 text-primary shrink-0" />
-                    <span className={locationName ? 'text-foreground/90' : 'text-muted-foreground/60 italic'}>
-                      {locationName || 'Choose a spot on the map'}
+                    <span className={locationInput ? 'text-foreground/90' : 'text-muted-foreground/60 italic'}>
+                      {locationInput || 'Choose a spot on the map'}
                     </span>
                   </div>
                 </div>
