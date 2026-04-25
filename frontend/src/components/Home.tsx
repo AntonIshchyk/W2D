@@ -22,16 +22,7 @@ export function Home() {
 
   return (
     <PageLayout>
-      {/* Greeting - subtle, not a hero */}
-      <div className="mb-10">
-        <h1 className="text-2xl font-medium text-muted-foreground">
-          Hey, <span className="text-foreground font-semibold">{user?.username}</span>
-        </h1>
-      </div>
-
-      {/* Asymmetric grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 auto-rows-fr">
-        {/* Big CTA - takes 2 cols */}
         <Link 
           to="/communities" 
           className="lg:col-span-2 group relative bg-primary rounded-2xl p-10 flex flex-col justify-between overflow-hidden transition-transform hover:scale-[1.01] duration-300"
@@ -52,12 +43,10 @@ export function Home() {
               </svg>
             </span>
           </div>
-          {/* Abstract decoration */}
           <div className="absolute -right-10 -bottom-10 w-60 h-60 bg-green-900/20 rounded-full opacity-50" />
           <div className="absolute right-20 -bottom-5 w-32 h-32 bg-green-800/20 rounded-full opacity-30" />
         </Link>
 
-        {/* Stacked right column */}
         <div className="flex flex-col gap-5">
           <Link 
             to="/posts" 
