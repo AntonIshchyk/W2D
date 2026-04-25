@@ -182,14 +182,15 @@ export function CreateEvent() {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-widest">Description</label>
-                    <Textarea
-                      value={description}
-                      onChange={e => setDescription(e.target.value)}
-                      placeholder="Share the plan, who it's for, what to bring, and what is imporant to know."
-                      rows={5}
-                      className="bg-card border-border text-foreground placeholder:text-muted-foreground text-sm resize-none focus-visible:ring-primary focus-visible:border-primary"
+                  <div className="relative">
+                    <label className="text-xs font-semibold uppercase tracking-widest">
+                      Date & Time
+                      </label>
+                    <Input
+                      type="datetime-local"
+                      value={scheduledAt}
+                      onChange={e => setScheduledAt(e.target.value)}
+                      className="pr-12 bg-card border-border text-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
                     />
                   </div>
 
@@ -238,16 +239,15 @@ export function CreateEvent() {
                     </Popover>
                   </div>
 
-                 <div className="relative">
-                  <label className="text-xs font-semibold uppercase tracking-widest">
-                    Date & Time
-                    </label>
-                  <Input
-                    type="datetime-local"
-                    value={scheduledAt}
-                    onChange={e => setScheduledAt(e.target.value)}
-                    className="pr-12 bg-card border-border text-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
-                  />
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold uppercase tracking-widest">Description</label>
+                    <Textarea
+                      value={description}
+                      onChange={e => setDescription(e.target.value)}
+                      placeholder="Share the plan, who it's for, what to bring, and what is imporant to know."
+                      rows={5}
+                      className="bg-card border-border text-foreground placeholder:text-muted-foreground text-sm resize-none focus-visible:ring-primary focus-visible:border-primary"
+                    />
                   </div>
                 </div>
               )}
@@ -273,7 +273,7 @@ export function CreateEvent() {
                         onChange={(e) => setLocationInput(e.target.value)}
                         onFocus={() => locationSearchResults.length > 0 && setShowLocationResults(true)}
                         onBlur={() => setTimeout(() => setShowLocationResults(false), 150)}
-                        placeholder="Search a place or drop a pin, then tweak the name if needed"
+                        placeholder="Search a place or drop a pin, then modify the name if needed"
                         className="pl-10 bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
                         autoComplete="off"
                       />
