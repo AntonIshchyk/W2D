@@ -8,9 +8,10 @@ ensureLeafletDefaultIcon()
 interface LocationPickerProps {
   onLocationSelect: (lat: number, lng: number) => void
   defaultLocation?: [number, number]
+  location?: [number, number] | null
 }
 
-export function LocationPickerMap({ onLocationSelect, defaultLocation }: LocationPickerProps) {
+export function LocationPickerMap({ onLocationSelect, defaultLocation, location }: LocationPickerProps) {
   return (
     <div className="w-full h-full min-h-full rounded-md overflow-hidden border">
       <MapContainer
@@ -23,7 +24,11 @@ export function LocationPickerMap({ onLocationSelect, defaultLocation }: Locatio
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <LocationMarker onLocationSelect={onLocationSelect} defaultLocation={defaultLocation} />
+        <LocationMarker
+          onLocationSelect={onLocationSelect}
+          defaultLocation={defaultLocation}
+          location={location}
+        />
       </MapContainer>
     </div>
   )

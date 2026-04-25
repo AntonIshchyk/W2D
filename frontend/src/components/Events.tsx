@@ -22,7 +22,8 @@ import { EventsMap, type FlyToTarget } from './EventsMap'
 import { EventCard } from './EventCard'
 import { cn } from '../lib/utils'
 import { useCurrentUser } from '../hooks/useCurrentUser'
-import { fetchEvents, reverseGeocode, searchCities } from '../api/events'
+import { useCitySearch } from '../hooks/useCitySearch'
+import { fetchEvents, reverseGeocode } from '../api/events'
 import { fetchCommunities } from '../api/communities'
 import { loadMapState, DEFAULT_CENTER, DEFAULT_ZOOM } from '../utils/events'
 import type { CitySearchResult, Event, EventQueryBounds, ViewMode } from '../types/events'
@@ -43,12 +44,20 @@ export function Events() {
   const [searchLocationName, setSearchLocationName] = useState<string | null>(null)
   const boundsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const [searchQuery, setSearchQuery] = useState('')
-  const [autocompleteResults, setAutocompleteResults] = useState<CitySearchResult[]>([])
-  const [showAutocomplete, setShowAutocomplete] = useState(false)
-  const [isSearchingCity, setIsSearchingCity] = useState(false)
   const [isGettingLocation, setIsGettingLocation] = useState(false)
-  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const {
+    query: searchQuery,
+    setQuery: setSearchQuery,
+    results: autocompleteResults,
+    isSearching: isSearchingCity,
+    showResults: showAutocomplete,
+    setShowResults: setShowAutocomplete,
+    clear: clearSearchInput,
+  } = useCitySearch({
+    debounceMs: 400,
+    onSearchError: () => toast.error('Search failed'),
+  })
 
   const { data: currentUser } = useCurrentUser()
   const { data: communities } = useQuery({
@@ -69,36 +78,6 @@ export function Events() {
       if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current)
     }
   }, [rawBounds])
-
-  useEffect(() => {
-    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
-
-    if (!searchQuery.trim()) {
-      setAutocompleteResults([])
-      setShowAutocomplete(false)
-      setIsSearchingCity(false)
-      return
-    }
-
-    setIsSearchingCity(true)
-    searchDebounceRef.current = setTimeout(async () => {
-      try {
-        const results = await searchCities(searchQuery)
-        setAutocompleteResults(results ?? [])
-        setShowAutocomplete(true)
-      } catch {
-        toast.error('Search failed')
-        setAutocompleteResults([])
-      } finally {
-        setIsSearchingCity(false)
-      }
-    }, 400)
-
-    return () => {
-      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
-    }
-  }, [searchQuery])
-
 
   function flyTo(center: [number, number], zoom: number) {
     flyToIdRef.current += 1
@@ -126,9 +105,7 @@ export function Events() {
     setSearchBounds(boundsFromResult(result))
     setSearchLocationName(result.display_name.split(',')[0])
     flyTo(center, 12)
-    setSearchQuery('')
-    setShowAutocomplete(false)
-    setAutocompleteResults([])
+    clearSearchInput()
   }
 
   function clearSearchLocation() {

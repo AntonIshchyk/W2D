@@ -6,6 +6,7 @@ import {
   ChevronsUpDown,
   Loader2,
   MapPin,
+  Search,
   Users,
   ArrowLeft,
   ArrowRight,
@@ -23,7 +24,9 @@ import { PageLayout } from './Navbar'
 import { LocationPickerMap } from './LocationPickerMap'
 import { createEvent, reverseGeocode } from '../api/events'
 import { fetchCommunities } from '../api/communities'
+import { useCitySearch } from '../hooks/useCitySearch'
 import { cn } from '../lib/utils'
+import type { CitySearchResult } from '../types/events'
 
 const STEPS = [
   { id: 1, label: 'Details', icon: Info },
@@ -50,6 +53,31 @@ export function CreateEvent() {
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [locationName, setLocationName] = useState('')
   const [isFetchingLocation, setIsFetchingLocation] = useState(false)
+
+  const {
+    query: locationSearchQuery,
+    setQuery: setLocationSearchQuery,
+    results: locationSearchResults,
+    isSearching: isSearchingLocation,
+    showResults: showLocationResults,
+    setShowResults: setShowLocationResults,
+    clear: clearLocationSearch,
+  } = useCitySearch({
+    debounceMs: 350,
+    onSearchError: () => toast.error('Location search failed'),
+  })
+
+  const applyLocationSearchResult = (result: CitySearchResult) => {
+    const lat = parseFloat(result.lat)
+    const lng = parseFloat(result.lon)
+
+    if (Number.isNaN(lat) || Number.isNaN(lng)) return
+
+    setLocation({ lat, lng })
+    setLocationName(result.display_name)
+    setShowLocationResults(false)
+    clearLocationSearch()
+  }
 
   const handleLocationSelect = async (lat: number, lng: number) => {
     setLocation({ lat, lng })
@@ -97,7 +125,7 @@ export function CreateEvent() {
       ...(communityId !== null ? { communityId } : {}),
       latitude: location?.lat,
       longitude: location?.lng,
-      locationName: locationName || undefined,
+      locationName: locationName.trim() || undefined,
     })
   }
 
@@ -235,6 +263,49 @@ export function CreateEvent() {
 
               {step === 3 && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                  <div className="space-y-2 relative">
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs font-semibold uppercase tracking-widest">
+                        Search Location
+                      </label>
+                    </div>
+                    <div className="relative">
+                      <Input
+                        value={locationSearchQuery}
+                        onChange={(e) => setLocationSearchQuery(e.target.value)}
+                        onFocus={() => locationSearchResults.length > 0 && setShowLocationResults(true)}
+                        onBlur={() => setTimeout(() => setShowLocationResults(false), 150)}
+                        placeholder="Use search or drop a pin on the map, change the name if needed."
+                        className="pl-10 bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
+                        autoComplete="off"
+                      />
+                      {isSearchingLocation ? (
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                      ) : (
+                        <Search className="h-4 w-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                      )}
+                    </div>
+
+                    {showLocationResults && locationSearchResults.length > 0 && (
+                      <div className="absolute left-0 right-0 top-full mt-1 z-1200 rounded-md border bg-card shadow-lg overflow-hidden">
+                        {locationSearchResults.slice(0, 8).map((result, idx) => (
+                          <button
+                            key={`${result.lat}-${result.lon}-${idx}`}
+                            type="button"
+                            className="w-full px-3 py-2 text-left text-sm hover:bg-accent transition-colors border-b last:border-b-0 flex items-start gap-2"
+                            onMouseDown={(e) => {
+                              e.preventDefault()
+                              applyLocationSearchResult(result)
+                            }}
+                          >
+                            <MapPin className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground" />
+                            <span className="line-clamp-1">{result.display_name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <label className="text-xs font-semibold uppercase tracking-widest">
@@ -245,7 +316,7 @@ export function CreateEvent() {
                     <Input
                       value={locationName}
                       onChange={e => setLocationName(e.target.value)}
-                      placeholder="Pin label (cafe, park gate, studio...)"
+                      placeholder="Select location first, then you can edit the name"
                       className="bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
                     />
                   </div>
@@ -253,6 +324,7 @@ export function CreateEvent() {
                   <div className="rounded-2xl overflow-hidden border bg-card h-150 relative">
                     <LocationPickerMap
                       onLocationSelect={handleLocationSelect}
+                      location={location ? [location.lat, location.lng] : null}
                     />
                   </div>
                 </div>
