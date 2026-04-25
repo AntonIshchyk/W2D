@@ -147,39 +147,39 @@ export function CreateEvent() {
               {step === 1 && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Title</label>
+                    <label className="text-xs font-semibold uppercase tracking-widest">Title</label>
                     <Input
                       autoFocus
                       value={title}
                       onChange={e => setTitle(e.target.value)}
-                      placeholder="Title of the event"
+                      placeholder="Title your event (e.g. Walk in the park, running group...)"
                       className="bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Description</label>
+                    <label className="text-xs font-semibold uppercase tracking-widest">Description</label>
                     <Textarea
                       value={description}
                       onChange={e => setDescription(e.target.value)}
                       placeholder="Share the plan, who it's for, what to bring, and what is imporant to know."
-                      rows={6}
-                      className="bg-card border-border text-foreground placeholder:text-muted-foreground text-base resize-none focus-visible:ring-primary focus-visible:border-primary"
+                      rows={5}
+                      className="bg-card border-border text-foreground placeholder:text-muted-foreground text-sm resize-none focus-visible:ring-primary focus-visible:border-primary"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                      Community <span className="normal-case font-normal text-muted-foreground/70">(optional)</span>
+                    <label className="text-xs font-semibold uppercase tracking-widest">
+                      Community
                     </label>
                     <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
                           role="combobox"
-                          className="w-full justify-between h-12 bg-card border-border text-foreground hover:bg-accent hover:text-accent-foreground font-normal text-base"
+                          className="w-full justify-between h-12 bg-card border-border text-foreground hover:bg-accent hover:text-accent-foreground font-normal text-sm"
                         >
-                          {selectedCommunity ? selectedCommunity.name : 'Pick a community (optional)'}
+                          {selectedCommunity ? selectedCommunity.name : 'Pick a community'}
                           <ChevronsUpDown className="h-5 w-5 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
@@ -214,7 +214,7 @@ export function CreateEvent() {
                   </div>
 
                  <div className="relative">
-                  <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                  <label className="text-xs font-semibold uppercase tracking-widest">
                     Date & Time
                     </label>
                   <Input
@@ -237,7 +237,7 @@ export function CreateEvent() {
                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      <label className="text-xs font-semibold uppercase tracking-widest">
                         Location Name
                       </label>
                       {isFetchingLocation && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
@@ -259,11 +259,11 @@ export function CreateEvent() {
               )}
             </div>
 
-            <div className="flex items-center justify-between pt-6">
+            <div className="flex items-center justify-between">
               <Button
                 variant="ghost"
                 onClick={() => (step === 1 ? navigate('/events') : setStep((s) => s - 1))}
-                className="text-muted-foreground hover:text-foreground hover:bg-accent gap-2 text-base h-12 px-6"
+                className="hover:text-foreground hover:bg-accent gap-2 text-base h-12 px-6"
               >
                 <ArrowLeft className="h-5 w-5" />
                 {step === 1 ? 'Cancel' : 'Back'}
@@ -323,7 +323,7 @@ export function CreateEvent() {
                   <div className="flex items-center gap-3 text-base">
                     <Calendar className="h-5 w-5 text-primary shrink-0" />
                     <span className={formattedDate ? 'text-foreground/90' : 'text-muted-foreground/60 italic'}>
-                      {formattedDate || 'Pick a date and time'}
+                      {formattedDate || 'No date and time selected yet'}
                     </span>
                   </div>
 
