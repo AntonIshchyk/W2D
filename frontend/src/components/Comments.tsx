@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { formatRelativeTime } from '../lib/utils/date'
-import { isValidImageUrl } from '../lib/utils/validation'
+import { isValidPhotoUrl } from '../lib/utils/validation'
 import type { Comment } from '../types/posts'
 import { PhotoUpload } from './PhotoUpload'
 import { VoteButtons } from './VoteButtons'
@@ -66,7 +66,7 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
             {comment.photoUrl && (
               <div className="rounded-lg overflow-hidden max-w-xs cursor-pointer"
                 onClick={() => {
-                  if (comment.photoUrl && isValidImageUrl(comment.photoUrl)) {
+                  if (comment.photoUrl && isValidPhotoUrl(comment.photoUrl)) {
                     window.open(comment.photoUrl, 'noopener,noreferrer')
                   } else {
                     toast.error('Invalid image URL')

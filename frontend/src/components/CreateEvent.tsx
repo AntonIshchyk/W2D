@@ -64,7 +64,7 @@ export function CreateEvent() {
   const [communityId, setCommunityId] = useState<number | null>(null)
   const [communityOpen, setCommunityOpen] = useState(false)
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
-  const [imageUrls, setImageUrls] = useState<string[]>([])
+  const [photoUrls, setPhotoUrls] = useState<string[]>([])
   const [isFetchingLocation, setIsFetchingLocation] = useState(false)
   const [detailErrors, setDetailErrors] = useState<EventDetailsErrors>({})
 
@@ -161,7 +161,7 @@ export function CreateEvent() {
       latitude: location?.lat,
       longitude: location?.lng,
       locationName: locationInput.trim() || undefined,
-      imageUrl: imageUrls[0] || undefined,
+      photoUrls,
     })
   }
 
@@ -387,11 +387,11 @@ export function CreateEvent() {
               >
                 <div className="space-y-2">
                   <label className="text-xs font-semibold uppercase tracking-widest">
-                    Event Image
+                    Event Photos
                   </label>
                   <EventImageUpload
-                    value={imageUrls}
-                    onChange={setImageUrls}
+                    value={photoUrls}
+                    onChange={setPhotoUrls}
                     maxFiles={4}
                     disabled={mutation.isPending}
                   />

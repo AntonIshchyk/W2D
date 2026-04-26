@@ -4,6 +4,7 @@ using Backend.Data;
 using Backend.Models;
 using Backend.Contracts.Comments;
 using Backend.Contracts.Common;
+using Backend.Extensions;
 using System.Linq.Expressions;
 
 namespace Backend.Services;
@@ -91,6 +92,11 @@ public class CommentService : ICommentService
 
     public async Task<Result<CommentResponse>> CreateCommentAsync(int postId, CreateCommentRequest request, int userId)
     {
+        if (!PhotoUrlValidationExtensions.TryValidateOptionalPhotoUrl(request.PhotoUrl, nameof(request.PhotoUrl), out string? photoUrlError))
+        {
+            return Result<CommentResponse>.Invalid(photoUrlError!);
+        }
+
         if (string.IsNullOrWhiteSpace(request.Content) && string.IsNullOrWhiteSpace(request.PhotoUrl))
         {
             return Result<CommentResponse>.Invalid("Content or PhotoUrl is required.");

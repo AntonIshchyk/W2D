@@ -3,6 +3,7 @@ using Backend.Data;
 using Backend.Models;
 using Backend.Contracts.Events;
 using Backend.Contracts.Common;
+using Backend.Extensions;
 using System.Linq.Expressions;
 
 namespace Backend.Services;
@@ -29,7 +30,7 @@ public class EventService : IEventService
         Latitude = e.Latitude,
         Longitude = e.Longitude,
         LocationName = e.LocationName,
-        ImageUrl = e.ImageUrl,
+        PhotoUrls = e.PhotoUrls,
         CreatedAt = e.CreatedAt,
         UpdatedAt = e.UpdatedAt
     };
@@ -97,6 +98,11 @@ public class EventService : IEventService
             }
         }
 
+        if (!PhotoUrlValidationExtensions.TryValidatePhotoUrls(request.PhotoUrls, nameof(request.PhotoUrls), out string? photoUrlError))
+        {
+            return Result<EventResponse>.Invalid(photoUrlError!);
+        }
+
         Event eventEntity = new Event
         {
             Title = request.Title,
@@ -107,7 +113,7 @@ public class EventService : IEventService
             Latitude = request.Latitude,
             Longitude = request.Longitude,
             LocationName = request.LocationName,
-            ImageUrl = request.ImageUrl,
+            PhotoUrls = request.PhotoUrls,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -147,11 +153,16 @@ public class EventService : IEventService
             }
         }
 
+        if (!PhotoUrlValidationExtensions.TryValidatePhotoUrls(request.PhotoUrls, nameof(request.PhotoUrls), out string? photoUrlError))
+        {
+            return Result<EventResponse>.Invalid(photoUrlError!);
+        }
+
         if (request.Title != null) eventEntity.Title = request.Title;
         if (request.Description != null) eventEntity.Description = request.Description;
         if (request.CommunityId.HasValue) eventEntity.CommunityId = request.CommunityId;
         if (request.ScheduledAt.HasValue) eventEntity.ScheduledAt = request.ScheduledAt.Value;
-        if (request.ImageUrl != null) eventEntity.ImageUrl = request.ImageUrl;
+        if (request.PhotoUrls != null) eventEntity.PhotoUrls = request.PhotoUrls;
 
         eventEntity.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();

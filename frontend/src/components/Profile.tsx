@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Separator } from './ui/separator'
 import { Skeleton } from './ui/skeleton'
-import { isValidImageUrl } from '../lib/utils/validation'
+import { isValidPhotoUrl } from '../lib/utils/validation'
 
 export function Profile() {
   const { data: user, isLoading, isError, error: userError } = useCurrentUser()
@@ -40,7 +40,7 @@ export function Profile() {
 
           <CardHeader className="-mt-10 relative">
             <Avatar className="h-20 w-20 border-4 border-background shadow-lg">
-              {user.profilePhotoUrl && isValidImageUrl(user.profilePhotoUrl) && <AvatarImage src={user.profilePhotoUrl} alt={user.username} />}
+              {user.profilePhotoUrl && isValidPhotoUrl(user.profilePhotoUrl) && <AvatarImage src={user.profilePhotoUrl} alt={user.username} />}
                 <AvatarFallback className="bg-linear-to-br from-primary to-primary/70 text-primary-foreground text-2xl font-bold">
                 {user.username.charAt(0).toUpperCase()}
               </AvatarFallback>

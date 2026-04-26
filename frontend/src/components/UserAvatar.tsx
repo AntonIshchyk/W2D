@@ -1,5 +1,5 @@
 import { cn } from '../lib/utils'
-import { isValidImageUrl } from '../lib/utils/validation'
+import { isValidPhotoUrl } from '../lib/utils/validation'
 
 interface UserAvatarProps {
   url?: string | null
@@ -8,7 +8,7 @@ interface UserAvatarProps {
 }
 
 export function UserAvatar({ url, username, className }: UserAvatarProps) {
-  if (url && isValidImageUrl(url)) {
+  if (url && isValidPhotoUrl(url)) {
     return (
       <img
         src={url}

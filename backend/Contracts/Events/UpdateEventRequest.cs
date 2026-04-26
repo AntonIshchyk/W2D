@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Backend.Models;
 
 namespace Backend.Contracts.Events;
 
@@ -15,5 +14,5 @@ public class UpdateEventRequest
 
     public DateTime? ScheduledAt { get; set; }
 
-    public string? ImageUrl { get; set; }
+    public List<string>? PhotoUrls { get; set; }
 }

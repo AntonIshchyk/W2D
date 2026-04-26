@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from './ui/dialog'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel"
 import { cn } from '../lib/utils'
-import { isValidImageUrl } from '../lib/utils/validation'
+import { isValidPhotoUrl } from '../lib/utils/validation'
 
 interface PostCarouselProps {
   urls: string[]
@@ -14,7 +14,7 @@ export function PostCarousel({
   containerClassName = "mt-4 mb-6 md:px-0",
   imageContainerClassName = "h-96"
 }: PostCarouselProps) {
-  const validUrls = urls.filter(isValidImageUrl)
+  const validUrls = urls.filter(isValidPhotoUrl)
   if (!validUrls || validUrls.length === 0) return null
 
   return (

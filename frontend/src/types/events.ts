@@ -15,7 +15,7 @@ export interface Event {
   latitude?: number
   longitude?: number
   locationName?: string
-  imageUrl?: string
+  photoUrls: string[]
   createdAt: string
   updatedAt: string
 }
@@ -35,13 +35,18 @@ export interface CreateEventRequest {
   latitude?: number
   longitude?: number
   locationName?: string
-  imageUrl?: string
+  photoUrls?: string[]
 }
 
 export interface UpdateEventRequest {
   title?: string
   description?: string
+  communityId?: number | null
   scheduledAt?: string
+  latitude?: number
+  longitude?: number
+  locationName?: string
+  photoUrls?: string[]
 }
 
 export interface CitySearchResult {

@@ -85,6 +85,19 @@ public class AppDbContext : DbContext
             )
             .HasColumnType("TEXT"); // use "jsonb" for Postgres
 
+        modelBuilder.Entity<Event>()
+            .Property(e => e.PhotoUrls)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>(),
+                new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<List<string>>(
+                    (a, b) => a != null && b != null && a.SequenceEqual(b),
+                    v => v.Aggregate(0, (h, s) => HashCode.Combine(h, s.GetHashCode())),
+                    v => v.ToList()
+                )
+            )
+            .HasColumnType("TEXT");
+
         // PostVote - User relationship
         modelBuilder.Entity<PostVote>()
             .HasOne(v => v.User)

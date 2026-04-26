@@ -5,6 +5,7 @@ using Backend.Models;
 using Backend.Contracts.Auth;
 using Backend.Contracts.Users;
 using Backend.Contracts.Common;
+using Backend.Extensions;
 
 namespace Backend.Services;
 
@@ -99,6 +100,11 @@ public class UserService : IUserService
         if (usernameTaken)
         {
             return Result<LoginResponse>.Invalid("Username is already taken.");
+        }
+
+        if (!PhotoUrlValidationExtensions.TryValidateOptionalPhotoUrl(request.ProfilePhotoUrl, nameof(request.ProfilePhotoUrl), out string? profilePhotoError))
+        {
+            return Result<LoginResponse>.Invalid(profilePhotoError!);
         }
 
         user.Username = trimmedUsername;

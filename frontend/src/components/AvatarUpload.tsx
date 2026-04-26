@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { ImagePlus, Loader2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { getPresignedUrl, uploadToR2 } from '../api/uploads'
-import { isValidImageUrl } from '../lib/utils/validation'
+import { isValidPhotoUrl } from '../lib/utils/validation'
 import { AvatarCropModal } from './AvatarCropModal'
 
 interface AvatarUploadProps {
@@ -53,7 +53,7 @@ export function AvatarUpload({ value, onChange, disabled }: AvatarUploadProps) {
     }
   }
 
-  if (value && isValidImageUrl(value)) {
+  if (value && isValidPhotoUrl(value)) {
     return (
       <div className="relative inline-block">
         <img

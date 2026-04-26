@@ -5,6 +5,7 @@ using Backend.Models;
 using Backend.Contracts.Posts;
 using Backend.Contracts.Common;
 using Backend.Constants;
+using Backend.Extensions;
 
 namespace Backend.Services;
 
@@ -155,7 +156,7 @@ public class PostService : IPostService
             return Result<PostResponse>.Invalid("Latitude and Longitude must both be provided or both be omitted.");
         }
 
-        if (!ValidatePhotoUrls(request.PhotoUrls, out string? urlError))
+        if (!PhotoUrlValidationExtensions.TryValidatePhotoUrls(request.PhotoUrls, nameof(request.PhotoUrls), out string? urlError))
         {
             return Result<PostResponse>.Invalid(urlError!);
         }
@@ -200,7 +201,7 @@ public class PostService : IPostService
             return Result<PostResponse>.Invalid("Latitude and Longitude must both be provided or both be omitted.");
         }
 
-        if (!ValidatePhotoUrls(request.PhotoUrls, out string? urlError))
+        if (!PhotoUrlValidationExtensions.TryValidatePhotoUrls(request.PhotoUrls, nameof(request.PhotoUrls), out string? urlError))
         {
             return Result<PostResponse>.Invalid(urlError!);
         }
@@ -303,27 +304,5 @@ public class PostService : IPostService
             await transaction.RollbackAsync();
             throw;
         }
-    }
-
-    private static bool ValidatePhotoUrls(List<string>? photoUrls, out string? error)
-    {
-        error = null;
-
-        if (photoUrls == null || photoUrls.Count == 0)
-        {
-            return true;
-        }
-
-        foreach (string url in photoUrls)
-        {
-            if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri) ||
-                (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
-            {
-                error = $"Invalid URL in PhotoUrls: {url}";
-                return false;
-            }
-        }
-
-        return true;
     }
 }

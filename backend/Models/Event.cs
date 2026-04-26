@@ -29,5 +29,5 @@ public class Event : BaseModel
     [MaxLength(255)]
     public string? LocationName { get; set; }
 
-    public string? ImageUrl { get; set; }
+    public List<string> PhotoUrls { get; set; } = new();
 }
