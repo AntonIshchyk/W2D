@@ -21,7 +21,6 @@ import { PageLayout } from './Navbar'
 import { EventsMap, type FlyToTarget } from './EventsMap'
 import { EventCard } from './EventCard'
 import { cn } from '../lib/utils'
-import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useCitySearch } from '../hooks/useCitySearch'
 import { fetchEvents, reverseGeocode } from '../api/events'
 import { fetchCommunities } from '../api/communities'
@@ -59,7 +58,6 @@ export function Events() {
     onSearchError: () => toast.error('Search failed'),
   })
 
-  const { data: currentUser } = useCurrentUser()
   const { data: communities } = useQuery({
     queryKey: ['communities-list'],
     queryFn: fetchCommunities,
