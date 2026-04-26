@@ -377,21 +377,26 @@ export function CreateEvent() {
                 </div>
               )}
 
-              {step === 3 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-widest">
-                      Event Image
-                    </label>
-                    <EventImageUpload
-                      value={imageUrls}
-                      onChange={setImageUrls}
-                      maxFiles={4}
-                      disabled={mutation.isPending}
-                    />
-                  </div>
+              <div
+                className={cn(
+                  'space-y-8',
+                  step === 3
+                    ? 'animate-in fade-in slide-in-from-right-4 duration-300'
+                    : 'hidden',
+                )}
+              >
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-widest">
+                    Event Image
+                  </label>
+                  <EventImageUpload
+                    value={imageUrls}
+                    onChange={setImageUrls}
+                    maxFiles={4}
+                    disabled={mutation.isPending}
+                  />
                 </div>
-              )}
+              </div>
             </div>
 
             <div className="flex items-center justify-between">

@@ -188,6 +188,7 @@ export function EventImageUpload({
   }
 
   const uploadedItems = items.filter((item) => item.status !== 'error' || item.previewUrl)
+  const doneItemsCount = items.filter((item) => item.status === 'done').length
 
   return (
     <div className="space-y-4">
@@ -244,6 +245,7 @@ export function EventImageUpload({
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {uploadedItems.map((item) => {
             const isCover = item.status === 'done' && item.publicUrl === value[0]
+            const canSelectCover = item.status === 'done' && doneItemsCount > 1
 
             return (
               <div key={item.id} className="group overflow-hidden rounded-2xl border bg-card shadow-sm">
@@ -278,7 +280,7 @@ export function EventImageUpload({
                     <X className="h-4 w-4" />
                   </button>
 
-                  {item.status === 'done' && (
+                  {canSelectCover && (
                     <button
                       type="button"
                       onClick={(e) => {
@@ -297,6 +299,7 @@ export function EventImageUpload({
                       {isCover ? 'Cover' : 'Set cover'}
                     </button>
                   )}
+
                 </div>
 
                 <div className="space-y-1.5 p-3">
