@@ -311,7 +311,7 @@ export function CreateEvent() {
                         }
                       }}
                       placeholder="Share the plan, who it's for, and what is imporant to know."
-                      rows={5}
+                      rows={4}
                       className={cn(
                         'bg-card border-border text-foreground placeholder:text-muted-foreground text-sm resize-none focus-visible:ring-primary focus-visible:border-primary',
                         detailErrors.description && 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive',
