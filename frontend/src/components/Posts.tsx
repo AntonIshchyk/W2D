@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Skeleton } from './ui/skeleton'
 import { PageLayout } from './Navbar'
 import { useCurrentUser } from '../hooks/useCurrentUser'
-import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { PostType } from '../types/posts'
 import type { Post } from '../types/posts'
 import { EmptyState } from './ui/empty-state'
@@ -30,7 +29,7 @@ export function Posts() {
   const [communityOpen, setCommunityOpen]         = useState(false)
   const observerTarget = useRef<HTMLDivElement>(null)
 
-  const { data: currentUser, isError, error: userError } = useCurrentUser()
+  const { data: currentUser } = useCurrentUser()
 
   const { data: communities } = useQuery({
     queryKey: ['communities'],
@@ -89,8 +88,6 @@ export function Posts() {
     }
   })
 
-  useAuthErrorHandler(isError, userError)
-
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
     const [target] = entries
     if (target.isIntersecting && hasNextPage && !isFetchingNextPage) fetchNextPage()
@@ -109,8 +106,6 @@ export function Posts() {
     const value = currentVote === newValue ? 0 : newValue
     voteMutation.mutate({ postId, value })
   }
-
-  if (isError) return null
 
   return (
     <PageLayout>
@@ -194,15 +189,13 @@ export function Posts() {
               </SelectContent>
             </Select>
 
-            {currentUser && (
-              <Button
-                className="rounded-full shadow-sm hover:shadow-md transition-all px-6 shrink-0 flex items-center gap-2"
-                onClick={() => navigate('/posts/create')}
-              >
-                <Plus className="h-4 w-4" />
-                <span>Create Post</span>
-              </Button>
-            )}
+            <Button
+              className="rounded-full shadow-sm hover:shadow-md transition-all px-6 shrink-0 flex items-center gap-2"
+              onClick={() => navigate('/posts/create')}
+            >
+              <Plus className="h-4 w-4" />
+              <span>Create Post</span>
+            </Button>
           </div>
 
           {(selectedCommunities.length > 0 || selectedType !== undefined || sortBy !== 'new') && (
@@ -239,7 +232,7 @@ export function Posts() {
               icon={ImageIcon}
               title="No posts found"
               description="There are no posts here yet."
-              action={currentUser && selectedCommunities.length === 0 && !selectedType ? {
+              action={selectedCommunities.length === 0 && !selectedType ? {
                 label: 'Create Post',
                 onClick: () => navigate('/posts/create')
               } : undefined}

@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import { toast } from 'sonner'
 import { setAuthToken } from '../hooks/useAuthSync'
@@ -7,12 +7,14 @@ import { googleLogin } from '../api/users'
 
 export function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const redirectPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/'
 
   const googleMutation = useMutation({
     mutationFn: googleLogin,
     onSuccess: (data) => {
       setAuthToken(data.token)
-      navigate('/')
+      navigate(redirectPath)
     },
     onError: (error: Error) => {
       toast.error(error.message)

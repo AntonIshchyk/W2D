@@ -1,11 +1,13 @@
 import { useNavigate, Link, useLocation } from 'react-router-dom'
-import { Home, Map, MessageCircle, User, LogOut } from 'lucide-react'
+import { Home, Map, MessageCircle, User, LogIn, LogOut } from 'lucide-react'
 import { clearAuthToken } from '../hooks/useAuthSync'
+import { hasAuthToken } from '../lib/authToken'
 
 
 export function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
+  const isLoggedIn = hasAuthToken()
 
   const handleLogout = () => {
     clearAuthToken()
@@ -72,15 +74,27 @@ export function Navbar() {
       </div>
 
       {/* Logout at bottom */}
-      <button
-        onClick={handleLogout}
-        className="group relative w-11 h-11 rounded-xl flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-secondary transition-all duration-200"
-      >
-        <LogOut className="w-5 h-5" />
-        <span className="absolute left-full ml-3 px-2.5 py-1 bg-popover text-popover-foreground text-xs rounded-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-lg border border-border">
-          Logout
-        </span>
-      </button>
+      {isLoggedIn ? (
+        <button
+          onClick={handleLogout}
+          className="group relative w-11 h-11 rounded-xl flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-secondary transition-all duration-200"
+        >
+          <LogOut className="w-5 h-5" />
+          <span className="absolute left-full ml-3 px-2.5 py-1 bg-popover text-popover-foreground text-xs rounded-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-lg border border-border">
+            Logout
+          </span>
+        </button>
+      ) : (
+        <button
+          onClick={() => navigate('/login')}
+          className="group relative w-11 h-11 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200"
+        >
+          <LogIn className="w-5 h-5" />
+          <span className="absolute left-full ml-3 px-2.5 py-1 bg-popover text-popover-foreground text-xs rounded-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-lg border border-border">
+            Login
+          </span>
+        </button>
+      )}
     </nav>
   )
 }

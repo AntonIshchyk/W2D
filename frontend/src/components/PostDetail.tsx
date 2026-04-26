@@ -8,7 +8,6 @@ import {
 import { PageLayout } from './Navbar'
 import { PostType } from '../types/posts'
 import { useCurrentUser } from '../hooks/useCurrentUser'
-import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { formatRelativeTime } from '../lib/utils/date'
 import { Comments } from './Comments'
 import { PostCarousel } from './PostCarousel'
@@ -20,7 +19,7 @@ export function PostDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { data: currentUser, isError: userError, error: userQueryError } = useCurrentUser()
+  const { data: currentUser } = useCurrentUser()
   const { data: post, isLoading, isError } = useQuery({
     queryKey: ['post', id],
     queryFn: () => fetchPost(Number(id)),
@@ -45,8 +44,6 @@ export function PostDetail() {
     },
     onError: (e: Error) => toast.error(e.message),
   })
-
-  useAuthErrorHandler(userError, userQueryError)
 
   const handleVote = (currentVote: number | undefined, newValue: number) => {
     if (!currentUser || !id) return

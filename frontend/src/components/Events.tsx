@@ -335,13 +335,11 @@ export function Events() {
                   <List className="h-4 w-4" />
                 </Button>
               </div>
-              {currentUser && (
-                <Button onClick={() => navigate('/events/create')} size="sm" className="h-9">
-                  <Plus className="h-4 w-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Create Event</span>
-                  <span className="sm:hidden">Create</span>
-                </Button>
-              )}
+              <Button onClick={() => navigate('/events/create')} size="sm" className="h-9">
+                <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Create Event</span>
+                <span className="sm:hidden">Create</span>
+              </Button>
             </div>
           </div>
         </div>

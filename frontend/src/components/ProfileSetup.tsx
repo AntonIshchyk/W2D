@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { setAuthToken } from '../hooks/useAuthSync'
@@ -23,7 +23,9 @@ type ProfileSetupErrors = Partial<Record<keyof z.infer<typeof profileSetupSchema
 
 export function ProfileSetup() {
   const navigate = useNavigate()
+  const location = useLocation()
   const queryClient = useQueryClient()
+  const redirectPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/'
 
   const [profile, setProfile] = useState({
     username: '',
@@ -68,7 +70,7 @@ export function ProfileSetup() {
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: ['currentUser'] })
       setAuthToken(data.token)
-      navigate('/')
+      navigate(redirectPath)
     },
     onError: (error: Error) => {
       toast.error(error.message)
@@ -85,7 +87,7 @@ export function ProfileSetup() {
 
   if (isError || !currentUser) return <Navigate to="/login" replace />
   if (currentUser.profileSetupComplete) {
-    return <Navigate to="/" replace />
+    return <Navigate to={redirectPath} replace />
   }
 
   const handleSubmit = () => {

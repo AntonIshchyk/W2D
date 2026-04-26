@@ -10,11 +10,9 @@ import { Posts } from './components/Posts'
 import { PostDetail } from './components/PostDetail'
 import { useAuthSync } from './hooks/useAuthSync'
 import { ProtectedRoute } from './components/ProtectedRoute'
-import { hasAuthToken } from './lib/authToken'
 
 function App() {
   useAuthSync()
-  const isLoggedIn = hasAuthToken()
 
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -22,13 +20,14 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/profile-setup" element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
-        <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/" element={<Home />} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
+        <Route path="/events" element={<Events />} />
         <Route path="/events/create" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
-        <Route path="/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
-        <Route path="/posts/:id" element={<ProtectedRoute><PostDetail /></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to={isLoggedIn ? '/' : '/login'} replace />} />
+        <Route path="/posts" element={<Posts />} />
+        <Route path="/posts/create" element={<ProtectedRoute><Navigate to="/posts" replace /></ProtectedRoute>} />
+        <Route path="/posts/:id" element={<PostDetail />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )

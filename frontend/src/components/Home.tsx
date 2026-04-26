@@ -1,25 +1,7 @@
 import { Link } from 'react-router-dom'
 import { PageLayout } from './Navbar'
-import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
-import { useCurrentUser } from '../hooks/useCurrentUser'
 
 export function Home() {
-  const { data: user, isLoading, isError, error: userError } = useCurrentUser()
-
-  useAuthErrorHandler(isError, userError)
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground text-sm tracking-wide uppercase">Loading...</p>
-      </div>
-    )
-  }
-
-  if (isError) {
-    return null
-  }
-
   return (
     <PageLayout>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 auto-rows-fr">

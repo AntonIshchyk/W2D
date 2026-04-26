@@ -1,35 +1,40 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { isTokenExpired } from '../lib/auth'
+import { ApiError, isTokenExpired } from '../lib/auth'
 import { clearAuthToken } from '../hooks/useAuthSync'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { getAuthToken } from '../lib/authToken'
 
 export const ProtectedRoute = React.memo(({ children }: { children: React.ReactNode }) => {
   const location = useLocation()
-  
   const token = getAuthToken()
-  const { data: currentUser } = useCurrentUser()
+  const { data: currentUser, isLoading, isError, error } = useCurrentUser()
 
-  const navigationTarget = useMemo(() => {
-    if (!token || isTokenExpired(token)) {
-      if (token) clearAuthToken()
-      return '/login'
+  if (!token || isTokenExpired(token)) {
+    if (token) clearAuthToken()
+    return <Navigate to="/login" replace state={{ from: location }} />
+  }
+
+  if (isError) {
+    if (error instanceof ApiError && error.status === 401) {
+      clearAuthToken()
     }
-    
-    if (!currentUser) return null
-    
-    const isProfileSetup = location.pathname === '/profile-setup'
-    const isSetupComplete = currentUser.profileSetupComplete
-    
-    if (!isSetupComplete && !isProfileSetup) return '/profile-setup'
-    if (isSetupComplete && isProfileSetup) return '/'
-    
-    return null
-  }, [token, currentUser, location.pathname])
+    return <Navigate to="/login" replace state={{ from: location }} />
+  }
 
-  if (navigationTarget) {
-    return <Navigate to={navigationTarget} replace />
+  if (isLoading || !currentUser) {
+    return null
+  }
+
+  const isProfileSetupPage = location.pathname === '/profile-setup'
+  const isSetupComplete = currentUser.profileSetupComplete
+
+  if (!isSetupComplete && !isProfileSetupPage) {
+    return <Navigate to="/profile-setup" replace state={{ from: location }} />
+  }
+
+  if (isSetupComplete && isProfileSetupPage) {
+    return <Navigate to="/" replace />
   }
 
   return <>{children}</>
