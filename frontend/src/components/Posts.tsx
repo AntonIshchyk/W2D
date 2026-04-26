@@ -231,7 +231,7 @@ export function Posts() {
             <EmptyState
               icon={ImageIcon}
               title="No posts found"
-              description="There are no posts here yet."
+              description="There are no posts yet."
               action={selectedCommunities.length === 0 && !selectedType ? {
                 label: 'Create Post',
                 onClick: () => navigate('/posts/create')

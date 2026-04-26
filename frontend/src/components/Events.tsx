@@ -10,6 +10,7 @@ import {
   Loader2,
   MapPin,
   Map, List,
+  ImageIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from './ui/button'
@@ -26,6 +27,7 @@ import { fetchEvents, reverseGeocode } from '../api/events'
 import { fetchCommunities } from '../api/communities'
 import { loadMapState, DEFAULT_CENTER, DEFAULT_ZOOM } from '../utils/events'
 import type { CitySearchResult, Event, EventQueryBounds, ViewMode } from '../types/events'
+import { EmptyState } from './ui/empty-state'
 
 
 export function Events() {
@@ -363,10 +365,18 @@ export function Events() {
                 Loading events…
               </div>
             ) : allEvents.length === 0 ? (
-              <div className="flex items-center justify-center py-16 text-sm text-muted-foreground">
-                No events found
-              </div>
-            ) : (
+            <div className="py-20 text-center">
+              <EmptyState
+                icon={ImageIcon}
+                title="No Events found"
+                description="There are no events yet."
+                action={selectedCommunities.length === 0 ? {
+                  label: 'Create Event',
+                  onClick: () => navigate('/events/create')
+                } : undefined}
+              />
+            </div>
+          )  : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {allEvents.map((event) => (
                   <EventCard key={event.id} event={event} />
