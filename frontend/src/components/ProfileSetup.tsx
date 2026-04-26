@@ -2,11 +2,23 @@ import { useEffect, useState, useCallback } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { z } from 'zod'
 import { setAuthToken } from '../hooks/useAuthSync'
 import { AvatarUpload } from './AvatarUpload'
 import { isValidImageUrl } from '../lib/utils/validation'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { updateCurrentUserProfile } from '../api/users'
+
+const profileSetupSchema = z.object({
+  username: z
+    .string()
+    .trim()
+    .min(1, 'Username is required.')
+    .regex(/^[A-Za-z0-9_]{3,20}$/, 'Use 3-20 chars: letters, numbers, underscore.'),
+  bio: z.string().max(160, 'Bio must be 160 characters or less.'),
+})
+
+type ProfileSetupErrors = Partial<Record<keyof z.infer<typeof profileSetupSchema>, string>>
 
 
 export function ProfileSetup() {
@@ -20,6 +32,7 @@ export function ProfileSetup() {
   })
 
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<ProfileSetupErrors>({})
   const [isInitialized, setIsInitialized] = useState(false)
 
   const { data: currentUser, isLoading: isUserLoading, isError } = useCurrentUser()
@@ -38,6 +51,10 @@ export function ProfileSetup() {
   const handleInputChange = useCallback(
     (field: keyof typeof profile, value: string | string[]) => {
       setProfile((prev) => ({ ...prev, [field]: value }))
+
+      if (field === 'username' || field === 'bio') {
+        setFieldErrors((prev) => ({ ...prev, [field]: undefined }))
+      }
     },
     []
   )
@@ -73,16 +90,21 @@ export function ProfileSetup() {
 
   const handleSubmit = () => {
     setSubmitError(null)
+    const parsed = profileSetupSchema.safeParse({
+      username: profile.username,
+      bio: profile.bio,
+    })
 
-    const username = profile.username.trim()
-    if (!username) {
-      setSubmitError('Username is required.')
+    if (!parsed.success) {
+      const errors = parsed.error.flatten().fieldErrors
+      setFieldErrors({
+        username: errors.username?.[0],
+        bio: errors.bio?.[0],
+      })
       return
     }
-    if (!/^[A-Za-z0-9_]{3,20}$/.test(username)) {
-      setSubmitError('Use 3-20 chars: letters, numbers, underscore.')
-      return
-    }
+
+    setFieldErrors({})
 
     completeMutation.mutate()
   }
@@ -108,7 +130,9 @@ export function ProfileSetup() {
 
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-bold tracking-wide uppercase text-foreground">Username *</label>
+              <label className="block text-sm font-bold tracking-wide uppercase text-foreground">
+                Username <span className="text-destructive">*</span>
+              </label>
               <div className="relative mt-2.5">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                   <span className="text-foreground font-medium sm:text-base">@</span>
@@ -118,11 +142,15 @@ export function ProfileSetup() {
                   onChange={(e) =>
                     handleInputChange('username', e.target.value.replace(/[^A-Za-z0-9_]/g, '').slice(0, 20))
                   }
-                  placeholder="your_handle"
-                  className="block w-full rounded-2xl border border-input bg-background py-3.5 pl-10 pr-4 text-base text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                  placeholder="user_name"
+                  className={[
+                    'block w-full rounded-2xl border border-input bg-background py-3.5 pl-10 pr-4 text-base text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring',
+                    fieldErrors.username ? 'border-destructive focus:border-destructive focus:ring-destructive' : '',
+                  ].join(' ')}
                 />
               </div>
-              {submitError && <p className="mt-2 text-sm text-destructive">{submitError}</p>}
+              {fieldErrors.username && <p className="mt-2 text-sm text-destructive">{fieldErrors.username}</p>}
+              {!fieldErrors.username && submitError && <p className="mt-2 text-sm text-destructive">{submitError}</p>}
             </div>
 
             <div>
@@ -131,9 +159,13 @@ export function ProfileSetup() {
                 value={profile.bio}
                 onChange={(e) => handleInputChange('bio', e.target.value.slice(0, 160))}
                 rows={4}
-                placeholder="Tell us a little about yourself..."
-                className="mt-2.5 block w-full rounded-2xl border border-input bg-background p-4 text-base text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                placeholder="What are your interests? Share a bit about yourself!"
+                className={[
+                  'mt-2.5 block w-full rounded-2xl border border-input bg-background p-4 text-base text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring',
+                  fieldErrors.bio ? 'border-destructive focus:border-destructive focus:ring-destructive' : '',
+                ].join(' ')}
               />
+              {fieldErrors.bio && <p className="mt-2 text-sm text-destructive">{fieldErrors.bio}</p>}
               <p className="mt-2 text-right text-sm font-medium text-muted-foreground">{profile.bio.length}/160</p>
             </div>
           </div>

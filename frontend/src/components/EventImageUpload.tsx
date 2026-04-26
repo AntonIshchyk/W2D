@@ -237,7 +237,7 @@ export function EventImageUpload({
         )}
 
         <p className="text-base font-medium text-foreground mt-3">Drag & drop or choose images to upload</p>
-        <p className="text-sm text-muted-foreground mt-1">Max {maxFiles} files · Up to {MAX_FILE_SIZE_MB}MB each</p>
+        <p className="text-sm text-muted-foreground mt-1">Max {maxFiles} files · Allowed: JPEG, PNG, WebP, GIF</p>
       </div>
 
       {uploadedItems.length > 0 && (

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { z } from 'zod'
 import {
   Check,
   ChevronsUpDown,
@@ -35,6 +36,17 @@ const STEPS = [
   { id: 3, label: 'Photos', icon: Image },
 ]
 
+const eventDetailsSchema = z.object({
+  title: z.string().trim().min(1, 'Title is required.'),
+  description: z.string().trim().min(1, 'Description is required.'),
+  scheduledAt: z
+    .string()
+    .min(1, 'Date & time is required.')
+    .refine((value) => !Number.isNaN(new Date(value).getTime()), 'Please provide a valid date & time.'),
+})
+
+type EventDetailsErrors = Partial<Record<keyof z.infer<typeof eventDetailsSchema>, string>>
+
 export function CreateEvent() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
@@ -54,6 +66,7 @@ export function CreateEvent() {
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [imageUrls, setImageUrls] = useState<string[]>([])
   const [isFetchingLocation, setIsFetchingLocation] = useState(false)
+  const [detailErrors, setDetailErrors] = useState<EventDetailsErrors>({})
 
   const {
     query: locationInput,
@@ -106,6 +119,23 @@ export function CreateEvent() {
 
   const selectedCommunity = communities.find(c => c.id === communityId)
 
+  const validateDetails = () => {
+    const parsed = eventDetailsSchema.safeParse({ title, description, scheduledAt })
+
+    if (parsed.success) {
+      setDetailErrors({})
+      return true
+    }
+
+    const fieldErrors = parsed.error.flatten().fieldErrors
+    setDetailErrors({
+      title: fieldErrors.title?.[0],
+      description: fieldErrors.description?.[0],
+      scheduledAt: fieldErrors.scheduledAt?.[0],
+    })
+    return false
+  }
+
   const formattedDate = scheduledAt
     ? new Date(scheduledAt).toLocaleDateString('en-US', {
         weekday: 'short',
@@ -117,6 +147,12 @@ export function CreateEvent() {
     : null
 
   function handleSubmit() {
+    if (!validateDetails()) {
+      setStep(1)
+      toast.error('Please fix the required fields before creating the event.')
+      return
+    }
+
     mutation.mutate({
       title,
       description,
@@ -131,7 +167,7 @@ export function CreateEvent() {
 
   const canProceed =
     step === 1
-      ? title.trim().length > 0 && description.trim().length > 0 && scheduledAt.length > 0
+      ? eventDetailsSchema.safeParse({ title, description, scheduledAt }).success
       : step === 2
         ? true
         : true
@@ -175,26 +211,46 @@ export function CreateEvent() {
               {step === 1 && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-widest">Title</label>
+                    <label className="text-xs font-semibold uppercase tracking-widest">
+                      Title <span className="text-destructive">*</span>
+                    </label>
                     <Input
                       autoFocus
                       value={title}
-                      onChange={e => setTitle(e.target.value)}
+                      onChange={e => {
+                        setTitle(e.target.value)
+                        if (detailErrors.title) {
+                          setDetailErrors((prev) => ({ ...prev, title: undefined }))
+                        }
+                      }}
                       placeholder="Title your event (e.g. Walk in the park, running group...)"
-                      className="bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
+                      className={cn(
+                        'bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary',
+                        detailErrors.title && 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive',
+                      )}
                     />
+                    {detailErrors.title && <p className="text-xs text-destructive">{detailErrors.title}</p>}
                   </div>
 
                   <div className="relative">
                     <label className="text-xs font-semibold uppercase tracking-widest">
-                      Date & Time
+                      Date & Time <span className="text-destructive">*</span>
                       </label>
                     <Input
                       type="datetime-local"
                       value={scheduledAt}
-                      onChange={e => setScheduledAt(e.target.value)}
-                      className="pr-12 bg-card border-border text-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
+                      onChange={e => {
+                        setScheduledAt(e.target.value)
+                        if (detailErrors.scheduledAt) {
+                          setDetailErrors((prev) => ({ ...prev, scheduledAt: undefined }))
+                        }
+                      }}
+                      className={cn(
+                        'pr-12 bg-card border-border text-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary',
+                        detailErrors.scheduledAt && 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive',
+                      )}
                     />
+                    {detailErrors.scheduledAt && <p className="mt-2 text-xs text-destructive">{detailErrors.scheduledAt}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -243,14 +299,25 @@ export function CreateEvent() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-widest">Description</label>
+                    <label className="text-xs font-semibold uppercase tracking-widest">
+                      Description <span className="text-destructive">*</span>
+                    </label>
                     <Textarea
                       value={description}
-                      onChange={e => setDescription(e.target.value)}
-                      placeholder="Share the plan, who it's for, what to bring, and what is imporant to know."
+                      onChange={e => {
+                        setDescription(e.target.value)
+                        if (detailErrors.description) {
+                          setDetailErrors((prev) => ({ ...prev, description: undefined }))
+                        }
+                      }}
+                      placeholder="Share the plan, who it's for, and what is imporant to know."
                       rows={5}
-                      className="bg-card border-border text-foreground placeholder:text-muted-foreground text-sm resize-none focus-visible:ring-primary focus-visible:border-primary"
+                      className={cn(
+                        'bg-card border-border text-foreground placeholder:text-muted-foreground text-sm resize-none focus-visible:ring-primary focus-visible:border-primary',
+                        detailErrors.description && 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive',
+                      )}
                     />
+                    {detailErrors.description && <p className="text-xs text-destructive">{detailErrors.description}</p>}
                   </div>
                 </div>
               )}
@@ -314,7 +381,7 @@ export function CreateEvent() {
                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="space-y-2">
                     <label className="text-xs font-semibold uppercase tracking-widest">
-                      Event Image <span className="normal-case font-normal text-muted-foreground/70">(optional)</span>
+                      Event Image
                     </label>
                     <EventImageUpload
                       value={imageUrls}
@@ -339,7 +406,10 @@ export function CreateEvent() {
 
               {step < 3 ? (
                 <Button
-                  onClick={() => setStep((s) => s + 1)}
+                  onClick={() => {
+                    if (step === 1 && !validateDetails()) return
+                    setStep((s) => s + 1)
+                  }}
                   disabled={!canProceed}
                   className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold gap-2 text-base h-12 px-8 disabled:opacity-30"
                 >
