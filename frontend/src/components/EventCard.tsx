@@ -1,5 +1,4 @@
 import { MapPin, Clock, Users } from 'lucide-react'
-import { cn } from '../lib/utils'
 import { PhotoCarousel } from './PhotoCarousel'
 import type { Event } from '../types/events'
 
@@ -32,9 +31,7 @@ export function EventCard({ event, onClick, className }: EventCardProps) {
       tabIndex={0}
       onClick={() => onClick?.(event)}
       onKeyDown={(e) => e.key === 'Enter' && onClick?.(event)}
-      className={cn(
-        className
-      )}
+      className={className}
     >
       <PhotoCarousel
         urls={event.photoUrls}
