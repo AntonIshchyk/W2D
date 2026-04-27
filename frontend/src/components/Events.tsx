@@ -260,10 +260,13 @@ export function Events() {
                   disabled={isGettingLocation}
                   title="Use my location"
                 >
-                  {isGettingLocation
-                    ? <Loader2 className="h-4 w-4 animate-spin" />
-                    : <MapPin className="h-4 w-4" />
-                  }
+                  <>
+                    {isGettingLocation
+                      ? <Loader2 className="h-4 w-4 animate-spin" />
+                      : <MapPin className="h-4 w-4" />
+                    }
+                    <span className="hidden sm:inline">Use my location</span>
+                  </>
                 </Button>
               </div>
 
