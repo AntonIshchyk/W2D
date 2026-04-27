@@ -15,8 +15,8 @@ function formatEventDate(dateStr: string) {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
-    }) +
-    ' · ' +
+    }) + ' at ' +
+
     date.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
