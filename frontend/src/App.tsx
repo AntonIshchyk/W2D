@@ -20,13 +20,13 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/profile-setup" element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/events" element={<Events />} />
+        <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
         <Route path="/events/create" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
-        <Route path="/posts" element={<Posts />} />
+        <Route path="/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
         <Route path="/posts/create" element={<ProtectedRoute><Navigate to="/posts" replace /></ProtectedRoute>} />
-        <Route path="/posts/:id" element={<PostDetail />} />
+        <Route path="/posts/:id" element={<ProtectedRoute><PostDetail /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
