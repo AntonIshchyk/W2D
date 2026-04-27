@@ -1,5 +1,5 @@
 import { useNavigate, Link, useLocation } from 'react-router-dom'
-import { Home, Map, MessageCircle, User, LogIn, LogOut } from 'lucide-react'
+import { Home, Map, MessageCircle, User, LogOut } from 'lucide-react'
 import { clearAuthToken } from '../hooks/useAuthSync'
 import { hasAuthToken } from '../lib/authToken'
 
@@ -47,12 +47,10 @@ export function Navbar() {
 
   return (
     <nav className="fixed left-0 top-0 bottom-0 w-18 bg-card flex flex-col items-center py-6 z-50 shadow-sm border-r border-border">
-      {/* Logo */}
       <Link to="/" className="text-card-foreground font-black text-lg tracking-tighter mb-10 hover:opacity-80 transition-opacity">
         W2D
       </Link>
 
-      {/* Nav items */}
       <div className="flex flex-col items-center gap-1 flex-1">
         {navItems.map((item) => (
           <Link
@@ -65,7 +63,6 @@ export function Navbar() {
             }`}
           >
             {item.icon}
-            {/* Tooltip */}
             <span className="absolute left-full ml-3 px-2.5 py-1 bg-popover text-popover-foreground text-xs rounded-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-lg border border-border">
               {item.label}
             </span>
@@ -73,8 +70,7 @@ export function Navbar() {
         ))}
       </div>
 
-      {/* Logout at bottom */}
-      {isLoggedIn ? (
+      {isLoggedIn && (
         <button
           onClick={handleLogout}
           className="group relative w-11 h-11 rounded-xl flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-secondary transition-all duration-200"
@@ -84,22 +80,11 @@ export function Navbar() {
             Logout
           </span>
         </button>
-      ) : (
-        <button
-          onClick={() => navigate('/login')}
-          className="group relative w-11 h-11 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200"
-        >
-          <LogIn className="w-5 h-5" />
-          <span className="absolute left-full ml-3 px-2.5 py-1 bg-popover text-popover-foreground text-xs rounded-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-lg border border-border">
-            Login
-          </span>
-        </button>
       )}
     </nav>
   )
 }
 
-/** Layout wrapper that accounts for the sidebar */
 export function PageLayout({ children, fullWidth = false }: { children: React.ReactNode, fullWidth?: boolean }) {
   return (
     <div className="min-h-screen bg-background text-foreground pl-18">
