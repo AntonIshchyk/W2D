@@ -14,7 +14,6 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from './ui/button'
-import { Badge } from './ui/badge'
 import { Input } from './ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
@@ -28,7 +27,6 @@ import { fetchCommunities } from '../api/communities'
 import { loadMapState, DEFAULT_CENTER, DEFAULT_ZOOM } from '../utils/events'
 import type { CitySearchResult, Event, EventQueryBounds, ViewMode } from '../types/events'
 import { EmptyState } from './ui/empty-state'
-
 
 export function Events() {
   const navigate = useNavigate()
@@ -44,7 +42,6 @@ export function Events() {
   const [searchBounds, setSearchBounds] = useState<EventQueryBounds | null>(null)
   const [searchLocationName, setSearchLocationName] = useState<string | null>(null)
   const boundsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
   const [isGettingLocation, setIsGettingLocation] = useState(false)
 
   const {
@@ -111,6 +108,7 @@ export function Events() {
   function clearSearchLocation() {
     setSearchBounds(null)
     setSearchLocationName(null)
+    setSearchQuery('')
     flyTo(DEFAULT_CENTER, DEFAULT_ZOOM)
   }
 
@@ -182,31 +180,58 @@ export function Events() {
       <div className="relative w-full h-dvh flex flex-col overflow-hidden">
         <div className="absolute top-0 left-0 right-0 z-10 p-4 pointer-events-none flex flex-col gap-2">
           
-          <div className="pointer-events-auto flex flex-col xl:flex-row xl:items-center justify-between bg-card/95 backdrop-blur shadow-sm border rounded-xl p-3 gap-3">
-            <div className="flex flex-wrap items-center gap-3 xl:gap-6">
+          <div className="pointer-events-auto flex flex-col xl:flex-row xl:items-center justify-between bg-card/95 backdrop-blur shadow-sm border rounded-xl p-4 gap-3">
+              <div className="flex flex-wrap items-center gap-3 xl:gap-4">
               <h1 className="text-xl font-bold leading-none">
                 Events ({allEvents.length})
               </h1>
 
               <div className="relative flex gap-2 flex-wrap sm:flex-nowrap items-start sm:items-center">
-                <form onSubmit={handleSearchSubmit} className="relative w-40 sm:w-48">
+                <form onSubmit={handleSearchSubmit} className="relative w-40 sm:w-52">
                   <Input
                     type="text"
                     placeholder="Search city…"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    value={searchLocationName ?? searchQuery}
+                    onChange={(e) => {
+                      if (searchLocationName) {
+                        clearSearchLocation()
+                      }
+                      setSearchQuery(e.target.value)
+                    }}
                     onBlur={() => setTimeout(() => setShowAutocomplete(false), 150)}
-                    onFocus={() => autocompleteResults.length > 0 && setShowAutocomplete(true)}
-                    className="pl-8 h-9 text-sm w-full bg-background"
+                    onFocus={() => {
+                      if (searchLocationName) return
+                      autocompleteResults.length > 0 && setShowAutocomplete(true)
+                    }}
+                    className={cn(
+                      'pl-8 pr-8 h-9 text-sm w-full bg-background',
+                      searchLocationName && 'text-foreground font-medium',
+                    )}
                     disabled={isGettingLocation}
                     autoComplete="off"
+                    readOnly={!!searchLocationName}
                   />
+
                   {isSearchingCity
                     ? <Loader2 className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground animate-spin" />
-                    : <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    : <Search className={cn('absolute left-2.5 top-2.5 h-4 w-4', searchLocationName ? 'text-primary' : 'text-muted-foreground')} />
                   }
 
-                  {showAutocomplete && autocompleteResults.length > 0 && (
+                  {searchLocationName && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        clearSearchLocation()
+                      }}
+                      className="absolute right-2 top-2 rounded-full p-0.5 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                      aria-label="Clear location filter"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+
+                  {showAutocomplete && autocompleteResults.length > 0 && !searchLocationName && (
                     <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg z-50">
                       {autocompleteResults.slice(0, 8).map((result, idx) => (
                         <button
@@ -241,21 +266,6 @@ export function Events() {
                   }
                 </Button>
               </div>
-
-              {searchLocationName && (
-                <Badge variant="secondary" className="gap-1.5 pl-2 pr-1 h-7 text-l font-normal">
-                  <MapPin className="h-4 w-4 shrink-0" />
-                  {searchLocationName}
-                  <button
-                    type="button"
-                    onClick={clearSearchLocation}
-                    className="rounded-full p-0.5 hover:bg-foreground/10 transition-colors"
-                    aria-label={`Clear location filter: ${searchLocationName}`}
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </Badge>
-              )}
 
               <div className="flex items-center gap-2 flex-wrap">
                 <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
@@ -304,8 +314,11 @@ export function Events() {
                     variant="ghost"
                     size="sm"
                     className="h-9 text-destructive border-destructive/40 hover:bg-destructive hover:text-white hover:border-destructive transition-colors"
-                    onClick={() => setSelectedCommunities([])}
-                    title="Clear community filter"
+                    onClick={() => {
+                      setSelectedCommunities([])
+                      setSearchLocationName(null)
+                    }}
+                    title="Reset filters"
                   >
                     <X className="h-4 w-4" /> Reset filters
                   </Button>
@@ -313,7 +326,7 @@ export function Events() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <div className="flex rounded-lg border overflow-hidden h-9">
                 <Button
                   variant={viewMode === 'map' ? 'default' : 'ghost'}
