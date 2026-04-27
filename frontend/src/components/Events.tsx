@@ -243,16 +243,16 @@ export function Events() {
               </div>
 
               {searchLocationName && (
-                <Badge variant="secondary" className="gap-1.5 pl-2 pr-1 h-7 text-xs font-normal">
-                  <MapPin className="h-3 w-3 shrink-0" />
+                <Badge variant="secondary" className="gap-1.5 pl-2 pr-1 h-7 text-l font-normal">
+                  <MapPin className="h-4 w-4 shrink-0" />
                   {searchLocationName}
                   <button
                     type="button"
                     onClick={clearSearchLocation}
-                    className="ml-0.5 rounded-full p-0.5 hover:bg-foreground/10 transition-colors"
+                    className="rounded-full p-0.5 hover:bg-foreground/10 transition-colors"
                     aria-label={`Clear location filter: ${searchLocationName}`}
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4" />
                   </button>
                 </Badge>
               )}
@@ -303,11 +303,11 @@ export function Events() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-9 w-9 p-0"
+                    className="h-9 text-destructive border-destructive/40 hover:bg-destructive hover:text-white hover:border-destructive transition-colors"
                     onClick={() => setSelectedCommunities([])}
                     title="Clear community filter"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-4 w-4" /> Reset filters
                   </Button>
                 )}
               </div>
