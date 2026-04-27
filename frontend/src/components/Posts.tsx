@@ -230,8 +230,7 @@ export function Posts() {
           <div className="py-20 text-center">
             <EmptyState
               icon={ImageIcon}
-              title="No posts found"
-              description="There are no posts yet."
+              title="There are no posts yet"
               action={selectedCommunities.length === 0 && !selectedType ? {
                 label: 'Create Post',
                 onClick: () => navigate('/posts/create')

@@ -368,8 +368,7 @@ export function Events() {
             <div className="py-20 text-center">
               <EmptyState
                 icon={ImageIcon}
-                title="No Events found"
-                description="There are no events yet."
+                title="There are no events yet"
                 action={selectedCommunities.length === 0 ? {
                   label: 'Create Event',
                   onClick: () => navigate('/events/create')
