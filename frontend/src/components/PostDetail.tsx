@@ -10,7 +10,7 @@ import { PostType } from '../types/posts'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { formatRelativeTime } from '../lib/utils/date'
 import { Comments } from './Comments'
-import { PostCarousel } from './PostCarousel'
+import { PhotoCarousel } from './PhotoCarousel'
 import { fetchPost, votePost, deletePost } from '../api/posts'
 import { PostAuthorInfo } from './PostAuthorInfo'
 import { VoteButtons } from './VoteButtons'
@@ -120,7 +120,7 @@ export function PostDetail() {
               {post.title}
             </h1>
 
-            {photos.length > 0 && <PostCarousel urls={photos} />}
+            {photos.length > 0 && <PhotoCarousel urls={photos} />}
 
             {post.description && (
               <p className="text-sm md:text-base text-foreground leading-relaxed whitespace-pre-wrap mb-6">

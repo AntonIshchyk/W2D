@@ -3,7 +3,7 @@ import { MessageSquare, Clock } from 'lucide-react'
 import type { Post } from '../types/posts'
 import { PostType } from '../types/posts'
 import { formatRelativeTime } from '../lib/utils/date'
-import { PostCarousel } from './PostCarousel'
+import { PhotoCarousel } from './PhotoCarousel'
 import { PostAuthorInfo } from './PostAuthorInfo'
 import { VoteButtons } from './VoteButtons'
 
@@ -41,7 +41,7 @@ export function PostCard({ post, currentUser, onVote }: PostCardProps) {
           </p>
         )}
 
-        <PostCarousel urls={post.photoUrls || []} containerClassName="mt-4 mb-2 md:px-0" imageContainerClassName="h-75 md:h-112.5" />
+        <PhotoCarousel urls={post.photoUrls || []} containerClassName="mt-4 mb-2 md:px-0" imageContainerClassName="h-75 md:h-112.5" />
       </div>
 
       <div className="flex items-center justify-between mt-5 pt-4 border-t border-border/40">

@@ -3,17 +3,17 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { cn } from '../lib/utils'
 import { isValidPhotoUrl } from '../lib/utils/validation'
 
-interface PostCarouselProps {
+interface PhotoCarouselProps {
   urls: string[]
   containerClassName?: string
   imageContainerClassName?: string
 }
 
-export function PostCarousel({ 
+export function PhotoCarousel({ 
   urls, 
   containerClassName = "mt-4 mb-6 md:px-0",
   imageContainerClassName = "h-96"
-}: PostCarouselProps) {
+}: PhotoCarouselProps) {
   const validUrls = urls.filter(isValidPhotoUrl)
   if (!validUrls || validUrls.length === 0) return null
 
