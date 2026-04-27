@@ -309,14 +309,14 @@ export function Events() {
                     </Command>
                   </PopoverContent>
                 </Popover>
-                {selectedCommunities.length > 0 && (
+                {(selectedCommunities.length > 0 || searchLocationName) && (
                   <Button
                     variant="ghost"
                     size="sm"
                     className="h-9 text-destructive border-destructive/40 hover:bg-destructive hover:text-white hover:border-destructive transition-colors"
                     onClick={() => {
                       setSelectedCommunities([])
-                      setSearchLocationName(null)
+                      clearSearchLocation()
                     }}
                     title="Reset filters"
                   >
@@ -400,7 +400,7 @@ export function Events() {
 
         <div
           className={cn(
-            'absolute top-28 sm:top-24 right-4 w-[calc(100vw-2rem)] sm:w-80 max-h-[60vh] z-20',
+            'absolute top-28 sm:top-24 right-4 w-[calc(100vw-2rem)] sm:w-96 max-h-[80vh] z-20',
             'bg-card border shadow-2xl rounded-xl overflow-hidden flex flex-col',
             'transition-all duration-300 ease-in-out',
             selectedEvent && viewMode === 'map'
@@ -409,20 +409,7 @@ export function Events() {
           )}
           aria-hidden={!selectedEvent || viewMode !== 'map'}
         >
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 right-2 z-30 w-9 h-9 rounded-full bg-background/80 hover:bg-background shadow-sm"
-            onClick={(e) => {
-              e.stopPropagation()
-              setSelectedEvent(null)
-            }}
-            tabIndex={selectedEvent ? 0 : -1}
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close event preview</span>
-          </Button>
-            {selectedEvent && <EventCard event={selectedEvent} />}
+          {selectedEvent && <EventCard event={selectedEvent} />}
         </div>
       </div>
     </PageLayout>
