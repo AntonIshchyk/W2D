@@ -33,10 +33,7 @@ export function EventCard({ event, onClick, className }: EventCardProps) {
       onClick={() => onClick?.(event)}
       onKeyDown={(e) => e.key === 'Enter' && onClick?.(event)}
       className={cn(
-        'group rounded-2xl border bg-card overflow-hidden cursor-pointer',
-        'transition-colors duration-150 hover:border-border/80',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-        className,
+        className
       )}
     >
       <PhotoCarousel
@@ -46,7 +43,6 @@ export function EventCard({ event, onClick, className }: EventCardProps) {
       />
 
       <div className="px-4 py-3.5 space-y-2.5">
-
         {event.communityName && (
           <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-primary/10 text-primary px-2.5 py-0.5 rounded-full">
             <Users className="h-3 w-3" />
@@ -54,27 +50,26 @@ export function EventCard({ event, onClick, className }: EventCardProps) {
           </span>
         )}
 
-        <h3 className="font-semibold text-[15px] leading-snug text-foreground">
+        <h1 className="font-semibold text-l leading-snug text-foreground">
           {event.title}
-        </h3>
+        </h1>
 
-        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+        <p className="text-sm leading-relaxed line-clamp-2">
           {event.description}
         </p>
 
         <div className="flex items-center gap-1.5 flex-wrap">
-          <Clock className="h-3 w-3 text-muted-foreground shrink-0" />
-          <span className="text-xs text-muted-foreground">
+          <Clock className="h-3 w-3  shrink-0" />
+          <span className="text-xs">
             {formatEventDate(event.scheduledAt)}
           </span>
           {event.locationName && (
-            <>
-              <span className="w-1 h-1 rounded-full bg-muted-foreground/35 shrink-0" />
-              <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
-              <span className="text-xs text-muted-foreground truncate">
+            <span className="flex items-center gap-1.5">
+              <MapPin className="h-3 w-3 shrink-0" />
+              <span className="text-xs truncate">
                 {event.locationName}
               </span>
-            </>
+            </span>
           )}
         </div>
       </div>
