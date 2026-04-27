@@ -410,11 +410,8 @@ export function Events() {
             <X className="h-4 w-4" />
             <span className="sr-only">Close event preview</span>
           </Button>
-          <div className="flex-1 overflow-y-auto p-3 sm:p-4">
             {selectedEvent && <EventCard event={selectedEvent} />}
-          </div>
         </div>
-
       </div>
     </PageLayout>
   )
