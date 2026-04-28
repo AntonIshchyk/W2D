@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Backend.Contracts.Events;
+namespace Backend.Contracts.Places;
 
-public class CreateEventRequest
+public class CreatePlaceRequest
 {
     [Required]
     [MaxLength(120)]

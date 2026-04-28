@@ -3,7 +3,7 @@ const DEFAULT_ZOOM = 3
 
 export function loadMapState(): { center: [number, number]; zoom: number } {
   try {
-    const raw = localStorage.getItem('events.mapState')
+    const raw = localStorage.getItem('places.mapState')
     if (!raw) return { center: DEFAULT_CENTER, zoom: DEFAULT_ZOOM }
     const parsed = JSON.parse(raw)
     const lat  = Number(parsed.center?.[0])

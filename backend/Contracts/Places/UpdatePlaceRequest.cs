@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Backend.Contracts.Events;
+namespace Backend.Contracts.Places;
 
-public class UpdateEventRequest
+public class UpdatePlaceRequest
 {
     [MaxLength(120)]
     public string? Title { get; set; }

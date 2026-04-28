@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 
 import { getPresignedUrl, uploadToR2 } from '../api/uploads'
 
-interface EventImageUploadProps {
+interface PlaceImageUploadProps {
   value: string[]
   onChange: (urls: string[]) => void
   maxFiles?: number
@@ -39,12 +39,12 @@ function deriveUploadError(file: File): string | null {
   return null
 }
 
-export function EventImageUpload({
+export function PlaceImageUpload({
   value,
   onChange,
   maxFiles = 4,
   disabled = false,
-}: EventImageUploadProps) {
+}: PlaceImageUploadProps) {
   const [items, setItems] = useState<UploadListItem[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)

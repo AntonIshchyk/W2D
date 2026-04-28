@@ -8,22 +8,22 @@ import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { ensureLeafletDefaultIcon } from '../utils/leafletIcon'
 import { MapController, type FlyToTarget } from './MapController'
-import type { Event, EventQueryBounds } from '../types/events'
+import type { Place, PlaceQueryBounds } from '../types/places'
 
 ensureLeafletDefaultIcon()
 
-interface EventsMapProps {
-  events: Event[]
-  onBoundsChange: (bounds: EventQueryBounds) => void
+interface PlacesMapProps {
+  events: Place[]
+  onBoundsChange: (bounds: PlaceQueryBounds) => void
   onViewChange?: (center: [number, number], zoom: number) => void
   flyToTarget?: FlyToTarget | null
   selectedEventId?: number | null
-  onEventClick?: (event: Event | null) => void
+  onEventClick?: (event: Place | null) => void
   initialCenter?: [number, number]
   initialZoom?: number
 }
 
-export function EventsMap({
+export function PlacesMap({
   events,
   onBoundsChange,
   onViewChange,
@@ -32,7 +32,7 @@ export function EventsMap({
   onEventClick,
   initialCenter = [20, 0],
   initialZoom = 2,
-}: EventsMapProps) {
+}: PlacesMapProps) {
   return (
     <div className="w-full h-full relative z-0">
       <MapContainer
@@ -75,4 +75,3 @@ export function EventsMap({
   )
 }
 export type { FlyToTarget }
-

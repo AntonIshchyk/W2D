@@ -1,14 +1,14 @@
 import { MapPin, Clock, Users } from 'lucide-react'
 import { PhotoCarousel } from './PhotoCarousel'
-import type { Event } from '../types/events'
+import type { Place } from '../types/places'
 
-interface EventCardProps {
-  event: Event
-  onClick?: (event: Event) => void
+interface PlaceCardProps {
+  event: Place
+  onClick?: (event: Place) => void
   className?: string
 }
 
-function formatEventDate(dateStr: string) {
+function formatPlaceDate(dateStr: string) {
   const date = new Date(dateStr)
   return (
     date.toLocaleDateString('en-US', {
@@ -24,7 +24,7 @@ function formatEventDate(dateStr: string) {
   )
 }
 
-export function EventCard({ event, onClick, className }: EventCardProps) {
+export function PlaceCard({ event, onClick, className }: PlaceCardProps) {
   return (
     <div
       role="button"
@@ -58,7 +58,7 @@ export function EventCard({ event, onClick, className }: EventCardProps) {
         <div className="flex items-center gap-1.5 flex-wrap">
           <Clock className="h-3 w-3  shrink-0" />
           <span className="text-xs">
-            {formatEventDate(event.scheduledAt)}
+            {formatPlaceDate(event.scheduledAt)}
           </span>
           {event.locationName && (
             <span className="flex items-center gap-1.5">

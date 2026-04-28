@@ -2,11 +2,11 @@ import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { ensureResponseOk } from '../lib/utils/http'
 import type {
   CitySearchResult,
-  CreateEventRequest,
-  Event,
-  EventQueryBounds,
-  UpdateEventRequest,
-} from '../types/events'
+  CreatePlaceRequest,
+  Place,
+  PlaceQueryBounds,
+  UpdatePlaceRequest,
+} from '../types/places'
 
 const COORDINATE_PAIR_REGEX =
   /^\s*[-+]?\d+(?:\.\d+)?\s*,\s*[-+]?\d+(?:\.\d+)?\s*$/
@@ -18,7 +18,6 @@ function normalizeLocationPart(value: unknown): string | null {
   const trimmed = value.trim()
   if (!trimmed) return null
 
-  // Drop noisy geocoder labels that are just coordinates or numeric fragments.
   if (COORDINATE_PAIR_REGEX.test(trimmed) || NUMERIC_LABEL_REGEX.test(trimmed)) {
     return null
   }
@@ -54,10 +53,10 @@ function buildDisplayName(props: Record<string, unknown>): string | null {
   return uniqueParts.length > 0 ? uniqueParts.join(', ') : null
 }
 
-export async function fetchEvents(
+export async function fetchPlaces(
   communityIds?: number[],
-  bounds?: EventQueryBounds
-): Promise<Event[]> {
+  bounds?: PlaceQueryBounds
+): Promise<Place[]> {
   const params = new URLSearchParams()
 
   if (communityIds && communityIds.length > 0) {
@@ -71,56 +70,56 @@ export async function fetchEvents(
     params.append('maxLng', bounds.maxLng.toString())
   }
 
-  const response = await fetch(`${API_ENDPOINTS.events.base}?${params}`, {
+  const response = await fetch(`${API_ENDPOINTS.places.base}?${params}`, {
     headers: getAuthHeaders(),
   })
 
-  await ensureResponseOk(response, 'Failed to fetch events')
+  await ensureResponseOk(response, 'Failed to fetch places')
 
   return response.json()
 }
 
-export async function createEvent(data: CreateEventRequest): Promise<Event> {
-  const response = await fetch(API_ENDPOINTS.events.base, {
+export async function createPlace(data: CreatePlaceRequest): Promise<Place> {
+  const response = await fetch(API_ENDPOINTS.places.base, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
   })
 
-  await ensureResponseOk(response, 'Failed to create event')
+  await ensureResponseOk(response, 'Failed to create place')
 
   return response.json()
 }
 
-export async function fetchEvent(id: number): Promise<Event> {
-  const response = await fetch(API_ENDPOINTS.events.byId(id), {
+export async function fetchPlace(id: number): Promise<Place> {
+  const response = await fetch(API_ENDPOINTS.places.byId(id), {
     headers: getAuthHeaders(),
   })
 
-  await ensureResponseOk(response, 'Event not found')
+  await ensureResponseOk(response, 'Place not found')
 
   return response.json()
 }
 
-export async function updateEvent(id: number, data: UpdateEventRequest): Promise<Event> {
-  const response = await fetch(API_ENDPOINTS.events.byId(id), {
+export async function updatePlace(id: number, data: UpdatePlaceRequest): Promise<Place> {
+  const response = await fetch(API_ENDPOINTS.places.byId(id), {
     method: 'PUT',
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
   })
 
-  await ensureResponseOk(response, 'Failed to update event')
+  await ensureResponseOk(response, 'Failed to update place')
 
   return response.json()
 }
 
-export async function deleteEvent(id: number): Promise<void> {
-  const response = await fetch(API_ENDPOINTS.events.byId(id), {
+export async function deletePlace(id: number): Promise<void> {
+  const response = await fetch(API_ENDPOINTS.places.byId(id), {
     method: 'DELETE',
     headers: getAuthHeaders(),
   })
 
-  await ensureResponseOk(response, 'Failed to delete event')
+  await ensureResponseOk(response, 'Failed to delete place')
 }
 
 export async function searchCities(query: string): Promise<CitySearchResult[]> {

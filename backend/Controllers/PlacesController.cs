@@ -1,12 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
-using Backend.Contracts.Events;
+using Backend.Contracts.Places;
 using Backend.Contracts.Common;
-using Backend.Models;
 using Backend.Services;
 using Backend.Extensions;
-using Backend.Constants;
 
 namespace Backend.Controllers;
 
@@ -14,62 +12,62 @@ namespace Backend.Controllers;
 [Route("api/[controller]")]
 [Authorize]
 [EnableRateLimiting("fixed")]
-public class EventsController : ControllerBase
+public class PlacesController : ControllerBase
 {
-    private readonly IEventService _eventService;
+    private readonly IPlaceService _placeService;
 
-    public EventsController(IEventService eventService)
+    public PlacesController(IPlaceService placeService)
     {
-        _eventService = eventService;
+        _placeService = placeService;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<EventResponse>>> GetEvents(
+    public async Task<ActionResult<IEnumerable<PlaceResponse>>> GetPlaces(
         [FromQuery(Name = "communityId")] int[]? communityIds = null,
         [FromQuery] double? minLat = null,
         [FromQuery] double? maxLat = null,
         [FromQuery] double? minLng = null,
         [FromQuery] double? maxLng = null)
     {
-        IEnumerable<EventResponse> result = await _eventService.GetEventsAsync(
+        IEnumerable<PlaceResponse> result = await _placeService.GetPlacesAsync(
             communityIds, minLat, maxLat, minLng, maxLng);
         return Ok(result);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<EventResponse>> GetEvent(int id)
+    public async Task<ActionResult<PlaceResponse>> GetPlace(int id)
     {
-        Result<EventResponse> result = await _eventService.GetEventByIdAsync(id);
+        Result<PlaceResponse> result = await _placeService.GetPlaceByIdAsync(id);
         return result.ToActionResult(this);
     }
 
     [HttpPost]
-    public async Task<ActionResult<EventResponse>> CreateEvent(CreateEventRequest request)
+    public async Task<ActionResult<PlaceResponse>> CreatePlace(CreatePlaceRequest request)
     {
         int userId = User.GetUserId();
-        Result<EventResponse> result = await _eventService.CreateEventAsync(userId, request);
+        Result<PlaceResponse> result = await _placeService.CreatePlaceAsync(userId, request);
 
         if (!result.IsSuccess || result.Value == null)
         {
             return result.ToActionResult(this);
         }
 
-        return CreatedAtAction(nameof(GetEvent), new { id = result.Value.Id }, result.Value);
+        return CreatedAtAction(nameof(GetPlace), new { id = result.Value.Id }, result.Value);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<EventResponse>> UpdateEvent(int id, UpdateEventRequest request)
+    public async Task<ActionResult<PlaceResponse>> UpdatePlace(int id, UpdatePlaceRequest request)
     {
         int userId = User.GetUserId();
-        Result<EventResponse> result = await _eventService.UpdateEventAsync(id, userId, request);
+        Result<PlaceResponse> result = await _placeService.UpdatePlaceAsync(id, userId, request);
         return result.ToActionResult(this);
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteEvent(int id)
+    public async Task<ActionResult> DeletePlace(int id)
     {
         int userId = User.GetUserId();
-        Result<bool> result = await _eventService.DeleteEventAsync(id, userId);
+        Result<bool> result = await _placeService.DeletePlaceAsync(id, userId);
 
         if (!result.IsSuccess)
         {
