@@ -42,8 +42,8 @@ export function PlaceCard({ place, onClick, className }: PlaceCardProps) {
         <div className="flex items-center gap-1.5 flex-wrap">
           {place.locationName && (
             <span className="flex items-center gap-1.5">
-              <MapPin className="h-3 w-3 shrink-0" />
-              <span className="text-xs truncate">
+              <MapPin className="h-4 w-4 shrink-0" />
+              <span className="text-xs wrap-break-word max-w-56 whitespace-normal">
                 {place.locationName}
               </span>
             </span>
