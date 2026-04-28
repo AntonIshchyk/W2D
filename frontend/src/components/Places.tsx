@@ -81,7 +81,7 @@ export function Places() {
     setFlyToTarget({ center, zoom, id: flyToIdRef.current })
   }
 
-  function boundsFromResult(result: Pick<CitySearchResult, 'lat' | 'lon'>): EventQueryBounds {
+  function boundsFromResult(result: Pick<CitySearchResult, 'lat' | 'lon'>): PlaceQueryBounds {
     const lat = parseFloat(result.lat)
     const lon = parseFloat(result.lon)
     const radiusKm = 30
@@ -380,7 +380,7 @@ export function Places() {
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Loading places…
               </div>
-            ) : allEvents.length === 0 ? (
+            ) : allPlaces.length === 0 ? (
             <div className="py-20 text-center">
               <EmptyState
                 icon={ImageIcon}
@@ -410,7 +410,7 @@ export function Places() {
               ? 'opacity-100 translate-x-0 pointer-events-auto'
               : 'opacity-0 translate-x-6 pointer-events-none',
           )}
-          aria-hidden={!selectedEvent || viewMode !== 'map'}
+          aria-hidden={!selectedPlace || viewMode !== 'map'}
         >
           {selectedPlace && <PlaceCard place={selectedPlace} />}
         </div>
