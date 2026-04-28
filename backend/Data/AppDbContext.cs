@@ -202,10 +202,6 @@ public class AppDbContext : DbContext
 
         // Place performance indexes
         modelBuilder.Entity<Place>()
-            .HasIndex(e => e.ScheduledAt)
-            .HasDatabaseName("IX_Places_ScheduledAt");
-
-        modelBuilder.Entity<Place>()
             .HasIndex(e => e.UserId)
             .HasDatabaseName("IX_Places_UserId");
 

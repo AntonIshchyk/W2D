@@ -12,7 +12,5 @@ public class UpdatePlaceRequest
 
     public int? CommunityId { get; set; }
 
-    public DateTime? ScheduledAt { get; set; }
-
     public List<string>? PhotoUrls { get; set; }
 }

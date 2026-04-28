@@ -13,7 +13,6 @@ import {
   ArrowRight,
   Info,
   Image,
-  Calendar
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from './ui/button'
@@ -38,11 +37,7 @@ const STEPS = [
 
 const eventDetailsSchema = z.object({
   title: z.string().trim().min(1, 'Title is required.'),
-  description: z.string().trim().min(1, 'Description is required.'),
-  scheduledAt: z
-    .string()
-    .min(1, 'Date & time is required.')
-    .refine((value) => !Number.isNaN(new Date(value).getTime()), 'Please provide a valid date & time.'),
+  description: z.string().trim().min(1, 'Description is required.')
 })
 
 type EventDetailsErrors = Partial<Record<keyof z.infer<typeof eventDetailsSchema>, string>>
@@ -60,7 +55,6 @@ export function CreatePlace() {
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [scheduledAt, setScheduledAt] = useState('')
   const [communityId, setCommunityId] = useState<number | null>(null)
   const [communityOpen, setCommunityOpen] = useState(false)
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
@@ -120,7 +114,7 @@ export function CreatePlace() {
   const selectedCommunity = communities.find(c => c.id === communityId)
 
   const validateDetails = () => {
-    const parsed = eventDetailsSchema.safeParse({ title, description, scheduledAt })
+    const parsed = eventDetailsSchema.safeParse({ title, description })
 
     if (parsed.success) {
       setDetailErrors({})
@@ -130,21 +124,10 @@ export function CreatePlace() {
     const fieldErrors = parsed.error.flatten().fieldErrors
     setDetailErrors({
       title: fieldErrors.title?.[0],
-      description: fieldErrors.description?.[0],
-      scheduledAt: fieldErrors.scheduledAt?.[0],
+      description: fieldErrors.description?.[0]
     })
     return false
   }
-
-  const formattedDate = scheduledAt
-    ? new Date(scheduledAt).toLocaleDateString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    : null
 
   function handleSubmit() {
     if (!validateDetails()) {
@@ -156,7 +139,6 @@ export function CreatePlace() {
     mutation.mutate({
       title,
       description,
-      scheduledAt: new Date(scheduledAt).toISOString(),
       ...(communityId !== null ? { communityId } : {}),
       latitude: location?.lat,
       longitude: location?.lng,
@@ -167,7 +149,7 @@ export function CreatePlace() {
 
   const canProceed =
     step === 1
-      ? eventDetailsSchema.safeParse({ title, description, scheduledAt }).success
+      ? eventDetailsSchema.safeParse({ title, description }).success
       : step === 2
         ? true
         : true
@@ -230,27 +212,6 @@ export function CreatePlace() {
                       )}
                     />
                     {detailErrors.title && <p className="text-xs text-destructive">{detailErrors.title}</p>}
-                  </div>
-
-                  <div className="relative">
-                    <label className="text-xs font-semibold uppercase tracking-widest">
-                      Date & Time <span className="text-destructive">*</span>
-                      </label>
-                    <Input
-                      type="datetime-local"
-                      value={scheduledAt}
-                      onChange={e => {
-                        setScheduledAt(e.target.value)
-                        if (detailErrors.scheduledAt) {
-                          setDetailErrors((prev) => ({ ...prev, scheduledAt: undefined }))
-                        }
-                      }}
-                      className={cn(
-                        'pr-12 bg-card border-border text-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary',
-                        detailErrors.scheduledAt && 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive',
-                      )}
-                    />
-                    {detailErrors.scheduledAt && <p className="mt-2 text-xs text-destructive">{detailErrors.scheduledAt}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -463,13 +424,6 @@ export function CreatePlace() {
                 </div>
 
                 <div className="space-y-3 pt-4 border-t">
-                  <div className="flex items-center gap-3 text-base">
-                    <Calendar className="h-5 w-5 text-primary shrink-0" />
-                    <span className={formattedDate ? 'text-foreground/90' : 'text-muted-foreground/60 italic'}>
-                      {formattedDate || 'No date and time selected yet'}
-                    </span>
-                  </div>
-
                   <div className="flex items-center gap-3 text-base">
                     <Users className="h-5 w-5 text-primary shrink-0" />
                     <span className={selectedCommunity ? 'text-foreground/90' : 'text-muted-foreground/60 italic'}>

@@ -11,7 +11,6 @@ export interface Place {
   userName: string
   communityId: number | null
   communityName: string | null
-  scheduledAt: string
   latitude?: number
   longitude?: number
   locationName?: string
@@ -30,7 +29,6 @@ export interface PlaceQueryBounds {
 export interface CreatePlaceRequest {
   title: string
   description: string
-  scheduledAt: string
   communityId?: number | null
   latitude?: number
   longitude?: number
@@ -42,7 +40,6 @@ export interface UpdatePlaceRequest {
   title?: string
   description?: string
   communityId?: number | null
-  scheduledAt?: string
   latitude?: number
   longitude?: number
   locationName?: string

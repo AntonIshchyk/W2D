@@ -20,9 +20,6 @@ public class Place : BaseModel
     public int? CommunityId { get; set; }
     public Community? Community { get; set; }
 
-    [Required]
-    public DateTime ScheduledAt { get; set; }
-
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
 

@@ -26,7 +26,6 @@ public class PlaceService : IPlaceService
         UserName = e.User != null ? e.User.Username : null,
         CommunityId = e.CommunityId,
         CommunityName = e.Community != null ? e.Community.Name : null,
-        ScheduledAt = e.ScheduledAt,
         Latitude = e.Latitude,
         Longitude = e.Longitude,
         LocationName = e.LocationName,
@@ -47,16 +46,13 @@ public class PlaceService : IPlaceService
         if (communityIds is { Count: > 0 })
             query = query.Where(e => e.CommunityId.HasValue && communityIds.Contains(e.CommunityId.Value));
 
-        query = query.Where(e => e.ScheduledAt >= DateTime.UtcNow);
-
         if (minLat.HasValue) query = query.Where(e => e.Latitude >= minLat.Value);
         if (maxLat.HasValue) query = query.Where(e => e.Latitude <= maxLat.Value);
         if (minLng.HasValue) query = query.Where(e => e.Longitude >= minLng.Value);
         if (maxLng.HasValue) query = query.Where(e => e.Longitude <= maxLng.Value);
 
         return await query
-            .OrderBy(e => e.ScheduledAt)
-            .ThenBy(e => e.Id)
+            .OrderBy(e => e.Id)
             .Take(500)
             .Select(ProjectPlace)
             .ToListAsync();
@@ -79,11 +75,6 @@ public class PlaceService : IPlaceService
 
     public async Task<Result<PlaceResponse>> CreatePlaceAsync(int userId, CreatePlaceRequest request)
     {
-        if (request.ScheduledAt < DateTime.UtcNow)
-        {
-            return Result<PlaceResponse>.Invalid("Place cannot be scheduled in the past.");
-        }
-
         if (request.Latitude.HasValue != request.Longitude.HasValue)
         {
             return Result<PlaceResponse>.Invalid("Latitude and Longitude must both be provided or both be omitted.");
@@ -109,7 +100,6 @@ public class PlaceService : IPlaceService
             Description = request.Description,
             UserId = userId,
             CommunityId = request.CommunityId,
-            ScheduledAt = request.ScheduledAt,
             Latitude = request.Latitude,
             Longitude = request.Longitude,
             LocationName = request.LocationName,
@@ -161,7 +151,6 @@ public class PlaceService : IPlaceService
         if (request.Title != null) eventEntity.Title = request.Title;
         if (request.Description != null) eventEntity.Description = request.Description;
         if (request.CommunityId.HasValue) eventEntity.CommunityId = request.CommunityId;
-        if (request.ScheduledAt.HasValue) eventEntity.ScheduledAt = request.ScheduledAt.Value;
         if (request.PhotoUrls != null) eventEntity.PhotoUrls = request.PhotoUrls;
 
         eventEntity.UpdatedAt = DateTime.UtcNow;

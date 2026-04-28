@@ -127,1202 +127,1202 @@ namespace Backend.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4325),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3043),
                             Description = "Play football with friends or join a local team. A great team sport that builds endurance, coordination, and teamwork skills.",
                             Name = "Football",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4333)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3047)
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4811),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3429),
                             Description = "Shoot hoops at your local court. Can be played solo for practice or in teams for competitive games.",
                             Name = "Basketball",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4813)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3429)
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4860),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3430),
                             Description = "Play beach or indoor volleyball. A fun team sport that doesn't require extensive equipment.",
                             Name = "Volleyball",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4860)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3431)
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4861),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3431),
                             Description = "America's pastime - bat, pitch, and field in this strategic team sport.",
                             Name = "Baseball",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4862)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3432)
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4862),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3432),
                             Description = "A high-intensity contact sport requiring strength, speed, and teamwork.",
                             Name = "Rugby",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4863)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3433)
                         },
                         new
                         {
                             Id = 6,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4876),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3438),
                             Description = "Fast-paced indoor sport combining elements of basketball and soccer.",
                             Name = "Handball",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4876)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3438)
                         },
                         new
                         {
                             Id = 7,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4890),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3438),
                             Description = "Throw, dodge, and catch in this exciting and energetic team game.",
                             Name = "Dodgeball",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4890)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3439)
                         },
                         new
                         {
                             Id = 8,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4891),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3439),
                             Description = "Tackle football with strategic plays and intense physicality.",
                             Name = "American Football",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4891)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3440)
                         },
                         new
                         {
                             Id = 9,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4892),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3440),
                             Description = "A fun, accessible game similar to baseball but played with a large rubber ball.",
                             Name = "Kickball",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4892)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3441)
                         },
                         new
                         {
                             Id = 10,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4894),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3442),
                             Description = "Roll strikes and spares at your local bowling alley. Great social community for all ages.",
                             Name = "Bowling",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4894)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3442)
                         },
                         new
                         {
                             Id = 11,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4895),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3456),
                             Description = "A classic racket sport that can be played in singles or doubles. Great for improving reflexes and cardiovascular fitness.",
                             Name = "Tennis",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4895)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3457)
                         },
                         new
                         {
                             Id = 12,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4896),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3457),
                             Description = "A fast-paced racket sport that can be played casually or competitively. Great for reflexes and agility.",
                             Name = "Badminton",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4896)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3458)
                         },
                         new
                         {
                             Id = 13,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4897),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3458),
                             Description = "Fast-paced indoor sport requiring quick reflexes. Can be played competitively or just for fun.",
                             Name = "Table Tennis (Ping Pong)",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4897)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3458)
                         },
                         new
                         {
                             Id = 14,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4898),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3459),
                             Description = "Intense racket sport played in a four-walled court. Excellent cardio workout.",
                             Name = "Squash",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4898)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3459)
                         },
                         new
                         {
                             Id = 15,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4899),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3460),
                             Description = "A paddle sport combining elements of tennis, badminton, and table tennis. Easy to learn and very social.",
                             Name = "Pickleball",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4899)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3460)
                         },
                         new
                         {
                             Id = 16,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4900),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3461),
                             Description = "High-energy racket sport played in an enclosed court with a hollow rubber ball.",
                             Name = "Racquetball",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4900)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3461)
                         },
                         new
                         {
                             Id = 17,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4901),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3462),
                             Description = "Take a simple walk around your neighborhood or local park. Perfect for clearing your mind and getting light exercise.",
                             Name = "Walking",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4901)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3462)
                         },
                         new
                         {
                             Id = 18,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4902),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3464),
                             Description = "Explore nature trails and mountain paths. From easy trails to challenging climbs, there's a hike for everyone.",
                             Name = "Hiking",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4902)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3465)
                         },
                         new
                         {
                             Id = 19,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4903),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3465),
                             Description = "Whether you're training for a marathon or just want to stay fit, running is an accessible and effective exercise.",
                             Name = "Running/Jogging",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4903)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3466)
                         },
                         new
                         {
                             Id = 20,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4904),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3466),
                             Description = "Ride a bicycle for leisure or exercise. Great for exploring your city or countryside while getting a good workout.",
                             Name = "Cycling",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4904)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3467)
                         },
                         new
                         {
                             Id = 21,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4905),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3467),
                             Description = "Observe and identify birds in their natural habitat. A peaceful outdoor community that connects you with nature.",
                             Name = "Bird Watching",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4905)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3468)
                         },
                         new
                         {
                             Id = 22,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4906),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3468),
                             Description = "Enjoy outdoor meals in parks or scenic locations. Great for relaxation and socializing.",
                             Name = "Picnicking",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4906)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3469)
                         },
                         new
                         {
                             Id = 23,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4907),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3469),
                             Description = "Observe the night sky, constellations, and celestial events. A peaceful and awe-inspiring community.",
                             Name = "Stargazing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4907)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3470)
                         },
                         new
                         {
                             Id = 24,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4908),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3470),
                             Description = "Throw a frisbee in the park. Can be casual tossing or competitive ultimate frisbee.",
                             Name = "Frisbee",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4908)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3470)
                         },
                         new
                         {
                             Id = 25,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4909),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3471),
                             Description = "Practice yoga for flexibility, strength, and mental clarity. Suitable for all levels and can be done at home or in a studio.",
                             Name = "Yoga",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4909)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3471)
                         },
                         new
                         {
                             Id = 26,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4910),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3472),
                             Description = "Build strength and muscle through resistance training. Can be done at the gym or at home with appropriate equipment.",
                             Name = "Weight Training",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4910)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3472)
                         },
                         new
                         {
                             Id = 27,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4911),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3473),
                             Description = "Low-impact exercise focusing on core strength, flexibility, and body awareness. Great for all fitness levels.",
                             Name = "Pilates",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4911)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3473)
                         },
                         new
                         {
                             Id = 28,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4912),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3474),
                             Description = "High-intensity functional fitness program combining weightlifting, cardio, and gymnastics.",
                             Name = "CrossFit",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4912)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3474)
                         },
                         new
                         {
                             Id = 29,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4913),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3475),
                             Description = "Dance-based fitness class with energetic Latin and international music.",
                             Name = "Zumba",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4913)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3475)
                         },
                         new
                         {
                             Id = 30,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4914),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3476),
                             Description = "High-energy stationary bike workout often done in group classes.",
                             Name = "Spinning/Indoor Cycling",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4914)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3476)
                         },
                         new
                         {
                             Id = 31,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4915),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3477),
                             Description = "Cardiovascular exercise routine performed to music, often in a group setting.",
                             Name = "Aerobics",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4915)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3477)
                         },
                         new
                         {
                             Id = 32,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4916),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3478),
                             Description = "Ballet-inspired workout focusing on low-impact, high-intensity movements.",
                             Name = "Barre",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4916)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3478)
                         },
                         new
                         {
                             Id = 33,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4917),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3479),
                             Description = "Improve flexibility and reduce muscle tension through dedicated stretching routines.",
                             Name = "Stretching",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4917)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3479)
                         },
                         new
                         {
                             Id = 34,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4918),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3480),
                             Description = "Bodyweight exercises like push-ups, pull-ups, and squats. No equipment needed.",
                             Name = "Calisthenics",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4919)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3481)
                         },
                         new
                         {
                             Id = 35,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4919),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3481),
                             Description = "Swim for fitness, recreation, or competition. Excellent full-body workout that's easy on the joints.",
                             Name = "Swimming",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4920)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3482)
                         },
                         new
                         {
                             Id = 36,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4920),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3482),
                             Description = "Ride ocean waves on a surfboard. An exciting water sport that builds strength and balance.",
                             Name = "Surfing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4921)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3483)
                         },
                         new
                         {
                             Id = 37,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4921),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3483),
                             Description = "Paddle through calm waters or tackle rapids in a kayak. Great for exploring waterways and building upper body strength.",
                             Name = "Kayaking",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4922)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3484)
                         },
                         new
                         {
                             Id = 38,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4922),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3484),
                             Description = "Stand-up paddleboarding on calm waters. Great core workout and peaceful way to explore.",
                             Name = "Paddleboarding (SUP)",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4923)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3485)
                         },
                         new
                         {
                             Id = 39,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4923),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3485),
                             Description = "Intense team water sport combining swimming, ball handling, and strategy.",
                             Name = "Water Polo",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4924)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3486)
                         },
                         new
                         {
                             Id = 40,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4933),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3486),
                             Description = "Explore underwater worlds with scuba equipment. Requires certification but offers unique experiences.",
                             Name = "Scuba Diving",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4933)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3486)
                         },
                         new
                         {
                             Id = 41,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4934),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3487),
                             Description = "Swim on the water surface while viewing underwater attractions through a snorkel mask.",
                             Name = "Snorkeling",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4934)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3487)
                         },
                         new
                         {
                             Id = 42,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4935),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3488),
                             Description = "Paddle a canoe through rivers, lakes, or calm seas. Great for nature exploration.",
                             Name = "Canoeing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4935)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3488)
                         },
                         new
                         {
                             Id = 43,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4936),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3489),
                             Description = "High-speed water sport on a personal watercraft. Thrilling and adrenaline-pumping.",
                             Name = "Jet Skiing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4936)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3489)
                         },
                         new
                         {
                             Id = 44,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4937),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3497),
                             Description = "Navigate waters using wind power in a sailboat. Combines skill, strategy, and nature.",
                             Name = "Sailing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4937)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3497)
                         },
                         new
                         {
                             Id = 45,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4938),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3498),
                             Description = "Express yourself through painting with watercolors, acrylics, or oils. Perfect for relaxation and creativity.",
                             Name = "Painting",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4938)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3498)
                         },
                         new
                         {
                             Id = 46,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4939),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3499),
                             Description = "Sketch and draw with pencils, charcoal, or digital tools. A portable and accessible creative outlet.",
                             Name = "Drawing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4939)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3499)
                         },
                         new
                         {
                             Id = 47,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4940),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3500),
                             Description = "Capture moments and express your artistic vision through photography. Can be done with a phone or professional camera.",
                             Name = "Photography",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4940)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3500)
                         },
                         new
                         {
                             Id = 48,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4941),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3501),
                             Description = "Create three-dimensional art with clay, stone, metal, or other materials.",
                             Name = "Sculpting",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4941)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3501)
                         },
                         new
                         {
                             Id = 49,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4942),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3502),
                             Description = "Create functional or decorative ceramic pieces. A hands-on art form that's both creative and meditative.",
                             Name = "Pottery",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4942)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3502)
                         },
                         new
                         {
                             Id = 50,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4943),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3503),
                             Description = "Create art using digital tools like tablets and software. Modern artistic expression.",
                             Name = "Digital Art",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4943)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3503)
                         },
                         new
                         {
                             Id = 51,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4944),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3504),
                             Description = "The art of beautiful handwriting. Practice various lettering styles with pens and brushes.",
                             Name = "Calligraphy",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4944)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3504)
                         },
                         new
                         {
                             Id = 52,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4945),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3505),
                             Description = "Japanese paper folding art. Create intricate designs from simple paper squares.",
                             Name = "Origami",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4945)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3505)
                         },
                         new
                         {
                             Id = 53,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4946),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3506),
                             Description = "Create visual content for digital and print media. Combine art and communication.",
                             Name = "Graphic Design",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4946)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3506)
                         },
                         new
                         {
                             Id = 54,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4947),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3507),
                             Description = "Bring drawings and characters to life through frame-by-frame or digital animation.",
                             Name = "Animation",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4947)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3507)
                         },
                         new
                         {
                             Id = 55,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4948),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3508),
                             Description = "Design and create jewelry pieces using various materials and techniques.",
                             Name = "Jewelry Making",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4948)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3508)
                         },
                         new
                         {
                             Id = 56,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4949),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3509),
                             Description = "Create custom candles with different scents, colors, and designs.",
                             Name = "Candle Making",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4949)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3509)
                         },
                         new
                         {
                             Id = 57,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4949),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3510),
                             Description = "Craft handmade soaps with natural ingredients and custom fragrances.",
                             Name = "Soap Making",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4950)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3510)
                         },
                         new
                         {
                             Id = 58,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4950),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3511),
                             Description = "Build furniture, decorations, or art pieces from wood. Satisfying hands-on craft.",
                             Name = "Woodworking",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4951)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3511)
                         },
                         new
                         {
                             Id = 59,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4951),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3512),
                             Description = "Craft items from leather including wallets, bags, and belts.",
                             Name = "Leatherworking",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4952)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3512)
                         },
                         new
                         {
                             Id = 60,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4952),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3513),
                             Description = "Learn to play acoustic or electric guitar. Great for self-expression and can be enjoyed solo or in a band.",
                             Name = "Guitar",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4953)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3513)
                         },
                         new
                         {
                             Id = 61,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4953),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3513),
                             Description = "Learn classical pieces or contemporary songs on the piano. A versatile instrument suitable for all ages.",
                             Name = "Piano",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4954)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3514)
                         },
                         new
                         {
                             Id = 62,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4954),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3514),
                             Description = "Practice singing alone or join a choir. Express yourself through music and improve your vocal skills.",
                             Name = "Singing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4955)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3515)
                         },
                         new
                         {
                             Id = 63,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4955),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3515),
                             Description = "Learn rhythm and coordination through drumming. Great stress relief and physical workout.",
                             Name = "Drums",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4956)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3516)
                         },
                         new
                         {
                             Id = 64,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4956),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3516),
                             Description = "Master this elegant string instrument. Requires dedication but offers beautiful musical expression.",
                             Name = "Violin",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4957)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3517)
                         },
                         new
                         {
                             Id = 65,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4957),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3517),
                             Description = "Mix and create music using turntables or digital equipment. Perfect for music enthusiasts.",
                             Name = "DJing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4958)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3518)
                         },
                         new
                         {
                             Id = 66,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4978),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3533),
                             Description = "Create original music using digital audio workstations and software.",
                             Name = "Music Production",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4978)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3533)
                         },
                         new
                         {
                             Id = 67,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4979),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3534),
                             Description = "Provide the rhythmic foundation in bands or practice solo. Essential in many music genres.",
                             Name = "Bass Guitar",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4979)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3534)
                         },
                         new
                         {
                             Id = 68,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4980),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3535),
                             Description = "Learn this expressive wind instrument popular in jazz, classical, and contemporary music.",
                             Name = "Saxophone",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4980)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3535)
                         },
                         new
                         {
                             Id = 69,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4981),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3536),
                             Description = "Create percussion sounds and music with your mouth. No equipment needed, just practice.",
                             Name = "Beatboxing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4981)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3536)
                         },
                         new
                         {
                             Id = 70,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4981),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3537),
                             Description = "Play the classic strategy game of chess. Improve your tactical thinking and problem-solving skills.",
                             Name = "Chess",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4982)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3537)
                         },
                         new
                         {
                             Id = 71,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4982),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3538),
                             Description = "Gather friends and family for board game nights. From strategy games to party games, there's something for everyone.",
                             Name = "Board Games",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4983)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3538)
                         },
                         new
                         {
                             Id = 72,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4990),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3539),
                             Description = "Play video games on console, PC, or mobile. From casual puzzle games to competitive esports.",
                             Name = "Video Gaming",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4991)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3539)
                         },
                         new
                         {
                             Id = 73,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4991),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3540),
                             Description = "Play poker, bridge, magic the gathering, or casual card games with friends.",
                             Name = "Card Games",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4992)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3540)
                         },
                         new
                         {
                             Id = 74,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4992),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3541),
                             Description = "Work on jigsaw puzzles, crosswords, sudoku, or other brain teasers.",
                             Name = "Puzzle Solving",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4993)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3541)
                         },
                         new
                         {
                             Id = 75,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4993),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3542),
                             Description = "Master the classic 3D combination puzzle. Great for developing spatial reasoning.",
                             Name = "Rubik's Cube",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4994)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3542)
                         },
                         new
                         {
                             Id = 76,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4994),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3549),
                             Description = "Throw darts at a target board. Fun pub game that improves focus and precision.",
                             Name = "Darts",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4995)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3550)
                         },
                         new
                         {
                             Id = 77,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4995),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3550),
                             Description = "Play pool, snooker, or other cue sports at a table. Strategic and social community.",
                             Name = "Pool/Billiards",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4996)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3551)
                         },
                         new
                         {
                             Id = 78,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4996),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3551),
                             Description = "Test your knowledge in trivia nights or quiz games. Great for groups and learning.",
                             Name = "Trivia/Quiz Games",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4997)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3552)
                         },
                         new
                         {
                             Id = 79,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4997),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3552),
                             Description = "Solve puzzles and riddles to 'escape' from a themed room within a time limit.",
                             Name = "Escape Rooms",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4997)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3553)
                         },
                         new
                         {
                             Id = 80,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4998),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3553),
                             Description = "Experiment in the kitchen with new recipes. Cook meals for yourself or loved ones.",
                             Name = "Cooking",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4998)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3554)
                         },
                         new
                         {
                             Id = 81,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4999),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3554),
                             Description = "Bake bread, cakes, cookies, and pastries. A precise and rewarding culinary art.",
                             Name = "Baking",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(4999)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3555)
                         },
                         new
                         {
                             Id = 82,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5000),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3555),
                             Description = "Explore different coffee beans, roasts, and brewing methods. Develop your palate.",
                             Name = "Coffee Tasting",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5000)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3556)
                         },
                         new
                         {
                             Id = 83,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5001),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3556),
                             Description = "Sample and appreciate different wines. Learn about varieties, regions, and pairing.",
                             Name = "Wine Tasting",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5001)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3557)
                         },
                         new
                         {
                             Id = 84,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5002),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3557),
                             Description = "Brew your own beer, cider, or kombucha. A fascinating blend of science and art.",
                             Name = "Homebrewing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5002)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3557)
                         },
                         new
                         {
                             Id = 85,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5003),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3558),
                             Description = "Learn various dance styles from salsa to hip-hop. Great exercise and a fun social community.",
                             Name = "Dancing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5003)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3558)
                         },
                         new
                         {
                             Id = 86,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5004),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3559),
                             Description = "Give back to your community through volunteer work. A rewarding way to make a positive impact.",
                             Name = "Volunteering",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5004)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3559)
                         },
                         new
                         {
                             Id = 87,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5005),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3560),
                             Description = "Join a group to read and discuss books. Combine reading with social interaction.",
                             Name = "Book Club",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5005)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3560)
                         },
                         new
                         {
                             Id = 88,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5006),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3561),
                             Description = "Dive into books, whether fiction, non-fiction, or poetry. Expand your knowledge and imagination.",
                             Name = "Reading",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5006)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3561)
                         },
                         new
                         {
                             Id = 89,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5007),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3562),
                             Description = "Study a new language through apps, courses, or tutors. Expand your communication skills and cultural understanding.",
                             Name = "Learning a Language",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5007)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3562)
                         },
                         new
                         {
                             Id = 90,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5008),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3563),
                             Description = "Learn to code in various programming languages. Build apps, websites, or automate tasks.",
                             Name = "Coding/Programming",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5008)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3563)
                         },
                         new
                         {
                             Id = 91,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5009),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3564),
                             Description = "Creative writing, journaling, or blogging. Express thoughts and develop storytelling skills.",
                             Name = "Writing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5009)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3564)
                         },
                         new
                         {
                             Id = 92,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5010),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3565),
                             Description = "Create and share audio content on communities you're passionate about. Express ideas and connect with audiences.",
                             Name = "Podcasting",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5010)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3565)
                         },
                         new
                         {
                             Id = 93,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5011),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3566),
                             Description = "Share your thoughts, experiences, or expertise through written or video blogs.",
                             Name = "Blogging/Vlogging",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5011)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3566)
                         },
                         new
                         {
                             Id = 94,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5012),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3567),
                             Description = "Take structured online courses on platforms like Coursera, Udemy, or edX. Learn anything from anywhere.",
                             Name = "Online Courses",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5012)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3567)
                         },
                         new
                         {
                             Id = 95,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5013),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3568),
                             Description = "Study celestial objects and phenomena. Combine observation with scientific learning.",
                             Name = "Astronomy",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5013)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3568)
                         },
                         new
                         {
                             Id = 96,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5014),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3569),
                             Description = "Explore philosophical texts and ideas. Develop critical thinking and question fundamental concepts.",
                             Name = "Philosophy",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5014)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3569)
                         },
                         new
                         {
                             Id = 97,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5015),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3570),
                             Description = "Deep dive into historical periods, events, or figures. Understand the past to inform the present.",
                             Name = "History Research",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5015)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3570)
                         },
                         new
                         {
                             Id = 98,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5016),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3571),
                             Description = "Practice mindfulness and meditation to reduce stress and improve mental clarity. Can be done anywhere.",
                             Name = "Meditation",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5016)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3571)
                         },
                         new
                         {
                             Id = 99,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5017),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3572),
                             Description = "Grow plants, flowers, or vegetables. A relaxing hobby that connects you with nature.",
                             Name = "Gardening",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5017)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3572)
                         },
                         new
                         {
                             Id = 100,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5018),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3573),
                             Description = "Practice this gentle martial art focused on slow, flowing movements and breath control.",
                             Name = "Tai Chi",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5018)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3573)
                         },
                         new
                         {
                             Id = 101,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5019),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3574),
                             Description = "Learn massage techniques or receive professional massages for relaxation and muscle relief.",
                             Name = "Massage Therapy",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5019)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3574)
                         },
                         new
                         {
                             Id = 102,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5020),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3575),
                             Description = "Use essential oils for therapeutic benefits. Promote relaxation and well-being.",
                             Name = "Aromatherapy",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5020)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3575)
                         },
                         new
                         {
                             Id = 103,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5021),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3576),
                             Description = "Write daily thoughts, gratitude, or reflections. Great for mental health and self-awareness.",
                             Name = "Journaling",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5021)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3576)
                         },
                         new
                         {
                             Id = 104,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5030),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3577),
                             Description = "Immerse yourself in nature to reduce stress and improve well-being. Simply be present in natural settings.",
                             Name = "Nature Bathing (Shinrin-Yoku)",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5030)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3577)
                         },
                         new
                         {
                             Id = 105,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5031),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3578),
                             Description = "Practice controlled breathing techniques to reduce stress and improve focus.",
                             Name = "Breathing Exercises",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5031)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3578)
                         },
                         new
                         {
                             Id = 106,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5032),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3579),
                             Description = "Relax in hot water or steam rooms. Great for muscle recovery and stress relief.",
                             Name = "Hot Tub/Sauna",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5032)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3579)
                         },
                         new
                         {
                             Id = 107,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5033),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3580),
                             Description = "Enjoy music for relaxation, motivation, or pure pleasure. Create playlists or explore new genres.",
                             Name = "Listening to Music",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5033)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3580)
                         },
                         new
                         {
                             Id = 108,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5034),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3587),
                             Description = "Traditional Japanese martial art focusing on striking techniques and kata forms.",
                             Name = "Karate",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5034)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3588)
                         },
                         new
                         {
                             Id = 109,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5035),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3588),
                             Description = "Train in the sweet science. Great cardio workout and learn self-defense.",
                             Name = "Boxing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5035)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3589)
                         },
                         new
                         {
                             Id = 110,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5036),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3589),
                             Description = "Japanese martial art focused on throws and grappling techniques.",
                             Name = "Judo",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5036)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3590)
                         },
                         new
                         {
                             Id = 111,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5037),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3590),
                             Description = "Korean martial art known for dynamic kicking techniques and discipline.",
                             Name = "Taekwondo",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5037)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3591)
                         },
                         new
                         {
                             Id = 112,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5038),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3591),
                             Description = "Ground-fighting martial art focused on submissions and positional control.",
                             Name = "Brazilian Jiu-Jitsu",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5038)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3592)
                         },
                         new
                         {
                             Id = 113,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5039),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3592),
                             Description = "Downhill or cross-country skiing in winter. An exhilarating sport for snow enthusiasts.",
                             Name = "Skiing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5039)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3593)
                         },
                         new
                         {
                             Id = 114,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5040),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3593),
                             Description = "Ride down snowy slopes on a snowboard. Dynamic and exciting winter sport.",
                             Name = "Snowboarding",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5040)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3594)
                         },
                         new
                         {
                             Id = 115,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5041),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3594),
                             Description = "Glide on ice at a rink. Fun winter community that builds balance and leg strength.",
                             Name = "Ice Skating",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5041)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3594)
                         },
                         new
                         {
                             Id = 116,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5042),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3595),
                             Description = "Fast-paced team sport played on ice. Requires skating ability and competitive spirit.",
                             Name = "Ice Hockey",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5042)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3595)
                         },
                         new
                         {
                             Id = 117,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5043),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3596),
                             Description = "Slide down snowy hills on sleds. Simple, fun winter community for all ages.",
                             Name = "Sledding/Tobogganing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5043)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3596)
                         },
                         new
                         {
                             Id = 118,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5043),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3597),
                             Description = "Perform in plays or take acting classes. Express emotions and stories through performance.",
                             Name = "Acting/Theater",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5044)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3597)
                         },
                         new
                         {
                             Id = 119,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5044),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3598),
                             Description = "Write and perform comedy routines. Make people laugh while expressing your unique voice.",
                             Name = "Stand-up Comedy",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5045)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3598)
                         },
                         new
                         {
                             Id = 120,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5045),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3599),
                             Description = "Perform unscripted comedy based on audience suggestions. Develops quick thinking and creativity.",
                             Name = "Improv Comedy",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5046)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3599)
                         },
                         new
                         {
                             Id = 121,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5046),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3600),
                             Description = "Learn and perform magic illusions. Entertain others with sleight of hand and misdirection.",
                             Name = "Magic Tricks",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5047)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3600)
                         },
                         new
                         {
                             Id = 122,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5047),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3601),
                             Description = "Learn to juggle balls, clubs, or other objects. Impressive skill that improves coordination.",
                             Name = "Juggling",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5048)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3601)
                         },
                         new
                         {
                             Id = 123,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5048),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3602),
                             Description = "The art of silent acting through exaggerated gestures and expressions.",
                             Name = "Mime",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5049)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3602)
                         },
                         new
                         {
                             Id = 124,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5049),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3603),
                             Description = "Create garments and accessories with knitting needles and yarn. Relaxing and productive.",
                             Name = "Knitting",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5050)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3603)
                         },
                         new
                         {
                             Id = 125,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5050),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3604),
                             Description = "Create items using a crochet hook and yarn. Similar to knitting but with different techniques.",
                             Name = "Crocheting",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5051)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3604)
                         },
                         new
                         {
                             Id = 126,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5051),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3605),
                             Description = "Make or repair clothing and fabric items. Practical skill that allows for creative expression.",
                             Name = "Sewing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5052)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3605)
                         },
                         new
                         {
                             Id = 127,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5052),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3606),
                             Description = "Decorate fabric with needle and thread designs. Detailed handwork that creates beautiful patterns.",
                             Name = "Embroidery",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5053)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3606)
                         },
                         new
                         {
                             Id = 128,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5053),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3607),
                             Description = "Sew layers of fabric together to create quilts. Combines artistry with practical warmth.",
                             Name = "Quilting",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5054)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3607)
                         },
                         new
                         {
                             Id = 129,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5054),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3608),
                             Description = "Create fabric by interlacing threads on a loom. Ancient craft with modern applications.",
                             Name = "Weaving",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5055)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3608)
                         },
                         new
                         {
                             Id = 130,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5073),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3619),
                             Description = "Indoor or outdoor climbing that builds strength, problem-solving skills, and confidence.",
                             Name = "Rock Climbing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5074)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3619)
                         },
                         new
                         {
                             Id = 131,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5074),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3620),
                             Description = "Climb shorter walls without ropes, using crash pads. Great intro to climbing.",
                             Name = "Bouldering",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5075)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3620)
                         },
                         new
                         {
                             Id = 132,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5075),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3621),
                             Description = "Ride and perform tricks on a skateboard. A creative sport that builds balance and coordination.",
                             Name = "Skateboarding",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5076)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3621)
                         },
                         new
                         {
                             Id = 133,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5076),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3622),
                             Description = "Navigate urban environments efficiently using running, jumping, and climbing. Develops athleticism and creativity.",
                             Name = "Parkour",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5077)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3622)
                         },
                         new
                         {
                             Id = 134,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5077),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3623),
                             Description = "Perform tricks and stunts on BMX bicycles. Combines cycling with extreme sports.",
                             Name = "BMX Biking",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5078)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3623)
                         },
                         new
                         {
                             Id = 135,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5078),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3624),
                             Description = "Ride bicycles off-road on rugged terrain. Adventurous and challenging.",
                             Name = "Mountain Biking",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5079)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3624)
                         },
                         new
                         {
                             Id = 136,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5079),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3625),
                             Description = "Jump from heights while connected to an elastic cord. Ultimate adrenaline rush.",
                             Name = "Bungee Jumping",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5080)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3625)
                         },
                         new
                         {
                             Id = 137,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5080),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3625),
                             Description = "Jump from aircraft and freefall before deploying a parachute. Unforgettable experience.",
                             Name = "Skydiving",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5081)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3626)
                         },
                         new
                         {
                             Id = 138,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5081),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3626),
                             Description = "Spend nights outdoors in a tent or RV. Experience nature and disconnect from daily routines.",
                             Name = "Camping",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5082)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3627)
                         },
                         new
                         {
                             Id = 139,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5082),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3627),
                             Description = "Cast a line in rivers, lakes, or the ocean. A relaxing pastime that can be social or solitary.",
                             Name = "Fishing",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5083)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3628)
                         },
                         new
                         {
                             Id = 140,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5083),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3628),
                             Description = "Use GPS to find hidden containers (geocaches) placed by others. Modern treasure hunting.",
                             Name = "Geocaching",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5084)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3629)
                         },
                         new
                         {
                             Id = 141,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5084),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3629),
                             Description = "Ride horses on trails or in arenas. Connect with animals while enjoying outdoor exercise.",
                             Name = "Horseback Riding",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5085)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3630)
                         },
                         new
                         {
                             Id = 142,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5085),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3630),
                             Description = "Shoot arrows at targets with a bow. Ancient skill requiring focus and precision.",
                             Name = "Archery",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5085)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3631)
                         },
                         new
                         {
                             Id = 143,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5086),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3631),
                             Description = "Play golf at a course or practice at a driving range. A social sport that combines skill and strategy.",
                             Name = "Golf",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5086)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3632)
                         },
                         new
                         {
                             Id = 144,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5087),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3632),
                             Description = "Like golf but with frisbees. Throw discs into baskets across a course. Low cost and accessible.",
                             Name = "Disc Golf",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5087)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3633)
                         },
                         new
                         {
                             Id = 145,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5088),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3633),
                             Description = "Identify and collect wild edible plants, mushrooms, and berries. Connects you with nature's bounty.",
                             Name = "Foraging",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5088)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3633)
                         },
                         new
                         {
                             Id = 146,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5089),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3634),
                             Description = "Navigate through terrain using a map and compass. Combines hiking with navigational challenges.",
                             Name = "Orienteering",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5089)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3634)
                         },
                         new
                         {
                             Id = 147,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5090),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3635),
                             Description = "Search for buried metals and artifacts. Treasure hunting hobby that gets you outdoors.",
                             Name = "Metal Detecting",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5090)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3635)
                         },
                         new
                         {
                             Id = 148,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5091),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3636),
                             Description = "Build scale models of vehicles, buildings, or figures. Detail-oriented hobby requiring patience.",
                             Name = "Model Building",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5091)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3636)
                         },
                         new
                         {
                             Id = 149,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5092),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3637),
                             Description = "Collect stamps, coins, cards, or other items. Combines research with the thrill of the hunt.",
                             Name = "Collecting",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5092)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3637)
                         },
                         new
                         {
                             Id = 150,
-                            CreatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5093),
+                            CreatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3638),
                             Description = "Fly drones and capture aerial footage. Modern hobby combining technology with creativity.",
                             Name = "Drone Flying",
-                            UpdatedAt = new DateTime(2026, 4, 28, 15, 29, 52, 501, DateTimeKind.Utc).AddTicks(5093)
+                            UpdatedAt = new DateTime(2026, 4, 28, 18, 31, 43, 963, DateTimeKind.Utc).AddTicks(3638)
                         });
                 });
 
@@ -1357,9 +1357,6 @@ namespace Backend.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("ScheduledAt")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(120)
@@ -1375,9 +1372,6 @@ namespace Backend.Migrations
 
                     b.HasIndex("CommunityId")
                         .HasDatabaseName("IX_Places_CommunityId");
-
-                    b.HasIndex("ScheduledAt")
-                        .HasDatabaseName("IX_Places_ScheduledAt");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("IX_Places_UserId");

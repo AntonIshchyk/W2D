@@ -9,7 +9,6 @@ public class PlaceResponse
     public string? UserName { get; set; }
     public int? CommunityId { get; set; }
     public string? CommunityName { get; set; }
-    public DateTime ScheduledAt { get; set; }
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
     public string? LocationName { get; set; }
