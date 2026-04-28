@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Backend.Contracts.Events;
+namespace Backend.Contracts.Places;
 
-public class CreateEventRequest
+public class CreatePlaceRequest
 {
     [Required]
     [MaxLength(120)]
@@ -13,9 +13,6 @@ public class CreateEventRequest
     public string Description { get; set; } = null!;
 
     public int? CommunityId { get; set; }
-
-    [Required]
-    public DateTime ScheduledAt { get; set; }
 
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }

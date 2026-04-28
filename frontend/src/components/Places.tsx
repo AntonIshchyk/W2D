@@ -18,28 +18,28 @@ import { Input } from './ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { PageLayout } from './Navbar'
-import { EventsMap, type FlyToTarget } from './EventsMap'
-import { EventCard } from './EventCard'
+import { PlacesMap, type FlyToTarget } from './PlacesMap'
+import { PlaceCard } from './PlaceCard'
 import { cn } from '../lib/utils'
 import { useCitySearch } from '../hooks/useCitySearch'
-import { fetchEvents, reverseGeocode } from '../api/events'
+import { fetchPlaces, reverseGeocode } from '../api/places'
 import { fetchCommunities } from '../api/communities'
-import { loadMapState, DEFAULT_CENTER, DEFAULT_ZOOM } from '../utils/events'
-import type { CitySearchResult, Event, EventQueryBounds, ViewMode } from '../types/events'
+import { loadMapState, DEFAULT_CENTER, DEFAULT_ZOOM } from '../utils/mapState'
+import type { CitySearchResult, Place, PlaceQueryBounds, ViewMode } from '../types/places'
 import { EmptyState } from './ui/empty-state'
 
-export function Events() {
+export function Places() {
   const navigate = useNavigate()
   const [viewMode, setViewMode] = useState<ViewMode>('map')
   const [selectedCommunities, setSelectedCommunities] = useState<number[]>([])
   const [communityOpen, setCommunityOpen] = useState(false)
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null)
   const flyToIdRef = useRef(0)
   const [flyToTarget, setFlyToTarget] = useState<FlyToTarget | null>(null)
   const [initialMapState] = useState(() => loadMapState())
-  const [rawBounds, setRawBounds] = useState<EventQueryBounds | undefined>()
-  const [debouncedBounds, setDebouncedBounds] = useState<EventQueryBounds | undefined>()
-  const [searchBounds, setSearchBounds] = useState<EventQueryBounds | null>(null)
+  const [rawBounds, setRawBounds] = useState<PlaceQueryBounds | undefined>()
+  const [debouncedBounds, setDebouncedBounds] = useState<PlaceQueryBounds | undefined>()
+  const [searchBounds, setSearchBounds] = useState<PlaceQueryBounds | null>(null)
   const [searchLocationName, setSearchLocationName] = useState<string | null>(null)
   const boundsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [isGettingLocation, setIsGettingLocation] = useState(false)
@@ -63,9 +63,9 @@ export function Events() {
   })
 
   const effectiveBounds = searchBounds ?? debouncedBounds
-  const { data: allEvents = [], isLoading: eventsLoading } = useQuery({
-    queryKey: ['events', selectedCommunities, effectiveBounds],
-    queryFn: () => fetchEvents(selectedCommunities, effectiveBounds),
+  const { data: allPlaces = [], isLoading: placesLoading } = useQuery({
+    queryKey: ['places', selectedCommunities, effectiveBounds],
+    queryFn: () => fetchPlaces(selectedCommunities, effectiveBounds),
   })
 
   useEffect(() => {
@@ -81,7 +81,7 @@ export function Events() {
     setFlyToTarget({ center, zoom, id: flyToIdRef.current })
   }
 
-  function boundsFromResult(result: Pick<CitySearchResult, 'lat' | 'lon'>): EventQueryBounds {
+  function boundsFromResult(result: Pick<CitySearchResult, 'lat' | 'lon'>): PlaceQueryBounds {
     const lat = parseFloat(result.lat)
     const lon = parseFloat(result.lon)
     const radiusKm = 30
@@ -160,7 +160,7 @@ export function Events() {
 
   function handleViewChange(center: [number, number], zoom: number) {
     try {
-      localStorage.setItem('events.mapState', JSON.stringify({ center, zoom }))
+      localStorage.setItem('places.mapState', JSON.stringify({ center, zoom }))
     } catch {}
   }
 
@@ -182,8 +182,8 @@ export function Events() {
           
           <div className="pointer-events-auto flex flex-col xl:flex-row xl:items-center justify-between bg-card/95 backdrop-blur shadow-sm border rounded-xl p-4 gap-3">
               <div className="flex flex-wrap items-center gap-3 xl:gap-4">
-              <h1 className="text-xl font-bold leading-none">
-                Events ({allEvents.length})
+                <h1 className="text-xl font-bold leading-none">
+                Places ({allPlaces.length})
               </h1>
 
               <div className="relative flex gap-2 flex-wrap sm:flex-nowrap items-start sm:items-center">
@@ -351,9 +351,9 @@ export function Events() {
                   <List className="h-4 w-4" />
                 </Button>
               </div>
-              <Button onClick={() => navigate('/events/create')} size="sm" className="h-9">
+              <Button onClick={() => navigate('/places/create')} size="sm" className="h-9">
                 <Plus className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Create Event</span>
+                <span className="hidden sm:inline">Create Place</span>
                 <span className="sm:hidden">Create</span>
               </Button>
             </div>
@@ -361,40 +361,40 @@ export function Events() {
         </div>
 
         <div className={cn('flex-1 w-full h-full relative z-0', viewMode !== 'map' && 'hidden')}>
-          <EventsMap
-            events={allEvents}
+          <PlacesMap
+            places={allPlaces}
             onBoundsChange={setRawBounds}
             onViewChange={handleViewChange}
             flyToTarget={flyToTarget}
             initialCenter={initialMapState.center}
             initialZoom={initialMapState.zoom}
-            selectedEventId={selectedEvent?.id}
-            onEventClick={setSelectedEvent}
+            selectedPlaceId={selectedPlace?.id}
+            onPlaceClick={setSelectedPlace}
           />
         </div>
 
         {viewMode === 'list' && (
           <div className="flex-1 overflow-y-auto pt-28 sm:pt-24 px-4 pb-6">
-            {eventsLoading ? (
+            {placesLoading ? (
               <div className="flex items-center justify-center gap-2 py-16 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Loading events…
+                Loading places…
               </div>
-            ) : allEvents.length === 0 ? (
+            ) : allPlaces.length === 0 ? (
             <div className="py-20 text-center">
               <EmptyState
                 icon={ImageIcon}
-                title="There are no events yet"
+                title="There are no places yet"
                 action={selectedCommunities.length === 0 ? {
-                  label: 'Create Event',
-                  onClick: () => navigate('/events/create')
+                  label: 'Create Place',
+                  onClick: () => navigate('/places/create')
                 } : undefined}
               />
             </div>
           )  : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {allEvents.map((event) => (
-                  <EventCard key={event.id} event={event} />
+                {allPlaces.map((place) => (
+                  <PlaceCard key={place.id} place={place} />
                 ))}
               </div>
             )}
@@ -406,13 +406,13 @@ export function Events() {
             'absolute top-28 sm:top-24 right-4 w-[calc(100vw-2rem)] sm:w-96 max-h-[80vh] z-20',
             'bg-card border shadow-2xl rounded-xl overflow-hidden flex flex-col',
             'transition-all duration-300 ease-in-out',
-            selectedEvent && viewMode === 'map'
+            selectedPlace && viewMode === 'map'
               ? 'opacity-100 translate-x-0 pointer-events-auto'
               : 'opacity-0 translate-x-6 pointer-events-none',
           )}
-          aria-hidden={!selectedEvent || viewMode !== 'map'}
+          aria-hidden={!selectedPlace || viewMode !== 'map'}
         >
-          {selectedEvent && <EventCard event={selectedEvent} />}
+          {selectedPlace && <PlaceCard place={selectedPlace} />}
         </div>
       </div>
     </PageLayout>

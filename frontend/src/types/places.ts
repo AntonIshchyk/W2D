@@ -3,15 +3,14 @@ export interface Community {
   name: string
 }
 
-export interface Event {
+export interface Place {
   id: number
   title: string
   description: string
-  organizerId: number
-  organizerName: string
+  userId: number
+  userName: string
   communityId: number | null
   communityName: string | null
-  scheduledAt: string
   latitude?: number
   longitude?: number
   locationName?: string
@@ -20,17 +19,16 @@ export interface Event {
   updatedAt: string
 }
 
-export interface EventQueryBounds {
+export interface PlaceQueryBounds {
   minLat: number
   maxLat: number
   minLng: number
   maxLng: number
 }
 
-export interface CreateEventRequest {
+export interface CreatePlaceRequest {
   title: string
   description: string
-  scheduledAt: string
   communityId?: number | null
   latitude?: number
   longitude?: number
@@ -38,11 +36,10 @@ export interface CreateEventRequest {
   photoUrls?: string[]
 }
 
-export interface UpdateEventRequest {
+export interface UpdatePlaceRequest {
   title?: string
   description?: string
   communityId?: number | null
-  scheduledAt?: string
   latitude?: number
   longitude?: number
   locationName?: string
@@ -62,5 +59,5 @@ export type SearchLocation = {
   name: string
   lat: number
   lon: number
-  bounds: EventQueryBounds
+  bounds: PlaceQueryBounds
 }

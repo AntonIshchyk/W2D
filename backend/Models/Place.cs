@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Models;
 
-public class Event : BaseModel
+public class Place : BaseModel
 {
     [Required]
     [MaxLength(120)]
@@ -13,15 +13,12 @@ public class Event : BaseModel
     public string Description { get; set; } = null!;
 
     [Required]
-    public int OrganizerId { get; set; }
+    public int UserId { get; set; }
 
-    public User? Organizer { get; set; }
+    public User? User { get; set; }
 
     public int? CommunityId { get; set; }
     public Community? Community { get; set; }
-
-    [Required]
-    public DateTime ScheduledAt { get; set; }
 
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }

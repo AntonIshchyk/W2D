@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { searchCities } from '../api/events'
-import type { CitySearchResult } from '../types/events'
+import { searchCities } from '../api/places'
+import type { CitySearchResult } from '../types/places'
 
 type UseCitySearchOptions = {
   debounceMs?: number

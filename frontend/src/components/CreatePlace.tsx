@@ -13,7 +13,6 @@ import {
   ArrowRight,
   Info,
   Image,
-  Calendar
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from './ui/button'
@@ -23,12 +22,12 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { PageLayout } from './Navbar'
 import { LocationPickerMap } from './LocationPickerMap'
-import { EventImageUpload } from './EventImageUpload'
-import { createEvent, reverseGeocode } from '../api/events'
+import { PlaceImageUpload } from './PlaceImageUpload'
+import { createPlace, reverseGeocode } from '../api/places'
 import { fetchCommunities } from '../api/communities'
 import { useCitySearch } from '../hooks/useCitySearch'
 import { cn } from '../lib/utils'
-import type { CitySearchResult } from '../types/events'
+import type { CitySearchResult } from '../types/places'
 
 const STEPS = [
   { id: 1, label: 'Details', icon: Info },
@@ -38,16 +37,12 @@ const STEPS = [
 
 const eventDetailsSchema = z.object({
   title: z.string().trim().min(1, 'Title is required.'),
-  description: z.string().trim().min(1, 'Description is required.'),
-  scheduledAt: z
-    .string()
-    .min(1, 'Date & time is required.')
-    .refine((value) => !Number.isNaN(new Date(value).getTime()), 'Please provide a valid date & time.'),
+  description: z.string().trim().min(1, 'Description is required.')
 })
 
 type EventDetailsErrors = Partial<Record<keyof z.infer<typeof eventDetailsSchema>, string>>
 
-export function CreateEvent() {
+export function CreatePlace() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
 
@@ -60,7 +55,6 @@ export function CreateEvent() {
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [scheduledAt, setScheduledAt] = useState('')
   const [communityId, setCommunityId] = useState<number | null>(null)
   const [communityOpen, setCommunityOpen] = useState(false)
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
@@ -105,14 +99,14 @@ export function CreateEvent() {
   }
 
   const mutation = useMutation({
-    mutationFn: createEvent,
+    mutationFn: createPlace,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['events'] })
-      toast.success('Event created!')
-      navigate('/events')
+      queryClient.invalidateQueries({ queryKey: ['places'] })
+      toast.success('Place created!')
+      navigate('/places')
     },
     onError: (err: unknown) => {
-      const message = err instanceof Error ? err.message : 'Failed to create event'
+      const message = err instanceof Error ? err.message : 'Failed to create place'
       toast.error(message)
     },
   })
@@ -120,7 +114,7 @@ export function CreateEvent() {
   const selectedCommunity = communities.find(c => c.id === communityId)
 
   const validateDetails = () => {
-    const parsed = eventDetailsSchema.safeParse({ title, description, scheduledAt })
+    const parsed = eventDetailsSchema.safeParse({ title, description })
 
     if (parsed.success) {
       setDetailErrors({})
@@ -130,33 +124,21 @@ export function CreateEvent() {
     const fieldErrors = parsed.error.flatten().fieldErrors
     setDetailErrors({
       title: fieldErrors.title?.[0],
-      description: fieldErrors.description?.[0],
-      scheduledAt: fieldErrors.scheduledAt?.[0],
+      description: fieldErrors.description?.[0]
     })
     return false
   }
 
-  const formattedDate = scheduledAt
-    ? new Date(scheduledAt).toLocaleDateString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    : null
-
   function handleSubmit() {
     if (!validateDetails()) {
       setStep(1)
-      toast.error('Please fix the required fields before creating the event.')
+      toast.error('Please fix the required fields before creating the place.')
       return
     }
 
     mutation.mutate({
       title,
       description,
-      scheduledAt: new Date(scheduledAt).toISOString(),
       ...(communityId !== null ? { communityId } : {}),
       latitude: location?.lat,
       longitude: location?.lng,
@@ -167,7 +149,7 @@ export function CreateEvent() {
 
   const canProceed =
     step === 1
-      ? eventDetailsSchema.safeParse({ title, description, scheduledAt }).success
+      ? eventDetailsSchema.safeParse({ title, description }).success
       : step === 2
         ? true
         : true
@@ -223,34 +205,13 @@ export function CreateEvent() {
                           setDetailErrors((prev) => ({ ...prev, title: undefined }))
                         }
                       }}
-                      placeholder="Title your event (e.g. Walk in the park, running group...)"
+                      placeholder="Title your place (e.g. Walk in the park, running group...)"
                       className={cn(
                         'bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary',
                         detailErrors.title && 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive',
                       )}
                     />
                     {detailErrors.title && <p className="text-xs text-destructive">{detailErrors.title}</p>}
-                  </div>
-
-                  <div className="relative">
-                    <label className="text-xs font-semibold uppercase tracking-widest">
-                      Date & Time <span className="text-destructive">*</span>
-                      </label>
-                    <Input
-                      type="datetime-local"
-                      value={scheduledAt}
-                      onChange={e => {
-                        setScheduledAt(e.target.value)
-                        if (detailErrors.scheduledAt) {
-                          setDetailErrors((prev) => ({ ...prev, scheduledAt: undefined }))
-                        }
-                      }}
-                      className={cn(
-                        'pr-12 bg-card border-border text-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary',
-                        detailErrors.scheduledAt && 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive',
-                      )}
-                    />
-                    {detailErrors.scheduledAt && <p className="mt-2 text-xs text-destructive">{detailErrors.scheduledAt}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -386,10 +347,10 @@ export function CreateEvent() {
                 )}
               >
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase tracking-widest">
-                    Event Photos
+                    <label className="text-xs font-semibold uppercase tracking-widest">
+                    Place Photos
                   </label>
-                  <EventImageUpload
+                  <PlaceImageUpload
                     value={photoUrls}
                     onChange={setPhotoUrls}
                     maxFiles={4}
@@ -402,7 +363,7 @@ export function CreateEvent() {
             <div className="flex items-center justify-between">
               <Button
                 variant="ghost"
-                onClick={() => (step === 1 ? navigate('/events') : setStep((s) => s - 1))}
+                onClick={() => (step === 1 ? navigate('/places') : setStep((s) => s - 1))}
                 className="hover:text-foreground hover:bg-accent gap-2 text-base h-12 px-6"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -434,7 +395,7 @@ export function CreateEvent() {
                       </>
                     ) : (
                       <>
-                        Create Event
+                        Create Place
                       </>
                     )
                   }
@@ -452,7 +413,7 @@ export function CreateEvent() {
                     'font-bold text-lg leading-snug transition-all wrap-break-word',
                     title ? 'text-foreground' : 'text-muted-foreground italic',
                   )}>
-                    {title || 'Your event title…'}
+                    {title || 'Your place title…'}
                   </h3>
                   <p className={cn(
                     'mt-2 text-sm leading-relaxed line-clamp-4 transition-all wrap-break-word',
@@ -463,13 +424,6 @@ export function CreateEvent() {
                 </div>
 
                 <div className="space-y-3 pt-4 border-t">
-                  <div className="flex items-center gap-3 text-base">
-                    <Calendar className="h-5 w-5 text-primary shrink-0" />
-                    <span className={formattedDate ? 'text-foreground/90' : 'text-muted-foreground/60 italic'}>
-                      {formattedDate || 'No date and time selected yet'}
-                    </span>
-                  </div>
-
                   <div className="flex items-center gap-3 text-base">
                     <Users className="h-5 w-5 text-primary shrink-0" />
                     <span className={selectedCommunity ? 'text-foreground/90' : 'text-muted-foreground/60 italic'}>

@@ -24,7 +24,7 @@ public class AppDbContext : DbContext
     public DbSet<PostVote> PostVotes { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<CommentVote> CommentVotes { get; set; }
-    public DbSet<Event> Events { get; set; }
+    public DbSet<Place> Places { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -85,7 +85,7 @@ public class AppDbContext : DbContext
             )
             .HasColumnType("TEXT"); // use "jsonb" for Postgres
 
-        modelBuilder.Entity<Event>()
+        modelBuilder.Entity<Place>()
             .Property(e => e.PhotoUrls)
             .HasConversion(
                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
@@ -186,32 +186,28 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<CommentVote>()
             .HasIndex(v => v.CommentId);
 
-        // Event - Organizer relationship
-        modelBuilder.Entity<Event>()
-            .HasOne(e => e.Organizer)
+        // Place - User relationship
+        modelBuilder.Entity<Place>()
+            .HasOne(e => e.User)
             .WithMany()
-            .HasForeignKey(e => e.OrganizerId)
+            .HasForeignKey(e => e.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Event - Community relationship (optional)
-        modelBuilder.Entity<Event>()
+        // Place - Community relationship (optional)
+        modelBuilder.Entity<Place>()
             .HasOne(e => e.Community)
             .WithMany()
             .HasForeignKey(e => e.CommunityId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        // Event performance indexes
-        modelBuilder.Entity<Event>()
-            .HasIndex(e => e.ScheduledAt)
-            .HasDatabaseName("IX_Events_ScheduledAt");
+        // Place performance indexes
+        modelBuilder.Entity<Place>()
+            .HasIndex(e => e.UserId)
+            .HasDatabaseName("IX_Places_UserId");
 
-        modelBuilder.Entity<Event>()
-            .HasIndex(e => e.OrganizerId)
-            .HasDatabaseName("IX_Events_OrganizerId");
-
-        modelBuilder.Entity<Event>()
+        modelBuilder.Entity<Place>()
             .HasIndex(e => e.CommunityId)
-            .HasDatabaseName("IX_Events_CommunityId");
+            .HasDatabaseName("IX_Places_CommunityId");
 
         // Seed database with communities, communities
         DatabaseSeeder.SeedData(modelBuilder);

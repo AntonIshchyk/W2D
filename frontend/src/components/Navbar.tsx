@@ -16,7 +16,7 @@ export function Navbar() {
 
   const isActive = (path: string) => location.pathname === path
   const isPostsActive  = isActive('/posts') || location.pathname.startsWith('/posts/')
-  const isEventsActive = isActive('/events') || location.pathname.startsWith('/events/')
+  const isPlacesActive = isActive('/places') || location.pathname.startsWith('/places/')
 
   const navItems = [
     {
@@ -26,10 +26,10 @@ export function Navbar() {
       active: isActive('/')
     },
     {
-      path: '/events',
+      path: '/places',
       label: 'Map',
       icon: <Map className="w-5 h-5" />,
-      active: isEventsActive
+      active: isPlacesActive
     },
     {
       path: '/posts',

@@ -1,32 +1,31 @@
 using Microsoft.EntityFrameworkCore;
 using Backend.Data;
 using Backend.Models;
-using Backend.Contracts.Events;
+using Backend.Contracts.Places;
 using Backend.Contracts.Common;
 using Backend.Extensions;
 using System.Linq.Expressions;
 
 namespace Backend.Services;
 
-public class EventService : IEventService
+public class PlaceService : IPlaceService
 {
     private readonly AppDbContext _context;
 
-    public EventService(AppDbContext context)
+    public PlaceService(AppDbContext context)
     {
         _context = context;
     }
 
-    private static readonly Expression<Func<Event, EventResponse>> ProjectEvent = e => new EventResponse
+    private static readonly Expression<Func<Place, PlaceResponse>> ProjectPlace = e => new PlaceResponse
     {
         Id = e.Id,
         Title = e.Title,
         Description = e.Description,
-        OrganizerId = e.OrganizerId,
-        OrganizerName = e.Organizer != null ? e.Organizer.Username : null,
+        UserId = e.UserId,
+        UserName = e.User != null ? e.User.Username : null,
         CommunityId = e.CommunityId,
         CommunityName = e.Community != null ? e.Community.Name : null,
-        ScheduledAt = e.ScheduledAt,
         Latitude = e.Latitude,
         Longitude = e.Longitude,
         LocationName = e.LocationName,
@@ -35,19 +34,17 @@ public class EventService : IEventService
         UpdatedAt = e.UpdatedAt
     };
 
-    public async Task<IEnumerable<EventResponse>> GetEventsAsync(
+    public async Task<IEnumerable<PlaceResponse>> GetPlacesAsync(
         IReadOnlyCollection<int>? communityIds = null,
         double? minLat = null,
         double? maxLat = null,
         double? minLng = null,
         double? maxLng = null)
     {
-        IQueryable<Event> query = _context.Events.AsNoTracking();
+        IQueryable<Place> query = _context.Places.AsNoTracking();
 
         if (communityIds is { Count: > 0 })
             query = query.Where(e => e.CommunityId.HasValue && communityIds.Contains(e.CommunityId.Value));
-
-        query = query.Where(e => e.ScheduledAt >= DateTime.UtcNow);
 
         if (minLat.HasValue) query = query.Where(e => e.Latitude >= minLat.Value);
         if (maxLat.HasValue) query = query.Where(e => e.Latitude <= maxLat.Value);
@@ -55,38 +52,32 @@ public class EventService : IEventService
         if (maxLng.HasValue) query = query.Where(e => e.Longitude <= maxLng.Value);
 
         return await query
-            .OrderBy(e => e.ScheduledAt)
-            .ThenBy(e => e.Id)
+            .OrderBy(e => e.Id)
             .Take(500)
-            .Select(ProjectEvent)
+            .Select(ProjectPlace)
             .ToListAsync();
     }
 
-    public async Task<Result<EventResponse>> GetEventByIdAsync(int id)
+    public async Task<Result<PlaceResponse>> GetPlaceByIdAsync(int id)
     {
-        EventResponse? e = await _context.Events
+        PlaceResponse? e = await _context.Places
             .AsNoTracking()
-            .Select(ProjectEvent)
+            .Select(ProjectPlace)
             .FirstOrDefaultAsync(e => e.Id == id);
 
         if (e == null)
         {
-            return Result<EventResponse>.NotFound("Event not found.");
+            return Result<PlaceResponse>.NotFound("Place not found.");
         }
 
-        return Result<EventResponse>.Success(e);
+        return Result<PlaceResponse>.Success(e);
     }
 
-    public async Task<Result<EventResponse>> CreateEventAsync(int organizerId, CreateEventRequest request)
+    public async Task<Result<PlaceResponse>> CreatePlaceAsync(int userId, CreatePlaceRequest request)
     {
-        if (request.ScheduledAt < DateTime.UtcNow)
-        {
-            return Result<EventResponse>.Invalid("Event cannot be scheduled in the past.");
-        }
-
         if (request.Latitude.HasValue != request.Longitude.HasValue)
         {
-            return Result<EventResponse>.Invalid("Latitude and Longitude must both be provided or both be omitted.");
+            return Result<PlaceResponse>.Invalid("Latitude and Longitude must both be provided or both be omitted.");
         }
 
         if (request.CommunityId.HasValue)
@@ -94,22 +85,21 @@ public class EventService : IEventService
             bool communityExists = await _context.Communities.AnyAsync(c => c.Id == request.CommunityId.Value);
             if (!communityExists)
             {
-                return Result<EventResponse>.Invalid("Community does not exist.");
+                return Result<PlaceResponse>.Invalid("Community does not exist.");
             }
         }
 
         if (!PhotoUrlValidationExtensions.TryValidatePhotoUrls(request.PhotoUrls, nameof(request.PhotoUrls), out string? photoUrlError))
         {
-            return Result<EventResponse>.Invalid(photoUrlError!);
+            return Result<PlaceResponse>.Invalid(photoUrlError!);
         }
 
-        Event eventEntity = new Event
+        Place eventEntity = new Place
         {
             Title = request.Title,
             Description = request.Description,
-            OrganizerId = organizerId,
+            UserId = userId,
             CommunityId = request.CommunityId,
-            ScheduledAt = request.ScheduledAt,
             Latitude = request.Latitude,
             Longitude = request.Longitude,
             LocationName = request.LocationName,
@@ -118,30 +108,30 @@ public class EventService : IEventService
             UpdatedAt = DateTime.UtcNow
         };
 
-        _context.Events.Add(eventEntity);
+        _context.Places.Add(eventEntity);
         await _context.SaveChangesAsync();
 
-        EventResponse created = await _context.Events
+        PlaceResponse created = await _context.Places
             .AsNoTracking()
-            .Select(ProjectEvent)
+            .Select(ProjectPlace)
             .FirstAsync(e => e.Id == eventEntity.Id);
 
-        return Result<EventResponse>.Success(created);
+        return Result<PlaceResponse>.Success(created);
     }
 
-    public async Task<Result<EventResponse>> UpdateEventAsync(int id, int organizerId, UpdateEventRequest request)
+    public async Task<Result<PlaceResponse>> UpdatePlaceAsync(int id, int userId, UpdatePlaceRequest request)
     {
-        Event? eventEntity = await _context.Events
+        Place? eventEntity = await _context.Places
             .FirstOrDefaultAsync(e => e.Id == id);
 
         if (eventEntity == null)
         {
-            return Result<EventResponse>.NotFound("Event not found.");
+            return Result<PlaceResponse>.NotFound("Place not found.");
         }
 
-        if (eventEntity.OrganizerId != organizerId)
+        if (eventEntity.UserId != userId)
         {
-            return Result<EventResponse>.Unauthorized("You do not have permission to edit this event.");
+            return Result<PlaceResponse>.Unauthorized("You do not have permission to edit this place.");
         }
 
         if (request.CommunityId.HasValue)
@@ -149,48 +139,47 @@ public class EventService : IEventService
             bool communityExists = await _context.Communities.AnyAsync(c => c.Id == request.CommunityId.Value);
             if (!communityExists)
             {
-                return Result<EventResponse>.Invalid("Community does not exist.");
+                return Result<PlaceResponse>.Invalid("Community does not exist.");
             }
         }
 
         if (!PhotoUrlValidationExtensions.TryValidatePhotoUrls(request.PhotoUrls, nameof(request.PhotoUrls), out string? photoUrlError))
         {
-            return Result<EventResponse>.Invalid(photoUrlError!);
+            return Result<PlaceResponse>.Invalid(photoUrlError!);
         }
 
         if (request.Title != null) eventEntity.Title = request.Title;
         if (request.Description != null) eventEntity.Description = request.Description;
         if (request.CommunityId.HasValue) eventEntity.CommunityId = request.CommunityId;
-        if (request.ScheduledAt.HasValue) eventEntity.ScheduledAt = request.ScheduledAt.Value;
         if (request.PhotoUrls != null) eventEntity.PhotoUrls = request.PhotoUrls;
 
         eventEntity.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
-        EventResponse updated = await _context.Events
+        PlaceResponse updated = await _context.Places
             .AsNoTracking()
-            .Select(ProjectEvent)
+            .Select(ProjectPlace)
             .FirstAsync(e => e.Id == eventEntity.Id);
 
-        return Result<EventResponse>.Success(updated);
+        return Result<PlaceResponse>.Success(updated);
     }
 
-    public async Task<Result<bool>> DeleteEventAsync(int id, int organizerId)
+    public async Task<Result<bool>> DeletePlaceAsync(int id, int userId)
     {
-        Event? eventEntity = await _context.Events
+        Place? eventEntity = await _context.Places
             .FirstOrDefaultAsync(e => e.Id == id);
 
         if (eventEntity == null)
         {
-            return Result<bool>.NotFound("Event not found.");
+            return Result<bool>.NotFound("Place not found.");
         }
 
-        if (eventEntity.OrganizerId != organizerId)
+        if (eventEntity.UserId != userId)
         {
-            return Result<bool>.Unauthorized("You do not have permission to delete this event.");
+            return Result<bool>.Unauthorized("You do not have permission to delete this place.");
         }
 
-        _context.Events.Remove(eventEntity);
+        _context.Places.Remove(eventEntity);
         await _context.SaveChangesAsync();
 
         return Result<bool>.Success(true);

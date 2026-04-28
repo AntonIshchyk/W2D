@@ -8,31 +8,31 @@ import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { ensureLeafletDefaultIcon } from '../utils/leafletIcon'
 import { MapController, type FlyToTarget } from './MapController'
-import type { Event, EventQueryBounds } from '../types/events'
+import type { Place, PlaceQueryBounds } from '../types/places'
 
 ensureLeafletDefaultIcon()
 
-interface EventsMapProps {
-  events: Event[]
-  onBoundsChange: (bounds: EventQueryBounds) => void
+interface PlacesMapProps {
+  places: Place[]
+  onBoundsChange: (bounds: PlaceQueryBounds) => void
   onViewChange?: (center: [number, number], zoom: number) => void
   flyToTarget?: FlyToTarget | null
-  selectedEventId?: number | null
-  onEventClick?: (event: Event | null) => void
+  selectedPlaceId?: number | null
+  onPlaceClick?: (place: Place | null) => void
   initialCenter?: [number, number]
   initialZoom?: number
 }
 
-export function EventsMap({
-  events,
+export function PlacesMap({
+  places,
   onBoundsChange,
   onViewChange,
   flyToTarget,
-  selectedEventId,
-  onEventClick,
+  selectedPlaceId,
+  onPlaceClick,
   initialCenter = [20, 0],
   initialZoom = 2,
-}: EventsMapProps) {
+}: PlacesMapProps) {
   return (
     <div className="w-full h-full relative z-0">
       <MapContainer
@@ -53,18 +53,18 @@ export function EventsMap({
           onMapClick={() => onEventClick?.(null)}
           flyToTarget={flyToTarget}
         />
-        {events.map((event) => {
-          if (event.latitude == null || event.longitude == null) return null
-          const isSelected = selectedEventId === event.id
+        {places.map((place) => {
+          if (place.latitude == null || place.longitude == null) return null
+          const isSelected = selectedPlaceId === place.id
           return (
             <Marker
-              key={event.id}
-              position={[event.latitude, event.longitude]}
-              opacity={selectedEventId != null ? (isSelected ? 1 : 0.45) : 1}
+              key={place.id}
+              position={[place.latitude, place.longitude]}
+              opacity={selectedPlaceId != null ? (isSelected ? 1 : 0.45) : 1}
               eventHandlers={{
                 click: (e) => {
                   L.DomEvent.stopPropagation(e)
-                  onEventClick?.(event)
+                  onPlaceClick?.(place)
                 },
               }}
             />
@@ -75,4 +75,3 @@ export function EventsMap({
   )
 }
 export type { FlyToTarget }
-

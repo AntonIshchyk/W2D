@@ -4,8 +4,8 @@ import { Login } from './components/Login'
 import { ProfileSetup } from './components/ProfileSetup'
 import { Home } from './components/Home'
 import { Profile } from './components/Profile'
-import { Events } from './components/Events'
-import { CreateEvent } from './components/CreateEvent'
+import { Places } from './components/Places'
+import { CreatePlace } from './components/CreatePlace'
 import { Posts } from './components/Posts'
 import { PostDetail } from './components/PostDetail'
 import { useAuthSync } from './hooks/useAuthSync'
@@ -22,8 +22,8 @@ function App() {
         <Route path="/profile-setup" element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
         <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
-        <Route path="/events/create" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
+        <Route path="/places" element={<ProtectedRoute><Places /></ProtectedRoute>} />
+        <Route path="/places/create" element={<ProtectedRoute><CreatePlace /></ProtectedRoute>} />
         <Route path="/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
         <Route path="/posts/create" element={<ProtectedRoute><Navigate to="/posts" replace /></ProtectedRoute>} />
         <Route path="/posts/:id" element={<ProtectedRoute><PostDetail /></ProtectedRoute>} />

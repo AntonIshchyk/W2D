@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useMap, useMapEvents } from 'react-leaflet'
-import type { EventQueryBounds } from '../types/events'
+import type { PlaceQueryBounds } from '../types/places'
 
 export interface FlyToTarget {
   center: [number, number]
@@ -9,7 +9,7 @@ export interface FlyToTarget {
 }
 
 interface MapControllerProps {
-  onBoundsChange: (b: EventQueryBounds) => void
+  onBoundsChange: (b: PlaceQueryBounds) => void
   onViewChange?: (center: [number, number], zoom: number) => void
   onMapClick: () => void
   flyToTarget?: FlyToTarget | null
