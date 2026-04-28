@@ -3,8 +3,8 @@ import { PhotoCarousel } from './PhotoCarousel'
 import type { Place } from '../types/places'
 
 interface PlaceCardProps {
-  event: Place
-  onClick?: (event: Place) => void
+  place: Place
+  onClick?: (place: Place) => void
   className?: string
 }
 
@@ -24,47 +24,47 @@ function formatPlaceDate(dateStr: string) {
   )
 }
 
-export function PlaceCard({ event, onClick, className }: PlaceCardProps) {
+export function PlaceCard({ place, onClick, className }: PlaceCardProps) {
   return (
     <div
       role="button"
       tabIndex={0}
-      onClick={() => onClick?.(event)}
-      onKeyDown={(e) => e.key === 'Enter' && onClick?.(event)}
+      onClick={() => onClick?.(place)}
+      onKeyDown={(e) => e.key === 'Enter' && onClick?.(place)}
       className={className}
     >
       <PhotoCarousel
-        urls={event.photoUrls}
+        urls={place.photoUrls}
         containerClassName="m-0"
         imageContainerClassName="h-52"
       />
 
       <div className="px-4 py-3.5 space-y-2.5">
-        {event.communityName && (
+        {place.communityName && (
           <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-primary/10 text-primary px-2.5 py-0.5 rounded-full">
             <Users className="h-3 w-3" />
-            {event.communityName}
+            {place.communityName}
           </span>
         )}
 
         <h1 className="font-semibold text-l leading-snug text-foreground">
-          {event.title}
+          {place.title}
         </h1>
 
         <p className="text-sm leading-relaxed line-clamp-2">
-          {event.description}
+          {place.description}
         </p>
 
         <div className="flex items-center gap-1.5 flex-wrap">
           <Clock className="h-3 w-3  shrink-0" />
           <span className="text-xs">
-            {formatPlaceDate(event.scheduledAt)}
+            {formatPlaceDate(place.scheduledAt)}
           </span>
-          {event.locationName && (
+          {place.locationName && (
             <span className="flex items-center gap-1.5">
               <MapPin className="h-3 w-3 shrink-0" />
               <span className="text-xs truncate">
-                {event.locationName}
+                {place.locationName}
               </span>
             </span>
           )}

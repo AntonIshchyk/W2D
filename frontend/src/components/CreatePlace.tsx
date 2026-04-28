@@ -23,12 +23,12 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { PageLayout } from './Navbar'
 import { LocationPickerMap } from './LocationPickerMap'
-import { EventImageUpload } from './EventImageUpload'
-import { createEvent, reverseGeocode } from '../api/events'
+import { PlaceImageUpload } from './PlaceImageUpload'
+import { createPlace, reverseGeocode } from '../api/places'
 import { fetchCommunities } from '../api/communities'
 import { useCitySearch } from '../hooks/useCitySearch'
 import { cn } from '../lib/utils'
-import type { CitySearchResult } from '../types/events'
+import type { CitySearchResult } from '../types/places'
 
 const STEPS = [
   { id: 1, label: 'Details', icon: Info },
@@ -47,7 +47,7 @@ const eventDetailsSchema = z.object({
 
 type EventDetailsErrors = Partial<Record<keyof z.infer<typeof eventDetailsSchema>, string>>
 
-export function CreateEvent() {
+export function CreatePlace() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
 
@@ -105,14 +105,14 @@ export function CreateEvent() {
   }
 
   const mutation = useMutation({
-    mutationFn: createEvent,
+    mutationFn: createPlace,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['events'] })
-      toast.success('Event created!')
-      navigate('/events')
+      queryClient.invalidateQueries({ queryKey: ['places'] })
+      toast.success('Place created!')
+      navigate('/places')
     },
     onError: (err: unknown) => {
-      const message = err instanceof Error ? err.message : 'Failed to create event'
+      const message = err instanceof Error ? err.message : 'Failed to create place'
       toast.error(message)
     },
   })
@@ -149,7 +149,7 @@ export function CreateEvent() {
   function handleSubmit() {
     if (!validateDetails()) {
       setStep(1)
-      toast.error('Please fix the required fields before creating the event.')
+      toast.error('Please fix the required fields before creating the place.')
       return
     }
 
@@ -223,7 +223,7 @@ export function CreateEvent() {
                           setDetailErrors((prev) => ({ ...prev, title: undefined }))
                         }
                       }}
-                      placeholder="Title your event (e.g. Walk in the park, running group...)"
+                      placeholder="Title your place (e.g. Walk in the park, running group...)"
                       className={cn(
                         'bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary',
                         detailErrors.title && 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive',
@@ -386,10 +386,10 @@ export function CreateEvent() {
                 )}
               >
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase tracking-widest">
-                    Event Photos
+                    <label className="text-xs font-semibold uppercase tracking-widest">
+                    Place Photos
                   </label>
-                  <EventImageUpload
+                  <PlaceImageUpload
                     value={photoUrls}
                     onChange={setPhotoUrls}
                     maxFiles={4}
@@ -402,7 +402,7 @@ export function CreateEvent() {
             <div className="flex items-center justify-between">
               <Button
                 variant="ghost"
-                onClick={() => (step === 1 ? navigate('/events') : setStep((s) => s - 1))}
+                onClick={() => (step === 1 ? navigate('/places') : setStep((s) => s - 1))}
                 className="hover:text-foreground hover:bg-accent gap-2 text-base h-12 px-6"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -434,7 +434,7 @@ export function CreateEvent() {
                       </>
                     ) : (
                       <>
-                        Create Event
+                        Create Place
                       </>
                     )
                   }
@@ -452,7 +452,7 @@ export function CreateEvent() {
                     'font-bold text-lg leading-snug transition-all wrap-break-word',
                     title ? 'text-foreground' : 'text-muted-foreground italic',
                   )}>
-                    {title || 'Your event title…'}
+                    {title || 'Your place title…'}
                   </h3>
                   <p className={cn(
                     'mt-2 text-sm leading-relaxed line-clamp-4 transition-all wrap-break-word',
