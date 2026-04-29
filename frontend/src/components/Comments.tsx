@@ -192,7 +192,6 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
       setReplyPhotos({})
       setActiveReplyId(null)
       queryClient.invalidateQueries({ queryKey: ['comments', postId] })
-      toast.success('Comment posted!')
     },
     onError: (err: Error) => toast.error(err.message),
   })
@@ -201,7 +200,6 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
     mutationFn: (commentId: number) => deleteComment(postId, commentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['comments', postId] })
-      toast.success('Comment deleted')
     },
     onError: (err: Error) => toast.error(err.message),
   })

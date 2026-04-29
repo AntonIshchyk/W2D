@@ -27,7 +27,6 @@ export function AvatarCropModal({ imageSrc, onClose, onCropComplete }: AvatarCro
         onCropComplete(croppedImage)
       }
     } catch (e) {
-      console.error(e)
     } finally {
       setIsProcessing(false)
     }

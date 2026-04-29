@@ -91,7 +91,7 @@ export function CreatePlace() {
       const displayName = await reverseGeocode(lat, lng)
       if (displayName) setLocationInputSilently(displayName)
     } catch (err) {
-      console.error(err)
+
     } finally {
       setIsFetchingLocation(false)
     }
