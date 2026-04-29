@@ -36,7 +36,7 @@ public class PostService : IPostService
 
         if (communityIds != null && communityIds.Length > 0)
         {
-            query = query.Where(p => communityIds.Contains(p.CommunityId));
+            query = query.Where(p => p.CommunityId.HasValue && communityIds.Contains(p.CommunityId.Value));
         }
 
         if (userId.HasValue)
