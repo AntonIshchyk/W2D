@@ -27,7 +27,8 @@ import { createPlace, reverseGeocode } from '../api/places'
 import { fetchCommunities } from '../api/communities'
 import { useCitySearch } from '../hooks/useCitySearch'
 import { cn } from '../lib/utils'
-import type { CitySearchResult } from '../types/places'
+import type { CitySearchResult, Place } from '../types/places'
+import { PlaceCard } from './PlaceCard'
 
 const STEPS = [
   { id: 1, label: 'Details', icon: Info },
@@ -153,6 +154,22 @@ export function CreatePlace() {
       : step === 2
         ? true
         : true
+
+  const previewPlace: Place = {
+    id: 0,
+    title: title || 'Your place title…',
+    description: description || 'Description will appear here…',
+    userId: 0,
+    userName: 'You',
+    communityId: selectedCommunity?.id ?? null,
+    communityName: selectedCommunity?.name ?? 'Open to everyone',
+    latitude: location?.lat,
+    longitude: location?.lng,
+    locationName: locationInput || 'Choose a spot on the map',
+    photoUrls: photoUrls ?? [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
 
   return (
     <PageLayout>
@@ -405,41 +422,11 @@ export function CreatePlace() {
           </div>
 
           <div className="hidden lg:block sticky top-24">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">Preview</p>
-            <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
-              <div className="p-6 space-y-5">
-                <div>
-                  <h3 className={cn(
-                    'font-bold text-lg leading-snug transition-all wrap-break-word',
-                    title ? 'text-foreground' : 'text-muted-foreground italic',
-                  )}>
-                    {title || 'Your place title…'}
-                  </h3>
-                  <p className={cn(
-                    'mt-2 text-sm leading-relaxed line-clamp-4 transition-all wrap-break-word',
-                    description ? 'text-muted-foreground/90' : 'text-muted-foreground/60 italic',
-                  )}>
-                    {description || 'Description will appear here…'}
-                  </p>
-                </div>
-
-                <div className="space-y-3 pt-4 border-t">
-                  <div className="flex items-center gap-3 text-base">
-                    <Users className="h-5 w-5 text-primary shrink-0" />
-                    <span className={selectedCommunity ? 'text-foreground/90' : 'text-muted-foreground/60 italic'}>
-                      {selectedCommunity?.name || 'Open to everyone'}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-base">
-                    <MapPin className="h-5 w-5 text-primary shrink-0" />
-                    <span className={locationInput ? 'text-foreground/90' : 'text-muted-foreground/60 italic'}>
-                      {locationInput || 'Choose a spot on the map'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <p className="text-sm font-semibold uppercase tracking-widest mb-4">Preview</p>
+            <PlaceCard
+              place={previewPlace}
+              className='rounded-2xl border bg-card shadow-sm overflow-hidden cursor-default'
+            />
           </div>
         </div>
       </div>

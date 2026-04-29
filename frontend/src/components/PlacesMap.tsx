@@ -50,7 +50,7 @@ export function PlacesMap({
         <MapController
           onBoundsChange={onBoundsChange}
           onViewChange={onViewChange}
-          onMapClick={() => onEventClick?.(null)}
+          onMapClick={() => onPlaceClick?.(null)}
           flyToTarget={flyToTarget}
         />
         {places.map((place) => {

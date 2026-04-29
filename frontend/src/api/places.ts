@@ -173,14 +173,13 @@ export async function searchCities(query: string): Promise<CitySearchResult[]> {
 }
 
 export async function reverseGeocode(lat: number, lng: number): Promise<string | null> {
-  const response = await fetch(`https://photon.komoot.io/reverse?lon=${lng}&lat=${lat}`)
+  const response = await fetch(
+    `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+  )
+
   await ensureResponseOk(response, 'Reverse geocoding failed')
 
   const data = await response.json()
-  if (!data.features || data.features.length === 0) {
-    return null
-  }
 
-  const props = (data.features[0].properties ?? {}) as Record<string, unknown>
-  return buildDisplayName(props)
+  return data.display_name ?? null
 }
