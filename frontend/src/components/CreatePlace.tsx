@@ -8,7 +8,6 @@ import {
   Loader2,
   MapPin,
   Search,
-  Users,
   ArrowLeft,
   ArrowRight,
   Info,
@@ -53,7 +52,6 @@ export function CreatePlace() {
   })
 
   const [step, setStep] = useState(1)
-
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [communityId, setCommunityId] = useState<number | null>(null)
