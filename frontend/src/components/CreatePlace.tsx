@@ -313,7 +313,7 @@ export function CreatePlace() {
                         onChange={(e) => setLocationInput(e.target.value)}
                         onFocus={() => locationSearchResults.length > 0 && setShowLocationResults(true)}
                         onBlur={() => setTimeout(() => setShowLocationResults(false), 150)}
-                        placeholder="Search a place or drop a pin, then modify the name if needed"
+                        placeholder="Optional: search or drop a pin"
                         className="pl-10 bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
                         autoComplete="off"
                       />

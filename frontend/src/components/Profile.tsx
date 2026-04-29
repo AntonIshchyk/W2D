@@ -1,7 +1,7 @@
 import { PageLayout } from './Navbar'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Separator } from './ui/separator'
 import { Skeleton } from './ui/skeleton'
@@ -46,12 +46,11 @@ export function Profile() {
               </AvatarFallback>
             </Avatar>
             <CardTitle className="text-xl pt-2">@{user.username}</CardTitle>
-            <CardDescription className="text-sm">{user.email}</CardDescription>
           </CardHeader>
 
           <CardContent>
             <Separator />
-            {user.bio && <p className="mt-4 text-sm leading-relaxed text-foreground/80">{user.bio}</p>}
+            {user.bio && <p className="mt-4 text-lg leading-relaxed">{user.bio}</p>}
           </CardContent>
         </Card>
       </div>

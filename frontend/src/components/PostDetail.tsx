@@ -129,7 +129,7 @@ export function PostDetail() {
             )}
 
             {post.locationName && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/40 border border-border/50 rounded-2xl px-4 py-3 mb-6 w-fit">
+              <div className="flex items-center gap-2 text-sm bg-muted/40 border border-border/50 rounded-2xl px-4 py-3 mb-6 w-fit">
                 <MapPin className="w-4 h-4 shrink-0" />
                 <span>{post.locationName}</span>
               </div>
@@ -143,8 +143,8 @@ export function PostDetail() {
                 disabled={!currentUser || voteMutation.isPending}
               />
 
-              <div className="flex items-center gap-1.5 text-sm font-bold text-muted-foreground bg-muted/40 px-3 py-2 rounded-full border border-border/50">
-                <Clock className="w-4 h-4 opacity-70" />
+              <div className="flex items-center gap-1.5 text-sm font-bold bg-muted/40 px-3 py-2 rounded-full border border-border/50">
+                <Clock className="w-4 h-4" />
                 <span>{formatRelativeTime(post.createdAt)}</span>
               </div>
             </div>

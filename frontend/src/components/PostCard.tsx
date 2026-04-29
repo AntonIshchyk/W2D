@@ -78,15 +78,15 @@ export function PostCard({ post, currentUser, onVote, className, isPreview }: Po
           ) : (
             <Link
               to={`/posts/${post.id}`}
-              className="flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground hover:bg-muted/50 px-3 py-2 rounded-full transition-colors border border-transparent hover:border-border/50 bg-muted/40"
+              className="flex items-center gap-2 text-sm font-bold hover:bg-muted/50 px-3 py-2 rounded-full transition-colors border border-transparent hover:border-border/50 bg-muted/40"
             >
               <MessageSquare className="w-4 h-4" />
               <span>{post.commentCount}</span>
             </Link>
           )}
 
-          <div className="flex items-center gap-1.5 text-sm font-bold text-muted-foreground bg-muted/40 px-3 py-2 rounded-full border border-border/50">
-            <Clock className="w-4 h-4 opacity-70" />
+          <div className="flex items-center gap-1.5 text-sm font-bold bg-muted/40 px-3 py-2 rounded-full border border-border/50">
+            <Clock className="w-4 h-4" />
             <span>{formatRelativeTime(post.createdAt)}</span>
           </div>
         </div>

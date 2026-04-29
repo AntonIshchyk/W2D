@@ -229,7 +229,7 @@ export function CreatePost() {
                           setDetailErrors((prev) => ({ ...prev, title: undefined }))
                         }
                       }}
-                      placeholder="Give your post a clear title"
+                      placeholder="Give your post a title"
                       className={cn(
                         'bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary',
                         detailErrors.title && 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive',

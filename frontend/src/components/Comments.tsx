@@ -49,10 +49,10 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
 
       <div className="flex-1 min-w-0 pb-4">
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-xs font-semibold text-gray-800">{comment.userName || 'Anonymous'}</span>
-          <span className="text-xs text-gray-400">{formatRelativeTime(comment.createdAt)}</span>
+          <span className="text-sm font-semibold text-gray-800">{comment.userName || 'Anonymous'}</span>
+          <span className="text-sm text-gray-400">{formatRelativeTime(comment.createdAt)}</span>
           {isOwner && !comment.isDeleted && (
-            <span className="text-xs text-gray-300 bg-gray-100 rounded px-1.5 py-0.5 leading-none">you</span>
+            <span className="text-sm text-gray-300 bg-gray-100 rounded px-1.5 py-0.5 leading-none">you</span>
           )}
         </div>
 
@@ -78,22 +78,22 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
           </div>
         )}
 
-        <div className="mt-1.5 flex items-center gap-3 text-xs">
+        <div className="mt-1.5 flex items-center gap-3 text-sm">
           {currentUserId && !comment.isDeleted && (
             <button type="button" onClick={() => onReplyToggle(comment.id)}
-              className="text-gray-400 hover:text-gray-600 transition-colors">
+              className="text-foreground hover:text-foreground/80 transition-colors">
               {activeReplyId === comment.id ? 'cancel' : 'reply'}
             </button>
           )}
           {isOwner && !comment.isDeleted && (
             <button type="button" onClick={() => onDelete(comment.id)} disabled={deletePending}
-              className="text-gray-400 hover:text-red-500 transition-colors disabled:opacity-40">
+              className="text-foreground hover:text-destructive transition-colors disabled:opacity-40">
               delete
             </button>
           )}
           {comment.replies && comment.replies.length > 0 && (
             <button type="button" onClick={() => setShowReplies(p => !p)}
-              className="text-gray-400 hover:text-gray-600 transition-colors">
+              className="text-foreground hover:text-foreground/80 transition-colors">
               {showReplies ? 'hide replies' : `show ${comment.replies.length} ${comment.replies.length === 1 ? 'reply' : 'replies'}`}
             </button>
           )}
@@ -118,17 +118,17 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
               />
               <div className="flex items-center gap-2">
                 <button type="button" onClick={() => onReplyToggle(null)}
-                  className="px-3 py-1 text-xs text-gray-500 hover:text-gray-700 transition-colors">
+                  className="px-3 py-1 text-sm text-gray-500 hover:text-gray-700 transition-colors">
                   Cancel
                 </button>
                 <button type="button" onClick={() => submitReply(comment.id)}
                   disabled={(!replyDrafts[comment.id]?.trim() && !replyPhotos[comment.id]) || createPending}
-                  className="px-3 py-1.5 bg-primary text-primary-foreground text-xs rounded-lg hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                  className="px-3 py-1.5 bg-primary text-primary-foreground text-sm rounded-lg hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                   {createPending ? 'Posting...' : 'Reply'}
                 </button>
               </div>
             </div>
-            {createError && <p className="text-xs text-red-500 mt-1">Failed to post. Try again.</p>}
+            {createError && <p className="text-sm text-red-500 mt-1">Failed to post. Try again.</p>}
           </div>
         )}
 
@@ -192,6 +192,8 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
       setReplyPhotos({})
       setActiveReplyId(null)
       queryClient.invalidateQueries({ queryKey: ['comments', postId] })
+      queryClient.invalidateQueries({ queryKey: ['post', postId] })
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
     },
     onError: (err: Error) => toast.error(err.message),
   })
@@ -200,6 +202,8 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
     mutationFn: (commentId: number) => deleteComment(postId, commentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['comments', postId] })
+      queryClient.invalidateQueries({ queryKey: ['post', postId] })
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
     },
     onError: (err: Error) => toast.error(err.message),
   })
@@ -248,10 +252,10 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
 
   return (
     <div className="mt-8 pt-6 border-t border-gray-100">
-      <h3 className="text-sm font-semibold text-gray-900 mb-5 flex items-center gap-2">
+      <h3 className="text-sm font-semibold mb-5 flex items-center gap-2">
         Comments
         {total > 0 && (
-          <span className="text-xs font-normal text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">
+          <span className="text-sm font-normal bg-gray-100 rounded-full px-2 py-0.5">
             {total}
           </span>
         )}
@@ -276,26 +280,26 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
                 maxPhotos={1}
                 disabled={createMutation.isPending}
               />
-              <span className="text-xs text-gray-400 tabular-nums">{newComment.length}/1000</span>
+              <span className="text-sm text-gray-400 tabular-nums">{newComment.length}/1000</span>
             </div>
             <button
               type="submit"
               disabled={!canSubmit}
-              className="px-4 py-1.5 bg-primary text-primary-foreground text-xs rounded-lg hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-1.5 bg-primary text-primary-foreground text-sm rounded-lg hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               {createMutation.isPending ? 'Posting...' : 'Comment'}
             </button>
           </div>
           {createMutation.isError && (
-            <p className="text-xs text-red-500 mt-1">Failed to post. Try again.</p>
+            <p className="text-sm text-red-500 mt-1">Failed to post. Try again.</p>
           )}
         </form>
       ) : (
-        <p className="text-xs text-gray-400 mb-7">Sign in to leave a comment.</p>
+        <p className="text-sm text-gray-400 mb-7">Sign in to leave a comment.</p>
       )}
 
       {isLoading ? (
-        <p className="text-xs text-gray-400">Loading comments…</p>
+        <p className="text-sm text-gray-400">Loading comments…</p>
       ) : (
         <div className="space-y-4">
           {comments.map(comment => (
