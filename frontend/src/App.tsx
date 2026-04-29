@@ -7,6 +7,7 @@ import { Profile } from './components/Profile'
 import { Places } from './components/Places'
 import { CreatePlace } from './components/CreatePlace'
 import { Posts } from './components/Posts'
+import { CreatePost } from './components/CreatePost'
 import { PostDetail } from './components/PostDetail'
 import { useAuthSync } from './hooks/useAuthSync'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -25,7 +26,7 @@ function App() {
         <Route path="/places" element={<ProtectedRoute><Places /></ProtectedRoute>} />
         <Route path="/places/create" element={<ProtectedRoute><CreatePlace /></ProtectedRoute>} />
         <Route path="/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
-        <Route path="/posts/create" element={<ProtectedRoute><Navigate to="/posts" replace /></ProtectedRoute>} />
+        <Route path="/posts/create" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
         <Route path="/posts/:id" element={<ProtectedRoute><PostDetail /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

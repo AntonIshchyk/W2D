@@ -22,12 +22,15 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { PageLayout } from './Navbar'
 import { LocationPickerMap } from './LocationPickerMap'
 import { PlaceImageUpload } from './PlaceImageUpload'
-import { createPlace, reverseGeocode } from '../api/places'
+import { createPost, POST_TYPE_LABELS } from '../api/posts'
 import { fetchCommunities } from '../api/communities'
 import { useCitySearch } from '../hooks/useCitySearch'
 import { cn } from '../lib/utils'
-import type { CitySearchResult, Place } from '../types/places'
-import { PlaceCard } from './PlaceCard'
+import type { CitySearchResult } from '../types/places'
+import type { Post } from '../types/posts'
+import { PostCard } from './PostCard'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
+import { PostType } from '../types/posts'
 
 const STEPS = [
   { id: 1, label: 'Details', icon: Info },
@@ -42,7 +45,7 @@ const eventDetailsSchema = z.object({
 
 type EventDetailsErrors = Partial<Record<keyof z.infer<typeof eventDetailsSchema>, string>>
 
-export function CreatePlace() {
+export function CreatePost() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
 
@@ -54,6 +57,7 @@ export function CreatePlace() {
   const [step, setStep] = useState(1)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [postType, setPostType] = useState<number>(PostType.ExperienceShare)
   const [communityId, setCommunityId] = useState<number | null>(null)
   const [communityOpen, setCommunityOpen] = useState(false)
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
@@ -88,24 +92,26 @@ export function CreatePlace() {
     setLocation({ lat, lng })
     setIsFetchingLocation(true)
     try {
+      // reuse reverse geocode from places API file
+      const { reverseGeocode } = await import('../api/places')
       const displayName = await reverseGeocode(lat, lng)
       if (displayName) setLocationInputSilently(displayName)
     } catch (err) {
-
+      console.error(err)
     } finally {
       setIsFetchingLocation(false)
     }
   }
 
   const mutation = useMutation({
-    mutationFn: createPlace,
+    mutationFn: createPost,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['places'] })
-      toast.success('Place created!')
-      navigate('/places')
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+      toast.success('Post created!')
+      navigate('/posts')
     },
     onError: (err: unknown) => {
-      const message = err instanceof Error ? err.message : 'Failed to create place'
+      const message = err instanceof Error ? err.message : 'Failed to create post'
       toast.error(message)
     },
   })
@@ -131,17 +137,18 @@ export function CreatePlace() {
   function handleSubmit() {
     if (!validateDetails()) {
       setStep(1)
-      toast.error('Please fix the required fields before creating the place.')
+      toast.error('Please fix the required fields before creating the post.')
       return
     }
 
     mutation.mutate({
       title,
       description,
+      type: postType,
       ...(communityId !== null ? { communityId } : {}),
+      locationName: locationInput.trim() || undefined,
       latitude: location?.lat,
       longitude: location?.lng,
-      locationName: locationInput.trim() || undefined,
       photoUrls,
     })
   }
@@ -153,18 +160,20 @@ export function CreatePlace() {
         ? true
         : true
 
-  const previewPlace: Place = {
+  const previewPost: Post = {
     id: 0,
-    title: title || 'Your place title…',
+    title: title || 'Your post title…',
     description: description || 'Description will appear here…',
-    userId: 0,
-    userName: 'You',
-    communityId: selectedCommunity?.id ?? null,
+    type: postType as PostType,
+    author: { id: 0, username: 'You' },
+    communityId: selectedCommunity?.id ?? 0,
     communityName: selectedCommunity?.name ?? 'Open to everyone',
+    score: 0,
+    locationName: locationInput || undefined,
     latitude: location?.lat,
     longitude: location?.lng,
-    locationName: locationInput || 'Choose a spot on the map',
     photoUrls: photoUrls ?? [],
+    commentCount: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
@@ -220,13 +229,31 @@ export function CreatePlace() {
                           setDetailErrors((prev) => ({ ...prev, title: undefined }))
                         }
                       }}
-                      placeholder="Title your place (e.g. Walk in the park, running group...)"
+                      placeholder="Give your post a clear title"
                       className={cn(
                         'bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary',
                         detailErrors.title && 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive',
                       )}
                     />
                     {detailErrors.title && <p className="text-xs text-destructive">{detailErrors.title}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold uppercase tracking-widest">
+                      Type
+                    </label>
+                    <Select value={postType.toString()} onValueChange={(v) => setPostType(Number(v))}>
+                      <SelectTrigger className="h-12 bg-card border-border text-foreground hover:bg-accent hover:text-accent-foreground font-normal text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-2xl">
+                        {Object.entries(POST_TYPE_LABELS).map(([value, label]) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
@@ -286,7 +313,7 @@ export function CreatePlace() {
                           setDetailErrors((prev) => ({ ...prev, description: undefined }))
                         }
                       }}
-                      placeholder="Share the plan, who it's for, and what is imporant to know."
+                      placeholder="Share the details of your post"
                       rows={4}
                       className={cn(
                         'bg-card border-border text-foreground placeholder:text-muted-foreground text-sm resize-none focus-visible:ring-primary focus-visible:border-primary',
@@ -313,7 +340,7 @@ export function CreatePlace() {
                         onChange={(e) => setLocationInput(e.target.value)}
                         onFocus={() => locationSearchResults.length > 0 && setShowLocationResults(true)}
                         onBlur={() => setTimeout(() => setShowLocationResults(false), 150)}
-                        placeholder="Search a place or drop a pin, then modify the name if needed"
+                        placeholder="Optional: search or drop a pin"
                         className="pl-10 bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
                         autoComplete="off"
                       />
@@ -363,7 +390,7 @@ export function CreatePlace() {
               >
                 <div className="space-y-2">
                     <label className="text-xs font-semibold uppercase tracking-widest">
-                    Place Photos
+                    Post Photos
                   </label>
                   <PlaceImageUpload
                     value={photoUrls}
@@ -378,7 +405,7 @@ export function CreatePlace() {
             <div className="flex items-center justify-between">
               <Button
                 variant="ghost"
-                onClick={() => (step === 1 ? navigate('/places') : setStep((s) => s - 1))}
+                onClick={() => (step === 1 ? navigate('/posts') : setStep((s) => s - 1))}
                 className="hover:text-foreground hover:bg-accent gap-2 text-base h-12 px-6"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -410,7 +437,7 @@ export function CreatePlace() {
                       </>
                     ) : (
                       <>
-                        Create Place
+                        Create Post
                       </>
                     )
                   }
@@ -421,11 +448,13 @@ export function CreatePlace() {
 
           <div className="hidden lg:block sticky top-24">
             <p className="text-sm font-semibold uppercase tracking-widest mb-4">Preview</p>
-            <PlaceCard
-              place={previewPlace}
-              isPreview
-              className='rounded-2xl border bg-card shadow-sm overflow-hidden cursor-default'
-            />
+              <PostCard
+                post={previewPost}
+                currentUser={null}
+                onVote={() => {}}
+                isPreview
+                className="rounded-2xl border bg-card shadow-sm overflow-hidden cursor-default"
+              />
           </div>
         </div>
       </div>

@@ -19,9 +19,8 @@ public class Post : BaseModel
     public int UserId { get; set; }
     public User User { get; set; } = null!;
 
-    [Required]
-    public int CommunityId { get; set; }
-    public Community Community { get; set; } = null!;
+    public int? CommunityId { get; set; }
+    public Community? Community { get; set; }
 
     public int Score { get; set; }
 

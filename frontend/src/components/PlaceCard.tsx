@@ -6,15 +6,18 @@ interface PlaceCardProps {
   place: Place
   onClick?: (place: Place) => void
   className?: string
+  isPreview?: boolean
 }
 
-export function PlaceCard({ place, onClick, className }: PlaceCardProps) {
+export function PlaceCard({ place, onClick, className, isPreview }: PlaceCardProps) {
+  type DivProps = { role?: string; tabIndex?: number }
+  const ContainerProps: DivProps = isPreview ? {} : { role: 'button', tabIndex: 0 }
+
   return (
     <div
-      role="button"
-      tabIndex={0}
-      onClick={() => onClick?.(place)}
-      onKeyDown={(e) => e.key === 'Enter' && onClick?.(place)}
+      {...ContainerProps}
+      onClick={isPreview ? undefined : () => onClick?.(place)}
+      onKeyDown={isPreview ? undefined : (e) => e.key === 'Enter' && onClick?.(place)}
       className={className}
     >
       <PhotoCarousel
@@ -31,11 +34,11 @@ export function PlaceCard({ place, onClick, className }: PlaceCardProps) {
           </span>
         )}
 
-        <h1 className="font-semibold text-l leading-snug text-foreground">
+        <h1 className="font-bold text-xl md:text-2xl leading-snug text-foreground wrap-break-word break-all whitespace-normal line-clamp-2">
           {place.title}
         </h1>
 
-        <p className="text-sm leading-relaxed line-clamp-2">
+        <p className="text-sm leading-relaxed whitespace-normal break-all line-clamp-2">
           {place.description}
         </p>
 

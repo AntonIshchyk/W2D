@@ -9,7 +9,7 @@ public class PostResponse : BaseModel
     public string Description { get; set; } = string.Empty;
     public int Type { get; set; }
     public UserSummary? Author { get; set; }
-    public int CommunityId { get; set; }
+    public int? CommunityId { get; set; }
     public string? CommunityName { get; set; }
     public int Score { get; set; }
     public string? LocationName { get; set; }

@@ -69,9 +69,9 @@ export function PostDetail() {
     <PageLayout>
       <div className="max-w-3xl mx-auto">
         <h2 className="text-xl font-semibold mb-2">Not found</h2>
-        <p className="text-sm text-muted-foreground mb-4">This post doesn't exist or has been removed.</p>
+        <p className="text-sm mb-4">This post doesn't exist or has been removed.</p>
         <button type="button" onClick={() => navigate('/posts')}
-          className="text-sm text-muted-foreground hover:text-foreground underline">
+          className="text-sm hover:text-foreground underline">
           Back to posts
         </button>
       </div>
@@ -107,7 +107,7 @@ export function PostDetail() {
                         deleteMutation.mutate(post.id)
                     }}
                     disabled={deleteMutation.isPending}
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors px-3 py-1.5 rounded-full hover:bg-destructive/10 border border-transparent hover:border-destructive/20"
+                    className="flex items-center gap-1.5 text-sm hover:text-destructive transition-colors px-3 py-1.5 rounded-full hover:bg-destructive/10 border border-transparent hover:border-destructive/20"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     {deleteMutation.isPending ? 'Deleting…' : 'Delete'}

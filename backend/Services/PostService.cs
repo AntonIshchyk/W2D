@@ -161,10 +161,13 @@ public class PostService : IPostService
             return Result<PostResponse>.Invalid(urlError!);
         }
 
-        bool communityExists = await _context.Communities.AnyAsync(c => c.Id == request.CommunityId);
-        if (!communityExists)
+        if (request.CommunityId.HasValue)
         {
-            return Result<PostResponse>.Invalid("Community does not exist.");
+            bool communityExists = await _context.Communities.AnyAsync(c => c.Id == request.CommunityId.Value);
+            if (!communityExists)
+            {
+                return Result<PostResponse>.Invalid("Community does not exist.");
+            }
         }
 
         Post post = _mapper.Map<Post>(request);

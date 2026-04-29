@@ -38,7 +38,7 @@ export interface CreatePostRequest {
   title: string
   description: string
   type: number
-  communityId: number
+  communityId?: number
   locationName?: string
   latitude?: number
   longitude?: number

@@ -16,8 +16,7 @@ public class CreatePostRequest
     [Range(1, 6)]
     public int Type { get; set; }
 
-    [Required]
-    public int CommunityId { get; set; }
+    public int? CommunityId { get; set; }
 
     [StringLength(500)]
     public string? LocationName { get; set; }
