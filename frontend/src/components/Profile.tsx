@@ -80,7 +80,7 @@ export function Profile() {
               <CardContent>
                 <Separator />
                 <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-                  {user.bio || 'No bio added yet.'}
+                  {user.bio || 'No bio yet.'}
                 </p>
               </CardContent>
             </Card>
