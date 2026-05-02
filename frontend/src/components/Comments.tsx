@@ -1,12 +1,16 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { Reply, Trash2, X, Send } from 'lucide-react'
+import { UserAvatar } from './UserAvatar'
+import { Dialog, DialogTrigger, DialogContent, DialogTitle } from './ui/dialog'
 import { formatRelativeTime } from '../lib/utils/date'
 import { isValidPhotoUrl } from '../lib/utils/validation'
 import type { Comment } from '../types/posts'
 import { PhotoUpload } from './PhotoUpload'
 import { VoteButtons } from './VoteButtons'
 import { fetchComments, createComment, deleteComment, voteComment } from '../api/comments'
+
 
 interface CommentNodeProps {
   comment: Comment
@@ -24,117 +28,156 @@ interface CommentNodeProps {
   createPending: boolean
   createError: boolean
   deletePending: boolean
+  isLast?: boolean
 }
 
 const CommentNode: React.FC<CommentNodeProps> = React.memo(({
   comment, depth = 0, currentUserId, onVote, onDelete,
   onReplyToggle, activeReplyId, replyDrafts, replyPhotos,
   setReplyDraft, setReplyPhoto, submitReply,
-  createPending, createError, deletePending,
+  createPending, createError, deletePending, isLast,
 }) => {
   const [showReplies, setShowReplies] = useState(true)
   const isOwner = currentUserId === comment.userId
+  const isReplyOpen = activeReplyId === comment.id
+  const replyText = replyDrafts[comment.id] || ''
+  const replyPhoto = replyPhotos[comment.id] ?? null
+  const canSubmitReply = (replyText.trim().length > 0 || !!replyPhoto) && !createPending
+  const hasReplies = !!comment.replies?.length
 
   return (
-    <div className={`flex gap-3 ${depth > 0 ? 'pl-5 border-l border-gray-100' : ''}`}>
-      <div className="flex flex-col items-center pt-0.5 shrink-0">
+    <div className={`flex gap-2.5 ${depth > 0 ? '' : ''}`}>
+      {comment.isDeleted ? (
+        <div className="w-10 shrink-0" />
+      ) : (
         <VoteButtons
           score={comment.score}
           currentUserVote={comment.currentUserVote}
           onVote={(val) => onVote(comment, val)}
           disabled={!currentUserId || comment.isDeleted}
-          className="flex-col px-1 py-1.5 min-w-10 bg-transparent border-transparent gap-0.5"
+          className="flex-col px-1 py-1 min-w-10 bg-transparent border-transparent gap-0.5"
         />
-      </div>
+      )}
 
-      <div className="flex-1 min-w-0 pb-4">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-sm font-semibold text-gray-800">{comment.userName || 'Anonymous'}</span>
-          <span className="text-sm text-gray-400">{formatRelativeTime(comment.createdAt)}</span>
-          {isOwner && !comment.isDeleted && (
-            <span className="text-sm text-gray-300 bg-gray-100 rounded px-1.5 py-0.5 leading-none">you</span>
+      <div className={`flex-1 min-w-0 pb-3 ${!isLast && depth === 0 ? 'border-b border-border/60' : ''}`}>
+        <div className="flex items-center gap-2 mb-1.5">
+          {!comment.isDeleted && (
+            <UserAvatar url={comment.userPhotoUrl} username={comment.userName} className="w-6 h-6" />
           )}
+          <span className="text-sm font-medium text-foreground">
+            {comment.isDeleted ? 'deleted' : (comment.userName || 'Anonymous')}
+          </span>
+          <span className="text-sm text-muted-foreground">
+            {formatRelativeTime(comment.createdAt)}
+          </span>
         </div>
 
         {comment.isDeleted ? (
-          <p className="text-sm text-gray-400 italic">{comment.content}</p>
+          <p className="text-sm text-muted-foreground italic">{comment.content}</p>
         ) : (
           <div className="space-y-2">
             {comment.content && (
-              <p className="text-sm leading-relaxed wrap-break-word text-gray-700">{comment.content}</p>
+              <p className="text-sm leading-relaxed wrap-break-word text-foreground">
+                {comment.content}
+              </p>
             )}
-            {comment.photoUrl && (
-              <div className="rounded-lg overflow-hidden max-w-xs cursor-pointer"
-                onClick={() => {
-                  if (comment.photoUrl && isValidPhotoUrl(comment.photoUrl)) {
-                    window.open(comment.photoUrl, 'noopener,noreferrer')
-                  } else {
-                    toast.error('Invalid image URL')
-                  }
-                }}>
-                <img src={comment.photoUrl} alt="" className="w-full object-cover max-h-64" />
-              </div>
+            {comment.photoUrl && isValidPhotoUrl(comment.photoUrl) && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="rounded-lg overflow-hidden max-w-55 cursor-pointer ring-1 ring-black/5 hover:ring-black/10 transition-all">
+                    <img src={comment.photoUrl} alt="" className="w-full object-cover max-h-52" />
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-[95vw] sm:max-w-[90vw] md:max-w-[80vw] h-[85vh] p-0 border-0 bg-transparent flex items-center justify-center shadow-none">
+                  <DialogTitle className="sr-only">Image Preview</DialogTitle>
+                  <img src={comment.photoUrl} alt="Preview" className="max-w-full max-h-full object-contain" />
+                </DialogContent>
+              </Dialog>
             )}
           </div>
         )}
 
-        <div className="mt-1.5 flex items-center gap-3 text-sm">
-          {currentUserId && !comment.isDeleted && (
-            <button type="button" onClick={() => onReplyToggle(comment.id)}
-              className="text-foreground hover:text-foreground/80 transition-colors">
-              {activeReplyId === comment.id ? 'cancel' : 'reply'}
-            </button>
-          )}
-          {isOwner && !comment.isDeleted && (
-            <button type="button" onClick={() => onDelete(comment.id)} disabled={deletePending}
-              className="text-foreground hover:text-destructive transition-colors disabled:opacity-40">
-              delete
-            </button>
-          )}
-          {comment.replies && comment.replies.length > 0 && (
-            <button type="button" onClick={() => setShowReplies(p => !p)}
-              className="text-foreground hover:text-foreground/80 transition-colors">
-              {showReplies ? 'hide replies' : `show ${comment.replies.length} ${comment.replies.length === 1 ? 'reply' : 'replies'}`}
-            </button>
-          )}
-        </div>
+        {!comment.isDeleted && (
+          <div className="mt-2 flex items-center gap-1">
+            {currentUserId && (
+              <button
+                type="button"
+                onClick={() => onReplyToggle(comment.id)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm transition-colors ${
+                  isReplyOpen
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
+                }`}
+              >
+                {isReplyOpen ? <X size={12} /> : <Reply size={12} />}
+                {isReplyOpen ? 'Cancel' : 'Reply'}
+              </button>
+            )}
+            {isOwner && (
+              <button
+                type="button"
+                onClick={() => onDelete(comment.id)}
+                disabled={deletePending}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors disabled:opacity-40"
+              >
+                <Trash2 size={12} />
+                Delete
+              </button>
+            )}
+            {hasReplies && (
+              <button
+                type="button"
+                onClick={() => setShowReplies(p => !p)}
+                className="px-2.5 py-1 rounded-full text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                {showReplies
+                  ? 'hide replies'
+                  : `${comment.replies!.length} ${comment.replies!.length === 1 ? 'reply' : 'replies'}`}
+              </button>
+            )}
+          </div>
+        )}
 
-        {activeReplyId === comment.id && currentUserId && (
-          <div className="mt-3">
+        {isReplyOpen && currentUserId && (
+          <div className="mt-2.5 bg-card rounded-xl border border-border/70 overflow-hidden">
             <textarea
-              value={replyDrafts[comment.id] || ''}
+              value={replyText}
               onChange={e => setReplyDraft(comment.id, e.target.value)}
-              placeholder="Write a reply…"
+              placeholder={`Reply to ${comment.userName || 'this comment'}…`}
               rows={2}
               maxLength={1000}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
+              autoFocus
+              className="w-full px-3 pt-2.5 pb-1.5 text-sm bg-transparent resize-none focus:outline-none text-foreground placeholder:text-muted-foreground"
             />
-            <div className="flex justify-between items-center mt-1.5">
+            <div className="flex items-center justify-between px-2 pb-2">
               <PhotoUpload
-                value={replyPhotos[comment.id] ? [replyPhotos[comment.id]!] : []}
+                value={replyPhoto ? [replyPhoto] : []}
                 onChange={urls => setReplyPhoto(comment.id, urls[0] ?? null)}
                 maxPhotos={1}
                 disabled={createPending}
               />
               <div className="flex items-center gap-2">
-                <button type="button" onClick={() => onReplyToggle(null)}
-                  className="px-3 py-1 text-sm text-gray-500 hover:text-gray-700 transition-colors">
-                  Cancel
-                </button>
-                <button type="button" onClick={() => submitReply(comment.id)}
-                  disabled={(!replyDrafts[comment.id]?.trim() && !replyPhotos[comment.id]) || createPending}
-                  className="px-3 py-1.5 bg-primary text-primary-foreground text-sm rounded-lg hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                  {createPending ? 'Posting...' : 'Reply'}
+                <span className="text-sm text-muted-foreground tabular-nums">{replyText.length}/1000</span>
+                <button
+                  type="button"
+                  onClick={() => submitReply(comment.id)}
+                  disabled={!canSubmitReply}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-full hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Send size={14} />
+                  {createPending ? 'Posting…' : 'Reply'}
                 </button>
               </div>
             </div>
-            {createError && <p className="text-sm text-red-500 mt-1">Failed to post. Try again.</p>}
+            {createError && (
+              <p className="text-sm text-destructive px-3 pb-2">Failed to post. Try again.</p>
+            )}
           </div>
         )}
 
-        {showReplies && comment.replies && comment.replies.length > 0 && (
-          <div className="mt-4 space-y-4">
-            {comment.replies.map(r => (
+        {showReplies && hasReplies && (
+          <div className="mt-3 pl-3 border-l-2 border-border/60 space-y-3">
+            {comment.replies!.map((r, i) => (
               <CommentNode
                 key={r.id}
                 comment={r}
@@ -152,6 +195,7 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
                 createPending={createPending}
                 createError={createError}
                 deletePending={deletePending}
+                isLast={i === comment.replies!.length - 1}
               />
             ))}
           </div>
@@ -251,58 +295,81 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
   const canSubmit = (newComment.trim().length > 0 || !!newPhoto) && !createMutation.isPending
 
   return (
-    <div className="mt-8 pt-6 border-t border-gray-100">
-      <h3 className="text-sm font-semibold mb-5 flex items-center gap-2">
-        Comments
+    <div className="mt-8 pt-6 border-t border-border/60">
+      <div className="flex items-center gap-2 mb-5">
+        <h3 className="text-sm font-semibold text-foreground">Comments</h3>
         {total > 0 && (
-          <span className="text-sm font-normal bg-gray-100 rounded-full px-2 py-0.5">
+          <span className="text-sm text-primary bg-primary/10 rounded-full px-2 py-0.5 tabular-nums">
             {total}
           </span>
         )}
-      </h3>
+      </div>
 
       {currentUserId ? (
-        <form onSubmit={handleSubmit} className="mb-7">
-          <textarea
-            value={newComment}
-            onChange={e => setNewComment(e.target.value)}
-            placeholder={newPhoto ? 'Add a caption (optional)…' : 'Write a comment…'}
-            rows={3}
-            maxLength={1000}
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent transition-shadow"
-          />
-
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center gap-2">
-              <PhotoUpload
-                value={newPhoto ? [newPhoto] : []}
-                onChange={urls => setNewPhoto(urls[0] ?? null)}
-                maxPhotos={1}
-                disabled={createMutation.isPending}
-              />
-              <span className="text-sm text-gray-400 tabular-nums">{newComment.length}/1000</span>
+        <form onSubmit={handleSubmit} className="mb-6">
+          <div className="border border-border rounded-xl overflow-hidden focus-within:border-ring transition-colors bg-card">
+            <textarea
+              value={newComment}
+              onChange={e => setNewComment(e.target.value)}
+              placeholder={newPhoto ? 'Add a caption (optional)…' : 'Write a comment…'}
+              rows={3}
+              maxLength={1000}
+              className="w-full px-3.5 pt-3 pb-2 text-sm bg-transparent resize-none focus:outline-none text-foreground placeholder:text-muted-foreground"
+            />
+            <div className="flex items-center justify-between px-3 pb-2.5 border-t border-border/60 pt-2">
+              <div className="flex items-center gap-3">
+                <PhotoUpload
+                  value={newPhoto ? [newPhoto] : []}
+                  onChange={urls => setNewPhoto(urls[0] ?? null)}
+                  maxPhotos={1}
+                  disabled={createMutation.isPending}
+                />
+                <span className="text-sm text-muted-foreground tabular-nums">{newComment.length}/1000</span>
+              </div>
+              <button
+                type="submit"
+                disabled={!canSubmit}
+                className="flex items-center gap-1.5 px-4 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-full hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <Send size={14} />
+                {createMutation.isPending ? 'Posting…' : 'Comment'}
+              </button>
             </div>
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className="px-4 py-1.5 bg-primary text-primary-foreground text-sm rounded-lg hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              {createMutation.isPending ? 'Posting...' : 'Comment'}
-            </button>
           </div>
           {createMutation.isError && (
-            <p className="text-sm text-red-500 mt-1">Failed to post. Try again.</p>
+            <p className="text-sm text-destructive mt-1.5 px-1">Failed to post. Try again.</p>
           )}
         </form>
       ) : (
-        <p className="text-sm text-gray-400 mb-7">Sign in to leave a comment.</p>
+        <p className="text-sm text-muted-foreground mb-6">Sign in to leave a comment.</p>
       )}
 
       {isLoading ? (
-        <p className="text-sm text-gray-400">Loading comments…</p>
-      ) : (
         <div className="space-y-4">
-          {comments.map(comment => (
+          {[1, 2, 3].map(i => (
+            <div key={i} className="flex gap-2.5 animate-pulse">
+              <div className="w-6 shrink-0 flex flex-col items-center gap-1 pt-0.5">
+                <div className="w-4 h-3 bg-muted rounded" />
+                <div className="w-4 h-3 bg-muted rounded" />
+                <div className="w-4 h-3 bg-muted rounded" />
+              </div>
+              <div className="flex-1 pb-3 border-b border-border/60">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded-full bg-muted" />
+                  <div className="h-3 w-20 bg-muted rounded" />
+                  <div className="h-3 w-12 bg-muted rounded" />
+                </div>
+                <div className="h-3 w-3/4 bg-muted rounded mb-1.5" />
+                <div className="h-3 w-1/2 bg-muted rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : comments.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No comments yet. Be the first!</p>
+      ) : (
+        <div className="space-y-3">
+          {comments.map((comment, i) => (
             <CommentNode
               key={comment.id}
               comment={comment}
@@ -320,6 +387,7 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
               createPending={createMutation.isPending}
               createError={createMutation.isError}
               deletePending={deleteMutation.isPending}
+              isLast={i === comments.length - 1}
             />
           ))}
         </div>

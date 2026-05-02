@@ -19,7 +19,7 @@ export function PostAuthorInfo({ author, type }: PostAuthorInfoProps) {
     <div className="flex items-center gap-3">
       <UserAvatar url={author?.profilePhotoUrl} username={author?.username} />
       <div>
-        <p className="text-sm font-semibold text-foreground/90 leading-tight">
+        <p className="text-sm font-semibold text-foreground leading-tight">
           {author?.username || 'Anonymous'}
         </p>
         {typeStyle && (

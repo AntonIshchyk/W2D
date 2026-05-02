@@ -69,6 +69,7 @@ export interface Comment {
   content: string
   userId: number
   userName?: string
+  userPhotoUrl?: string
   postId: number
   score: number
   photoUrl?: string
