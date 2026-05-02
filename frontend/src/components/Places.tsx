@@ -175,6 +175,8 @@ export function Places() {
         ? selectedCommunityNames[0] ?? '1 Community'
         : `${selectedCommunities.length} Communities`
 
+  const placeCardClassName = 'group bg-card border border-border/50 rounded-3xl p-5 md:p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 flex flex-col'
+
   return (
     <PageLayout fullWidth>
       <div className="relative w-full h-dvh flex flex-col overflow-hidden">
@@ -392,9 +394,9 @@ export function Places() {
               />
             </div>
           )  : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div className="max-w-3xl mx-auto space-y-6">
                 {allPlaces.map((place) => (
-                  <PlaceCard key={place.id} place={place} />
+                  <PlaceCard key={place.id} place={place} className={placeCardClassName} />
                 ))}
               </div>
             )}
@@ -404,15 +406,13 @@ export function Places() {
         <div
           className={cn(
             'absolute top-28 sm:top-24 right-4 w-[calc(100vw-2rem)] sm:w-96 max-h-[80vh] z-20',
-            'bg-card border shadow-2xl rounded-xl overflow-hidden flex flex-col',
-            'transition-all duration-300 ease-in-out',
             selectedPlace && viewMode === 'map'
               ? 'opacity-100 translate-x-0 pointer-events-auto'
               : 'opacity-0 translate-x-6 pointer-events-none',
           )}
           aria-hidden={!selectedPlace || viewMode !== 'map'}
         >
-          {selectedPlace && <PlaceCard place={selectedPlace} />}
+          {selectedPlace && <PlaceCard place={selectedPlace} className={placeCardClassName} />}
         </div>
       </div>
     </PageLayout>
