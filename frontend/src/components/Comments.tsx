@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Reply, Trash2, X, Send } from 'lucide-react'
+import { Reply, Trash2, X } from 'lucide-react'
 import { UserAvatar } from './UserAvatar'
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from './ui/dialog'
 import { formatRelativeTime } from '../lib/utils/date'
@@ -164,7 +164,6 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
                   disabled={!canSubmitReply}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-full hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 >
-                  <Send size={14} />
                   {createPending ? 'Posting…' : 'Reply'}
                 </button>
               </div>
@@ -331,7 +330,6 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
                 disabled={!canSubmit}
                 className="flex items-center gap-1.5 px-4 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-full hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
-                <Send size={14} />
                 {createMutation.isPending ? 'Posting…' : 'Comment'}
               </button>
             </div>

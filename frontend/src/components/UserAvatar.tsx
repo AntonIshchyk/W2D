@@ -26,7 +26,7 @@ export function UserAvatar({ url, username, className }: UserAvatarProps) {
       )}
     >
       <span className="text-primary font-bold text-sm">
-        {username ? username.substring(0, 2).toUpperCase() : 'AN'}
+        {username ? username.substring(0, 1).toUpperCase() : 'AN'}
       </span>
     </div>
   )
