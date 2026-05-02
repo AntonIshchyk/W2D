@@ -14,6 +14,11 @@ interface PlaceCardProps {
 export function PlaceCard({ place, onClick, className, isPreview }: PlaceCardProps) {
   type DivProps = { role?: string; tabIndex?: number }
   const ContainerProps: DivProps = isPreview ? {} : { role: 'button', tabIndex: 0 }
+  const googleMapsUrl = place.latitude != null && place.longitude != null
+    ? `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`
+    : place.locationName
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.locationName)}`
+      : null
 
   return (
     <div
@@ -58,12 +63,27 @@ export function PlaceCard({ place, onClick, className, isPreview }: PlaceCardPro
 
         <div className="flex items-center gap-1.5 flex-wrap mt-4 pt-4 border-t border-border/40">
           {place.locationName && (
-            <span className="flex items-center gap-1.5">
-              <MapPin className="h-4 w-4 shrink-0" />
-              <span className="text-xs wrap-break-word max-w-56 whitespace-normal">
-                {place.locationName}
+            googleMapsUrl ? (
+              <a
+                href={googleMapsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 text-primary hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MapPin className="h-4 w-4 shrink-0" />
+                <span className="text-xs wrap-break-word max-w-56 whitespace-normal">
+                  {place.locationName}
+                </span>
+              </a>
+            ) : (
+              <span className="flex items-center gap-1.5">
+                <MapPin className="h-4 w-4 shrink-0" />
+                <span className="text-xs wrap-break-word max-w-56 whitespace-normal">
+                  {place.locationName}
+                </span>
               </span>
-            </span>
+            )
           )}
         </div>
       </div>
