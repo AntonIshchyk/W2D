@@ -79,17 +79,9 @@ export function Profile() {
 
               <CardContent>
                 <Separator />
-                {user.bio && <p className="mt-4 text-lg leading-relaxed">{user.bio}</p>}
-                <div className="mt-6 pt-4 flex gap-6">
-                  <div className="flex flex-col">
-                    <span className="text-lg font-bold text-foreground">{allPosts.length}</span>
-                    <span className="text-xs text-muted-foreground">Posts</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-lg font-bold text-foreground">{userPlaces.length}</span>
-                    <span className="text-xs text-muted-foreground">Places</span>
-                  </div>
-                </div>
+                <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+                  {user.bio || 'No bio added yet.'}
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -98,8 +90,8 @@ export function Profile() {
             <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
               <TabsList>
                 <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="posts">Posts</TabsTrigger>
-                <TabsTrigger value="places">Places</TabsTrigger>
+                <TabsTrigger value="posts">Posts ({allPosts.length})</TabsTrigger>
+                <TabsTrigger value="places">Places ({userPlaces.length})</TabsTrigger>
               </TabsList>
 
               <TabsContent value="all">
