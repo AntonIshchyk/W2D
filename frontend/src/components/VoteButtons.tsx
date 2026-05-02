@@ -21,7 +21,7 @@ export function VoteButtons({ score, currentUserVote, onVote, disabled, classNam
         disabled={disabled}
         className={cn(
           "p-1.5 rounded-full transition-colors flex items-center justify-center",
-          currentUserVote === 1 ? "bg-orange-100 text-orange-600 dark:bg-orange-900/30" : "hover:bg-muted text-muted-foreground",
+          currentUserVote === 1 ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30" : "hover:bg-muted text-muted-foreground",
           "disabled:opacity-40 disabled:cursor-not-allowed"
         )}
         aria-label="Upvote"
@@ -30,10 +30,10 @@ export function VoteButtons({ score, currentUserVote, onVote, disabled, classNam
       </button>
 
       <span
-        className={cn(
-          "text-sm font-bold min-w-[2ch] text-center",
-          score > 0 ? "text-orange-600" : score < 0 ? "text-blue-600" : "text-foreground"
-        )}
+      className={cn(
+        "text-sm font-bold min-w-[2ch] text-center",
+        score > 0 ? "text-emerald-600" : score < 0 ? "text-rose-600" : "text-foreground"
+      )}
       >
         {score}
       </span>
@@ -47,7 +47,7 @@ export function VoteButtons({ score, currentUserVote, onVote, disabled, classNam
         disabled={disabled}
         className={cn(
           "p-1.5 rounded-full transition-colors flex items-center justify-center",
-          currentUserVote === -1 ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30" : "hover:bg-muted text-muted-foreground",
+          currentUserVote === -1 ? "bg-rose-100 text-rose-600 dark:bg-rose-900/30" : "hover:bg-muted text-muted-foreground",
           "disabled:opacity-40 disabled:cursor-not-allowed"
         )}
         aria-label="Downvote"
