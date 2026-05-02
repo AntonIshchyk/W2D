@@ -8,10 +8,11 @@ import {
 import { PageLayout } from './Navbar'
 import { PostType } from '../types/posts'
 import { useCurrentUser } from '../hooks/useCurrentUser'
+import { usePostVoteMutation } from '../hooks/usePostVoteMutation'
 import { formatRelativeTime } from '../lib/utils/date'
 import { Comments } from './Comments'
 import { PhotoCarousel } from './PhotoCarousel'
-import { fetchPost, votePost, deletePost } from '../api/posts'
+import { fetchPost, deletePost } from '../api/posts'
 import { PostAuthorInfo } from './PostAuthorInfo'
 import { VoteButtons } from './VoteButtons'
 
@@ -26,14 +27,7 @@ export function PostDetail() {
     enabled: !!id && !isNaN(Number(id)),
   })
 
-  const voteMutation = useMutation({
-    mutationFn: ({ postId, value }: { postId: number; value: number }) => votePost(postId, value),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['post', id] })
-      queryClient.invalidateQueries({ queryKey: ['posts'] })
-    },
-    onError: (e: Error) => toast.error(e.message),
-  })
+  const { handlePostVote: handleVoteMutation, voteMutation } = usePostVoteMutation(['post', id])
 
   const deleteMutation = useMutation({
     mutationFn: deletePost,
@@ -47,8 +41,7 @@ export function PostDetail() {
 
   const handleVote = (currentVote: number | undefined, newValue: number) => {
     if (!currentUser || !id) return
-    const value = currentVote === newValue ? 0 : newValue
-    voteMutation.mutate({ postId: Number(id), value })
+    handleVoteMutation(Number(id), currentVote, newValue)
   }
 
   if (isLoading) return (

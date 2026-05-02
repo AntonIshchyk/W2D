@@ -15,6 +15,7 @@ import { PostCard } from './PostCard'
 import { PlaceCard } from './PlaceCard'
 import { LoadingSpinner } from './ui/loading-spinner'
 import { Button } from './ui/button'
+import { usePostVoteMutation } from '../hooks/usePostVoteMutation'
 
 export function Profile() {
   const { data: user, isLoading, isError, error: userError } = useCurrentUser()
@@ -54,6 +55,8 @@ export function Profile() {
     queryKey: ['places', user.userId],
     queryFn: () => fetchPlaces(undefined, undefined, user.userId),
   })
+
+  const { handlePostVote } = usePostVoteMutation(['user-posts', user.userId])
 
   const allPosts = postsQuery.data?.pages.flatMap(p => p.items) ?? []
   const userPlaces = placesQuery.data ?? []
@@ -107,7 +110,7 @@ export function Profile() {
                     <p className="text-sm text-muted-foreground">No posts yet.</p>
                   ) : (
                     allPosts.map(p => (
-                      <PostCard key={p.id} post={p} currentUser={null} onVote={() => {}} />
+                      <PostCard key={p.id} post={p} currentUser={user} onVote={handlePostVote} />
                     ))
                   )}
 
@@ -121,9 +124,15 @@ export function Profile() {
 
               <TabsContent value="posts">
                 <div className="space-y-4">
-                  {postsQuery.isLoading ? <LoadingSpinner /> : allPosts.map(p => (
-                    <PostCard key={p.id} post={p} currentUser={null} onVote={() => {}} />
-                  ))}
+                  {postsQuery.isLoading ? (
+                    <LoadingSpinner />
+                  ) : allPosts.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No posts yet.</p>
+                  ) : (
+                    allPosts.map(p => (
+                      <PostCard key={p.id} post={p} currentUser={user} onVote={handlePostVote} />
+                    ))
+                  )}
                 </div>
               </TabsContent>
 

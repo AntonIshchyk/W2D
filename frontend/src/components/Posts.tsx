@@ -1,7 +1,6 @@
-import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'sonner'
 import {
   Plus, Check, ChevronsUpDown, ImageIcon, Clock, TrendingUp, X
 } from 'lucide-react'
@@ -10,14 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Skeleton } from './ui/skeleton'
 import { PageLayout } from './Navbar'
 import { useCurrentUser } from '../hooks/useCurrentUser'
+import { usePostVoteMutation } from '../hooks/usePostVoteMutation'
 import { PostType } from '../types/posts'
-import type { Post } from '../types/posts'
 import { EmptyState } from './ui/empty-state'
 import { LoadingSpinner } from './ui/loading-spinner'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { cn } from '../lib/utils'
-import { fetchPosts, votePost, POST_TYPE_LABELS, POST_TYPE_ICONS } from '../api/posts'
+import { fetchPosts, POST_TYPE_LABELS, POST_TYPE_ICONS } from '../api/posts'
 import { fetchCommunities } from '../api/communities'
 import { PostCard } from './PostCard'
 
@@ -51,42 +50,7 @@ export function Posts() {
     retry: false,
   })
 
-  const queryClient = useQueryClient()
-
-  const voteMutation = useMutation({
-    mutationFn: ({ postId, value }: { postId: number; value: number }) => votePost(postId, value),
-    onMutate: async ({ postId, value }) => {
-      const key = ['posts', selectedCommunities, selectedType, sortBy]
-      await queryClient.cancelQueries({ queryKey: key })
-      const previous = queryClient.getQueryData(key)
-      queryClient.setQueryData(key, (data: any) => {
-        if (!data) return data
-        return {
-          ...data,
-          pages: data.pages.map((page: any) => ({
-            ...page,
-            items: page.items.map((p: Post) => {
-              if (p.id !== postId) return p
-              const newVote = p.currentUserVote === value ? 0 : value
-              const delta = newVote - (p.currentUserVote ?? 0)
-              return { ...p, currentUserVote: newVote, score: p.score + delta }
-            })
-          }))
-        }
-      })
-      return { previous }
-    },
-    onError: (_err, context: any) => {
-      if (context?.previous) {
-        queryClient.setQueryData(['posts', selectedCommunities, selectedType, sortBy], context.previous)
-      }
-      toast.error('Failed to vote')
-    },
-    onSettled: (_data, _error, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['posts', selectedCommunities, selectedType, sortBy] })
-      if (variables) queryClient.invalidateQueries({ queryKey: ['post', variables.postId.toString()] })
-    }
-  })
+  const { handlePostVote } = usePostVoteMutation(['posts', selectedCommunities, selectedType, sortBy])
 
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
     const [target] = entries
@@ -102,10 +66,7 @@ export function Posts() {
 
   const allPosts = useMemo(() => data?.pages.flatMap(p => p.items) ?? [], [data?.pages])
 
-  const handleVote = (postId: number, currentVote: number | undefined, newValue: number) => {
-    const value = currentVote === newValue ? 0 : newValue
-    voteMutation.mutate({ postId, value })
-  }
+
 
   return (
     <PageLayout>
@@ -244,7 +205,7 @@ export function Posts() {
                 key={post.id}
                 post={post}
                 currentUser={currentUser}
-                onVote={handleVote}
+                onVote={handlePostVote}
               />
             ))}
             <div ref={observerTarget} className="h-20 flex items-center justify-center">
