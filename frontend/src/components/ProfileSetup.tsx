@@ -136,9 +136,6 @@ export function ProfileSetup() {
                 Username <span className="text-destructive">*</span>
               </label>
               <div className="relative mt-2.5">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                  <span className="text-foreground font-medium sm:text-base">@</span>
-                </div>
                 <input
                   value={profile.username}
                   onChange={(e) =>
@@ -146,7 +143,7 @@ export function ProfileSetup() {
                   }
                   placeholder="user_name"
                   className={[
-                    'block w-full rounded-2xl border border-input bg-background py-3.5 pl-10 pr-4 text-base text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring',
+                    'block w-full rounded-2xl border border-input bg-background py-3.5 pl-4 pr-4 text-base text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring',
                     fieldErrors.username ? 'border-destructive focus:border-destructive focus:ring-destructive' : '',
                   ].join(' ')}
                 />

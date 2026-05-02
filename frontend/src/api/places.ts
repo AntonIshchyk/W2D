@@ -55,7 +55,8 @@ function buildDisplayName(props: Record<string, unknown>): string | null {
 
 export async function fetchPlaces(
   communityIds?: number[],
-  bounds?: PlaceQueryBounds
+  bounds?: PlaceQueryBounds,
+  userId?: number
 ): Promise<Place[]> {
   const params = new URLSearchParams()
 
@@ -68,6 +69,10 @@ export async function fetchPlaces(
     params.append('maxLat', bounds.maxLat.toString())
     params.append('minLng', bounds.minLng.toString())
     params.append('maxLng', bounds.maxLng.toString())
+  }
+
+  if (typeof userId === 'number') {
+    params.append('userId', userId.toString())
   }
 
   const response = await fetch(`${API_ENDPOINTS.places.base}?${params}`, {

@@ -27,10 +27,11 @@ public class PlacesController : ControllerBase
         [FromQuery] double? minLat = null,
         [FromQuery] double? maxLat = null,
         [FromQuery] double? minLng = null,
-        [FromQuery] double? maxLng = null)
+        [FromQuery] double? maxLng = null,
+        [FromQuery] int? userId = null)
     {
         IEnumerable<PlaceResponse> result = await _placeService.GetPlacesAsync(
-            communityIds, minLat, maxLat, minLng, maxLng);
+            communityIds, minLat, maxLat, minLng, maxLng, userId);
         return Ok(result);
     }
 

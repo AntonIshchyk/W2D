@@ -39,7 +39,8 @@ public class PlaceService : IPlaceService
         double? minLat = null,
         double? maxLat = null,
         double? minLng = null,
-        double? maxLng = null)
+        double? maxLng = null,
+        int? userId = null)
     {
         IQueryable<Place> query = _context.Places.AsNoTracking();
 
@@ -50,6 +51,11 @@ public class PlaceService : IPlaceService
         if (maxLat.HasValue) query = query.Where(e => e.Latitude <= maxLat.Value);
         if (minLng.HasValue) query = query.Where(e => e.Longitude >= minLng.Value);
         if (maxLng.HasValue) query = query.Where(e => e.Longitude <= maxLng.Value);
+
+        if (userId.HasValue)
+        {
+            query = query.Where(e => e.UserId == userId.Value);
+        }
 
         return await query
             .OrderBy(e => e.Id)
