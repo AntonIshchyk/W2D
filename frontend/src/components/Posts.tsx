@@ -24,7 +24,7 @@ export function Posts() {
   const navigate = useNavigate()
   const [selectedCommunities, setSelectedCommunities] = useState<number[]>([])
   const [selectedType, setSelectedType]         = useState<number | undefined>()
-  const [sortBy, setSortBy]                     = useState('new')
+  const [sortBy, setSortBy]                     = useState('top')
   const [communityOpen, setCommunityOpen]         = useState(false)
   const observerTarget = useRef<HTMLDivElement>(null)
 
@@ -75,16 +75,16 @@ export function Posts() {
           <div className="flex items-center justify-center gap-3 overflow-x-auto no-scrollbar w-fit max-w-full">
             <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-full border border-border/50 shrink-0">
               <button
-                onClick={() => setSortBy('new')}
-                className={cn("px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2", sortBy === 'new' ? "bg-background shadow-sm text-foreground" : "text-foreground hover:text-primary")}
-              >
-                <Clock className="w-4 h-4" /> New
-              </button>
-              <button
                 onClick={() => setSortBy('top')}
                 className={cn("px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2", sortBy === 'top' ? "bg-background shadow-sm text-foreground" : "text-foreground hover:text-primary")}
               >
                 <TrendingUp className="w-4 h-4" /> Top
+              </button>
+              <button
+                onClick={() => setSortBy('new')}
+                className={cn("px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2", sortBy === 'new' ? "bg-background shadow-sm text-foreground" : "text-foreground hover:text-primary")}
+              >
+                <Clock className="w-4 h-4" /> New
               </button>
             </div>
 
@@ -159,12 +159,12 @@ export function Posts() {
             </Button>
           </div>
 
-          {(selectedCommunities.length > 0 || selectedType !== undefined || sortBy !== 'new') && (
+          {(selectedCommunities.length > 0 || selectedType !== undefined || sortBy !== 'top') && (
             <Button
               variant="outline"
               size="sm"
               className="rounded-full h-9 w-full text-destructive border-destructive/40 hover:bg-destructive hover:text-white hover:border-destructive transition-colors"
-              onClick={() => { setSelectedCommunities([]); setSelectedType(undefined); setSortBy('new') }}
+              onClick={() => { setSelectedCommunities([]); setSelectedType(undefined); setSortBy('top') }}
             >
               <X/> Reset filters
             </Button>

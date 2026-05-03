@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Reply, Trash2, X } from 'lucide-react'
+import { Reply, Trash2, X, Clock, TrendingUp } from 'lucide-react'
+import { cn } from '../lib/utils'
 import { UserAvatar } from './UserAvatar'
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from './ui/dialog'
 import { formatRelativeTime } from '../lib/utils/date'
@@ -47,17 +48,13 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
 
   return (
     <div className={`flex gap-2.5 ${depth > 0 ? '' : ''}`}>
-      {comment.isDeleted ? (
-        <div className="w-10 shrink-0" />
-      ) : (
-        <VoteButtons
-          score={comment.score}
-          currentUserVote={comment.currentUserVote}
-          onVote={(val) => onVote(comment, val)}
-          disabled={!currentUserId || comment.isDeleted}
-          className="flex-col px-1 py-1 min-w-10 bg-transparent border-transparent gap-0.5"
-        />
-      )}
+      <VoteButtons
+        score={comment.score}
+        currentUserVote={comment.currentUserVote}
+        onVote={(val) => onVote(comment, val)}
+        disabled={!currentUserId || comment.isDeleted}
+        className="flex-col px-1 py-1 min-w-10 bg-transparent border-transparent gap-0.5"
+      />
 
       <div className={`flex-1 min-w-0 pb-3 ${!isLast && depth === 0 ? 'border-b border-border/60' : ''}`}>
         <div className="flex items-center gap-2 mb-1.5">
@@ -219,10 +216,29 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
   const [replyDrafts, setReplyDrafts]     = useState<Record<number, string>>({})
   const [replyPhotos, setReplyPhotos]     = useState<Record<number, string | null>>({})
 
-  const { data: comments = [], isLoading } = useQuery({
+  const [sort, setSort] = useState<'top' | 'new'>('top')
+
+  const { data: allComments = [], isLoading } = useQuery({
     queryKey: ['comments', postId],
     queryFn: () => fetchComments(postId),
   })
+
+  const sortComments = (comments: Comment[]): Comment[] => {
+    const sorted = [...comments].sort((a, b) => {
+      if (sort === 'top') {
+        const scoreDiff = b.score - a.score
+        return scoreDiff !== 0 ? scoreDiff : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      } else {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      }
+    })
+    return sorted.map(c => ({
+      ...c,
+      replies: c.replies ? sortComments(c.replies) : undefined,
+    }))
+  }
+
+  const comments = sortComments(allComments)
 
   const createMutation = useMutation({
     mutationFn: ({ content, photoUrl, parentCommentId }: {
@@ -302,6 +318,22 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
             {total}
           </span>
         )}
+        <div className="ml-auto flex items-center gap-3">
+          <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-full border border-border/50 shrink-0">
+            <button
+              onClick={() => setSort('top')}
+              className={cn("px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2", sort === 'top' ? "bg-background shadow-sm text-foreground" : "text-foreground hover:text-primary")}
+            >
+              <TrendingUp className="w-4 h-4" /> Top
+            </button>
+            <button
+              onClick={() => setSort('new')}
+              className={cn("px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2", sort === 'new' ? "bg-background shadow-sm text-foreground" : "text-foreground hover:text-primary")}
+            >
+              <Clock className="w-4 h-4" /> New
+            </button>
+          </div>
+        </div>
       </div>
 
       {currentUserId ? (
