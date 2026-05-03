@@ -9,6 +9,7 @@ import { isValidPhotoUrl } from '../lib/utils/validation'
 import { useState } from 'react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { fetchPosts } from '../api/posts'
 import { fetchPlaces } from '../api/places'
 import { PostCard } from './PostCard'
@@ -22,6 +23,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 
 export function Profile() {
   const { data: user, isLoading, isError, error: userError } = useCurrentUser()
+  const navigate = useNavigate()
 
   useAuthErrorHandler(isError, userError)
 
@@ -50,8 +52,7 @@ export function Profile() {
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleEdit = () => {
-    // TODO: Navigate to edit profile page or open edit modal
-    console.log('Edit account clicked')
+    navigate('/profile/edit')
   }
 
   const handleDeleteClick = () => {
@@ -202,6 +203,7 @@ export function Profile() {
           </div>
         </div>
 
+        {/* Delete Account Confirmation Dialog */}
         <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
           <DialogContent className="[&>button]:hidden">
             <DialogHeader>
