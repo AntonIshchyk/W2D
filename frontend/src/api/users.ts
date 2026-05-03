@@ -36,3 +36,12 @@ export async function updateCurrentUserProfile(
 
   return response.json()
 }
+
+export async function deleteCurrentUserAccount(): Promise<void> {
+  const response = await fetch(API_ENDPOINTS.users.me, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  })
+
+  await ensureResponseOk(response, 'Failed to delete account')
+}

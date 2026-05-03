@@ -20,6 +20,8 @@ import { usePostVoteMutation } from '../hooks/usePostVoteMutation'
 import { Pencil, Trash2, Menu } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog'
+import { deleteCurrentUserAccount } from '../api/users'
+import { clearAuthToken } from '../hooks/useAuthSync'
 
 export function Profile() {
   const { data: user, isLoading, isError, error: userError } = useCurrentUser()
@@ -62,11 +64,11 @@ export function Profile() {
   const confirmDelete = async () => {
     setIsDeleting(true)
     try {
-      // TODO: Call API to delete account
-      console.log('Account deleted')
-    } finally {
+      await deleteCurrentUserAccount()
+      clearAuthToken()
+      navigate('/login')
+    } catch (error) {
       setIsDeleting(false)
-      setShowDeleteConfirm(false)
     }
   }
 

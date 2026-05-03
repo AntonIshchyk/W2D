@@ -59,6 +59,26 @@ public class UsersController : ControllerBase
         return result.ToActionResult(this);
     }
 
+    [HttpDelete("me")]
+    [Authorize]
+    public async Task<ActionResult> DeleteUserAccount()
+    {
+        int userId = User.GetUserId();
+
+        Result<bool> result = await _userService.DeleteUserAccountAsync(userId);
+
+        if (!result.IsSuccess)
+        {
+            return result.Status switch
+            {
+                ResultStatus.NotFound => NotFound(new { message = result.Error }),
+                _ => BadRequest(new { message = result.Error })
+            };
+        }
+
+        return Ok(new { message = "Account deleted successfully" });
+    }
+
     [HttpPost("google-login")]
     public async Task<ActionResult<LoginResponse>> GoogleLogin([FromBody] GoogleLoginRequest request)
     {

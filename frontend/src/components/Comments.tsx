@@ -253,6 +253,7 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
       queryClient.invalidateQueries({ queryKey: ['comments', postId] })
       queryClient.invalidateQueries({ queryKey: ['post', postId] })
       queryClient.invalidateQueries({ queryKey: ['posts'] })
+      queryClient.invalidateQueries({ queryKey: ['user-posts'] })
     },
     onError: (err: Error) => toast.error(err.message),
   })
@@ -263,6 +264,7 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
       queryClient.invalidateQueries({ queryKey: ['comments', postId] })
       queryClient.invalidateQueries({ queryKey: ['post', postId] })
       queryClient.invalidateQueries({ queryKey: ['posts'] })
+      queryClient.invalidateQueries({ queryKey: ['user-posts'] })
     },
     onError: (err: Error) => toast.error(err.message),
   })

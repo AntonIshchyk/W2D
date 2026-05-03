@@ -102,6 +102,18 @@ public class PostService : IPostService
                 .ToDictionaryAsync(v => v.PostId, v => v.Value);
         }
 
+        List<int> itemPostIds = items.Select(p => p.Id).ToList();
+        Dictionary<int, int> commentCounts = new();
+        if (itemPostIds.Count > 0)
+        {
+            commentCounts = await _context.Comments
+                .AsNoTracking()
+                .Where(c => itemPostIds.Contains(c.PostId))
+                .GroupBy(c => c.PostId)
+                .Select(g => new { PostId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.PostId, x => x.Count);
+        }
+
         List<PostResponse> postResponses = items.Select(p =>
         {
             int? vote = currentUserId.HasValue
@@ -110,6 +122,7 @@ public class PostService : IPostService
 
             PostResponse response = _mapper.Map<PostResponse>(p);
             response.CurrentUserVote = vote;
+            response.CommentCount = commentCounts.TryGetValue(p.Id, out int count) ? count : 0;
             return response;
         }).ToList();
 
@@ -146,6 +159,9 @@ public class PostService : IPostService
 
         PostResponse response = _mapper.Map<PostResponse>(post);
         response.CurrentUserVote = currentUserVote;
+        response.CommentCount = await _context.Comments
+            .AsNoTracking()
+            .CountAsync(c => c.PostId == id);
         return Result<PostResponse>.Success(response);
     }
 

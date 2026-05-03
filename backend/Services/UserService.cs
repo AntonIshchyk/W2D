@@ -124,4 +124,25 @@ public class UserService : IUserService
         response.Token = token;
         return response;
     }
+
+    public async Task<Result<bool>> DeleteUserAccountAsync(int userId)
+    {
+        User? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user == null)
+        {
+            return Result<bool>.NotFound("User not found.");
+        }
+        _context.Users.Remove(user);
+
+        try
+        {
+            await _context.SaveChangesAsync();
+            return Result<bool>.Success(true);
+        }
+        catch (DbUpdateException)
+        {
+            return Result<bool>.Invalid("Unable to delete account due to existing related records.");
+        }
+    }
 }

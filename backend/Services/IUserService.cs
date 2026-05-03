@@ -11,6 +11,7 @@ public interface IUserService
     Task<User?> GetUserByIdAsync(int id);
     Task<User?> GetUserByEmailAsync(string email);
     Task<Result<LoginResponse>> UpdateUserProfileAsync(int userId, UpdateUserProfileRequest request);
+    Task<Result<bool>> DeleteUserAccountAsync(int userId);
     LoginResponse GenerateTokenForUser(User user);
     Task<Result<LoginResponse>> RegisterUserAsync(string email);
 }
