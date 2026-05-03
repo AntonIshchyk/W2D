@@ -9,6 +9,7 @@ export interface Place {
   description: string
   userId: number
   userName: string
+  userPhotoUrl?: string | null
   communityId: number | null
   communityName: string | null
   latitude?: number

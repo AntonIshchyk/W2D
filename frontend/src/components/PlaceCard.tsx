@@ -32,7 +32,7 @@ export function PlaceCard({ place, onClick, className, isPreview }: PlaceCardPro
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3 min-w-0">
-          <UserAvatar username={place.userName} className="h-10 w-10" />
+          <UserAvatar url={place.userPhotoUrl} username={place.userName} className="h-10 w-10" />
           <div className="min-w-0">
             <p className="font-semibold text-foreground truncate">{place.userName}</p>
           </div>

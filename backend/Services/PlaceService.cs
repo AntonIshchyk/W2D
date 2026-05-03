@@ -23,7 +23,8 @@ public class PlaceService : IPlaceService
         Title = e.Title,
         Description = e.Description,
         UserId = e.UserId,
-        UserName = e.User != null ? e.User.Username : null,
+        UserName = e.User!.Username,
+        UserPhotoUrl = e.User.ProfilePhotoUrl,
         CommunityId = e.CommunityId,
         CommunityName = e.Community != null ? e.Community.Name : null,
         Latitude = e.Latitude,
@@ -42,7 +43,10 @@ public class PlaceService : IPlaceService
         double? maxLng = null,
         int? userId = null)
     {
-        IQueryable<Place> query = _context.Places.AsNoTracking();
+        IQueryable<Place> query = _context.Places
+            .AsNoTracking()
+            .Include(e => e.User)
+            .Include(e => e.Community);
 
         if (communityIds is { Count: > 0 })
             query = query.Where(e => e.CommunityId.HasValue && communityIds.Contains(e.CommunityId.Value));
@@ -68,6 +72,8 @@ public class PlaceService : IPlaceService
     {
         PlaceResponse? e = await _context.Places
             .AsNoTracking()
+            .Include(e => e.User)
+            .Include(e => e.Community)
             .Select(ProjectPlace)
             .FirstOrDefaultAsync(e => e.Id == id);
 
@@ -119,6 +125,8 @@ public class PlaceService : IPlaceService
 
         PlaceResponse created = await _context.Places
             .AsNoTracking()
+            .Include(e => e.User)
+            .Include(e => e.Community)
             .Select(ProjectPlace)
             .FirstAsync(e => e.Id == eventEntity.Id);
 
@@ -164,6 +172,8 @@ public class PlaceService : IPlaceService
 
         PlaceResponse updated = await _context.Places
             .AsNoTracking()
+            .Include(e => e.User)
+            .Include(e => e.Community)
             .Select(ProjectPlace)
             .FirstAsync(e => e.Id == eventEntity.Id);
 

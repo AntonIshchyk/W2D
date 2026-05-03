@@ -7,6 +7,7 @@ public class PlaceResponse
     public string Description { get; set; } = null!;
     public int UserId { get; set; }
     public string? UserName { get; set; }
+    public string? UserPhotoUrl { get; set; }
     public int? CommunityId { get; set; }
     public string? CommunityName { get; set; }
     public double? Latitude { get; set; }
