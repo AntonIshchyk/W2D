@@ -17,9 +17,9 @@ public class CommentService : ICommentService
         {
             Id = c.Id,
             Content = c.IsDeleted ? "[deleted]" : (c.Content ?? string.Empty),
-            UserId = c.UserId,
-            UserName = c.User.Username,
-            UserPhotoUrl = c.User.ProfilePhotoUrl,
+            UserId = c.IsDeleted ? 0 : c.UserId,
+            UserName = c.IsDeleted ? null : c.User.Username,
+            UserPhotoUrl = c.IsDeleted ? null : c.User.ProfilePhotoUrl,
             PostId = c.PostId,
             Score = c.Score,
             PhotoUrl = c.PhotoUrl,
@@ -50,6 +50,7 @@ public class CommentService : ICommentService
     {
         var allComments = await _context.Comments
             .AsNoTracking()
+            .IgnoreQueryFilters()
             .Where(c => c.PostId == postId)
             .OrderByDescending(c => c.Score)
             .ThenByDescending(c => c.CreatedAt)
@@ -166,14 +167,18 @@ public class CommentService : ICommentService
             return Result<bool>.Unauthorized("You do not have permission to delete this comment.");
         }
 
+        using var tx = await _context.Database.BeginTransactionAsync();
+
         comment.IsDeleted = true;
         comment.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
 
         await _context.Posts
             .Where(p => p.Id == comment.PostId)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.CommentCount, x => x.CommentCount - 1));
 
-        await _context.SaveChangesAsync();
+        await tx.CommitAsync();
+
         return Result<bool>.Success(true);
     }
 

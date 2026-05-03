@@ -288,7 +288,7 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
   }
 
   const countAll = (list: Comment[]): number =>
-    list.reduce((sum, c) => sum + 1 + countAll(c.replies || []), 0)
+    list.reduce((sum, c) => sum + (c.isDeleted ? 0 : 1) + countAll(c.replies || []), 0)
 
   const total = countAll(comments)
   const canSubmit = (newComment.trim().length > 0 || !!newPhoto) && !createMutation.isPending
