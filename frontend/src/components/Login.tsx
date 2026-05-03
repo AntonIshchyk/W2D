@@ -23,14 +23,10 @@ export function Login() {
 
   return (
     <div className="min-h-screen flex text-foreground">
-      {/* Left — placeholder, slightly wider for future content */}
       <div className="hidden lg:block lg:w-[58%] bg-primary" />
 
-      {/* Right — sign in */}
       <div className="flex-1 flex flex-col items-center justify-center px-10 py-16 bg-background">
         <div className="w-full max-w-[320px] space-y-10">
-
-          {/* Brand */}
           <div className="space-y-1">
             <h1 className="text-3xl font-black tracking-tight text-foreground">W2D</h1>
             <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
@@ -38,7 +34,6 @@ export function Login() {
             </p>
           </div>
 
-          {/* Headline */}
           <div className="space-y-2">
             <h2 className="text-xl font-semibold text-foreground leading-snug">
               Find your people,<br />make plans.

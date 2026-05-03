@@ -16,6 +16,9 @@ import { PlaceCard } from './PlaceCard'
 import { LoadingSpinner } from './ui/loading-spinner'
 import { Button } from './ui/button'
 import { usePostVoteMutation } from '../hooks/usePostVoteMutation'
+import { Pencil, Trash2, Menu } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog'
 
 export function Profile() {
   const { data: user, isLoading, isError, error: userError } = useCurrentUser()
@@ -43,6 +46,28 @@ export function Profile() {
   }
 
   const [tab, setTab] = useState<'all' | 'posts' | 'places'>('all')
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleEdit = () => {
+    // TODO: Navigate to edit profile page or open edit modal
+    console.log('Edit account clicked')
+  }
+
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDelete = async () => {
+    setIsDeleting(true)
+    try {
+      // TODO: Call API to delete account
+      console.log('Account deleted')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteConfirm(false)
+    }
+  }
 
   const postsQuery = useInfiniteQuery({
     queryKey: ['user-posts', user.userId],
@@ -67,14 +92,47 @@ export function Profile() {
         <div className="grid grid-cols-[320px_minmax(0,1fr)] gap-6">
           <div>
             <Card className="overflow-hidden border-2">
-              <CardHeader className="flex-row items-center gap-4">
-                <Avatar className="h-16 w-16 border-2 border-background">
-                  {user.profilePhotoUrl && isValidPhotoUrl(user.profilePhotoUrl) && <AvatarImage src={user.profilePhotoUrl} alt={user.username} />}
-                  <AvatarFallback className="bg-linear-to-br from-primary to-primary/70 text-primary-foreground text-lg font-bold">
-                    {user.username.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <CardTitle className="text-xl">{user.username}</CardTitle>
+              <CardHeader className="flex-row items-start justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-16 w-16 border-2 border-background">
+                    {user.profilePhotoUrl && isValidPhotoUrl(user.profilePhotoUrl) && <AvatarImage src={user.profilePhotoUrl} alt={user.username} />}
+                    <AvatarFallback className="bg-linear-to-br from-primary to-primary/70 text-primary-foreground text-lg font-bold">
+                      {user.username.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <CardTitle className="text-xl">{user.username}</CardTitle>
+                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="h-9 w-9 p-0"
+                    >
+                      <Menu className="w-4 h-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-40 p-2">
+                    <div className="flex flex-col gap-1">
+                      <Button 
+                        variant="ghost" 
+                        className="justify-start gap-2 h-9"
+                        onClick={handleEdit}
+                      >
+                        <Pencil className="w-4 h-4" />
+                        Edit Profile
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="justify-start gap-2 h-9 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={handleDeleteClick}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete Account
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </CardHeader>
 
               <CardContent>
@@ -143,6 +201,33 @@ export function Profile() {
           </div>
           </div>
         </div>
+
+        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <DialogContent className="[&>button]:hidden">
+            <DialogHeader>
+              <DialogTitle>Delete Account</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={confirmDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Account'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
     </PageLayout>
   )
 }
