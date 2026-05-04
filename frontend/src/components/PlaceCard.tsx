@@ -1,18 +1,39 @@
-import { MapPin, Users } from 'lucide-react'
+import { MapPin, Users, Menu, Pencil, Trash2 } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { getGoogleMapsUrl } from '../lib/utils/maps'
 import { PhotoCarousel } from './PhotoCarousel'
 import { UserAvatar } from './UserAvatar'
 import type { Place } from '../types/places'
+import { Button } from './ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { deletePlace } from '../api/places'
+import { toast } from 'sonner'
+import type { UserInfo } from '../lib/auth'
 
 interface PlaceCardProps {
   place: Place
+  currentUser?: UserInfo | null
   onClick?: (place: Place) => void
+  onDelete?: (placeId: number) => void
   className?: string
   isPreview?: boolean
 }
 
-export function PlaceCard({ place, onClick, className, isPreview }: PlaceCardProps) {
+export function PlaceCard({ place, currentUser, onClick, onDelete, className, isPreview }: PlaceCardProps) {
+  const queryClient = useQueryClient()
+  
+  const deleteMutation = useMutation({
+    mutationFn: deletePlace,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['places'] })
+      queryClient.invalidateQueries({ queryKey: ['user-places'] })
+      toast.success('Place deleted')
+      onDelete?.(place.id)
+    },
+    onError: (e: Error) => toast.error(e.message),
+  })
+
   type DivProps = { role?: string; tabIndex?: number }
   const ContainerProps: DivProps = isPreview ? {} : { role: 'button', tabIndex: 0 }
   const googleMapsUrl = getGoogleMapsUrl(place.latitude, place.longitude, place.locationName)
@@ -35,54 +56,91 @@ export function PlaceCard({ place, onClick, className, isPreview }: PlaceCardPro
           </div>
         </div>
 
-        {place.communityName && (
-          <span className="px-3 py-1 rounded-full text-xs font-bold border bg-primary text-primary-foreground border-primary inline-flex items-center gap-1.5 shrink-0">
-            <Users className="h-3 w-3" />
-            {place.communityName}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {place.communityName && (
+            <span className="px-3 py-1 rounded-full text-xs font-bold border bg-primary text-primary-foreground border-primary inline-flex items-center gap-1.5 shrink-0">
+              <Users className="h-3 w-3" />
+              {place.communityName}
+            </span>
+          )}
+          
+          {currentUser != null && currentUser.userId != null && currentUser.userId === place.userId && !isPreview && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                </div>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-40 p-2" onClick={(e) => e.stopPropagation()}>
+                <div className="flex flex-col gap-1">
+                  <Button 
+                    variant="ghost" 
+                    className="justify-start gap-2 h-9"
+                    onClick={() => {
+                      alert('Edit place coming soon')
+                    }}
+                  >
+                    <Pencil className="w-4 h-4" />
+                    Edit Place
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="justify-start gap-2 h-9 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => {
+                      if (window.confirm('Delete this place? This cannot be undone.')) {
+                        deleteMutation.mutate(place.id)
+                      }
+                    }}
+                    disabled={deleteMutation.isPending}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    {deleteMutation.isPending ? 'Deleting…' : 'Delete'}
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
+        </div>
       </div>
 
       <div className="flex-1">
-        <h3 className="font-bold text-xl md:text-2xl text-foreground mb-2 wrap-break-word break-all whitespace-normal line-clamp-2">
+        <h3 className={`font-bold text-xl md:text-2xl text-foreground ${place.locationName ? 'mb-2' : 'mb-2'} wrap-break-word break-all whitespace-normal line-clamp-2`}>
           {place.title}
         </h3>
 
-        <p className="text-foreground text-sm md:text-base whitespace-normal break-all leading-relaxed line-clamp-2">
-          {place.description}
-        </p>
+        {place.locationName && (
+          googleMapsUrl ? (
+            <a
+              href={googleMapsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 text-primary hover:underline mb-3 text-sm w-fit"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MapPin className="w-4 h-4 shrink-0" />
+              <span>{place.locationName}</span>
+            </a>
+          ) : (
+            <div className="flex items-center gap-1.5 text-muted-foreground mb-3 text-sm w-fit">
+              <MapPin className="w-4 h-4 shrink-0" />
+              <span>{place.locationName}</span>
+            </div>
+          )
+        )}
 
         <PhotoCarousel
           urls={place.photoUrls}
-          containerClassName="mt-4 mb-2 md:px-0"
+          containerClassName="mb-3 md:px-0"
           imageContainerClassName="h-75 md:h-112.5"
         />
 
-        <div className="flex items-center gap-1.5 flex-wrap mt-4 pt-4 border-t border-border/40">
-          {place.locationName && (
-            googleMapsUrl ? (
-              <a
-                href={googleMapsUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-1.5 text-primary hover:underline"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MapPin className="h-4 w-4 shrink-0" />
-                <span className="text-xs wrap-break-word max-w-56 whitespace-normal">
-                  {place.locationName}
-                </span>
-              </a>
-            ) : (
-              <span className="flex items-center gap-1.5">
-                <MapPin className="h-4 w-4 shrink-0" />
-                <span className="text-xs wrap-break-word max-w-56 whitespace-normal">
-                  {place.locationName}
-                </span>
-              </span>
-            )
-          )}
-        </div>
+        {place.description && (
+          <p className="text-foreground text-sm md:text-base whitespace-normal break-all leading-relaxed line-clamp-2">
+            {place.description}
+          </p>
+        )}
       </div>
     </div>
   )

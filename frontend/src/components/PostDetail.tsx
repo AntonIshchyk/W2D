@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
   ChevronLeft,
-  MapPin, Clock, Trash2
+  MapPin, Clock, Trash2, Pencil, Menu
 } from 'lucide-react'
 import { PageLayout } from './Navbar'
 import { PostType } from '../types/posts'
@@ -16,6 +16,8 @@ import { PhotoCarousel } from './PhotoCarousel'
 import { fetchPost, deletePost } from '../api/posts'
 import { PostAuthorInfo } from './PostAuthorInfo'
 import { VoteButtons } from './VoteButtons'
+import { Button } from './ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 
 export function PostDetail() {
   const { id } = useParams<{ id: string }>()
@@ -72,7 +74,7 @@ export function PostDetail() {
     </PageLayout>
   )
 
-  const isOwner = currentUser?.userId === post.author?.id
+  const isOwner = currentUser != null && currentUser.userId != null && currentUser.userId === post.author?.id
   const photos = post.photoUrls ?? []
   const googleMapsUrl = getGoogleMapsUrl(post.latitude, post.longitude, post.locationName)
 
@@ -96,17 +98,39 @@ export function PostDetail() {
                   </span>
                 )}
                 {isOwner && (
-                  <button type="button"
-                    onClick={() => {
-                      if (window.confirm('Delete this post? This cannot be undone.'))
-                        deleteMutation.mutate(post.id)
-                    }}
-                    disabled={deleteMutation.isPending}
-                    className="flex items-center gap-1.5 text-sm hover:text-destructive transition-colors px-3 py-1.5 rounded-full hover:bg-destructive/10 border border-transparent hover:border-destructive/20"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    {deleteMutation.isPending ? 'Deleting…' : 'Delete'}
-                  </button>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full">
+                        <Menu className="w-4 h-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="end" className="w-40 p-2">
+                      <div className="flex flex-col gap-1">
+                        <Button 
+                          variant="ghost" 
+                          className="justify-start gap-2 h-9"
+                          onClick={() => {
+                            alert('Edit post coming soon')
+                          }}
+                        >
+                          <Pencil className="w-4 h-4" />
+                          Edit Post
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          className="justify-start gap-2 h-9 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => {
+                            if (window.confirm('Delete this post? This cannot be undone.'))
+                              deleteMutation.mutate(post.id)
+                          }}
+                          disabled={deleteMutation.isPending}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          {deleteMutation.isPending ? 'Deleting…' : 'Delete'}
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 )}
               </div>
             </div>
@@ -121,13 +145,13 @@ export function PostDetail() {
                   href={googleMapsUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-1.5 text-primary hover:underline mb-5 text-sm w-fit"
+                  className="flex items-center gap-1.5 text-primary hover:underline text-sm w-fit"
                 >
                   <MapPin className="w-4 h-4 shrink-0" />
                   <span>{post.locationName}</span>
                 </a>
               ) : (
-                <div className="flex items-center gap-1.5 text-muted-foreground mb-5 text-sm w-fit">
+                <div className="flex items-center gap-1.5 text-muted-foreground text-sm w-fit">
                   <MapPin className="w-4 h-4 shrink-0" />
                   <span>{post.locationName}</span>
                 </div>

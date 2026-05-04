@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { MessageSquare, Clock, MapPin } from 'lucide-react'
+import { MessageSquare, Clock, MapPin, Menu, Pencil, Trash2 } from 'lucide-react'
 import { cn } from '../lib/utils'
 import type { Post } from '../types/posts'
 import { PostType } from '../types/posts'
@@ -8,6 +8,11 @@ import { getGoogleMapsUrl } from '../lib/utils/maps'
 import { PhotoCarousel } from './PhotoCarousel'
 import { PostAuthorInfo } from './PostAuthorInfo'
 import { VoteButtons } from './VoteButtons'
+import { Button } from './ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { deletePost } from '../api/posts'
+import { toast } from 'sonner'
 
 interface PostCardProps {
   post: Post
@@ -18,6 +23,18 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, currentUser, onVote, className, isPreview }: PostCardProps) {
+  const queryClient = useQueryClient()
+  
+  const deleteMutation = useMutation({
+    mutationFn: deletePost,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+      queryClient.invalidateQueries({ queryKey: ['user-posts'] })
+      toast.success('Post deleted')
+    },
+    onError: (e: Error) => toast.error(e.message),
+  })
+
   const ContainerProps = isPreview
     ? { role: undefined, tabIndex: undefined }
     : { role: 'button' as const, tabIndex: 0 as const }
@@ -39,6 +56,44 @@ export function PostCard({ post, currentUser, onVote, className, isPreview }: Po
             <span className="px-3 py-1 rounded-full text-xs font-bold border bg-primary text-primary-foreground border-primary">
               {post.communityName}
             </span>
+          )}
+          {currentUser != null && currentUser.userId != null && currentUser.userId === post.author?.id && !isPreview && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <Menu className="w-4 h-4" />
+                  </Button>
+                </div>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-40 p-2" onClick={(e) => e.stopPropagation()}>
+                <div className="flex flex-col gap-1">
+                  <Button 
+                    variant="ghost" 
+                    className="justify-start gap-2 h-9"
+                    onClick={() => {
+                      alert('Edit post coming soon')
+                    }}
+                  >
+                    <Pencil className="w-4 h-4" />
+                    Edit Post
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="justify-start gap-2 h-9 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => {
+                      if (window.confirm('Delete this post? This cannot be undone.')) {
+                        deleteMutation.mutate(post.id)
+                      }
+                    }}
+                    disabled={deleteMutation.isPending}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    {deleteMutation.isPending ? 'Deleting…' : 'Delete'}
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
           )}
         </div>
       </div>
@@ -65,24 +120,24 @@ export function PostCard({ post, currentUser, onVote, className, isPreview }: Po
               className="flex items-center gap-1.5 text-primary hover:underline mb-3 text-sm w-fit"
               onClick={(e) => e.stopPropagation()}
             >
-              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <MapPin className="w-4 h-4 shrink-0" />
               <span>{post.locationName}</span>
             </a>
           ) : (
             <div className="flex items-center gap-1.5 text-muted-foreground mb-3 text-sm w-fit">
-              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <MapPin className="w-4 h-4 shrink-0" />
               <span>{post.locationName}</span>
             </div>
           )
         )}
+
+        <PhotoCarousel urls={post.photoUrls || []} containerClassName="mb-3 md:px-0" imageContainerClassName="h-75 md:h-112.5" />
 
         {post.description && (
           <p className="text-foreground text-sm md:text-base whitespace-normal break-all leading-relaxed line-clamp-2">
             {post.description}
           </p>
         )}
-
-        <PhotoCarousel urls={post.photoUrls || []} containerClassName="mt-4 mb-2 md:px-0" imageContainerClassName="h-75 md:h-112.5" />
       </div>
 
       <div className="flex items-center justify-between mt-5 pt-4 border-t border-border/40">

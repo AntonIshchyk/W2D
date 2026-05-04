@@ -27,9 +27,11 @@ import { fetchCommunities } from '../api/communities'
 import { loadMapState, DEFAULT_CENTER, DEFAULT_ZOOM } from '../utils/mapState'
 import type { CitySearchResult, Place, PlaceQueryBounds, ViewMode } from '../types/places'
 import { EmptyState } from './ui/empty-state'
+import { useCurrentUser } from '../hooks/useCurrentUser'
 
 export function Places() {
   const navigate = useNavigate()
+  const { data: currentUser } = useCurrentUser()
   const [viewMode, setViewMode] = useState<ViewMode>('map')
   const [selectedCommunities, setSelectedCommunities] = useState<number[]>([])
   const [communityOpen, setCommunityOpen] = useState(false)
@@ -176,6 +178,12 @@ export function Places() {
         : `${selectedCommunities.length} Communities`
 
   const placeCardClassName = 'group bg-card border border-border/50 rounded-3xl p-5 md:p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 flex flex-col'
+
+  const handlePlaceDelete = (deletedPlaceId: number) => {
+    if (selectedPlace?.id === deletedPlaceId) {
+      setSelectedPlace(null)
+    }
+  }
 
   return (
     <PageLayout fullWidth>
@@ -396,7 +404,7 @@ export function Places() {
           )  : (
               <div className="max-w-3xl mx-auto space-y-6">
                 {allPlaces.map((place) => (
-                  <PlaceCard key={place.id} place={place} className={placeCardClassName} />
+                  <PlaceCard key={place.id} place={place} currentUser={currentUser} className={placeCardClassName} onDelete={handlePlaceDelete} />
                 ))}
               </div>
             )}
@@ -412,7 +420,7 @@ export function Places() {
           )}
           aria-hidden={!selectedPlace || viewMode !== 'map'}
         >
-          {selectedPlace && <PlaceCard place={selectedPlace} className={placeCardClassName} />}
+          {selectedPlace && <PlaceCard place={selectedPlace} currentUser={currentUser} className={placeCardClassName} onDelete={handlePlaceDelete} />}
         </div>
       </div>
     </PageLayout>

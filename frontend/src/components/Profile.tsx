@@ -195,7 +195,7 @@ export function Profile() {
                     <p className="text-sm text-muted-foreground">No places yet.</p>
                   ) : (
                     userPlaces.map((pl: any) => (
-                      <PlaceCard key={pl.id} place={pl} className="group bg-card border border-border/50 rounded-3xl p-5" />
+                      <PlaceCard key={pl.id} place={pl} currentUser={user} className="group bg-card border border-border/50 rounded-3xl p-5" />
                     ))
                   )}
                 </div>
