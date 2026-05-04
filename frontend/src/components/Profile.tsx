@@ -108,7 +108,7 @@ export function Profile() {
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button 
-                      variant="outline" 
+                      variant="ghost" 
                       size="sm"
                       className="h-9 w-9 p-0"
                     >
@@ -160,7 +160,7 @@ export function Profile() {
                   {postsQuery.isLoading ? (
                     <LoadingSpinner />
                   ) : allPosts.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No posts yet.</p>
+                    <p className="text-sm text-muted-foreground">Nothing here yet.</p>
                   ) : (
                     allPosts.map(p => (
                       <PostCard key={p.id} post={p} currentUser={user} onVote={handlePostVote} />
