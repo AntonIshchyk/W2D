@@ -10,6 +10,7 @@ import { PostType } from '../types/posts'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { usePostVoteMutation } from '../hooks/usePostVoteMutation'
 import { formatRelativeTime } from '../lib/utils/date'
+import { getGoogleMapsUrl } from '../lib/utils/maps'
 import { Comments } from './Comments'
 import { PhotoCarousel } from './PhotoCarousel'
 import { fetchPost, deletePost } from '../api/posts'
@@ -73,6 +74,7 @@ export function PostDetail() {
 
   const isOwner = currentUser?.userId === post.author?.id
   const photos = post.photoUrls ?? []
+  const googleMapsUrl = getGoogleMapsUrl(post.latitude, post.longitude, post.locationName)
 
   return (
     <PageLayout>
@@ -109,23 +111,35 @@ export function PostDetail() {
               </div>
             </div>
 
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground leading-snug mb-4">
+            <h1 className={`text-2xl md:text-3xl font-bold text-foreground leading-snug ${post.locationName ? 'mb-2' : 'mb-4'}`}>
               {post.title}
             </h1>
+
+            {post.locationName && (
+              googleMapsUrl ? (
+                <a
+                  href={googleMapsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1.5 text-primary hover:underline mb-5 text-sm w-fit"
+                >
+                  <MapPin className="w-4 h-4 shrink-0" />
+                  <span>{post.locationName}</span>
+                </a>
+              ) : (
+                <div className="flex items-center gap-1.5 text-muted-foreground mb-5 text-sm w-fit">
+                  <MapPin className="w-4 h-4 shrink-0" />
+                  <span>{post.locationName}</span>
+                </div>
+              )
+            )}
 
             {photos.length > 0 && <PhotoCarousel urls={photos} />}
 
             {post.description && (
-              <p className="text-sm md:text-base text-foreground leading-relaxed whitespace-pre-wrap mb-6">
+              <p className="text-sm md:text-base text-foreground leading-relaxed whitespace-pre-wrap mt-4 mb-6">
                 {post.description}
               </p>
-            )}
-
-            {post.locationName && (
-              <div className="flex items-center gap-2 text-sm bg-muted/40 border border-border/50 rounded-2xl px-4 py-3 mb-6 w-fit">
-                <MapPin className="w-4 h-4 shrink-0" />
-                <span>{post.locationName}</span>
-              </div>
             )}
 
             <div className="flex items-center gap-3 pt-5 border-t border-border/40 mb-8">

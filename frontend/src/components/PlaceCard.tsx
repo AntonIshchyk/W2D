@@ -1,5 +1,6 @@
 import { MapPin, Users } from 'lucide-react'
 import { cn } from '../lib/utils'
+import { getGoogleMapsUrl } from '../lib/utils/maps'
 import { PhotoCarousel } from './PhotoCarousel'
 import { UserAvatar } from './UserAvatar'
 import type { Place } from '../types/places'
@@ -14,11 +15,7 @@ interface PlaceCardProps {
 export function PlaceCard({ place, onClick, className, isPreview }: PlaceCardProps) {
   type DivProps = { role?: string; tabIndex?: number }
   const ContainerProps: DivProps = isPreview ? {} : { role: 'button', tabIndex: 0 }
-  const googleMapsUrl = place.latitude != null && place.longitude != null
-    ? `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`
-    : place.locationName
-      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.locationName)}`
-      : null
+  const googleMapsUrl = getGoogleMapsUrl(place.latitude, place.longitude, place.locationName)
 
   return (
     <div

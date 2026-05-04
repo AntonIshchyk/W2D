@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom'
-import { MessageSquare, Clock } from 'lucide-react'
+import { MessageSquare, Clock, MapPin } from 'lucide-react'
 import { cn } from '../lib/utils'
 import type { Post } from '../types/posts'
 import { PostType } from '../types/posts'
 import { formatRelativeTime } from '../lib/utils/date'
+import { getGoogleMapsUrl } from '../lib/utils/maps'
 import { PhotoCarousel } from './PhotoCarousel'
 import { PostAuthorInfo } from './PostAuthorInfo'
 import { VoteButtons } from './VoteButtons'
@@ -20,6 +21,8 @@ export function PostCard({ post, currentUser, onVote, className, isPreview }: Po
   const ContainerProps = isPreview
     ? { role: undefined, tabIndex: undefined }
     : { role: 'button' as const, tabIndex: 0 as const }
+
+  const googleMapsUrl = getGoogleMapsUrl(post.latitude, post.longitude, post.locationName)
 
   return (
     <article
@@ -42,16 +45,37 @@ export function PostCard({ post, currentUser, onVote, className, isPreview }: Po
 
         <div className="flex-1">
         {isPreview ? (
-          <h3 className="font-bold text-xl md:text-2xl text-foreground mb-2 wrap-break-word break-all whitespace-normal line-clamp-2">
+          <h3 className={`font-bold text-xl md:text-2xl text-foreground ${post.locationName ? 'mb-2' : 'mb-2'} wrap-break-word break-all whitespace-normal line-clamp-2`}>
             {post.title}
           </h3>
         ) : (
           <Link to={`/posts/${post.id}`}>
-            <h3 className="font-bold text-xl md:text-2xl text-foreground mb-2 group-hover:text-primary transition-colors wrap-break-word break-all whitespace-normal line-clamp-2">
+            <h3 className={`font-bold text-xl md:text-2xl text-foreground ${post.locationName ? 'mb-2' : 'mb-2'} group-hover:text-primary transition-colors wrap-break-word break-all whitespace-normal line-clamp-2`}>
               {post.title}
             </h3>
           </Link>
         )}
+
+        {post.locationName && (
+          googleMapsUrl ? (
+            <a
+              href={googleMapsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 text-primary hover:underline mb-3 text-sm w-fit"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <span>{post.locationName}</span>
+            </a>
+          ) : (
+            <div className="flex items-center gap-1.5 text-muted-foreground mb-3 text-sm w-fit">
+              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <span>{post.locationName}</span>
+            </div>
+          )
+        )}
+
         {post.description && (
           <p className="text-foreground text-sm md:text-base whitespace-normal break-all leading-relaxed line-clamp-2">
             {post.description}
