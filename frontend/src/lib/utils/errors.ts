@@ -4,7 +4,7 @@ export function extractErrorMessage(err: unknown): string {
       const parsed = JSON.parse(err.message)
       if (parsed.errors && typeof parsed.errors === 'object') {
         const messages: string[] = []
-        for (const [field, fieldErrors] of Object.entries(parsed.errors)) {
+        for (const [fieldErrors] of Object.entries(parsed.errors)) {
           if (Array.isArray(fieldErrors)) {
             messages.push(...fieldErrors)
           }
