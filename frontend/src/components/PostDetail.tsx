@@ -110,7 +110,7 @@ export function PostDetail() {
                           variant="ghost" 
                           className="justify-start gap-2 h-9"
                           onClick={() => {
-                            alert('Edit post coming soon')
+                            navigate(`/posts/${post.id}/edit`)
                           }}
                         >
                           <Pencil className="w-4 h-4" />

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { z } from 'zod'
 import {
   Check,
   ChevronsUpDown,
@@ -21,15 +22,15 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { PageLayout } from './Navbar'
 import { LocationPickerMap } from './LocationPickerMap'
 import { PlaceImageUpload } from './PlaceImageUpload'
-import { createPost, POST_TYPE_LABELS } from '../api/posts'
+import { fetchPost, updatePost, POST_TYPE_LABELS } from '../api/posts'
 import { fetchCommunities } from '../api/communities'
+import { useCitySearch } from '../hooks/useCitySearch'
 import { cn } from '../lib/utils'
+import type { CitySearchResult } from '../types/places'
 import type { Post } from '../types/posts'
 import { PostCard } from './PostCard'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { PostType } from '../types/posts'
-
-import { useEntityForm } from '../hooks/useEntityForm'
 
 const STEPS = [
   { id: 1, label: 'Details', icon: Info },
@@ -37,60 +38,96 @@ const STEPS = [
   { id: 3, label: 'Photos', icon: Image },
 ]
 
-export function CreatePost() {
+const eventDetailsSchema = z.object({
+  title: z.string().trim().min(1, 'Title is required.'),
+  description: z.string().trim().min(1, 'Description is required.')
+})
+
+type EventDetailsErrors = Partial<Record<keyof z.infer<typeof eventDetailsSchema>, string>>
+
+export function EditPost() {
+  const { postId } = useParams<{ postId: string }>()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+
+  const { data: existingPost, isLoading: isLoadingPost } = useQuery({
+    queryKey: ['post', postId],
+    queryFn: () => fetchPost(Number(postId)),
+    enabled: !!postId && !isNaN(Number(postId)),
+  })
 
   const { data: communities = [] } = useQuery({
     queryKey: ['communities-list'],
     queryFn: fetchCommunities,
   })
 
+  const [step, setStep] = useState(1)
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
   const [postType, setPostType] = useState<number>(PostType.ExperienceShare)
+  const [communityId, setCommunityId] = useState<number | null>(null)
+  const [communityOpen, setCommunityOpen] = useState(false)
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [photoUrls, setPhotoUrls] = useState<string[]>([])
+  const [isFetchingLocation, setIsFetchingLocation] = useState(false)
+  const [detailErrors, setDetailErrors] = useState<EventDetailsErrors>({})
 
   const {
-    step, setStep,
-    title, setTitle,
-    description, setDescription,
-    communityId, setCommunityId,
-    communityOpen, setCommunityOpen,
-    location,
-    photoUrls, setPhotoUrls,
-    isFetchingLocation,
-    detailErrors, setDetailErrors,
-    locationInput, setLocationInput,
-    locationSearchResults,
-    isSearchingLocation,
-    showLocationResults, setShowLocationResults,
-    applyLocationSearchResult,
-    handleLocationSelect,
-    validateDetails,
-    canProceed
-  } = useEntityForm()
-
-  const mutation = useMutation({
-    mutationFn: createPost,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] })
-      toast.success('Post created!')
-      navigate('/posts')
-    },
-    onError: (err: unknown) => {
-      const message = err instanceof Error ? err.message : 'Failed to create post'
-      toast.error(message)
-    },
+    query: locationInput,
+    setQuery: setLocationInput,
+    setQuerySilently: setLocationInputSilently,
+    results: locationSearchResults,
+    isSearching: isSearchingLocation,
+    showResults: showLocationResults,
+    setShowResults: setShowLocationResults,
+  } = useCitySearch({
+    debounceMs: 350,
+    onSearchError: () => toast.error('Location search failed'),
   })
 
-  const selectedCommunity = communities.find(c => c.id === communityId)
-
-  function handleSubmit() {
-    if (!validateDetails()) {
-      setStep(1)
-      toast.error('Please fix the required fields before creating the post.')
-      return
+  // Sync form fields when existing post data loads
+  useEffect(() => {
+    if (existingPost) {
+      setTitle(existingPost.title)
+      setDescription(existingPost.description)
+      setPostType(existingPost.type)
+      setCommunityId(existingPost.communityId || null)
+      setPhotoUrls(existingPost.photoUrls || [])
+      if (existingPost.latitude && existingPost.longitude) {
+        setLocation({ lat: existingPost.latitude, lng: existingPost.longitude })
+      }
+      if (existingPost.locationName) {
+        setLocationInputSilently(existingPost.locationName)
+      }
     }
+  }, [existingPost])
 
-    mutation.mutate({
+  const applyLocationSearchResult = (result: CitySearchResult) => {
+    const lat = parseFloat(result.lat)
+    const lng = parseFloat(result.lon)
+
+    if (Number.isNaN(lat) || Number.isNaN(lng)) return
+
+    setLocation({ lat, lng })
+    setLocationInputSilently(result.display_name)
+  }
+
+  const handleLocationSelect = async (lat: number, lng: number) => {
+    setLocation({ lat, lng })
+    setIsFetchingLocation(true)
+    try {
+      // reuse reverse geocode from places API file
+      const { reverseGeocode } = await import('../api/places')
+      const displayName = await reverseGeocode(lat, lng)
+      if (displayName) setLocationInputSilently(displayName)
+    } catch (err) {
+    } finally {
+      setIsFetchingLocation(false)
+    }
+  }
+
+  const mutation = useMutation({
+    mutationFn: () => updatePost(Number(postId), {
       title,
       description,
       type: postType,
@@ -99,25 +136,96 @@ export function CreatePost() {
       latitude: location?.lat,
       longitude: location?.lng,
       photoUrls,
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+      queryClient.invalidateQueries({ queryKey: ['post', postId] })
+      toast.success('Post updated!')
+      navigate(`/posts/${postId}`)
+    },
+    onError: (err: unknown) => {
+      const message = err instanceof Error ? err.message : 'Failed to update post'
+      toast.error(message)
+    },
+  })
+
+  const selectedCommunity = communities.find(c => c.id === communityId)
+
+  const validateDetails = () => {
+    const parsed = eventDetailsSchema.safeParse({ title, description })
+
+    if (parsed.success) {
+      setDetailErrors({})
+      return true
+    }
+
+    const fieldErrors = parsed.error.flatten().fieldErrors
+    setDetailErrors({
+      title: fieldErrors.title?.[0],
+      description: fieldErrors.description?.[0]
     })
+    return false
   }
 
+  function handleSubmit() {
+    if (!validateDetails()) {
+      setStep(1)
+      toast.error('Please fix the required fields before updating the post.')
+      return
+    }
+
+    mutation.mutate()
+  }
+
+  const canProceed =
+    step === 1
+      ? eventDetailsSchema.safeParse({ title, description }).success
+      : step === 2
+        ? true
+        : true
+
   const previewPost: Post = {
-    id: 0,
+    id: existingPost?.id ?? 0,
     title: title || 'Your post title…',
     description: description || 'Description will appear here…',
     type: postType as PostType,
-    author: { id: 0, username: 'You' },
-    communityId: selectedCommunity?.id ?? 0,
-    communityName: selectedCommunity?.name ?? 'Open to everyone',
-    score: 0,
+    author: existingPost?.author ?? { id: 0, username: 'You' },
+    communityId: selectedCommunity?.id ?? existingPost?.communityId ?? 0,
+    communityName: selectedCommunity?.name ?? existingPost?.communityName ?? 'Open to everyone',
+    score: existingPost?.score ?? 0,
     locationName: locationInput || undefined,
     latitude: location?.lat,
     longitude: location?.lng,
     photoUrls: photoUrls ?? [],
-    commentCount: 0,
-    createdAt: new Date().toISOString(),
+    commentCount: existingPost?.commentCount ?? 0,
+    createdAt: existingPost?.createdAt ?? new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+  }
+
+  if (isLoadingPost) {
+    return (
+      <PageLayout>
+        <div className="flex items-center justify-center py-20">
+          <div className="flex items-center gap-2.5 text-muted-foreground">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="text-sm">Loading…</span>
+          </div>
+        </div>
+      </PageLayout>
+    )
+  }
+
+  if (!existingPost) {
+    return (
+      <PageLayout>
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-xl font-semibold mb-2">Post not found</h2>
+          <Button variant="ghost" onClick={() => navigate('/posts')}>
+            Back to posts
+          </Button>
+        </div>
+      </PageLayout>
+    )
   }
 
   return (
@@ -331,7 +439,7 @@ export function CreatePost() {
                 )}
               >
                 <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-widest">
+                  <label className="text-xs font-semibold uppercase tracking-widest">
                     Post Photos
                   </label>
                   <PlaceImageUpload
@@ -347,7 +455,7 @@ export function CreatePost() {
             <div className="flex items-center justify-between">
               <Button
                 variant="ghost"
-                onClick={() => (step === 1 ? navigate('/posts') : setStep((s) => s - 1))}
+                onClick={() => (step === 1 ? navigate(`/posts/${postId}`) : setStep((s) => s - 1))}
                 className="hover:text-foreground hover:bg-accent gap-2 text-base h-12 px-6"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -375,11 +483,11 @@ export function CreatePost() {
                   {mutation.isPending
                     ? (
                       <>
-                        <Loader2 className="h-5 w-5 animate-spin" /> Creating…
+                        <Loader2 className="h-5 w-5 animate-spin" /> Updating…
                       </>
                     ) : (
                       <>
-                        Create Post
+                        Update Post
                       </>
                     )
                   }

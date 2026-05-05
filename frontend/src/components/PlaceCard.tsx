@@ -1,4 +1,5 @@
 import { MapPin, Users, Menu, Pencil, Trash2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { cn } from '../lib/utils'
 import { getGoogleMapsUrl } from '../lib/utils/maps'
 import { PhotoCarousel } from './PhotoCarousel'
@@ -22,6 +23,7 @@ interface PlaceCardProps {
 
 export function PlaceCard({ place, currentUser, onClick, onDelete, className, isPreview }: PlaceCardProps) {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
   
   const deleteMutation = useMutation({
     mutationFn: deletePlace,
@@ -79,7 +81,7 @@ export function PlaceCard({ place, currentUser, onClick, onDelete, className, is
                     variant="ghost" 
                     className="justify-start gap-2 h-9"
                     onClick={() => {
-                      alert('Edit place coming soon')
+                      navigate(`/places/${place.id}/edit`)
                     }}
                   >
                     <Pencil className="w-4 h-4" />

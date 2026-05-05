@@ -3,7 +3,7 @@ import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { PAGINATION } from '../config/constants'
 import { ensureResponseOk, sendVoteRequest } from '../lib/utils/http'
 import { PostType } from '../types/posts'
-import type { CreatePostRequest, Post, ScrollResult } from '../types/posts'
+import type { CreatePostRequest, Post, ScrollResult, UpdatePostRequest } from '../types/posts'
 
 export interface FetchPostsParams {
   cursor: number | null
@@ -43,6 +43,17 @@ export async function createPost(data: CreatePostRequest): Promise<void> {
   })
 
   await ensureResponseOk(response, 'Failed to create post')
+}
+
+export async function updatePost(postId: number, data: UpdatePostRequest): Promise<Post> {
+  const response = await fetch(API_ENDPOINTS.posts.byId(postId), {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data)
+  })
+
+  await ensureResponseOk(response, 'Failed to update post')
+  return response.json()
 }
 
 export async function votePost(postId: number, value: number): Promise<void> {

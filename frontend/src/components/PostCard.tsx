@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { MessageSquare, Clock, MapPin, Menu, Pencil, Trash2 } from 'lucide-react'
 import { cn } from '../lib/utils'
 import type { Post } from '../types/posts'
@@ -24,6 +24,7 @@ interface PostCardProps {
 
 export function PostCard({ post, currentUser, onVote, className, isPreview }: PostCardProps) {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
   
   const deleteMutation = useMutation({
     mutationFn: deletePost,
@@ -72,7 +73,7 @@ export function PostCard({ post, currentUser, onVote, className, isPreview }: Po
                     variant="ghost" 
                     className="justify-start gap-2 h-9"
                     onClick={() => {
-                      alert('Edit post coming soon')
+                      navigate(`/posts/${post.id}/edit`)
                     }}
                   >
                     <Pencil className="w-4 h-4" />

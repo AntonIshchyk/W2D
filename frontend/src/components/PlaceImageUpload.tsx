@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { AlertCircle, CheckCircle2, Loader2, Star, Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -45,11 +45,35 @@ export function PlaceImageUpload({
   maxFiles = 4,
   disabled = false,
 }: PlaceImageUploadProps) {
-  const [items, setItems] = useState<UploadListItem[]>([])
+  const [items, setItems] = useState<UploadListItem[]>(() => {
+    return value.map((url, index) => ({
+      id: crypto.randomUUID(),
+      fileName: `Uploaded photo ${index + 1}`,
+      sizeLabel: '',
+      status: 'done',
+      publicUrl: url,
+      previewUrl: url
+    }))
+  })
   const [isDragging, setIsDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  
   const confirmedRef = useRef<string[]>(value)
-  confirmedRef.current = value
+
+  useEffect(() => {
+    const activeUploads = items.filter(i => i.status === 'uploading').length
+    if (activeUploads === 0 && value.length !== confirmedRef.current.length) {
+      confirmedRef.current = value
+      setItems(value.map((url, index) => ({
+        id: crypto.randomUUID(),
+        fileName: `Uploaded photo ${index + 1}`,
+        sizeLabel: '',
+        status: 'done',
+        publicUrl: url,
+        previewUrl: url
+      })))
+    }
+  }, [value, items])
 
   const activeUploads = items.filter((i) => i.status === 'uploading').length
 
@@ -306,7 +330,9 @@ export function PlaceImageUpload({
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">{item.fileName}</p>
-                      <p className="text-xs text-muted-foreground">{item.sizeLabel}</p>
+                      {item.sizeLabel && (
+                        <p className="text-xs text-muted-foreground">{item.sizeLabel}</p>
+                      )}
                     </div>
                     {item.status === 'done' && (
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />

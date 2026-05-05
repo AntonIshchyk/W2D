@@ -1,7 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { z } from 'zod'
 import {
   Check,
   ChevronsUpDown,
@@ -22,25 +20,19 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { PageLayout } from './Navbar'
 import { LocationPickerMap } from './LocationPickerMap'
 import { PlaceImageUpload } from './PlaceImageUpload'
-import { createPlace, reverseGeocode } from '../api/places'
+import { createPlace } from '../api/places'
 import { fetchCommunities } from '../api/communities'
-import { useCitySearch } from '../hooks/useCitySearch'
 import { cn } from '../lib/utils'
-import type { CitySearchResult, Place } from '../types/places'
+import type { Place } from '../types/places'
 import { PlaceCard } from './PlaceCard'
+
+import { useEntityForm } from '../hooks/useEntityForm'
 
 const STEPS = [
   { id: 1, label: 'Details', icon: Info },
   { id: 2, label: 'Location', icon:  MapPin },
   { id: 3, label: 'Photos', icon: Image },
 ]
-
-const eventDetailsSchema = z.object({
-  title: z.string().trim().min(1, 'Title is required.'),
-  description: z.string().trim().min(1, 'Description is required.')
-})
-
-type EventDetailsErrors = Partial<Record<keyof z.infer<typeof eventDetailsSchema>, string>>
 
 export function CreatePlace() {
   const queryClient = useQueryClient()
@@ -51,51 +43,25 @@ export function CreatePlace() {
     queryFn: fetchCommunities,
   })
 
-  const [step, setStep] = useState(1)
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [communityId, setCommunityId] = useState<number | null>(null)
-  const [communityOpen, setCommunityOpen] = useState(false)
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
-  const [photoUrls, setPhotoUrls] = useState<string[]>([])
-  const [isFetchingLocation, setIsFetchingLocation] = useState(false)
-  const [detailErrors, setDetailErrors] = useState<EventDetailsErrors>({})
-
   const {
-    query: locationInput,
-    setQuery: setLocationInput,
-    setQuerySilently: setLocationInputSilently,
-    results: locationSearchResults,
-    isSearching: isSearchingLocation,
-    showResults: showLocationResults,
-    setShowResults: setShowLocationResults,
-  } = useCitySearch({
-    debounceMs: 350,
-    onSearchError: () => toast.error('Location search failed'),
-  })
-
-  const applyLocationSearchResult = (result: CitySearchResult) => {
-    const lat = parseFloat(result.lat)
-    const lng = parseFloat(result.lon)
-
-    if (Number.isNaN(lat) || Number.isNaN(lng)) return
-
-    setLocation({ lat, lng })
-    setLocationInputSilently(result.display_name)
-  }
-
-  const handleLocationSelect = async (lat: number, lng: number) => {
-    setLocation({ lat, lng })
-    setIsFetchingLocation(true)
-    try {
-      const displayName = await reverseGeocode(lat, lng)
-      if (displayName) setLocationInputSilently(displayName)
-    } catch (err) {
-
-    } finally {
-      setIsFetchingLocation(false)
-    }
-  }
+    step, setStep,
+    title, setTitle,
+    description, setDescription,
+    communityId, setCommunityId,
+    communityOpen, setCommunityOpen,
+    location,
+    photoUrls, setPhotoUrls,
+    isFetchingLocation,
+    detailErrors, setDetailErrors,
+    locationInput, setLocationInput,
+    locationSearchResults,
+    isSearchingLocation,
+    showLocationResults, setShowLocationResults,
+    applyLocationSearchResult,
+    handleLocationSelect,
+    validateDetails,
+    canProceed
+  } = useEntityForm()
 
   const mutation = useMutation({
     mutationFn: createPlace,
@@ -111,22 +77,6 @@ export function CreatePlace() {
   })
 
   const selectedCommunity = communities.find(c => c.id === communityId)
-
-  const validateDetails = () => {
-    const parsed = eventDetailsSchema.safeParse({ title, description })
-
-    if (parsed.success) {
-      setDetailErrors({})
-      return true
-    }
-
-    const fieldErrors = parsed.error.flatten().fieldErrors
-    setDetailErrors({
-      title: fieldErrors.title?.[0],
-      description: fieldErrors.description?.[0]
-    })
-    return false
-  }
 
   function handleSubmit() {
     if (!validateDetails()) {
@@ -145,13 +95,6 @@ export function CreatePlace() {
       photoUrls,
     })
   }
-
-  const canProceed =
-    step === 1
-      ? eventDetailsSchema.safeParse({ title, description }).success
-      : step === 2
-        ? true
-        : true
 
   const previewPlace: Place = {
     id: 0,

@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   Check,
   ChevronsUpDown,
@@ -21,14 +20,11 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { PageLayout } from './Navbar'
 import { LocationPickerMap } from './LocationPickerMap'
 import { PlaceImageUpload } from './PlaceImageUpload'
-import { createPost, POST_TYPE_LABELS } from '../api/posts'
+import { updatePlace, fetchPlace } from '../api/places'
 import { fetchCommunities } from '../api/communities'
 import { cn } from '../lib/utils'
-import type { Post } from '../types/posts'
-import { PostCard } from './PostCard'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import { PostType } from '../types/posts'
-
+import type { Place } from '../types/places'
+import { PlaceCard } from './PlaceCard'
 import { useEntityForm } from '../hooks/useEntityForm'
 
 const STEPS = [
@@ -37,16 +33,21 @@ const STEPS = [
   { id: 3, label: 'Photos', icon: Image },
 ]
 
-export function CreatePost() {
+export function EditPlace() {
+  const { placeId } = useParams<{ placeId: string }>()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+
+  const { data: existingPlace, isLoading: isLoadingPlace } = useQuery({
+    queryKey: ['place', placeId],
+    queryFn: () => fetchPlace(Number(placeId)),
+    enabled: !!placeId && !isNaN(Number(placeId)),
+  })
 
   const { data: communities = [] } = useQuery({
     queryKey: ['communities-list'],
     queryFn: fetchCommunities,
   })
-
-  const [postType, setPostType] = useState<number>(PostType.ExperienceShare)
 
   const {
     step, setStep,
@@ -66,17 +67,26 @@ export function CreatePost() {
     handleLocationSelect,
     validateDetails,
     canProceed
-  } = useEntityForm()
+  } = useEntityForm(existingPlace)
 
   const mutation = useMutation({
-    mutationFn: createPost,
+    mutationFn: () => updatePlace(Number(placeId), {
+      title,
+      description,
+      ...(communityId !== null ? { communityId } : {}),
+      latitude: location?.lat,
+      longitude: location?.lng,
+      locationName: locationInput.trim() || undefined,
+      photoUrls,
+    }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] })
-      toast.success('Post created!')
-      navigate('/posts')
+      queryClient.invalidateQueries({ queryKey: ['places'] })
+      queryClient.invalidateQueries({ queryKey: ['place', placeId] })
+      toast.success('Place updated!')
+      navigate('/places')
     },
     onError: (err: unknown) => {
-      const message = err instanceof Error ? err.message : 'Failed to create post'
+      const message = err instanceof Error ? err.message : 'Failed to update place'
       toast.error(message)
     },
   })
@@ -86,38 +96,55 @@ export function CreatePost() {
   function handleSubmit() {
     if (!validateDetails()) {
       setStep(1)
-      toast.error('Please fix the required fields before creating the post.')
+      toast.error('Please fix the required fields before updating the place.')
       return
     }
 
-    mutation.mutate({
-      title,
-      description,
-      type: postType,
-      ...(communityId !== null ? { communityId } : {}),
-      locationName: locationInput.trim() || undefined,
-      latitude: location?.lat,
-      longitude: location?.lng,
-      photoUrls,
-    })
+    mutation.mutate()
   }
 
-  const previewPost: Post = {
-    id: 0,
-    title: title || 'Your post title…',
+  
+
+  const previewPlace: Place = {
+    id: existingPlace?.id ?? 0,
+    title: title || 'Your place title…',
     description: description || 'Description will appear here…',
-    type: postType as PostType,
-    author: { id: 0, username: 'You' },
-    communityId: selectedCommunity?.id ?? 0,
-    communityName: selectedCommunity?.name ?? 'Open to everyone',
-    score: 0,
-    locationName: locationInput || undefined,
-    latitude: location?.lat,
-    longitude: location?.lng,
+    userId: existingPlace?.userId ?? 0,
+    userName: existingPlace?.userName ?? 'You',
+    communityId: selectedCommunity?.id ?? existingPlace?.communityId ?? null,
+    communityName: selectedCommunity?.name ?? existingPlace?.communityName ?? 'Open to everyone',
+    latitude: location?.lat ?? existingPlace?.latitude,
+    longitude: location?.lng ?? existingPlace?.longitude,
+    locationName: locationInput || existingPlace?.locationName || 'Choose a spot on the map',
     photoUrls: photoUrls ?? [],
-    commentCount: 0,
-    createdAt: new Date().toISOString(),
+    createdAt: existingPlace?.createdAt ?? new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+  }
+
+  if (isLoadingPlace) {
+    return (
+      <PageLayout>
+        <div className="flex items-center justify-center py-20">
+          <div className="flex items-center gap-2.5 text-muted-foreground">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="text-sm">Loading…</span>
+          </div>
+        </div>
+      </PageLayout>
+    )
+  }
+
+  if (!existingPlace) {
+    return (
+      <PageLayout>
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-xl font-semibold mb-2">Place not found</h2>
+          <Button variant="ghost" onClick={() => navigate('/places')}>
+            Back to places
+          </Button>
+        </div>
+      </PageLayout>
+    )
   }
 
   return (
@@ -171,31 +198,13 @@ export function CreatePost() {
                           setDetailErrors((prev) => ({ ...prev, title: undefined }))
                         }
                       }}
-                      placeholder="Give your post a title"
+                      placeholder="Title your place (e.g. Walk in the park, running group...)"
                       className={cn(
                         'bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary',
                         detailErrors.title && 'border-destructive focus-visible:ring-destructive focus-visible:border-destructive',
                       )}
                     />
                     {detailErrors.title && <p className="text-xs text-destructive">{detailErrors.title}</p>}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-widest">
-                      Type
-                    </label>
-                    <Select value={postType.toString()} onValueChange={(v) => setPostType(Number(v))}>
-                      <SelectTrigger className="h-12 bg-card border-border text-foreground hover:bg-accent hover:text-accent-foreground font-normal text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-2xl">
-                        {Object.entries(POST_TYPE_LABELS).map(([value, label]) => (
-                          <SelectItem key={value} value={value}>
-                            {label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
                   </div>
 
                   <div className="space-y-2">
@@ -255,7 +264,7 @@ export function CreatePost() {
                           setDetailErrors((prev) => ({ ...prev, description: undefined }))
                         }
                       }}
-                      placeholder="Share the details of your post"
+                      placeholder="Share the plan, who it's for, and what is imporant to know."
                       rows={4}
                       className={cn(
                         'bg-card border-border text-foreground placeholder:text-muted-foreground text-sm resize-none focus-visible:ring-primary focus-visible:border-primary',
@@ -331,8 +340,8 @@ export function CreatePost() {
                 )}
               >
                 <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-widest">
-                    Post Photos
+                  <label className="text-xs font-semibold uppercase tracking-widest">
+                    Place Photos
                   </label>
                   <PlaceImageUpload
                     value={photoUrls}
@@ -347,7 +356,7 @@ export function CreatePost() {
             <div className="flex items-center justify-between">
               <Button
                 variant="ghost"
-                onClick={() => (step === 1 ? navigate('/posts') : setStep((s) => s - 1))}
+                onClick={() => (step === 1 ? navigate('/places') : setStep((s) => s - 1))}
                 className="hover:text-foreground hover:bg-accent gap-2 text-base h-12 px-6"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -375,11 +384,11 @@ export function CreatePost() {
                   {mutation.isPending
                     ? (
                       <>
-                        <Loader2 className="h-5 w-5 animate-spin" /> Creating…
+                        <Loader2 className="h-5 w-5 animate-spin" /> Updating…
                       </>
                     ) : (
                       <>
-                        Create Post
+                        Update Place
                       </>
                     )
                   }
@@ -390,13 +399,11 @@ export function CreatePost() {
 
           <div className="hidden lg:block sticky top-24">
             <p className="text-sm font-semibold uppercase tracking-widest mb-4">Preview</p>
-              <PostCard
-                post={previewPost}
-                currentUser={null}
-                onVote={() => {}}
-                isPreview
-                className="rounded-2xl border bg-card shadow-sm overflow-hidden cursor-default"
-              />
+            <PlaceCard
+              place={previewPlace}
+              isPreview
+              className='rounded-2xl border bg-card shadow-sm overflow-hidden cursor-default'
+            />
           </div>
         </div>
       </div>
