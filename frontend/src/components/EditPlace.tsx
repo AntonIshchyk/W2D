@@ -23,6 +23,7 @@ import { PlaceImageUpload } from './PlaceImageUpload'
 import { updatePlace, fetchPlace } from '../api/places'
 import { fetchCommunities } from '../api/communities'
 import { cn } from '../lib/utils'
+import { extractErrorMessage } from '../lib/utils/errors'
 import type { Place } from '../types/places'
 import { PlaceCard } from './PlaceCard'
 import { useEntityForm } from '../hooks/useEntityForm'
@@ -86,7 +87,7 @@ export function EditPlace() {
       navigate('/places')
     },
     onError: (err: unknown) => {
-      const message = err instanceof Error ? err.message : 'Failed to update place'
+      const message = extractErrorMessage(err)
       toast.error(message)
     },
   })

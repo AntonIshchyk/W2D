@@ -25,6 +25,7 @@ import { fetchPost, updatePost, POST_TYPE_LABELS } from '../api/posts'
 import { fetchCommunities } from '../api/communities'
 import { useEntityForm } from '../hooks/useEntityForm'
 import { cn } from '../lib/utils'
+import { extractErrorMessage } from '../lib/utils/errors'
 import type { Post } from '../types/posts'
 import { PostCard } from './PostCard'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
@@ -98,7 +99,7 @@ export function EditPost() {
       navigate(`/posts/${postId}`)
     },
     onError: (err: unknown) => {
-      const message = err instanceof Error ? err.message : 'Failed to update post'
+      const message = extractErrorMessage(err)
       toast.error(message)
     },
   })

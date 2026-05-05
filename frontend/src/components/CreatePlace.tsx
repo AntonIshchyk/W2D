@@ -27,6 +27,7 @@ import type { Place } from '../types/places'
 import { PlaceCard } from './PlaceCard'
 
 import { useEntityForm } from '../hooks/useEntityForm'
+import { extractErrorMessage } from '../lib/utils/errors'
 
 const STEPS = [
   { id: 1, label: 'Details', icon: Info },
@@ -71,7 +72,7 @@ export function CreatePlace() {
       navigate('/places')
     },
     onError: (err: unknown) => {
-      const message = err instanceof Error ? err.message : 'Failed to create place'
+      const message = extractErrorMessage(err)
       toast.error(message)
     },
   })

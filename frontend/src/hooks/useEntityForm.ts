@@ -7,7 +7,7 @@ import type { CitySearchResult } from '../types/places'
 
 export const eventDetailsSchema = z.object({
   title: z.string().trim().min(1, 'Title is required.'),
-  description: z.string().trim().min(1, 'Description is required.')
+  description: z.string().trim().min(10, 'Description must be at least 10 characters.').max(500, 'Description must not exceed 500 characters.')
 })
 
 export type EventDetailsErrors = Partial<Record<keyof z.infer<typeof eventDetailsSchema>, string>>

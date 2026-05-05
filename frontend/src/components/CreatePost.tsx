@@ -24,6 +24,7 @@ import { PlaceImageUpload } from './PlaceImageUpload'
 import { createPost, POST_TYPE_LABELS } from '../api/posts'
 import { fetchCommunities } from '../api/communities'
 import { cn } from '../lib/utils'
+import { extractErrorMessage } from '../lib/utils/errors'
 import type { Post } from '../types/posts'
 import { PostCard } from './PostCard'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
@@ -76,7 +77,7 @@ export function CreatePost() {
       navigate('/posts')
     },
     onError: (err: unknown) => {
-      const message = err instanceof Error ? err.message : 'Failed to create post'
+      const message = extractErrorMessage(err)
       toast.error(message)
     },
   })
