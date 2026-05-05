@@ -50,7 +50,7 @@ builder.Services.AddSingleton<IAmazonS3>(_ =>
     var s3Config = new AmazonS3Config
     {
         ServiceURL = $"https://{config["R2:AccountId"]}.r2.cloudflarestorage.com",
-        ForcePathStyle = true,  // required for R2
+        ForcePathStyle = true,
     };
     return new AmazonS3Client(credentials, s3Config);
 });
@@ -113,7 +113,6 @@ builder.Services.AddCors(options =>
             }
             else if (builder.Environment.IsDevelopment())
             {
-                // Fallback for development only
                 corsBuilder
                     .AllowAnyOrigin()
                     .AllowAnyMethod()

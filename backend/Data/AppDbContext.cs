@@ -83,7 +83,7 @@ public class AppDbContext : DbContext
                     v => v.ToList()
                 )
             )
-            .HasColumnType("TEXT"); // use "jsonb" for Postgres
+            .HasColumnType("TEXT");
 
         modelBuilder.Entity<Place>()
             .Property(e => e.PhotoUrls)

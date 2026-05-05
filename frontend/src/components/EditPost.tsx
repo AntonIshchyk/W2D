@@ -76,7 +76,6 @@ export function EditPost() {
     canProceed
   } = useEntityForm(existingPost)
 
-  // Keep post-specific `type` synced from existing data
   useEffect(() => {
     if (existingPost && existingPost.type !== undefined) setPostType(existingPost.type)
   }, [existingPost])
@@ -115,8 +114,6 @@ export function EditPost() {
 
     mutation.mutate()
   }
-
-  
 
   const previewPost: Post = {
     id: existingPost?.id ?? 0,
