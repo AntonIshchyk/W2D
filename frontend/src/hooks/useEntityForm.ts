@@ -59,7 +59,7 @@ export function useEntityForm(existingData?: EntityFormData) {
         setLocationInputSilently(existingData.locationName)
       }
     }
-  }, [existingData, setLocationInputSilently])
+  }, [existingData])
 
   const applyLocationSearchResult = (result: CitySearchResult) => {
     const lat = parseFloat(result.lat)

@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { z } from 'zod'
 import {
   Check,
   ChevronsUpDown,
@@ -24,9 +23,8 @@ import { LocationPickerMap } from './LocationPickerMap'
 import { PlaceImageUpload } from './PlaceImageUpload'
 import { fetchPost, updatePost, POST_TYPE_LABELS } from '../api/posts'
 import { fetchCommunities } from '../api/communities'
-import { useCitySearch } from '../hooks/useCitySearch'
+import { useEntityForm } from '../hooks/useEntityForm'
 import { cn } from '../lib/utils'
-import type { CitySearchResult } from '../types/places'
 import type { Post } from '../types/posts'
 import { PostCard } from './PostCard'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
@@ -38,12 +36,7 @@ const STEPS = [
   { id: 3, label: 'Photos', icon: Image },
 ]
 
-const eventDetailsSchema = z.object({
-  title: z.string().trim().min(1, 'Title is required.'),
-  description: z.string().trim().min(1, 'Description is required.')
-})
 
-type EventDetailsErrors = Partial<Record<keyof z.infer<typeof eventDetailsSchema>, string>>
 
 export function EditPost() {
   const { postId } = useParams<{ postId: string }>()
@@ -61,70 +54,32 @@ export function EditPost() {
     queryFn: fetchCommunities,
   })
 
-  const [step, setStep] = useState(1)
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
   const [postType, setPostType] = useState<number>(PostType.ExperienceShare)
-  const [communityId, setCommunityId] = useState<number | null>(null)
-  const [communityOpen, setCommunityOpen] = useState(false)
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
-  const [photoUrls, setPhotoUrls] = useState<string[]>([])
-  const [isFetchingLocation, setIsFetchingLocation] = useState(false)
-  const [detailErrors, setDetailErrors] = useState<EventDetailsErrors>({})
 
   const {
-    query: locationInput,
-    setQuery: setLocationInput,
-    setQuerySilently: setLocationInputSilently,
-    results: locationSearchResults,
-    isSearching: isSearchingLocation,
-    showResults: showLocationResults,
-    setShowResults: setShowLocationResults,
-  } = useCitySearch({
-    debounceMs: 350,
-    onSearchError: () => toast.error('Location search failed'),
-  })
+    step, setStep,
+    title, setTitle,
+    description, setDescription,
+    communityId, setCommunityId,
+    communityOpen, setCommunityOpen,
+    location,
+    photoUrls, setPhotoUrls,
+    isFetchingLocation,
+    detailErrors, setDetailErrors,
+    locationInput, setLocationInput,
+    locationSearchResults,
+    isSearchingLocation,
+    showLocationResults, setShowLocationResults,
+    applyLocationSearchResult,
+    handleLocationSelect,
+    validateDetails,
+    canProceed
+  } = useEntityForm(existingPost)
 
-  // Sync form fields when existing post data loads
+  // Keep post-specific `type` synced from existing data
   useEffect(() => {
-    if (existingPost) {
-      setTitle(existingPost.title)
-      setDescription(existingPost.description)
-      setPostType(existingPost.type)
-      setCommunityId(existingPost.communityId || null)
-      setPhotoUrls(existingPost.photoUrls || [])
-      if (existingPost.latitude && existingPost.longitude) {
-        setLocation({ lat: existingPost.latitude, lng: existingPost.longitude })
-      }
-      if (existingPost.locationName) {
-        setLocationInputSilently(existingPost.locationName)
-      }
-    }
+    if (existingPost && existingPost.type !== undefined) setPostType(existingPost.type)
   }, [existingPost])
-
-  const applyLocationSearchResult = (result: CitySearchResult) => {
-    const lat = parseFloat(result.lat)
-    const lng = parseFloat(result.lon)
-
-    if (Number.isNaN(lat) || Number.isNaN(lng)) return
-
-    setLocation({ lat, lng })
-    setLocationInputSilently(result.display_name)
-  }
-
-  const handleLocationSelect = async (lat: number, lng: number) => {
-    setLocation({ lat, lng })
-    setIsFetchingLocation(true)
-    try {
-      // reuse reverse geocode from places API file
-      const { reverseGeocode } = await import('../api/places')
-      const displayName = await reverseGeocode(lat, lng)
-      if (displayName) setLocationInputSilently(displayName)
-    } catch (err) {
-    } finally {
-      setIsFetchingLocation(false)
-    }
-  }
 
   const mutation = useMutation({
     mutationFn: () => updatePost(Number(postId), {
@@ -151,22 +106,6 @@ export function EditPost() {
 
   const selectedCommunity = communities.find(c => c.id === communityId)
 
-  const validateDetails = () => {
-    const parsed = eventDetailsSchema.safeParse({ title, description })
-
-    if (parsed.success) {
-      setDetailErrors({})
-      return true
-    }
-
-    const fieldErrors = parsed.error.flatten().fieldErrors
-    setDetailErrors({
-      title: fieldErrors.title?.[0],
-      description: fieldErrors.description?.[0]
-    })
-    return false
-  }
-
   function handleSubmit() {
     if (!validateDetails()) {
       setStep(1)
@@ -177,12 +116,7 @@ export function EditPost() {
     mutation.mutate()
   }
 
-  const canProceed =
-    step === 1
-      ? eventDetailsSchema.safeParse({ title, description }).success
-      : step === 2
-        ? true
-        : true
+  
 
   const previewPost: Post = {
     id: existingPost?.id ?? 0,
