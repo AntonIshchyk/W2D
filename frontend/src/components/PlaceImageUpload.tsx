@@ -61,19 +61,22 @@ export function PlaceImageUpload({
   const confirmedRef = useRef<string[]>(value)
 
   useEffect(() => {
-    const activeUploads = items.filter(i => i.status === 'uploading').length
-    if (activeUploads === 0 && value.length !== confirmedRef.current.length) {
-      confirmedRef.current = value
-      setItems(value.map((url, index) => ({
-        id: crypto.randomUUID(),
-        fileName: `Uploaded photo ${index + 1}`,
-        sizeLabel: '',
-        status: 'done',
-        publicUrl: url,
-        previewUrl: url
-      })))
-    }
-  }, [value, items])
+    setItems((prev) => {
+      const activeUploads = prev.filter(i => i.status === 'uploading').length
+      if (activeUploads === 0 && value.length !== confirmedRef.current.length) {
+        confirmedRef.current = value
+        return value.map((url, index) => ({
+          id: crypto.randomUUID(),
+          fileName: `Uploaded photo ${index + 1}`,
+          sizeLabel: '',
+          status: 'done',
+          publicUrl: url,
+          previewUrl: url
+        }))
+      }
+      return prev
+    })
+  }, [value])
 
   const activeUploads = items.filter((i) => i.status === 'uploading').length
 
