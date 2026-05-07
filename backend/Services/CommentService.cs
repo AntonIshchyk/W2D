@@ -152,6 +152,51 @@ public class CommentService : ICommentService
         return Result<CommentResponse>.Success(response);
     }
 
+    public async Task<Result<CommentResponse>> UpdateCommentAsync(int postId, int commentId, UpdateCommentRequest request, int userId)
+    {
+        if (!PhotoUrlValidationExtensions.TryValidateOptionalPhotoUrl(request.PhotoUrl, nameof(request.PhotoUrl), out string? photoUrlError))
+        {
+            return Result<CommentResponse>.Invalid(photoUrlError!);
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Content) && string.IsNullOrWhiteSpace(request.PhotoUrl))
+        {
+            return Result<CommentResponse>.Invalid("Content or PhotoUrl is required.");
+        }
+
+        Comment? comment = await _context.Comments
+            .FirstOrDefaultAsync(c => c.Id == commentId && c.PostId == postId);
+
+        if (comment == null)
+        {
+            return Result<CommentResponse>.NotFound("Comment not found.");
+        }
+
+        if (comment.UserId != userId)
+        {
+            return Result<CommentResponse>.Unauthorized("You do not have permission to edit this comment.");
+        }
+
+        comment.Content = request.Content?.Trim();
+        comment.PhotoUrl = request.PhotoUrl;
+        comment.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        var response = await _context.Comments
+            .AsNoTracking()
+            .Where(c => c.Id == comment.Id)
+            .Select(ProjectComment(userId))
+            .FirstOrDefaultAsync();
+
+        if (response == null)
+        {
+            return Result<CommentResponse>.NotFound("Comment not found.");
+        }
+
+        return Result<CommentResponse>.Success(response);
+    }
+
     public async Task<Result<bool>> DeleteCommentAsync(int postId, int commentId, int userId)
     {
         Comment? comment = await _context.Comments

@@ -43,6 +43,20 @@ public class CommentsController : ControllerBase
         return Created($"api/posts/{postId}/comments/{result.Value.Id}", result.Value);
     }
 
+    [HttpPut("{commentId}")]
+    public async Task<ActionResult<CommentResponse>> UpdateComment(int postId, int commentId, UpdateCommentRequest request)
+    {
+        int userId = User.GetUserId();
+        Result<CommentResponse> result = await _commentService.UpdateCommentAsync(postId, commentId, request, userId);
+
+        if (!result.IsSuccess || result.Value == null)
+        {
+            return result.ToActionResult(this);
+        }
+
+        return Ok(result.Value);
+    }
+
     [HttpDelete("{commentId}")]
     public async Task<ActionResult> DeleteComment(int postId, int commentId)
     {

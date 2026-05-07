@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Reply, Trash2, X, Clock, TrendingUp, Menu } from 'lucide-react'
+import { Reply, Trash2, X, Clock, TrendingUp, Menu, Pencil } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { UserAvatar } from './UserAvatar'
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from './ui/dialog'
@@ -12,7 +12,7 @@ import { isValidPhotoUrl } from '../lib/utils/validation'
 import type { Comment } from '../types/posts'
 import { PhotoUpload } from './PhotoUpload'
 import { VoteButtons } from './VoteButtons'
-import { fetchComments, createComment, deleteComment, voteComment } from '../api/comments'
+import { fetchComments, createComment, deleteComment, updateComment, voteComment } from '../api/comments'
 
 
 interface CommentNodeProps {
@@ -21,32 +21,56 @@ interface CommentNodeProps {
   currentUserId?: number
   onVote: (c: Comment, v: number) => void
   onDelete: (id: number) => void
+  onEditToggle: (comment: Comment) => void
   onReplyToggle: (id: number | null) => void
   activeReplyId: number | null
+  activeEditId: number | null
   replyDrafts: Record<number, string>
   replyPhotos: Record<number, string | null>
+  editDrafts: Record<number, string>
+  editPhotos: Record<number, string | null>
   setReplyDraft: (id: number, value: string) => void
   setReplyPhoto: (id: number, url: string | null) => void
+  setEditDraft: (id: number, value: string) => void
+  setEditPhoto: (id: number, url: string | null) => void
   submitReply: (id: number) => void
+  submitEdit: (id: number) => void
   createPending: boolean
   createError: boolean
+  editPending: boolean
+  editError: boolean
   deletePending: boolean
   isLast?: boolean
 }
 
 const CommentNode: React.FC<CommentNodeProps> = React.memo(({
   comment, depth = 0, currentUserId, onVote, onDelete,
-  onReplyToggle, activeReplyId, replyDrafts, replyPhotos,
-  setReplyDraft, setReplyPhoto, submitReply,
-  createPending, createError, deletePending, isLast,
+  onEditToggle, onReplyToggle, activeReplyId, activeEditId, replyDrafts, replyPhotos,
+  editDrafts, editPhotos, setReplyDraft, setReplyPhoto, setEditDraft, setEditPhoto,
+  submitReply, submitEdit,
+  createPending, createError, editPending, editError, deletePending, isLast,
 }) => {
   const [showReplies, setShowReplies] = useState(true)
   const isOwner = currentUserId === comment.userId
   const isReplyOpen = activeReplyId === comment.id
+  const isEditOpen = activeEditId === comment.id
   const replyText = replyDrafts[comment.id] || ''
   const replyPhoto = replyPhotos[comment.id] ?? null
+  const editText = editDrafts[comment.id] || ''
+  const editPhoto = editPhotos[comment.id] ?? null
   const canSubmitReply = (replyText.trim().length > 0 || !!replyPhoto) && !createPending
+  const canSubmitEdit = (editText.trim().length > 0 || !!editPhoto) && !editPending
   const hasReplies = !!comment.replies?.length
+  const editTextareaRef = React.useRef<HTMLTextAreaElement | null>(null)
+
+  React.useEffect(() => {
+    if (!isEditOpen || !editTextareaRef.current) return
+
+    const textarea = editTextareaRef.current
+    textarea.focus()
+    const length = textarea.value.length
+    textarea.setSelectionRange(length, length)
+  }, [isEditOpen, editText])
 
   return (
     <div className={`flex gap-2.5 ${depth > 0 ? '' : ''}`}>
@@ -82,6 +106,14 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
               </PopoverTrigger>
               <PopoverContent align="end" className="w-32 p-2" onClick={(e) => e.stopPropagation()}>
                 <div className="flex flex-col gap-1">
+                  <Button
+                    variant="ghost"
+                    className="justify-start gap-2 h-8"
+                    onClick={() => onEditToggle(comment)}
+                  >
+                    <Pencil className="w-4 h-4" />
+                    Edit
+                  </Button>
                   <Button
                     variant="ghost"
                     className="justify-start gap-2 h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
@@ -122,6 +154,49 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
                   <img src={comment.photoUrl} alt="Preview" className="max-w-full max-h-full object-contain" />
                 </DialogContent>
               </Dialog>
+            )}
+          </div>
+        )}
+
+        {isEditOpen && currentUserId && (
+          <div className="mt-2.5 bg-card rounded-xl border border-border/70 overflow-hidden">
+            <textarea
+              ref={editTextareaRef}
+              value={editText}
+              onChange={e => setEditDraft(comment.id, e.target.value)}
+              placeholder="Edit your comment…"
+              rows={2}
+              maxLength={1000}
+              className="w-full px-3 pt-2.5 pb-1.5 text-sm bg-transparent resize-none focus:outline-none text-foreground placeholder:text-muted-foreground"
+            />
+            <div className="flex items-center justify-between px-2 pb-2">
+              <PhotoUpload
+                value={editPhoto ? [editPhoto] : []}
+                onChange={urls => setEditPhoto(comment.id, urls[0] ?? null)}
+                maxPhotos={1}
+                disabled={editPending}
+              />
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => onEditToggle(comment)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                >
+                  Cancel
+                </button>
+                <span className="text-sm text-muted-foreground tabular-nums">{editText.length}/1000</span>
+                <button
+                  type="button"
+                  onClick={() => submitEdit(comment.id)}
+                  disabled={!canSubmitEdit}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-full hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  {editPending ? 'Saving…' : 'Save'}
+                </button>
+              </div>
+            </div>
+            {editError && (
+              <p className="text-sm text-destructive px-3 pb-2">Failed to save. Try again.</p>
             )}
           </div>
         )}
@@ -202,15 +277,24 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
                 currentUserId={currentUserId}
                 onVote={onVote}
                 onDelete={onDelete}
+                onEditToggle={onEditToggle}
                 onReplyToggle={onReplyToggle}
                 activeReplyId={activeReplyId}
+                activeEditId={activeEditId}
                 replyDrafts={replyDrafts}
                 replyPhotos={replyPhotos}
+                editDrafts={editDrafts}
+                editPhotos={editPhotos}
                 setReplyDraft={setReplyDraft}
                 setReplyPhoto={setReplyPhoto}
+                setEditDraft={setEditDraft}
+                setEditPhoto={setEditPhoto}
                 submitReply={submitReply}
+                submitEdit={submitEdit}
                 createPending={createPending}
                 createError={createError}
+                editPending={editPending}
+                editError={editError}
                 deletePending={deletePending}
                 isLast={i === comment.replies!.length - 1}
               />
@@ -234,8 +318,11 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
   const [newComment, setNewComment]       = useState('')
   const [newPhoto, setNewPhoto]           = useState<string | null>(null)
   const [activeReplyId, setActiveReplyId] = useState<number | null>(null)
+  const [activeEditId, setActiveEditId]   = useState<number | null>(null)
   const [replyDrafts, setReplyDrafts]     = useState<Record<number, string>>({})
   const [replyPhotos, setReplyPhotos]     = useState<Record<number, string | null>>({})
+  const [editDrafts, setEditDrafts]       = useState<Record<number, string>>({})
+  const [editPhotos, setEditPhotos]       = useState<Record<number, string | null>>({})
 
   const [sort, setSort] = useState<'top' | 'new'>('top')
 
@@ -279,6 +366,21 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
     onError: (err: Error) => toast.error(err.message),
   })
 
+  const editMutation = useMutation({
+    mutationFn: ({ commentId, content, photoUrl }: {
+      commentId: number; content: string; photoUrl?: string
+    }) => updateComment({ postId, commentId, content, photoUrl }),
+    onSuccess: () => {
+      setActiveEditId(null)
+      toast.success('Comment updated')
+      queryClient.invalidateQueries({ queryKey: ['comments', postId] })
+      queryClient.invalidateQueries({ queryKey: ['post', postId] })
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+      queryClient.invalidateQueries({ queryKey: ['user-posts'] })
+    },
+    onError: (err: Error) => toast.error(err.message),
+  })
+
   const deleteMutation = useMutation({
     mutationFn: (commentId: number) => deleteComment(postId, commentId),
     onSuccess: () => {
@@ -303,6 +405,19 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
     voteMutation.mutate({ commentId: comment.id, value: voteValue })
   }
 
+  const toggleEdit = (comment: Comment) => {
+    setActiveEditId(prev => {
+      const next = prev === comment.id ? null : comment.id
+
+      if (next === comment.id) {
+        setEditDrafts(current => ({ ...current, [comment.id]: comment.content || '' }))
+        setEditPhotos(current => ({ ...current, [comment.id]: comment.photoUrl ?? null }))
+      }
+
+      return next
+    })
+  }
+
   const toggleReply = (commentId: number | null) =>
     setActiveReplyId(prev => prev === commentId ? null : commentId)
 
@@ -312,11 +427,24 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
   const handleReplyPhoto = (commentId: number, url: string | null) =>
     setReplyPhotos(prev => ({ ...prev, [commentId]: url }))
 
+  const handleEditChange = (commentId: number, value: string) =>
+    setEditDrafts(prev => ({ ...prev, [commentId]: value }))
+
+  const handleEditPhoto = (commentId: number, url: string | null) =>
+    setEditPhotos(prev => ({ ...prev, [commentId]: url }))
+
   const submitReply = (commentId: number) => {
     const text = (replyDrafts[commentId] || '').trim()
     const photo = replyPhotos[commentId] ?? undefined
     if (!text && !photo) return
     createMutation.mutate({ content: text, photoUrl: photo, parentCommentId: commentId })
+  }
+
+  const submitEdit = (commentId: number) => {
+    const text = (editDrafts[commentId] || '').trim()
+    const photo = editPhotos[commentId] ?? undefined
+    if (!text && !photo) return
+    editMutation.mutate({ commentId, content: text, photoUrl: photo })
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -430,15 +558,24 @@ export function Comments({ postId, currentUserId }: CommentsProps) {
               depth={0}
               onVote={handleVote}
               onDelete={(id) => deleteMutation.mutate(id)}
+              onEditToggle={toggleEdit}
               onReplyToggle={toggleReply}
               activeReplyId={activeReplyId}
+              activeEditId={activeEditId}
               replyDrafts={replyDrafts}
               replyPhotos={replyPhotos}
+              editDrafts={editDrafts}
+              editPhotos={editPhotos}
               setReplyDraft={handleReplyChange}
               setReplyPhoto={handleReplyPhoto}
+              setEditDraft={handleEditChange}
+              setEditPhoto={handleEditPhoto}
               submitReply={submitReply}
+              submitEdit={submitEdit}
               createPending={createMutation.isPending}
               createError={createMutation.isError}
+              editPending={editMutation.isPending}
+              editError={editMutation.isError}
               deletePending={deleteMutation.isPending}
               isLast={i === comments.length - 1}
             />
