@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Reply, Trash2, X, Clock, TrendingUp } from 'lucide-react'
+import { Reply, Trash2, X, Clock, TrendingUp, Menu } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { UserAvatar } from './UserAvatar'
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from './ui/dialog'
+import { Button } from './ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { formatRelativeTime } from '../lib/utils/date'
 import { isValidPhotoUrl } from '../lib/utils/validation'
 import type { Comment } from '../types/posts'
@@ -57,16 +59,46 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
       />
 
       <div className={`flex-1 min-w-0 pb-3 ${!isLast && depth === 0 ? 'border-b border-border/60' : ''}`}>
-        <div className="flex items-center gap-2 mb-1.5">
-          {!comment.isDeleted && (
-            <UserAvatar url={comment.userPhotoUrl} username={comment.userName} className="w-6 h-6" />
+        <div className="flex items-center justify-between gap-2 mb-1.5">
+          <div className="flex items-center gap-2 min-w-0">
+            {!comment.isDeleted && (
+              <UserAvatar url={comment.userPhotoUrl} username={comment.userName} className="w-6 h-6" />
+            )}
+            <span className="text-sm font-medium text-foreground">
+              {comment.isDeleted ? 'deleted' : (comment.userName || 'Anonymous')}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {formatRelativeTime(comment.createdAt)}
+            </span>
+          </div>
+          {isOwner && !comment.isDeleted && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                </div>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-32 p-2" onClick={(e) => e.stopPropagation()}>
+                <div className="flex flex-col gap-1">
+                  <Button
+                    variant="ghost"
+                    className="justify-start gap-2 h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => {
+                      if (window.confirm('Delete this comment? This cannot be undone.')) {
+                        onDelete(comment.id)
+                      }
+                    }}
+                    disabled={deletePending}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    {deletePending ? 'Deleting…' : 'Delete'}
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
           )}
-          <span className="text-sm font-medium text-foreground">
-            {comment.isDeleted ? 'deleted' : (comment.userName || 'Anonymous')}
-          </span>
-          <span className="text-sm text-muted-foreground">
-            {formatRelativeTime(comment.createdAt)}
-          </span>
         </div>
 
         {comment.isDeleted ? (
@@ -108,17 +140,6 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
               >
                 {isReplyOpen ? <X size={12} /> : <Reply size={12} />}
                 {isReplyOpen ? 'Cancel' : 'Reply'}
-              </button>
-            )}
-            {isOwner && (
-              <button
-                type="button"
-                onClick={() => onDelete(comment.id)}
-                disabled={deletePending}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors disabled:opacity-40"
-              >
-                <Trash2 size={12} />
-                Delete
               </button>
             )}
             {hasReplies && (
