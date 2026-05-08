@@ -30,15 +30,17 @@ public class PlacesController : ControllerBase
         [FromQuery] double? maxLng = null,
         [FromQuery] int? userId = null)
     {
+        int currentUserId = User.GetUserId();
         IEnumerable<PlaceResponse> result = await _placeService.GetPlacesAsync(
-            communityIds, minLat, maxLat, minLng, maxLng, userId);
+            communityIds, minLat, maxLat, minLng, maxLng, userId, currentUserId);
         return Ok(result);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<PlaceResponse>> GetPlace(int id)
     {
-        Result<PlaceResponse> result = await _placeService.GetPlaceByIdAsync(id);
+        int currentUserId = User.GetUserId();
+        Result<PlaceResponse> result = await _placeService.GetPlaceByIdAsync(id, currentUserId);
         return result.ToActionResult(this);
     }
 
@@ -62,6 +64,20 @@ public class PlacesController : ControllerBase
         int userId = User.GetUserId();
         Result<PlaceResponse> result = await _placeService.UpdatePlaceAsync(id, userId, request);
         return result.ToActionResult(this);
+    }
+
+    [HttpPost("{id}/vote")]
+    public async Task<ActionResult> VotePlace(int id, VotePlaceRequest request)
+    {
+        int userId = User.GetUserId();
+        Result<bool> result = await _placeService.VotePlaceAsync(id, userId, request.Value);
+
+        if (!result.IsSuccess)
+        {
+            return result.ToActionResult(this);
+        }
+
+        return Ok(new { message = "Vote recorded." });
     }
 
     [HttpDelete("{id}")]

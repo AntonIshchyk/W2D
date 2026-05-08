@@ -12,6 +12,7 @@ import { CreatePost } from './components/CreatePost'
 import { EditPost } from './components/EditPost'
 import { EditPlace } from './components/EditPlace'
 import { PostDetail } from './components/PostDetail'
+import { PlaceDetail } from './components/PlaceDetail'
 import { useAuthSync } from './hooks/useAuthSync'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
@@ -29,6 +30,7 @@ function App() {
         <Route path="/profile/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
         <Route path="/places" element={<ProtectedRoute><Places /></ProtectedRoute>} />
         <Route path="/places/create" element={<ProtectedRoute><CreatePlace /></ProtectedRoute>} />
+        <Route path="/places/:id" element={<ProtectedRoute><PlaceDetail /></ProtectedRoute>} />
         <Route path="/places/:placeId/edit" element={<ProtectedRoute><EditPlace /></ProtectedRoute>} />
         <Route path="/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
         <Route path="/posts/create" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />

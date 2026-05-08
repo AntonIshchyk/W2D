@@ -70,7 +70,8 @@ export interface Comment {
   userId: number
   userName?: string
   userPhotoUrl?: string
-  postId: number
+  postId?: number | null
+  placeId?: number | null
   score: number
   photoUrl?: string
   createdAt: string

@@ -11,9 +11,11 @@ public class Comment : BaseModel
     public int UserId { get; set; }
     public User User { get; set; } = null!;
 
-    [Required]
-    public int PostId { get; set; }
-    public Post Post { get; set; } = null!;
+    public int? PostId { get; set; }
+    public Post? Post { get; set; }
+
+    public int? PlaceId { get; set; }
+    public Place? Place { get; set; }
     public int Score { get; set; }
     public bool IsDeleted { get; set; } = false;
 

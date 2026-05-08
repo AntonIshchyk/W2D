@@ -13,6 +13,9 @@ public class PlaceResponse
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
     public string? LocationName { get; set; }
+    public int Score { get; set; }
+    public int CommentCount { get; set; }
+    public int? CurrentUserVote { get; set; }
     public List<string> PhotoUrls { get; set; } = new();
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }

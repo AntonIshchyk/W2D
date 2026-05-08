@@ -23,8 +23,15 @@ public class Place : BaseModel
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
 
+    public int Score { get; set; }
+
+    public int CommentCount { get; set; }
+
     [MaxLength(255)]
     public string? LocationName { get; set; }
 
     public List<string> PhotoUrls { get; set; } = new();
+
+    public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+    public ICollection<PlaceVote> Votes { get; set; } = new List<PlaceVote>();
 }

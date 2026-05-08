@@ -23,11 +23,24 @@ import { PlaceCard } from './PlaceCard'
 import { cn } from '../lib/utils'
 import { useCitySearch } from '../hooks/useCitySearch'
 import { fetchPlaces, reverseGeocode } from '../api/places'
+import { votePlace } from '../api/places'
 import { fetchCommunities } from '../api/communities'
 import { loadMapState, DEFAULT_CENTER, DEFAULT_ZOOM } from '../utils/mapState'
 import type { CitySearchResult, Place, PlaceQueryBounds, ViewMode } from '../types/places'
 import { EmptyState } from './ui/empty-state'
 import { useCurrentUser } from '../hooks/useCurrentUser'
+import { useEntityVoteMutation } from '../hooks/useEntityVoteMutation'
+
+function applyPlaceVote(place: Place, currentVote: number | undefined | null, newValue: number): Place {
+  const nextVote = currentVote === newValue ? 0 : newValue
+  const delta = nextVote - (currentVote ?? 0)
+
+  return {
+    ...place,
+    currentUserVote: nextVote,
+    score: place.score + delta,
+  }
+}
 
 export function Places() {
   const navigate = useNavigate()
@@ -65,9 +78,15 @@ export function Places() {
   })
 
   const effectiveBounds = searchBounds ?? debouncedBounds
+  const placesQueryKey = ['places', selectedCommunities, effectiveBounds]
   const { data: allPlaces = [], isLoading: placesLoading } = useQuery({
-    queryKey: ['places', selectedCommunities, effectiveBounds],
+    queryKey: placesQueryKey,
     queryFn: () => fetchPlaces(selectedCommunities, effectiveBounds),
+  })
+  const { handleVote: votePlaceMutation } = useEntityVoteMutation({
+    queryKey: placesQueryKey,
+    mutationFn: votePlace,
+    invalidateKeys: [['places'], ['place']],
   })
 
   useEffect(() => {
@@ -185,6 +204,18 @@ export function Places() {
     }
   }
 
+  const handlePlaceVote = (placeId: number, currentVote: number | undefined | null, newValue: number) => {
+    setSelectedPlace((current) => {
+      if (!current || current.id !== placeId) {
+        return current
+      }
+
+      return applyPlaceVote(current, currentVote, newValue)
+    })
+
+    votePlaceMutation(placeId, currentVote, newValue)
+  }
+
   return (
     <PageLayout fullWidth>
       <div className="relative w-full h-dvh flex flex-col overflow-hidden">
@@ -268,14 +299,14 @@ export function Places() {
                   className="h-9"
                   onClick={handleUseMyLocation}
                   disabled={isGettingLocation}
-                  title="Use my location"
+                  title="Near me"
                 >
                   <>
                     {isGettingLocation
                       ? <Loader2 className="h-4 w-4 animate-spin" />
                       : <MapPin className="h-4 w-4" />
                     }
-                    <span className="hidden sm:inline">Use my location</span>
+                    <span className="hidden sm:inline">Near me</span>
                   </>
                 </Button>
               </div>
@@ -404,7 +435,7 @@ export function Places() {
           )  : (
               <div className="max-w-3xl mx-auto space-y-6">
                 {allPlaces.map((place) => (
-                  <PlaceCard key={place.id} place={place} currentUser={currentUser} className={placeCardClassName} onDelete={handlePlaceDelete} />
+                  <PlaceCard key={place.id} place={place} currentUser={currentUser} className={placeCardClassName} onDelete={handlePlaceDelete} onVote={handlePlaceVote} />
                 ))}
               </div>
             )}
@@ -420,7 +451,7 @@ export function Places() {
           )}
           aria-hidden={!selectedPlace || viewMode !== 'map'}
         >
-          {selectedPlace && <PlaceCard place={selectedPlace} currentUser={currentUser} className={placeCardClassName} onDelete={handlePlaceDelete} />}
+          {selectedPlace && <PlaceCard place={selectedPlace} currentUser={currentUser} className={placeCardClassName} onDelete={handlePlaceDelete} onVote={handlePlaceVote} />}
         </div>
       </div>
     </PageLayout>

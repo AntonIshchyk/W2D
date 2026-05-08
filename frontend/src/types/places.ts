@@ -15,6 +15,9 @@ export interface Place {
   latitude?: number
   longitude?: number
   locationName?: string
+  score: number
+  commentCount: number
+  currentUserVote?: number | null
   photoUrls: string[]
   createdAt: string
   updatedAt: string

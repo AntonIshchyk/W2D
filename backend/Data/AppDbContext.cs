@@ -25,6 +25,7 @@ public class AppDbContext : DbContext
     public DbSet<Comment> Comments { get; set; }
     public DbSet<CommentVote> CommentVotes { get; set; }
     public DbSet<Place> Places { get; set; }
+    public DbSet<PlaceVote> PlaceVotes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -136,15 +137,18 @@ public class AppDbContext : DbContext
             .HasForeignKey(c => c.PostId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        modelBuilder.Entity<Comment>()
+            .HasOne(c => c.Place)
+            .WithMany(p => p.Comments)
+            .HasForeignKey(c => c.PlaceId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         // Comment - Parent/Replies self-referencing relationship
         modelBuilder.Entity<Comment>()
             .HasOne(c => c.ParentComment)
             .WithMany(c => c.Replies)
             .HasForeignKey(c => c.ParentCommentId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<Comment>()
-            .HasIndex(c => c.PostId);
 
         modelBuilder.Entity<Comment>()
             .HasIndex(c => c.UserId);
@@ -156,6 +160,10 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Comment>()
             .HasIndex(c => new { c.PostId, c.ParentCommentId })
             .HasDatabaseName("IX_Comments_PostId_ParentCommentId");
+
+        modelBuilder.Entity<Comment>()
+            .HasIndex(c => new { c.PlaceId, c.ParentCommentId })
+            .HasDatabaseName("IX_Comments_PlaceId_ParentCommentId");
 
         // Soft delete global query filter
         modelBuilder.Entity<Comment>().HasQueryFilter(c => !c.IsDeleted);
@@ -208,6 +216,27 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Place>()
             .HasIndex(e => e.CommunityId)
             .HasDatabaseName("IX_Places_CommunityId");
+
+        modelBuilder.Entity<Place>()
+            .HasIndex(e => e.Score)
+            .HasDatabaseName("IX_Places_Score");
+
+        modelBuilder.Entity<Place>()
+            .HasIndex(e => e.CreatedAt)
+            .HasDatabaseName("IX_Places_CreatedAt");
+
+        modelBuilder.Entity<Place>()
+            .HasMany(e => e.Votes)
+            .WithOne(v => v.Place)
+            .HasForeignKey(v => v.PlaceId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PlaceVote>()
+            .HasIndex(v => new { v.UserId, v.PlaceId })
+            .IsUnique();
+
+        modelBuilder.Entity<PlaceVote>()
+            .HasIndex(v => v.PlaceId);
 
         // Seed database with communities, communities
         DatabaseSeeder.SeedData(modelBuilder);
