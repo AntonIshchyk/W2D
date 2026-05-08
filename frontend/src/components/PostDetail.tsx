@@ -8,16 +8,17 @@ import {
 import { PageLayout } from './Navbar'
 import { PostType } from '../types/posts'
 import { useCurrentUser } from '../hooks/useCurrentUser'
-import { usePostVoteMutation } from '../hooks/usePostVoteMutation'
+import { useEntityVoteMutation } from '../hooks/useEntityVoteMutation'
 import { formatRelativeTime } from '../lib/utils/date'
 import { getGoogleMapsUrl } from '../lib/utils/maps'
-import { Comments } from './Comments'
+import { Comments } from './EntityComments'
 import { PhotoCarousel } from './PhotoCarousel'
 import { fetchPost, deletePost } from '../api/posts'
 import { PostAuthorInfo } from './PostAuthorInfo'
 import { VoteButtons } from './VoteButtons'
 import { Button } from './ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
+import { votePost } from '../api/posts'
 
 export function PostDetail() {
   const { id } = useParams<{ id: string }>()
@@ -30,7 +31,11 @@ export function PostDetail() {
     enabled: !!id && !isNaN(Number(id)),
   })
 
-  const { handlePostVote: handleVoteMutation, voteMutation } = usePostVoteMutation(['post', id])
+  const { handleVote: handleVoteMutation, voteMutation } = useEntityVoteMutation({
+    queryKey: ['post', id],
+    mutationFn: votePost,
+    invalidateKeys: [['posts'], ['user-posts']],
+  })
 
   const deleteMutation = useMutation({
     mutationFn: deletePost,
@@ -180,7 +185,7 @@ export function PostDetail() {
               </div>
             </div>
 
-            <Comments postId={post.id} currentUserId={currentUser?.userId} />
+            <Comments target="posts" entityId={post.id} currentUserId={currentUser?.userId} />
           </article>
         </div>
       </PageLayout>

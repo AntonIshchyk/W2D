@@ -14,6 +14,10 @@ export const API_ENDPOINTS = {
   places: {
     base: `${API_BASE_URL}/api/places`,
     byId: (id: number) => `${API_BASE_URL}/api/places/${id}`,
+    vote: (id: number) => `${API_BASE_URL}/api/places/${id}/vote`,
+    comments: (placeId: number) => `${API_BASE_URL}/api/places/${placeId}/comments`,
+    commentById: (placeId: number, commentId: number) => `${API_BASE_URL}/api/places/${placeId}/comments/${commentId}`,
+    commentVote: (placeId: number, commentId: number) => `${API_BASE_URL}/api/places/${placeId}/comments/${commentId}/vote`,
   },
   posts: {
     base: `${API_BASE_URL}/api/posts`,

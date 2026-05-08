@@ -11,6 +11,12 @@ namespace Backend.Services;
 
 public class CommentService : ICommentService
 {
+    private enum CommentTarget
+    {
+        Post,
+        Place
+    }
+
     private static Expression<Func<Comment, CommentResponse>> ProjectComment(int? currentUserId)
     {
         return c => new CommentResponse
@@ -21,6 +27,7 @@ public class CommentService : ICommentService
             UserName = c.IsDeleted ? null : c.User.Username,
             UserPhotoUrl = c.IsDeleted ? null : c.User.ProfilePhotoUrl,
             PostId = c.PostId,
+            PlaceId = c.PlaceId,
             Score = c.Score,
             PhotoUrl = c.PhotoUrl,
             CurrentUserVote = currentUserId.HasValue
@@ -48,10 +55,25 @@ public class CommentService : ICommentService
 
     public async Task<List<CommentResponse>> GetCommentsAsync(int postId, int? currentUserId = null)
     {
-        var allComments = await _context.Comments
+        return await GetCommentsAsync(CommentTarget.Post, postId, currentUserId);
+    }
+
+    public async Task<List<CommentResponse>> GetPlaceCommentsAsync(int placeId, int? currentUserId = null)
+    {
+        return await GetCommentsAsync(CommentTarget.Place, placeId, currentUserId);
+    }
+
+    private async Task<List<CommentResponse>> GetCommentsAsync(CommentTarget target, int entityId, int? currentUserId = null)
+    {
+        IQueryable<Comment> query = _context.Comments
             .AsNoTracking()
-            .IgnoreQueryFilters()
-            .Where(c => c.PostId == postId)
+            .IgnoreQueryFilters();
+
+        query = target == CommentTarget.Post
+            ? query.Where(c => c.PostId == entityId)
+            : query.Where(c => c.PlaceId == entityId);
+
+        var allComments = await query
             .OrderByDescending(c => c.Score)
             .ThenByDescending(c => c.CreatedAt)
             .Select(ProjectComment(currentUserId))
@@ -94,6 +116,16 @@ public class CommentService : ICommentService
 
     public async Task<Result<CommentResponse>> CreateCommentAsync(int postId, CreateCommentRequest request, int userId)
     {
+        return await CreateCommentAsync(CommentTarget.Post, postId, request, userId);
+    }
+
+    public async Task<Result<CommentResponse>> CreatePlaceCommentAsync(int placeId, CreateCommentRequest request, int userId)
+    {
+        return await CreateCommentAsync(CommentTarget.Place, placeId, request, userId);
+    }
+
+    private async Task<Result<CommentResponse>> CreateCommentAsync(CommentTarget target, int entityId, CreateCommentRequest request, int userId)
+    {
         if (!PhotoUrlValidationExtensions.TryValidateOptionalPhotoUrl(request.PhotoUrl, nameof(request.PhotoUrl), out string? photoUrlError))
         {
             return Result<CommentResponse>.Invalid(photoUrlError!);
@@ -106,20 +138,33 @@ public class CommentService : ICommentService
 
         Comment comment = _mapper.Map<Comment>(request);
         comment.UserId = userId;
-        comment.PostId = postId;
-
-        bool postExists = await _context.Posts.AnyAsync(p => p.Id == postId);
-        if (!postExists)
+        if (target == CommentTarget.Post)
         {
-            return Result<CommentResponse>.NotFound("Post not found.");
+            comment.PostId = entityId;
+
+            bool postExists = await _context.Posts.AnyAsync(p => p.Id == entityId);
+            if (!postExists)
+            {
+                return Result<CommentResponse>.NotFound("Post not found.");
+            }
+        }
+        else
+        {
+            comment.PlaceId = entityId;
+
+            bool placeExists = await _context.Places.AnyAsync(p => p.Id == entityId);
+            if (!placeExists)
+            {
+                return Result<CommentResponse>.NotFound("Place not found.");
+            }
         }
 
         if (request.ParentCommentId.HasValue)
         {
-            bool parentExists = await _context.Comments.AnyAsync(
-                c => c.Id == request.ParentCommentId.Value &&
-                     c.PostId == postId &&
-                     !c.IsDeleted);
+            bool parentExists = await _context.Comments.AnyAsync(c =>
+                c.Id == request.ParentCommentId.Value &&
+                !c.IsDeleted &&
+                (target == CommentTarget.Post ? c.PostId == entityId : c.PlaceId == entityId));
 
             if (!parentExists)
             {
@@ -132,9 +177,18 @@ public class CommentService : ICommentService
         _context.Comments.Add(comment);
         await _context.SaveChangesAsync();
 
-        await _context.Posts
-            .Where(p => p.Id == postId)
-            .ExecuteUpdateAsync(s => s.SetProperty(p => p.CommentCount, p => p.CommentCount + 1));
+        if (target == CommentTarget.Post)
+        {
+            await _context.Posts
+                .Where(p => p.Id == entityId)
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.CommentCount, p => p.CommentCount + 1));
+        }
+        else
+        {
+            await _context.Places
+                .Where(p => p.Id == entityId)
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.CommentCount, p => p.CommentCount + 1));
+        }
 
         await tx.CommitAsync();
 
@@ -154,6 +208,16 @@ public class CommentService : ICommentService
 
     public async Task<Result<CommentResponse>> UpdateCommentAsync(int postId, int commentId, UpdateCommentRequest request, int userId)
     {
+        return await UpdateCommentAsync(CommentTarget.Post, postId, commentId, request, userId);
+    }
+
+    public async Task<Result<CommentResponse>> UpdatePlaceCommentAsync(int placeId, int commentId, UpdateCommentRequest request, int userId)
+    {
+        return await UpdateCommentAsync(CommentTarget.Place, placeId, commentId, request, userId);
+    }
+
+    private async Task<Result<CommentResponse>> UpdateCommentAsync(CommentTarget target, int entityId, int commentId, UpdateCommentRequest request, int userId)
+    {
         if (!PhotoUrlValidationExtensions.TryValidateOptionalPhotoUrl(request.PhotoUrl, nameof(request.PhotoUrl), out string? photoUrlError))
         {
             return Result<CommentResponse>.Invalid(photoUrlError!);
@@ -165,7 +229,7 @@ public class CommentService : ICommentService
         }
 
         Comment? comment = await _context.Comments
-            .FirstOrDefaultAsync(c => c.Id == commentId && c.PostId == postId);
+            .FirstOrDefaultAsync(c => c.Id == commentId && (target == CommentTarget.Post ? c.PostId == entityId : c.PlaceId == entityId));
 
         if (comment == null)
         {
@@ -199,8 +263,18 @@ public class CommentService : ICommentService
 
     public async Task<Result<bool>> DeleteCommentAsync(int postId, int commentId, int userId)
     {
+        return await DeleteCommentAsync(CommentTarget.Post, postId, commentId, userId);
+    }
+
+    public async Task<Result<bool>> DeletePlaceCommentAsync(int placeId, int commentId, int userId)
+    {
+        return await DeleteCommentAsync(CommentTarget.Place, placeId, commentId, userId);
+    }
+
+    private async Task<Result<bool>> DeleteCommentAsync(CommentTarget target, int entityId, int commentId, int userId)
+    {
         Comment? comment = await _context.Comments
-            .FirstOrDefaultAsync(c => c.Id == commentId && c.PostId == postId);
+            .FirstOrDefaultAsync(c => c.Id == commentId && (target == CommentTarget.Post ? c.PostId == entityId : c.PlaceId == entityId));
 
         if (comment == null || comment.IsDeleted)
         {
@@ -218,9 +292,18 @@ public class CommentService : ICommentService
         comment.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
-        await _context.Posts
-            .Where(p => p.Id == comment.PostId)
-            .ExecuteUpdateAsync(p => p.SetProperty(x => x.CommentCount, x => x.CommentCount - 1));
+        if (target == CommentTarget.Post)
+        {
+            await _context.Posts
+                .Where(p => p.Id == entityId)
+                .ExecuteUpdateAsync(p => p.SetProperty(x => x.CommentCount, x => x.CommentCount - 1));
+        }
+        else
+        {
+            await _context.Places
+                .Where(p => p.Id == entityId)
+                .ExecuteUpdateAsync(p => p.SetProperty(x => x.CommentCount, x => x.CommentCount - 1));
+        }
 
         await tx.CommitAsync();
 
@@ -229,13 +312,23 @@ public class CommentService : ICommentService
 
     public async Task<Result<bool>> VoteCommentAsync(int postId, int commentId, int userId, int value)
     {
+        return await VoteCommentAsync(CommentTarget.Post, postId, commentId, userId, value);
+    }
+
+    public async Task<Result<bool>> VotePlaceCommentAsync(int placeId, int commentId, int userId, int value)
+    {
+        return await VoteCommentAsync(CommentTarget.Place, placeId, commentId, userId, value);
+    }
+
+    private async Task<Result<bool>> VoteCommentAsync(CommentTarget target, int entityId, int commentId, int userId, int value)
+    {
         if (value is not (-1 or 0 or 1))
         {
             return Result<bool>.Invalid("Vote value must be -1, 0, or 1.");
         }
 
         bool commentExists = await _context.Comments
-            .AnyAsync(c => c.Id == commentId && c.PostId == postId && !c.IsDeleted);
+            .AnyAsync(c => c.Id == commentId && !c.IsDeleted && (target == CommentTarget.Post ? c.PostId == entityId : c.PlaceId == entityId));
 
         if (!commentExists)
         {

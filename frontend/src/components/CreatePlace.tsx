@@ -108,6 +108,8 @@ export function CreatePlace() {
     latitude: location?.lat,
     longitude: location?.lng,
     locationName: locationInput || 'Choose a spot on the map',
+    score: 0,
+    commentCount: 0,
     photoUrls: photoUrls ?? [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),

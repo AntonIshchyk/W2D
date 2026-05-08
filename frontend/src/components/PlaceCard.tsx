@@ -1,5 +1,5 @@
-import { MapPin, Users, Menu, Pencil, Trash2 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { MapPin, Users, Menu, Pencil, Trash2, MessageSquare, Clock } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { getGoogleMapsUrl } from '../lib/utils/maps'
 import { PhotoCarousel } from './PhotoCarousel'
@@ -11,17 +11,19 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { deletePlace } from '../api/places'
 import { toast } from 'sonner'
 import type { UserInfo } from '../lib/auth'
+import { VoteButtons } from './VoteButtons'
+import { formatRelativeTime } from '../lib/utils/date'
 
 interface PlaceCardProps {
   place: Place
   currentUser?: UserInfo | null
-  onClick?: (place: Place) => void
   onDelete?: (placeId: number) => void
+  onVote?: (placeId: number, currentVote: number | undefined | null, newValue: number) => void
   className?: string
   isPreview?: boolean
 }
 
-export function PlaceCard({ place, currentUser, onClick, onDelete, className, isPreview }: PlaceCardProps) {
+export function PlaceCard({ place, currentUser, onDelete, onVote, className, isPreview }: PlaceCardProps) {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   
@@ -36,15 +38,10 @@ export function PlaceCard({ place, currentUser, onClick, onDelete, className, is
     onError: (e: Error) => toast.error(e.message),
   })
 
-  type DivProps = { role?: string; tabIndex?: number }
-  const ContainerProps: DivProps = isPreview ? {} : { role: 'button', tabIndex: 0 }
   const googleMapsUrl = getGoogleMapsUrl(place.latitude, place.longitude, place.locationName)
 
   return (
     <div
-      {...ContainerProps}
-      onClick={isPreview ? undefined : () => onClick?.(place)}
-      onKeyDown={isPreview ? undefined : (e) => e.key === 'Enter' && onClick?.(place)}
       className={cn(
         'group bg-card border border-border/50 rounded-3xl p-5 md:p-6 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 flex flex-col',
         className,
@@ -108,9 +105,17 @@ export function PlaceCard({ place, currentUser, onClick, onDelete, className, is
       </div>
 
       <div className="flex-1">
-        <h3 className={`font-bold text-xl md:text-2xl text-foreground ${place.locationName ? 'mb-2' : 'mb-2'} wrap-break-word break-all whitespace-normal line-clamp-2`}>
-          {place.title}
-        </h3>
+        {isPreview ? (
+          <h3 className={`font-bold text-xl md:text-2xl text-foreground ${place.locationName ? 'mb-2' : 'mb-2'} wrap-break-word break-all whitespace-normal line-clamp-2`}>
+            {place.title}
+          </h3>
+        ) : (
+          <Link to={`/places/${place.id}`} onClick={(e) => e.stopPropagation()}>
+            <h3 className={`font-bold text-xl md:text-2xl text-foreground ${place.locationName ? 'mb-2' : 'mb-2'} group-hover:text-primary transition-colors wrap-break-word break-all whitespace-normal line-clamp-2`}>
+              {place.title}
+            </h3>
+          </Link>
+        )}
 
         {place.locationName && (
           googleMapsUrl ? (
@@ -143,6 +148,38 @@ export function PlaceCard({ place, currentUser, onClick, onDelete, className, is
             {place.description}
           </p>
         )}
+      </div>
+
+      <div className="flex items-center justify-between mt-5 pt-4 border-t border-border/40">
+        <div className="flex items-center gap-3">
+          <VoteButtons
+            score={place.score}
+            currentUserVote={place.currentUserVote ?? undefined}
+            onVote={(value) => onVote?.(place.id, place.currentUserVote ?? undefined, value)}
+            disabled={isPreview || !currentUser || !onVote}
+          />
+
+          {isPreview ? (
+            <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground px-3 py-2 rounded-full bg-muted/40 border border-border/50">
+              <MessageSquare className="w-4 h-4" />
+              <span>{place.commentCount}</span>
+            </div>
+          ) : (
+            <Link
+              to={`/places/${place.id}`}
+              className="flex items-center gap-2 text-sm font-bold hover:bg-muted/50 px-3 py-2 rounded-full transition-colors border border-transparent hover:border-border/50 bg-muted/40"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span>{place.commentCount}</span>
+            </Link>
+          )}
+
+          <div className="flex items-center gap-1.5 text-sm font-bold bg-muted/40 px-3 py-2 rounded-full border border-border/50">
+            <Clock className="w-4 h-4" />
+            <span>{formatRelativeTime(place.createdAt)}</span>
+          </div>
+        </div>
       </div>
     </div>
   )

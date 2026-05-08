@@ -127,6 +127,16 @@ export async function deletePlace(id: number): Promise<void> {
   await ensureResponseOk(response, 'Failed to delete place')
 }
 
+export async function votePlace(placeId: number, value: number): Promise<void> {
+  const response = await fetch(API_ENDPOINTS.places.vote(placeId), {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ value }),
+  })
+
+  await ensureResponseOk(response, 'Failed to vote on place')
+}
+
 export async function searchCities(query: string): Promise<CitySearchResult[]> {
   const response = await fetch(
     `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=8`

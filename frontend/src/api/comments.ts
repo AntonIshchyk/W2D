@@ -2,28 +2,37 @@ import { API_ENDPOINTS, getAuthHeaders } from '../config/api'
 import { ensureResponseOk, sendVoteRequest } from '../lib/utils/http'
 import type { Comment } from '../types/posts'
 
+export type CommentTarget = 'posts' | 'places'
+
+function getCommentRoutes(target: CommentTarget) {
+  return target === 'posts' ? API_ENDPOINTS.posts : API_ENDPOINTS.places
+}
+
 export interface CreateCommentParams {
-  postId: number
+  target: CommentTarget
+  entityId: number
   content?: string
   photoUrl?: string
   parentCommentId?: number
 }
 
 export interface UpdateCommentParams {
-  postId: number
+  target: CommentTarget
+  entityId: number
   commentId: number
   content?: string
   photoUrl?: string
 }
 
-export async function fetchComments(postId: number): Promise<Comment[]> {
-  const response = await fetch(API_ENDPOINTS.posts.comments(postId), { headers: getAuthHeaders() })
+export async function fetchComments(target: CommentTarget, entityId: number): Promise<Comment[]> {
+  const response = await fetch(getCommentRoutes(target).comments(entityId), { headers: getAuthHeaders() })
   await ensureResponseOk(response, 'Failed to fetch comments')
   return response.json()
 }
 
 export async function createComment({
-  postId,
+  target,
+  entityId,
   content,
   photoUrl,
   parentCommentId,
@@ -33,7 +42,7 @@ export async function createComment({
   if (photoUrl) body.photoUrl = photoUrl
   if (parentCommentId !== undefined) body.parentCommentId = parentCommentId
 
-  const response = await fetch(API_ENDPOINTS.posts.comments(postId), {
+  const response = await fetch(getCommentRoutes(target).comments(entityId), {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(body),
@@ -42,15 +51,16 @@ export async function createComment({
   return response.json()
 }
 
-export async function deleteComment(postId: number, commentId: number): Promise<void> {
-  const response = await fetch(API_ENDPOINTS.posts.commentById(postId, commentId), {
+export async function deleteComment(target: CommentTarget, entityId: number, commentId: number): Promise<void> {
+  const response = await fetch(getCommentRoutes(target).commentById(entityId, commentId), {
     method: 'DELETE', headers: getAuthHeaders(),
   })
   await ensureResponseOk(response, 'Failed to delete comment')
 }
 
 export async function updateComment({
-  postId,
+  target,
+  entityId,
   commentId,
   content,
   photoUrl,
@@ -59,7 +69,7 @@ export async function updateComment({
   if (content?.trim()) body.content = content.trim()
   if (photoUrl !== undefined) body.photoUrl = photoUrl
 
-  const response = await fetch(API_ENDPOINTS.posts.commentById(postId, commentId), {
+  const response = await fetch(getCommentRoutes(target).commentById(entityId, commentId), {
     method: 'PUT',
     headers: getAuthHeaders(),
     body: JSON.stringify(body),
@@ -69,9 +79,9 @@ export async function updateComment({
   return response.json()
 }
 
-export async function voteComment(postId: number, commentId: number, value: number): Promise<void> {
+export async function voteComment(target: CommentTarget, entityId: number, commentId: number, value: number): Promise<void> {
   await sendVoteRequest(
-    API_ENDPOINTS.posts.commentVote(postId, commentId),
+    getCommentRoutes(target).commentVote(entityId, commentId),
     getAuthHeaders(),
     value,
     'Failed to vote on comment'

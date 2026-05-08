@@ -8,7 +8,8 @@ public class CommentResponse : BaseModel
     public int UserId { get; set; }
     public string? UserName { get; set; }
     public string? UserPhotoUrl { get; set; }
-    public int PostId { get; set; }
+    public int? PostId { get; set; }
+    public int? PlaceId { get; set; }
     public int Score { get; set; }
 
     public int? CurrentUserVote { get; set; }

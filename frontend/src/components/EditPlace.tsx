@@ -117,6 +117,8 @@ export function EditPlace() {
     latitude: location?.lat ?? existingPlace?.latitude,
     longitude: location?.lng ?? existingPlace?.longitude,
     locationName: locationInput || existingPlace?.locationName || 'Choose a spot on the map',
+    score: existingPlace?.score ?? 0,
+    commentCount: existingPlace?.commentCount ?? 0,
     photoUrls: photoUrls ?? [],
     createdAt: existingPlace?.createdAt ?? new Date().toISOString(),
     updatedAt: new Date().toISOString(),

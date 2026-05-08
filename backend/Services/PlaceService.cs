@@ -29,6 +29,8 @@ public class PlaceService : IPlaceService
         CommunityName = e.Community != null ? e.Community.Name : null,
         Latitude = e.Latitude,
         Longitude = e.Longitude,
+        Score = e.Score,
+        CommentCount = e.CommentCount,
         LocationName = e.LocationName,
         PhotoUrls = e.PhotoUrls,
         CreatedAt = e.CreatedAt,
@@ -41,7 +43,8 @@ public class PlaceService : IPlaceService
         double? maxLat = null,
         double? minLng = null,
         double? maxLng = null,
-        int? userId = null)
+        int? userId = null,
+        int? currentUserId = null)
     {
         IQueryable<Place> query = _context.Places
             .AsNoTracking()
@@ -61,28 +64,74 @@ public class PlaceService : IPlaceService
             query = query.Where(e => e.UserId == userId.Value);
         }
 
-        return await query
+        List<Place> items = await query
             .OrderBy(e => e.Id)
             .Take(500)
-            .Select(ProjectPlace)
             .ToListAsync();
+
+        Dictionary<int, int> userVotes = new();
+        if (currentUserId.HasValue && items.Count > 0)
+        {
+            List<int> placeIds = items.Select(p => p.Id).ToList();
+            userVotes = await _context.PlaceVotes
+                .AsNoTracking()
+                .Where(v => v.UserId == currentUserId.Value && placeIds.Contains(v.PlaceId))
+                .ToDictionaryAsync(v => v.PlaceId, v => v.Value);
+        }
+
+        List<int> itemIds = items.Select(p => p.Id).ToList();
+        Dictionary<int, int> commentCounts = new();
+        if (itemIds.Count > 0)
+        {
+            commentCounts = await _context.Comments
+                .AsNoTracking()
+                .Where(c => c.PlaceId.HasValue && itemIds.Contains(c.PlaceId.Value))
+                .GroupBy(c => c.PlaceId!.Value)
+                .Select(g => new { PlaceId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.PlaceId, x => x.Count);
+        }
+
+        return items.Select(p =>
+        {
+            PlaceResponse response = ProjectPlace.Compile().Invoke(p);
+            response.CurrentUserVote = currentUserId.HasValue
+                ? (userVotes.TryGetValue(p.Id, out int voteValue) ? voteValue : 0)
+                : null;
+            response.CommentCount = commentCounts.TryGetValue(p.Id, out int count) ? count : 0;
+            return response;
+        }).ToList();
     }
 
-    public async Task<Result<PlaceResponse>> GetPlaceByIdAsync(int id)
+    public async Task<Result<PlaceResponse>> GetPlaceByIdAsync(int id, int? currentUserId = null)
     {
-        PlaceResponse? e = await _context.Places
+        Place? place = await _context.Places
             .AsNoTracking()
             .Include(e => e.User)
             .Include(e => e.Community)
-            .Select(ProjectPlace)
             .FirstOrDefaultAsync(e => e.Id == id);
 
-        if (e == null)
+        if (place == null)
         {
             return Result<PlaceResponse>.NotFound("Place not found.");
         }
 
-        return Result<PlaceResponse>.Success(e);
+        int? currentUserVote = null;
+        if (currentUserId.HasValue)
+        {
+            PlaceVote? vote = await _context.PlaceVotes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(v => v.UserId == currentUserId.Value && v.PlaceId == id);
+            currentUserVote = vote?.Value ?? 0;
+        }
+
+        int commentCount = await _context.Comments
+            .AsNoTracking()
+            .CountAsync(c => c.PlaceId == id);
+
+        PlaceResponse response = ProjectPlace.Compile().Invoke(place);
+        response.CurrentUserVote = currentUserVote;
+        response.CommentCount = commentCount;
+        return Result<PlaceResponse>.Success(response);
     }
 
     public async Task<Result<PlaceResponse>> CreatePlaceAsync(int userId, CreatePlaceRequest request)
@@ -114,6 +163,8 @@ public class PlaceService : IPlaceService
             CommunityId = request.CommunityId,
             Latitude = request.Latitude,
             Longitude = request.Longitude,
+            Score = 0,
+            CommentCount = 0,
             LocationName = request.LocationName,
             PhotoUrls = request.PhotoUrls,
             CreatedAt = DateTime.UtcNow,
@@ -123,14 +174,7 @@ public class PlaceService : IPlaceService
         _context.Places.Add(eventEntity);
         await _context.SaveChangesAsync();
 
-        PlaceResponse created = await _context.Places
-            .AsNoTracking()
-            .Include(e => e.User)
-            .Include(e => e.Community)
-            .Select(ProjectPlace)
-            .FirstAsync(e => e.Id == eventEntity.Id);
-
-        return Result<PlaceResponse>.Success(created);
+        return await GetPlaceByIdAsync(eventEntity.Id, userId);
     }
 
     public async Task<Result<PlaceResponse>> UpdatePlaceAsync(int id, int userId, UpdatePlaceRequest request)
@@ -170,14 +214,7 @@ public class PlaceService : IPlaceService
         eventEntity.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
-        PlaceResponse updated = await _context.Places
-            .AsNoTracking()
-            .Include(e => e.User)
-            .Include(e => e.Community)
-            .Select(ProjectPlace)
-            .FirstAsync(e => e.Id == eventEntity.Id);
-
-        return Result<PlaceResponse>.Success(updated);
+        return await GetPlaceByIdAsync(eventEntity.Id, userId);
     }
 
     public async Task<Result<bool>> DeletePlaceAsync(int id, int userId)
@@ -199,5 +236,74 @@ public class PlaceService : IPlaceService
         await _context.SaveChangesAsync();
 
         return Result<bool>.Success(true);
+    }
+
+    public async Task<Result<bool>> VotePlaceAsync(int placeId, int userId, int value)
+    {
+        if (value is not (-1 or 0 or 1))
+        {
+            return Result<bool>.Invalid("Vote value must be -1, 0, or 1.");
+        }
+
+        bool placeExists = await _context.Places.AnyAsync(p => p.Id == placeId);
+
+        if (!placeExists)
+        {
+            return Result<bool>.NotFound("Place not found.");
+        }
+
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            PlaceVote? existingVote = await _context.PlaceVotes
+                .FirstOrDefaultAsync(v => v.UserId == userId && v.PlaceId == placeId);
+
+            int scoreDelta = 0;
+
+            if (value == 0)
+            {
+                if (existingVote != null)
+                {
+                    scoreDelta = -existingVote.Value;
+                    _context.PlaceVotes.Remove(existingVote);
+                }
+            }
+            else
+            {
+                if (existingVote != null)
+                {
+                    scoreDelta = value - existingVote.Value;
+                    existingVote.Value = value;
+                    existingVote.UpdatedAt = DateTime.UtcNow;
+                }
+                else
+                {
+                    scoreDelta = value;
+                    _context.PlaceVotes.Add(new PlaceVote
+                    {
+                        UserId = userId,
+                        PlaceId = placeId,
+                        Value = value
+                    });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            if (scoreDelta != 0)
+            {
+                await _context.Places
+                    .Where(p => p.Id == placeId)
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.Score, x => x.Score + scoreDelta));
+            }
+
+            await transaction.CommitAsync();
+            return Result<bool>.Success(true);
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 }

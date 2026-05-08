@@ -108,8 +108,8 @@ public class PostService : IPostService
         {
             commentCounts = await _context.Comments
                 .AsNoTracking()
-                .Where(c => itemPostIds.Contains(c.PostId))
-                .GroupBy(c => c.PostId)
+                .Where(c => c.PostId.HasValue && itemPostIds.Contains(c.PostId.Value))
+                .GroupBy(c => c.PostId!.Value)
                 .Select(g => new { PostId = g.Key, Count = g.Count() })
                 .ToDictionaryAsync(x => x.PostId, x => x.Count);
         }
