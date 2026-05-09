@@ -52,7 +52,7 @@ export function useEntityForm(existingData?: EntityFormData) {
       if (existingData.description !== undefined) setDescription(existingData.description)
       if (existingData.communityId !== undefined) setCommunityId(existingData.communityId)
       if (existingData.photoUrls !== undefined) setPhotoUrls(existingData.photoUrls)
-      if (existingData.latitude && existingData.longitude) {
+      if (existingData.latitude !== undefined && existingData.longitude !== undefined) {
         setLocation({ lat: existingData.latitude, lng: existingData.longitude })
       }
       if (existingData.locationName) {
@@ -99,11 +99,6 @@ export function useEntityForm(existingData?: EntityFormData) {
     return false
   }
 
-  const canProceed =
-    step === 1
-      ? eventDetailsSchema.safeParse({ title, description }).success
-      : true
-
   return {
     step, setStep,
     title, setTitle,
@@ -121,6 +116,5 @@ export function useEntityForm(existingData?: EntityFormData) {
     applyLocationSearchResult,
     handleLocationSelect,
     validateDetails,
-    canProceed,
   }
 }

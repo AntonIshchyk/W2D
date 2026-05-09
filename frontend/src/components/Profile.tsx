@@ -205,7 +205,6 @@ export function Profile() {
           </div>
         </div>
 
-        {/* Delete Account Confirmation Dialog */}
         <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
           <DialogContent className="[&>button]:hidden">
             <DialogHeader>

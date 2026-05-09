@@ -111,10 +111,7 @@ export function EditPlace() {
     <EditEntityPage
       steps={STEPS}
       currentStep={step}
-      onStepChange={(s) => {
-        if (s === 1 && step === 1 && !validateDetails()) return
-        setStep(s)
-      }}
+      onStepChange={setStep}
       onSubmit={handleSubmit}
       isPending={mutation.isPending}
       isLoading={isLoadingPlace}
