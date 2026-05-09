@@ -56,6 +56,7 @@ export function EditPost() {
     showLocationResults, setShowLocationResults,
     applyLocationSearchResult,
     handleLocationSelect,
+    handleUseMyLocation,
     validateDetails,
   } = useEntityForm(existingPost)
 
@@ -105,7 +106,7 @@ export function EditPost() {
     type: postType as PostType,
     author: existingPost?.author ?? { id: 0, username: 'You' },
     communityId: selectedCommunity?.id ?? existingPost?.communityId ?? 0,
-    communityName: selectedCommunity?.name ?? existingPost?.communityName ?? 'Open to everyone',
+    communityName: selectedCommunity?.name ?? existingPost?.communityName ?? 'For everyone',
     score: existingPost?.score ?? 0,
     locationName: locationInput || existingPost?.locationName || undefined,
     latitude: location?.lat ?? existingPost?.latitude,
@@ -180,6 +181,7 @@ export function EditPost() {
           onLocationSelect={handleLocationSelect}
           isFetching={isFetchingLocation}
           isSearching={isSearchingLocation}
+          onUseMyLocation={handleUseMyLocation}
           searchResults={locationSearchResults}
           showResults={showLocationResults}
           onShowResultsChange={setShowLocationResults}

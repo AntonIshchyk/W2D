@@ -299,14 +299,14 @@ export function Places() {
                   className="h-9"
                   onClick={handleUseMyLocation}
                   disabled={isGettingLocation}
-                  title="Near me"
+                  title="My location"
                 >
                   <>
                     {isGettingLocation
                       ? <Loader2 className="h-4 w-4 animate-spin" />
                       : <MapPin className="h-4 w-4" />
                     }
-                    <span className="hidden sm:inline">Near me</span>
+                    <span className="hidden sm:inline">My location</span>
                   </>
                 </Button>
               </div>

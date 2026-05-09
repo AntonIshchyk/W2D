@@ -1,5 +1,6 @@
 import { Loader2, Search, MapPin } from 'lucide-react'
 import { Input } from '../ui/input'
+import { Button } from '../ui/button'
 import { LocationPickerMap } from '../LocationPickerMap'
 import type { CitySearchResult } from '../../types/places'
 
@@ -10,6 +11,7 @@ interface LocationStepProps {
   onLocationSelect: (lat: number, lng: number) => Promise<void> | void
   isFetching: boolean
   isSearching: boolean
+  onUseMyLocation: () => void
   searchResults: CitySearchResult[]
   showResults: boolean
   onShowResultsChange: (show: boolean) => void
@@ -23,6 +25,7 @@ export function LocationStep({
   onLocationSelect,
   isFetching,
   isSearching,
+  onUseMyLocation,
   searchResults,
   showResults,
   onShowResultsChange,
@@ -37,21 +40,36 @@ export function LocationStep({
           </label>
           {isFetching && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
         </div>
-        <div className="relative">
-          <Input
-            value={locationInput}
-            onChange={(e) => onLocationInputChange(e.target.value)}
-            onFocus={() => searchResults.length > 0 && onShowResultsChange(true)}
-            onBlur={() => setTimeout(() => onShowResultsChange(false), 150)}
-            placeholder="Optional: search or drop a pin"
-            className="pl-10 bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
-            autoComplete="off"
-          />
-          {isSearching ? (
-            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
-          ) : (
-            <Search className="h-4 w-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
-          )}
+        <div className="flex gap-3 items-start">
+          <div className="relative flex-1">
+            <Input
+              value={locationInput}
+              onChange={(e) => onLocationInputChange(e.target.value)}
+              onFocus={() => searchResults.length > 0 && onShowResultsChange(true)}
+              onBlur={() => setTimeout(() => onShowResultsChange(false), 150)}
+              placeholder="Optional: search or drop a pin"
+              className="pl-10 bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
+              autoComplete="off"
+            />
+            {isSearching ? (
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+            ) : (
+              <Search className="h-4 w-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+            )}
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-12 shrink-0 gap-2"
+            onClick={onUseMyLocation}
+            disabled={isFetching}
+            title="My location"
+          >
+            <MapPin className="h-4 w-4" />
+            My location
+          </Button>
         </div>
 
         {showResults && searchResults.length > 0 && (

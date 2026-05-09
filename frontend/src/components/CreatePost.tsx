@@ -50,6 +50,7 @@ export function CreatePost() {
     showLocationResults, setShowLocationResults,
     applyLocationSearchResult,
     handleLocationSelect,
+    handleUseMyLocation,
     validateDetails,
   } = useEntityForm()
 
@@ -103,7 +104,7 @@ export function CreatePost() {
     type: (postType ?? PostType.ExperienceShare) as PostType,
     author: { id: 0, username: 'You' },
     communityId: selectedCommunity?.id ?? 0,
-    communityName: selectedCommunity?.name ?? 'Open to everyone',
+    communityName: selectedCommunity?.name ?? 'For everyone',
     score: 0,
     locationName: locationInput || undefined,
     latitude: location?.lat,
@@ -210,6 +211,7 @@ export function CreatePost() {
           onLocationSelect={handleLocationSelect}
           isFetching={isFetchingLocation}
           isSearching={isSearchingLocation}
+          onUseMyLocation={handleUseMyLocation}
           searchResults={locationSearchResults}
           showResults={showLocationResults}
           onShowResultsChange={setShowLocationResults}

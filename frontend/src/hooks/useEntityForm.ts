@@ -71,6 +71,38 @@ export function useEntityForm(existingData?: EntityFormData) {
     setLocationInputSilently(result.display_name)
   }
 
+  const handleUseMyLocation = async () => {
+    if (!('geolocation' in navigator)) {
+      toast.error('Please enable geolocation in your browser')
+      return
+    }
+
+    setIsFetchingLocation(true)
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude
+        const lng = pos.coords.longitude
+
+        setLocation({ lat, lng })
+
+        try {
+          const displayName = await reverseGeocode(lat, lng)
+          if (displayName) setLocationInputSilently(displayName)
+        } catch {
+          toast.error('Could not resolve your location')
+        } finally {
+          setIsFetchingLocation(false)
+        }
+      },
+      () => {
+        toast.error('Could not get your location')
+        setIsFetchingLocation(false)
+      },
+      { enableHighAccuracy: true, timeout: 10_000 },
+    )
+  }
+
   const handleLocationSelect = async (lat: number, lng: number) => {
     setLocation({ lat, lng })
     setIsFetchingLocation(true)
@@ -116,6 +148,7 @@ export function useEntityForm(existingData?: EntityFormData) {
     showLocationResults, setShowLocationResults,
     applyLocationSearchResult,
     handleLocationSelect,
+    handleUseMyLocation,
     validateDetails,
   }
 }

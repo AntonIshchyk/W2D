@@ -44,6 +44,7 @@ export function CreatePlace() {
     showLocationResults, setShowLocationResults,
     applyLocationSearchResult,
     handleLocationSelect,
+    handleUseMyLocation,
     validateDetails,
   } = useEntityForm()
 
@@ -87,7 +88,7 @@ export function CreatePlace() {
     userId: 0,
     userName: 'You',
     communityId: selectedCommunity?.id ?? null,
-    communityName: selectedCommunity?.name ?? 'Open to everyone',
+    communityName: selectedCommunity?.name ?? 'For everyone',
     latitude: location?.lat,
     longitude: location?.lng,
     locationName: locationInput || 'Choose a spot on the map',
@@ -138,6 +139,7 @@ export function CreatePlace() {
           onLocationSelect={handleLocationSelect}
           isFetching={isFetchingLocation}
           isSearching={isSearchingLocation}
+          onUseMyLocation={handleUseMyLocation}
           searchResults={locationSearchResults}
           showResults={showLocationResults}
           onShowResultsChange={setShowLocationResults}

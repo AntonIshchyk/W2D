@@ -51,6 +51,7 @@ export function EditPlace() {
     showLocationResults, setShowLocationResults,
     applyLocationSearchResult,
     handleLocationSelect,
+    handleUseMyLocation,
     validateDetails,
   } = useEntityForm(existingPlace)
 
@@ -96,7 +97,7 @@ export function EditPlace() {
     userId: existingPlace?.userId ?? 0,
     userName: existingPlace?.userName ?? 'You',
     communityId: selectedCommunity?.id ?? existingPlace?.communityId ?? null,
-    communityName: selectedCommunity?.name ?? existingPlace?.communityName ?? 'Open to everyone',
+    communityName: selectedCommunity?.name ?? existingPlace?.communityName ?? 'For everyone',
     latitude: location?.lat ?? existingPlace?.latitude,
     longitude: location?.lng ?? existingPlace?.longitude,
     locationName: locationInput || existingPlace?.locationName || 'Choose a spot on the map',
@@ -150,6 +151,7 @@ export function EditPlace() {
           onLocationSelect={handleLocationSelect}
           isFetching={isFetchingLocation}
           isSearching={isSearchingLocation}
+          onUseMyLocation={handleUseMyLocation}
           searchResults={locationSearchResults}
           showResults={showLocationResults}
           onShowResultsChange={setShowLocationResults}
