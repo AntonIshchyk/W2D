@@ -21,9 +21,10 @@ interface PlaceCardProps {
   onVote?: (placeId: number, currentVote: number | undefined | null, newValue: number) => void
   className?: string
   isPreview?: boolean
+  compact?: boolean
 }
 
-export function PlaceCard({ place, currentUser, onDelete, onVote, className, isPreview }: PlaceCardProps) {
+export function PlaceCard({ place, currentUser, onDelete, onVote, className, isPreview, compact }: PlaceCardProps) {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   
@@ -49,7 +50,7 @@ export function PlaceCard({ place, currentUser, onDelete, onVote, className, isP
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3 min-w-0">
-          <UserAvatar url={place.userPhotoUrl} username={place.userName} className="h-10 w-10" />
+          <UserAvatar url={place.userPhotoUrl} username={place.userName} className={compact ? 'h-8 w-8' : 'h-10 w-10'} />
           <div className="min-w-0">
             <p className="font-semibold text-foreground truncate">{place.userName}</p>
           </div>
@@ -105,17 +106,18 @@ export function PlaceCard({ place, currentUser, onDelete, onVote, className, isP
       </div>
 
       <div className="flex-1">
-        {isPreview ? (
-          <h3 className={`font-bold text-xl md:text-2xl text-foreground ${place.locationName ? 'mb-2' : 'mb-2'} wrap-break-word break-all whitespace-normal line-clamp-2`}>
-            {place.title}
-          </h3>
-        ) : (
-          <Link to={`/places/${place.id}`} onClick={(e) => e.stopPropagation()}>
-            <h3 className={`font-bold text-xl md:text-2xl text-foreground ${place.locationName ? 'mb-2' : 'mb-2'} group-hover:text-primary transition-colors wrap-break-word break-all whitespace-normal line-clamp-2`}>
-              {place.title}
-            </h3>
-          </Link>
-        )}
+        {
+          (() => {
+            const titleClass = `font-bold ${compact ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'} text-foreground ${place.locationName ? 'mb-2' : 'mb-2'} wrap-break-word break-all whitespace-normal line-clamp-2`
+            return isPreview ? (
+              <h3 className={titleClass}>{place.title}</h3>
+            ) : (
+              <Link to={`/places/${place.id}`} onClick={(e) => e.stopPropagation()}>
+                <h3 className={`${titleClass} group-hover:text-primary transition-colors`}>{place.title}</h3>
+              </Link>
+            )
+          })()
+        }
 
         {place.locationName && (
           googleMapsUrl ? (
@@ -139,8 +141,8 @@ export function PlaceCard({ place, currentUser, onDelete, onVote, className, isP
 
         <PhotoCarousel
           urls={place.photoUrls}
-          containerClassName="mb-3 md:px-0"
-          imageContainerClassName="h-75 md:h-112.5"
+          containerClassName={compact ? 'mb-2 md:px-0' : 'mb-3 md:px-0'}
+          imageContainerClassName={compact ? 'h-40 md:h-56' : 'h-75 md:h-112.5'}
         />
 
         {place.description && (

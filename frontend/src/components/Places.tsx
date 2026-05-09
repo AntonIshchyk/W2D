@@ -451,7 +451,7 @@ export function Places() {
           )}
           aria-hidden={!selectedPlace || viewMode !== 'map'}
         >
-          {selectedPlace && <PlaceCard place={selectedPlace} currentUser={currentUser} className={placeCardClassName} onDelete={handlePlaceDelete} onVote={handlePlaceVote} />}
+          {selectedPlace && <PlaceCard place={selectedPlace} currentUser={currentUser} className={placeCardClassName} compact onDelete={handlePlaceDelete} onVote={handlePlaceVote} />}
         </div>
       </div>
     </PageLayout>
