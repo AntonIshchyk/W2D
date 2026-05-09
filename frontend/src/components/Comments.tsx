@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Reply, Trash2, X, Clock, TrendingUp, Menu, Pencil } from 'lucide-react'
+import { Reply, Trash2, X, Menu, Pencil } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { UserAvatar } from './UserAvatar'
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from './ui/dialog'
@@ -474,21 +474,25 @@ export function Comments({ target, entityId, currentUserId }: CommentsProps) {
             {total}
           </span>
         )}
-        <div className="ml-auto flex items-center gap-3">
-          <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-full border border-border/50 shrink-0">
-            <button
-              onClick={() => setSort('top')}
-              className={cn('px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2', sort === 'top' ? 'bg-background shadow-sm text-foreground' : 'text-foreground hover:text-primary')}
-            >
-              <TrendingUp className="w-4 h-4" /> Top
-            </button>
-            <button
-              onClick={() => setSort('new')}
-              className={cn('px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2', sort === 'new' ? 'bg-background shadow-sm text-foreground' : 'text-foreground hover:text-primary')}
-            >
-              <Clock className="w-4 h-4" /> New
-            </button>
-          </div>
+        <div className="ml-auto flex items-center gap-4">
+          <button
+            onClick={() => setSort('top')}
+            className={cn(
+              'text-sm font-medium transition-colors pb-1 border-b-2',
+              sort === 'top' ? 'text-foreground border-primary' : 'text-muted-foreground border-transparent hover:text-foreground'
+            )}
+          >
+            Top
+          </button>
+          <button
+            onClick={() => setSort('new')}
+            className={cn(
+              'text-sm font-medium transition-colors pb-1 border-b-2',
+              sort === 'new' ? 'text-foreground border-primary' : 'text-muted-foreground border-transparent hover:text-foreground'
+            )}
+          >
+            New
+          </button>
         </div>
       </div>
 
