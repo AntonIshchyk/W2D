@@ -8,10 +8,10 @@ import { extractErrorMessage } from '../lib/utils/errors'
 import type { Place } from '../types/places'
 import { PlaceCard } from './PlaceCard'
 import { useEntityForm } from '../hooks/useEntityForm'
-import { CreateEntityPage } from './createEntity/CreateEntityPage'
-import { DetailsStep } from './createEntity/DetailsStep'
-import { LocationStep } from './createEntity/LocationStep'
-import { PhotosStep } from './createEntity/PhotosStep'
+import { CreateEntityPage } from './entity/CreateEntityPage'
+import { DetailsStep } from './entity/DetailsStep'
+import { LocationStep } from './entity/LocationStep'
+import { PhotosStep } from './entity/PhotosStep'
 
 const STEPS = [
   { id: 1, label: 'Details', icon: Info },

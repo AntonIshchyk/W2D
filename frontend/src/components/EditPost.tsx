@@ -11,10 +11,10 @@ import type { Post } from '../types/posts'
 import { PostCard } from './PostCard'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { PostType } from '../types/posts'
-import { EditEntityPage } from './create/EditEntityPage'
-import { DetailsStep } from './createEntity/DetailsStep'
-import { LocationStep } from './createEntity/LocationStep'
-import { PhotosStep } from './createEntity/PhotosStep'
+import { EditEntityPage } from './entity/EditEntityPage'
+import { DetailsStep } from './entity/DetailsStep'
+import { LocationStep } from './entity/LocationStep'
+import { PhotosStep } from './entity/PhotosStep'
 
 const STEPS = [
   { id: 1, label: 'Details', icon: Info },

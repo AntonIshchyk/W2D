@@ -2,8 +2,8 @@ import { useNavigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { Button } from '../ui/button'
 import { PageLayout } from '../Navbar'
-import { type Step } from '../createEntity/EntityStepper'
-import { EntityFormShell } from '../createEntity/EntityFormShell'
+import { type Step } from './EntityStepper'
+import { EntityFormShell } from './EntityFormShell'
 
 interface EditEntityPageProps {
   steps: Step[]
