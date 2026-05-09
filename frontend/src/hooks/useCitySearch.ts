@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { searchCities } from '../api/places'
 import type { CitySearchResult } from '../types/places'
 
@@ -55,20 +55,20 @@ export function useCitySearch(options?: UseCitySearchOptions) {
     }
   }, [query, debounceMs])
 
-  const clear = () => {
+  const clear = useCallback(() => {
     setQuery('')
     setResults([])
     setShowResults(false)
     setIsSearching(false)
-  }
+  }, [])
 
-  const setQuerySilently = (nextQuery: string) => {
+  const setQuerySilently = useCallback((nextQuery: string) => {
     skipNextSearchRef.current = true
     setQuery(nextQuery)
     setResults([])
     setShowResults(false)
     setIsSearching(false)
-  }
+  }, [])
 
   return {
     query,

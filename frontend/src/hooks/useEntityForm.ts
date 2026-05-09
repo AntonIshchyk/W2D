@@ -47,19 +47,19 @@ export function useEntityForm(existingData?: EntityFormData) {
   })
 
   useEffect(() => {
-    if (existingData) {
-      if (existingData.title !== undefined) setTitle(existingData.title)
-      if (existingData.description !== undefined) setDescription(existingData.description)
-      if (existingData.communityId !== undefined) setCommunityId(existingData.communityId)
-      if (existingData.photoUrls !== undefined) setPhotoUrls(existingData.photoUrls)
-      if (existingData.latitude !== undefined && existingData.longitude !== undefined) {
-        setLocation({ lat: existingData.latitude, lng: existingData.longitude })
-      }
-      if (existingData.locationName) {
-        setLocationInputSilently(existingData.locationName)
-      }
-    }
-  }, [existingData])
+    if (!existingData) return
+
+    setTitle(existingData.title ?? '')
+    setDescription(existingData.description ?? '')
+    setCommunityId(existingData.communityId ?? null)
+    setPhotoUrls(existingData.photoUrls ?? [])
+    setLocation(
+      typeof existingData.latitude === 'number' && typeof existingData.longitude === 'number'
+        ? { lat: existingData.latitude, lng: existingData.longitude }
+        : null,
+    )
+    setLocationInputSilently(existingData.locationName ?? '')
+  }, [existingData, setLocationInputSilently])
 
   const applyLocationSearchResult = (result: CitySearchResult) => {
     const lat = parseFloat(result.lat)
@@ -77,7 +77,8 @@ export function useEntityForm(existingData?: EntityFormData) {
     try {
       const displayName = await reverseGeocode(lat, lng)
       if (displayName) setLocationInputSilently(displayName)
-    } catch (err) {
+    } catch {
+      return
     } finally {
       setIsFetchingLocation(false)
     }
