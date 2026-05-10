@@ -148,7 +148,7 @@ export function CreatePost() {
           onErrorClear={(field) => setDetailErrors((prev) => ({ ...prev, [field]: undefined }))}
           extraFields={
             <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase tracking-widest">
+              <label className="text-sm font-semibold">
                 Type <span className="text-destructive">*</span>
               </label>
               <Select

@@ -45,7 +45,7 @@ export function DetailsStep({
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
       <div className="space-y-2">
-        <label className="text-xs font-semibold uppercase tracking-widest">
+        <label className="text-sm font-semibold">
           Title <span className="text-destructive">*</span>
         </label>
         <Input
@@ -69,7 +69,7 @@ export function DetailsStep({
       {extraFields}
 
       <div className="space-y-2">
-        <label className="text-xs font-semibold uppercase tracking-widest">
+        <label className="text-sm font-semibold">
           Community
         </label>
         <Popover open={communityOpen} onOpenChange={onCommunityOpenChange}>
@@ -114,7 +114,7 @@ export function DetailsStep({
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs font-semibold uppercase tracking-widest">
+        <label className="text-sm font-semibold">
           Description <span className="text-destructive">*</span>
         </label>
         <Textarea
