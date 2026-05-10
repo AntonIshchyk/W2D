@@ -32,7 +32,7 @@ export function LocationStep({
   onApplySearchResult,
 }: LocationStepProps) {
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+    <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
       <div className="space-y-2 relative">
         <div className="flex items-center gap-2">
           <label className="text-lg font-semibold">
@@ -47,7 +47,7 @@ export function LocationStep({
               onChange={(e) => onLocationInputChange(e.target.value)}
               onFocus={() => searchResults.length > 0 && onShowResultsChange(true)}
               onBlur={() => setTimeout(() => onShowResultsChange(false), 150)}
-              placeholder="Optional: search or drop a pin"
+              placeholder="Search or drop a pin"
               className="pl-10 bg-card border-border text-foreground placeholder:text-muted-foreground h-12 text-base focus-visible:ring-primary focus-visible:border-primary"
               autoComplete="off"
             />
@@ -73,7 +73,7 @@ export function LocationStep({
         </div>
 
         {showResults && searchResults.length > 0 && (
-          <div className="absolute left-0 right-0 top-full mt-1 z-1200 rounded-md border bg-card shadow-lg overflow-hidden">
+          <div className="absolute left-0 right-0 top-full mt-0.5 z-1200 rounded-md border bg-card shadow-lg overflow-hidden">
             {searchResults.slice(0, 8).map((result, idx) => (
               <button
                 key={`${result.lat}-${result.lon}-${idx}`}
