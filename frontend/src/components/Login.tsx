@@ -53,7 +53,7 @@ export function Login() {
         <div className="absolute inset-0 bg-linear-to-r from-background via-transparent to-transparent pointer-events-none" />
         <div className="absolute bottom-10 left-10 z-10">
           <h2 className="text-2xl font-bold tracking-tight text-foreground leading-tight">
-            Discover places and people<br />of your interests
+            Discover places and people of your interests
           </h2>
         </div>
       </div>
