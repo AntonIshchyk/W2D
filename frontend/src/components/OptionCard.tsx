@@ -15,9 +15,9 @@ export function OptionCard({ label, Icon, selected, onClick }: OptionCardProps) 
       onClick={onClick}
       className={cn(
         'flex flex-col items-center gap-2 rounded-2xl border p-4 text-center transition-all duration-150 cursor-pointer',
-        'hover:bg-accent hover:border-border',
+        'hover:border-primary hover:ring-1 hover:ring-primary',
         selected
-          ? 'border-primary bg-primary/5 ring-1 ring-primary'
+          ? 'border-primary ring-1 ring-primary'
           : 'border-border bg-card',
       )}
     >

@@ -63,7 +63,7 @@ export function ActivitySuggestionsPage() {
   } = useEntityForm()
 
   function handleSubmit() {
-    if (!social || !mood) return
+    if (!social || !mood || !location) return
     console.log('Activity prefs:', {
       social,
       mood,
@@ -75,62 +75,69 @@ export function ActivitySuggestionsPage() {
 
   return (
     <PageLayout>
-      <div className="mx-auto max-w-5xl px-4 py-8 lg:px-8">
-        <div className="rounded-3xl border border-border bg-card p-6 shadow-sm sm:p-8">
-          <h2 className="mb-2 text-lg font-semibold">Who are you going with?</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {SOCIAL_OPTIONS.map((opt) => (
-              <OptionCard
-                key={opt.value}
-                {...opt}
-                selected={social === opt.value}
-                onClick={() => setSocial(opt.value)}
-              />
-            ))}
-          </div>
-            
-            <h2 className="my-2 text-lg font-semibold">How are you feeling?</h2>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {MOOD_OPTIONS.map((opt) => (
-                  <OptionCard
-                    key={opt.value}
-                    {...opt}
-                    selected={mood === opt.value}
-                    onClick={() => setMood(opt.value)}
-                  />
-                ))}
-              </div>
-
-              <h2 className="my-2 text-lg font-semibold">Preferences and wishes</h2>
-              <Textarea
-                value={extraNotes}
-                onChange={(e) => setExtraNotes(e.target.value)}
-                placeholder="Any specific preferences, needs, or ideas you have in mind?"
-                className="min-h-28 resize-y"
-              />
-
-              <LocationStep
-                locationInput={locationInput}
-                onLocationInputChange={setLocationInput}
-                location={location}
-                onLocationSelect={handleLocationSelect}
-                isFetching={isFetchingLocation}
-                isSearching={isSearchingLocation}
-                onUseMyLocation={handleUseMyLocation}
-                searchResults={locationSearchResults}
-                showResults={showLocationResults}
-                onShowResultsChange={setShowLocationResults}
-                onApplySearchResult={applyLocationSearchResult}
-              />
-
-            <div className="mt-4 flex justify-end">
-              <Button onClick={handleSubmit} disabled={!social || !mood} className="gap-2">
-                <Sparkles className="h-4 w-4" />
-                Find activities
-              </Button>
+      <div className="rounded-3xl border border-border bg-card p-6 shadow-sm sm:p-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold">Who are you going with?</h2>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {SOCIAL_OPTIONS.map((opt) => (
+                <OptionCard
+                  key={opt.value}
+                  {...opt}
+                  selected={social === opt.value}
+                  onClick={() => setSocial(opt.value)}
+                />
+              ))}
             </div>
+
+            <h2 className="text-lg font-semibold">How are you feeling?</h2>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {MOOD_OPTIONS.map((opt) => (
+                <OptionCard
+                  key={opt.value}
+                  {...opt}
+                  selected={mood === opt.value}
+                  onClick={() => setMood(opt.value)}
+                />
+              ))}
+            </div>
+
+            <h2 className="text-lg font-semibold">Preferences and wishes</h2>
+            <Textarea
+              value={extraNotes}
+              onChange={(e) => setExtraNotes(e.target.value)}
+              placeholder="Any specific preferences, needs, or ideas you have in mind?"
+              className="flex-1 resize-none"
+            />
           </div>
+
+          <LocationStep
+            locationInput={locationInput}
+            onLocationInputChange={setLocationInput}
+            location={location}
+            onLocationSelect={handleLocationSelect}
+            isFetching={isFetchingLocation}
+            isSearching={isSearchingLocation}
+            onUseMyLocation={handleUseMyLocation}
+            searchResults={locationSearchResults}
+            showResults={showLocationResults}
+            onShowResultsChange={setShowLocationResults}
+            onApplySearchResult={applyLocationSearchResult}
+          />
         </div>
+
+        <div className="mt-6">
+          <Button
+            variant="outline"
+            size="lg"
+            className="rounded-full h-9 w-full text-primary border-primary/40 hover:bg-primary hover:text-white hover:border-primary transition-colors"
+            onClick={handleSubmit}
+            disabled={!social || !mood || !location}
+          >
+            <Sparkles className="h-4 w-4" /> Find activities
+          </Button>
+        </div>
+      </div>
     </PageLayout>
   )
 }
