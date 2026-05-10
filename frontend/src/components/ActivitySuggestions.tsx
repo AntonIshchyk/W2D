@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  Brain,
+  HeartCrack,
   Frown,
   Heart,
   Home,
@@ -28,24 +28,24 @@ export interface SuggestionPreferences {
 }
 
 const SOCIAL_OPTIONS = [
-  { value: 'alone', label: 'Just me', hint: 'Solo, your pace', Icon: User },
-  { value: 'partner', label: 'With partner', hint: 'Date-friendly', Icon: Heart },
-  { value: 'friends', label: 'With friends', hint: 'Group vibes', Icon: Users },
-  { value: 'family', label: 'With family', hint: 'All-ages friendly', Icon: Home },
+  { value: 'alone', label: 'Just me', Icon: User },
+  { value: 'partner', label: 'With partner', Icon: Heart },
+  { value: 'friends', label: 'With friends', Icon: Users },
+  { value: 'family', label: 'With family', Icon: Home },
 ]
 
 const MOOD_OPTIONS = [
-  { value: 'sad', label: 'Sad', hint: 'Something gentle', Icon: Frown },
-  { value: 'bored', label: 'Bored', hint: 'Surprise me', Icon: Meh },
-  { value: 'happy', label: 'Happy', hint: 'Ready for anything', Icon: Smile },
-  { value: 'calm', label: 'Calm', hint: 'Peaceful, low-key', Icon: Leaf },
-  { value: 'stressed', label: 'Stressed', hint: 'Clear my head', Icon: Brain },
-  { value: 'motivated', label: 'Motivated', hint: 'Need momentum', Icon: Zap },
+  { value: 'sad', label: 'Sad', Icon: Frown },
+  { value: 'bored', label: 'Bored', Icon: Meh },
+  { value: 'happy', label: 'Happy', Icon: Smile },
+  { value: 'stressed', label: 'Stressed', Icon: HeartCrack },
+  { value: 'calm', label: 'Calm', Icon: Leaf },
+  { value: 'motivated', label: 'Motivated', Icon: Zap },
 ]
 
 export function ActivitySuggestionsPage() {
   const [social, setSocial] = useState<string | null>(null)
-  const [mood, setMood]     = useState<string | null>(null)
+  const [mood, setMood] = useState<string | null>(null)
   const [extraNotes, setExtraNotes] = useState('')
 
   const {
