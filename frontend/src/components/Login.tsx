@@ -1,12 +1,11 @@
 import { useMutation } from '@tanstack/react-query'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useGoogleLogin } from '@react-oauth/google'
+import { GoogleLogin } from '@react-oauth/google'
 import { toast } from 'sonner'
 import { setAuthToken } from '../hooks/useAuthSync'
 import { googleLogin } from '../api/users'
 import { PlacesMap } from './PlacesMap'
 import logo from '../assets/logo.png'
-import googleIcon from '../assets/google.png'
 import type { Place } from '../types/places'
 
 const MOCK_PLACES = [
@@ -29,13 +28,6 @@ export function Login() {
     onError: (error: Error) => {
       toast.error(error.message)
     },
-  })
-
-  const login = useGoogleLogin({
-    onSuccess: (tokenResponse) => {
-      googleMutation.mutate(tokenResponse.access_token)
-    },
-    onError: () => toast.error('Google login failed'),
   })
 
   return (
@@ -64,15 +56,16 @@ export function Login() {
           <img src={logo} alt="W2D" className="h-auto w-auto" />
 
           <div className="w-full">
-            <button
-              type="button"
-              onClick={() => login()}
-              disabled={googleMutation.isPending}
-              className="w-full flex items-center justify-center gap-3 h-14 px-6 rounded-xl border border-border bg-card text-foreground text-base font-semibold shadow-sm hover:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <img src={googleIcon} className="h-5 w-5" alt="Google Icon" />
-              {googleMutation.isPending ? 'Signing in…' : 'Continue with Google'}
-            </button>
+            <GoogleLogin
+              onSuccess={(cr) => {
+                if (!cr.credential) {
+                  return
+                }
+                googleMutation.mutate(cr.credential)
+              }}
+              onError={() => toast.error('Google login failed')}
+              useOneTap
+            />
           </div>
         </div>
       </div>
