@@ -5,9 +5,6 @@ namespace Backend.Contracts.Activities;
 public class GetActivitySuggestionsRequest
 {
     [Required]
-    public int UserId { get; set; }
-
-    [Required]
     [MaxLength(30)]
     public string Social { get; set; } = string.Empty;
 

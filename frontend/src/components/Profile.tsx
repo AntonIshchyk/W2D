@@ -14,6 +14,7 @@ import { fetchPosts } from '../api/posts'
 import { fetchPlaces, votePlace } from '../api/places'
 import { PostCard } from './PostCard'
 import { PlaceCard } from './PlaceCard'
+import type { Place } from '../types/places'
 import { LoadingSpinner } from './ui/loading-spinner'
 import { Button } from './ui/button'
 import { usePostVoteMutation } from '../hooks/usePostVoteMutation'
@@ -95,7 +96,7 @@ export function Profile() {
   })
 
   const allPosts = postsQuery.data?.pages.flatMap(p => p.items) ?? []
-  const userPlaces = placesQuery.data ?? []
+  const userPlaces: Place[] = placesQuery.data ?? []
   const isAllLoading = postsQuery.isLoading || placesQuery.isLoading
   const hasAnyContent = allPosts.length > 0 || userPlaces.length > 0
 
@@ -176,7 +177,7 @@ export function Profile() {
                       {allPosts.map(p => (
                         <PostCard key={p.id} post={p} currentUser={user} onVote={handlePostVote} />
                       ))}
-                      {userPlaces.map((pl: any) => (
+                      {userPlaces.map((pl) => (
                         <PlaceCard
                           key={pl.id}
                           place={pl}
@@ -215,7 +216,7 @@ export function Profile() {
                   {placesQuery.isLoading ? <LoadingSpinner /> : userPlaces.length === 0 ? (
                     <p className="text-sm text-muted-foreground">No places yet.</p>
                   ) : (
-                    userPlaces.map((pl: any) => (
+                    userPlaces.map((pl) => (
                       <PlaceCard
                         key={pl.id}
                         place={pl}

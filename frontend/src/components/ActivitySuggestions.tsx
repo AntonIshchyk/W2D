@@ -16,6 +16,7 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { PageLayout } from './Navbar'
+import { Link } from 'react-router-dom'
 import { Button } from './ui/button'
 import { Textarea } from './ui/textarea'
 import { LocationStep } from './entity/LocationStep'
@@ -92,15 +93,15 @@ function SuggestionsPanel({ isOpen, onClose, result }: SuggestionsPanelProps) {
                 <ul className="flex flex-col gap-2">
                   {result.places.map((place) => (
                     <li key={place.id} className="rounded-xl border border-border bg-background px-4 py-3">
-                      <a
-                        href={`/places/${place.id}`}
+                      <Link
+                        to={`/places/${place.id}`}
                         className="flex flex-col gap-0.5 text-sm text-primary hover:underline"
                       >
                         <span className="font-medium">{place.title}</span>
                         {place.locationName && (
                           <span className="text-xs text-muted-foreground">{place.locationName}</span>
                         )}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>

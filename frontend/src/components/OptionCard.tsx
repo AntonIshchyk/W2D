@@ -13,6 +13,7 @@ export function OptionCard({ label, Icon, selected, onClick }: OptionCardProps) 
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={selected}
       className={cn(
         'flex flex-col items-center gap-2 rounded-2xl border p-4 text-center transition-all duration-150 cursor-pointer',
         'hover:border-primary hover:ring-1 hover:ring-primary',
