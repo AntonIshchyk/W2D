@@ -102,7 +102,7 @@ export function ActivitySuggestionsPage() {
               ))}
             </div>
 
-            <h2 className="text-lg font-semibold">Preferences and wishes</h2>
+            <h2 className="text-lg font-semibold">Preferences and wishes <span className="text-sm font-normal text-muted-foreground">(optional)</span></h2>
             <Textarea
               value={extraNotes}
               onChange={(e) => setExtraNotes(e.target.value)}
