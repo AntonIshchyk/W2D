@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import { PageLayout } from './Navbar'
+import { Sparkles } from 'lucide-react'
 
 export function Home() {
+
   return (
     <PageLayout>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 auto-rows-fr">
@@ -40,6 +42,17 @@ export function Home() {
             <div>
               <h3 className="text-lg font-semibold text-card-foreground mb-1">Community</h3>
               <p className="text-sm text-muted-foreground">Experiences, guides, questions</p>
+            </div>
+          </Link>
+
+          <Link
+            to="/suggestions"
+            className="group flex-1 bg-card border border-border rounded-2xl p-7 flex flex-col justify-between hover:border-foreground/30 transition-colors"
+          >
+            <Sparkles className="w-7 h-7 text-muted-foreground mb-4" />
+            <div>
+              <h3 className="text-lg font-semibold text-card-foreground mb-1">Find activities</h3>
+              <p className="text-sm text-muted-foreground">Get tailored ideas based on mood and company</p>
             </div>
           </Link>
 

@@ -121,7 +121,7 @@ export function Places() {
   function applySearchResult(result: CitySearchResult) {
     const center: [number, number] = [parseFloat(result.lat), parseFloat(result.lon)]
     setSearchBounds(boundsFromResult(result))
-    setSearchLocationName(result.display_name.split(',')[0])
+    setSearchLocationName(result.display_name)
     flyTo(center, 12)
     clearSearchInput()
   }
@@ -163,7 +163,7 @@ export function Places() {
 
         try {
           const displayName = await reverseGeocode(lat, lng)
-          setSearchLocationName(displayName?.split(',')[0] ?? 'Your Location')
+          setSearchLocationName(displayName ?? 'Your Location')
         } catch {
           setSearchLocationName('Your Location')
         }

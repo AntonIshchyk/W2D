@@ -1,5 +1,5 @@
 import { useNavigate, Link, useLocation } from 'react-router-dom'
-import { Home, Map, MessageCircle, User, LogOut } from 'lucide-react'
+import { Home, Map, MessageCircle, User, LogOut, Sparkles } from 'lucide-react'
 import { clearAuthToken } from '../hooks/useAuthSync'
 import { hasAuthToken } from '../lib/authToken'
 
@@ -36,6 +36,12 @@ export function Navbar() {
       label: 'Posts',
       icon: <MessageCircle className="w-5 h-5" />,
       active: isPostsActive
+    },
+    {
+      path: '/suggestions',
+      label: 'Suggest',
+      icon: <Sparkles className="w-5 h-5" />,
+      active: isActive('/suggestions')
     },
     {
       path: '/profile',

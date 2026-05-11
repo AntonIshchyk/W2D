@@ -4,6 +4,17 @@ import { GoogleLogin } from '@react-oauth/google'
 import { toast } from 'sonner'
 import { setAuthToken } from '../hooks/useAuthSync'
 import { googleLogin } from '../api/users'
+import { lazy, Suspense } from 'react'
+const PlacesMap = lazy(() => import('./PlacesMap').then(m => ({ default: m.PlacesMap })))
+import logo from '../assets/logo.png'
+import type { Place } from '../types/places'
+
+type MapMarker = { id: number; latitude: number; longitude: number; title: string; score: number }
+const MOCK_PLACES: MapMarker[] = [
+  { id: 1, latitude: 51.924, longitude: 4.481, title: 'Rooftop Bar', score: 48 },
+  { id: 2, latitude: 51.920, longitude: 4.476, title: 'Canal Walk', score: 91 },
+  { id: 3, latitude: 51.918, longitude: 4.484, title: 'Hidden Garden', score: 34 },
+]
 
 export function Login() {
   const navigate = useNavigate()
@@ -18,52 +29,50 @@ export function Login() {
     },
     onError: (error: Error) => {
       toast.error(error.message)
-    }
+    },
   })
 
   return (
     <div className="min-h-screen flex text-foreground">
-      <div className="hidden lg:block lg:w-[58%] bg-primary" />
+      <div className="hidden lg:block lg:w-[58%] relative overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none">
+          <Suspense>
+            <PlacesMap
+              places={MOCK_PLACES as unknown as Place[]}
+              onBoundsChange={() => {}}
+              initialCenter={[51.922, 4.479]}
+              initialZoom={14}
+            />
+          </Suspense>
+        </div>
+        <div className="absolute inset-0 bg-linear-to-b from-transparent via-background/50 to-background pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-r from-background via-transparent to-transparent pointer-events-none" />
+        <div className="absolute bottom-10 left-10 z-10">
+          <h2 className="text-2xl font-semibold leading-tight">
+            Discover places and people of your interests
+          </h2>
+        </div>
+      </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-10 py-16 bg-background">
-        <div className="w-full max-w-[320px] space-y-10">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-black tracking-tight text-foreground">W2D</h1>
-            <p className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
-              What to do
-            </p>
+      <div className="flex-1 flex flex-col items-center justify-center bg-background">
+        <div className="w-full max-w-[320px] flex flex-col items-center text-center">
+
+          <img src={logo} alt="W2D" className="h-auto w-auto" />
+
+          <div className="w-full">
+            <GoogleLogin
+              onSuccess={(cr) => {
+                if (!cr.credential) {
+                  return
+                }
+                googleMutation.mutate(cr.credential)
+              }}
+              onError={() => toast.error('Google login failed')}
+              useOneTap
+            />
           </div>
-
-          <div className="space-y-2">
-            <h2 className="text-xl font-semibold text-foreground leading-snug">
-              Find your people,<br />make plans.
-            </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Join communities you love and organise places with others.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <div className="rounded-lg border border-border p-3 bg-card inline-block">
-              <GoogleLogin
-                onSuccess={(cr) => {
-                  if (!cr.credential) {
-                    return
-                  }
-                  googleMutation.mutate(cr.credential)
-                }}
-                onError={() => toast.error('Google login failed')}
-                useOneTap
-              />
-            </div>
-          </div>
-
-          <p className="text-[11px] text-muted-foreground/70 leading-relaxed">
-            By signing in you agree to share good times and have fun.
-          </p>
         </div>
       </div>
     </div>
   )
 }
-
