@@ -11,12 +11,13 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { fetchPosts } from '../api/posts'
-import { fetchPlaces } from '../api/places'
+import { fetchPlaces, votePlace } from '../api/places'
 import { PostCard } from './PostCard'
 import { PlaceCard } from './PlaceCard'
 import { LoadingSpinner } from './ui/loading-spinner'
 import { Button } from './ui/button'
 import { usePostVoteMutation } from '../hooks/usePostVoteMutation'
+import { useEntityVoteMutation } from '../hooks/useEntityVoteMutation'
 import { Pencil, Trash2, Menu } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog'
@@ -79,15 +80,24 @@ export function Profile() {
     initialPageParam: null as number | null,
   })
 
+  const placesQueryKey = ['places', user.userId]
+
   const placesQuery = useQuery({
-    queryKey: ['places', user.userId],
+    queryKey: placesQueryKey,
     queryFn: () => fetchPlaces(undefined, undefined, user.userId),
   })
 
   const { handlePostVote } = usePostVoteMutation(['user-posts', user.userId])
+  const { handleVote: handlePlaceVote } = useEntityVoteMutation({
+    queryKey: placesQueryKey,
+    mutationFn: votePlace,
+    invalidateKeys: [['places'], ['place'], ['user-places']],
+  })
 
   const allPosts = postsQuery.data?.pages.flatMap(p => p.items) ?? []
   const userPlaces = placesQuery.data ?? []
+  const isAllLoading = postsQuery.isLoading || placesQuery.isLoading
+  const hasAnyContent = allPosts.length > 0 || userPlaces.length > 0
 
   return (
     <PageLayout>
@@ -157,14 +167,25 @@ export function Profile() {
 
               <TabsContent value="all">
                 <div className="space-y-4">
-                  {postsQuery.isLoading ? (
+                  {isAllLoading ? (
                     <LoadingSpinner />
-                  ) : allPosts.length === 0 ? (
+                  ) : !hasAnyContent ? (
                     <p className="text-sm text-muted-foreground">Nothing here yet.</p>
                   ) : (
-                    allPosts.map(p => (
-                      <PostCard key={p.id} post={p} currentUser={user} onVote={handlePostVote} />
-                    ))
+                    <>
+                      {allPosts.map(p => (
+                        <PostCard key={p.id} post={p} currentUser={user} onVote={handlePostVote} />
+                      ))}
+                      {userPlaces.map((pl: any) => (
+                        <PlaceCard
+                          key={pl.id}
+                          place={pl}
+                          currentUser={user}
+                          onVote={handlePlaceVote}
+                          className="group bg-card border border-border/50 rounded-3xl p-5"
+                        />
+                      ))}
+                    </>
                   )}
 
                   {postsQuery.hasNextPage && (
@@ -195,7 +216,13 @@ export function Profile() {
                     <p className="text-sm text-muted-foreground">No places yet.</p>
                   ) : (
                     userPlaces.map((pl: any) => (
-                      <PlaceCard key={pl.id} place={pl} currentUser={user} className="group bg-card border border-border/50 rounded-3xl p-5" />
+                      <PlaceCard
+                        key={pl.id}
+                        place={pl}
+                        currentUser={user}
+                        onVote={handlePlaceVote}
+                        className="group bg-card border border-border/50 rounded-3xl p-5"
+                      />
                     ))
                   )}
                 </div>
