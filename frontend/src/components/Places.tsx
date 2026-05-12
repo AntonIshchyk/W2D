@@ -20,6 +20,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { PageLayout } from './Navbar'
 import { PlacesMap, type FlyToTarget } from './PlacesMap'
 import { PlaceCard } from './PlaceCard'
+import { ScoreHistogram } from './ScoreHistogram'
 import { cn } from '../lib/utils'
 import { useCitySearch } from '../hooks/useCitySearch'
 import { fetchPlaces, reverseGeocode } from '../api/places'
@@ -58,6 +59,9 @@ export function Places() {
   const [searchLocationName, setSearchLocationName] = useState<string | null>(null)
   const boundsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [isGettingLocation, setIsGettingLocation] = useState(false)
+  const [scoreRange, setScoreRange] = useState<[number, number] | null>(null)
+  const stableMinRef = useRef<number | undefined>(undefined)
+  const stableMaxRef = useRef<number | undefined>(undefined)
 
   const {
     query: searchQuery,
@@ -83,6 +87,38 @@ export function Places() {
     queryKey: placesQueryKey,
     queryFn: () => fetchPlaces(selectedCommunities, effectiveBounds),
   })
+
+  const allScores = allPlaces.map((p) => p.score)
+
+  if (allPlaces.length > 0) {
+    const lo = Math.min(...allScores)
+    const hi = Math.max(...allScores)
+    stableMinRef.current = stableMinRef.current === undefined ? lo : Math.min(stableMinRef.current, lo)
+    stableMaxRef.current = stableMaxRef.current === undefined ? hi : Math.max(stableMaxRef.current, hi)
+  }
+
+  const stableMin = stableMinRef.current
+  const stableMax = stableMaxRef.current
+  const hasScoreRange = stableMin !== undefined && stableMax !== undefined && stableMin < stableMax
+
+  useEffect(() => {
+    if (stableMin !== undefined && stableMax !== undefined) {
+      setScoreRange((prev) => prev ?? [stableMin, stableMax])
+    }
+  }, [stableMin, stableMax])
+
+  const isScoreFiltered = Boolean(
+    scoreRange &&
+      stableMin !== undefined &&
+      stableMax !== undefined &&
+      (scoreRange[0] !== stableMin || scoreRange[1] !== stableMax),
+  )
+
+  const filteredPlaces =
+    scoreRange && stableMin !== undefined && stableMax !== undefined
+      ? allPlaces.filter((p) => p.score >= scoreRange[0] && p.score <= scoreRange[1])
+      : allPlaces
+
   const { handleVote: votePlaceMutation } = useEntityVoteMutation({
     queryKey: placesQueryKey,
     mutationFn: votePlace,
@@ -206,15 +242,21 @@ export function Places() {
 
   const handlePlaceVote = (placeId: number, currentVote: number | undefined | null, newValue: number) => {
     setSelectedPlace((current) => {
-      if (!current || current.id !== placeId) {
-        return current
-      }
-
+      if (!current || current.id !== placeId) return current
       return applyPlaceVote(current, currentVote, newValue)
     })
-
     votePlaceMutation(placeId, currentVote, newValue)
   }
+
+  const resetFilters = () => {
+    setSelectedCommunities([])
+    clearSearchLocation()
+    if (stableMin !== undefined && stableMax !== undefined) {
+      setScoreRange([stableMin, stableMax])
+    }
+  }
+
+  const hasActiveFilters = selectedCommunities.length > 0 || !!searchLocationName || isScoreFiltered
 
   return (
     <PageLayout fullWidth>
@@ -222,9 +264,9 @@ export function Places() {
         <div className="absolute top-0 left-0 right-0 z-10 p-4 pointer-events-none flex flex-col gap-2">
           
           <div className="pointer-events-auto flex flex-col xl:flex-row xl:items-center justify-between bg-card/95 backdrop-blur shadow-sm border rounded-xl p-4 gap-3">
-              <div className="flex flex-wrap items-center gap-3 xl:gap-4">
-                <h1 className="text-xl font-bold leading-none">
-                Places ({allPlaces.length})
+            <div className="flex flex-wrap items-center gap-3 xl:gap-4">
+              <h1 className="text-xl font-bold leading-none">
+                Places ({filteredPlaces.length})
               </h1>
 
               <div className="relative flex gap-2 flex-wrap sm:flex-nowrap items-start sm:items-center">
@@ -234,9 +276,7 @@ export function Places() {
                     placeholder="Search city…"
                     value={searchLocationName ?? searchQuery}
                     onChange={(e) => {
-                      if (searchLocationName) {
-                        clearSearchLocation()
-                      }
+                      if (searchLocationName) clearSearchLocation()
                       setSearchQuery(e.target.value)
                     }}
                     onBlur={() => setTimeout(() => setShowAutocomplete(false), 150)}
@@ -261,10 +301,7 @@ export function Places() {
                   {searchLocationName && (
                     <button
                       type="button"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        clearSearchLocation()
-                      }}
+                      onClick={(e) => { e.preventDefault(); clearSearchLocation() }}
                       className="absolute right-2 top-2 rounded-full p-0.5 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                       aria-label="Clear location filter"
                     >
@@ -279,10 +316,7 @@ export function Places() {
                           key={idx}
                           type="button"
                           className="w-full px-3 py-2 text-left text-sm hover:bg-accent transition-colors border-b last:border-b-0 flex items-start gap-2"
-                          onMouseDown={(e) => {
-                            e.preventDefault()
-                            applySearchResult(result)
-                          }}
+                          onMouseDown={(e) => { e.preventDefault(); applySearchResult(result) }}
                         >
                           <MapPin className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground" />
                           <span className="line-clamp-1">{result.display_name}</span>
@@ -301,17 +335,15 @@ export function Places() {
                   disabled={isGettingLocation}
                   title="My location"
                 >
-                  <>
-                    {isGettingLocation
-                      ? <Loader2 className="h-4 w-4 animate-spin" />
-                      : <MapPin className="h-4 w-4" />
-                    }
-                    <span className="hidden sm:inline">My location</span>
-                  </>
+                  {isGettingLocation
+                    ? <Loader2 className="h-4 w-4 animate-spin" />
+                    : <MapPin className="h-4 w-4" />
+                  }
+                  <span className="hidden sm:inline">My location</span>
                 </Button>
               </div>
 
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-3 flex-wrap">
                 <Popover open={communityOpen} onOpenChange={setCommunityOpen}>
                   <PopoverTrigger asChild>
                     <Button variant="outline" size="sm" className="h-9 text-xs gap-1">
@@ -325,10 +357,7 @@ export function Places() {
                       <CommandList>
                         <CommandEmpty>No communities.</CommandEmpty>
                         <CommandGroup>
-                          <CommandItem
-                            value="__all__"
-                            onSelect={() => setSelectedCommunities([])}
-                          >
+                          <CommandItem value="__all__" onSelect={() => setSelectedCommunities([])}>
                             <Check className={cn('mr-2 h-4 w-4', selectedCommunities.length === 0 ? 'opacity-100' : 'opacity-0')} />
                             All communities
                           </CommandItem>
@@ -338,9 +367,7 @@ export function Places() {
                               value={c.name}
                               onSelect={() => {
                                 setSelectedCommunities((prev) =>
-                                  prev.includes(c.id)
-                                    ? prev.filter((id) => id !== c.id)
-                                    : [...prev, c.id]
+                                  prev.includes(c.id) ? prev.filter((id) => id !== c.id) : [...prev, c.id]
                                 )
                               }}
                             >
@@ -353,15 +380,47 @@ export function Places() {
                     </Command>
                   </PopoverContent>
                 </Popover>
-                {(selectedCommunities.length > 0 || searchLocationName) && (
+
+                {hasScoreRange && scoreRange && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className={cn('h-9 text-xs gap-1', isScoreFiltered && 'border-primary text-primary')}>
+                        {isScoreFiltered ? `Score: ${scoreRange[0]} – ${scoreRange[1]}` : 'Score'}
+                        <ChevronsUpDown className="h-3 w-3 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72 p-4" align="start">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium">Score range</p>
+                          {isScoreFiltered && (
+                            <button
+                              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                              onClick={() => setScoreRange([stableMin!, stableMax!])}
+                            >
+                              Reset
+                            </button>
+                          )}
+                        </div>
+                        <ScoreHistogram
+                          scores={allScores}
+                          min={stableMin!}
+                          max={stableMax!}
+                          low={scoreRange[0]}
+                          high={scoreRange[1]}
+                          onChange={(lo, hi) => setScoreRange([lo, hi])}
+                        />
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                )}
+
+                {hasActiveFilters && (
                   <Button
                     variant="ghost"
                     size="sm"
                     className="h-9 text-destructive border-destructive/40 hover:bg-destructive hover:text-white hover:border-destructive transition-colors"
-                    onClick={() => {
-                      setSelectedCommunities([])
-                      clearSearchLocation()
-                    }}
+                    onClick={resetFilters}
                     title="Reset filters"
                   >
                     <X className="h-4 w-4" /> Reset filters
@@ -403,7 +462,7 @@ export function Places() {
 
         <div className={cn('flex-1 w-full h-full relative z-0', viewMode !== 'map' && 'hidden')}>
           <PlacesMap
-            places={allPlaces}
+            places={filteredPlaces}
             onBoundsChange={setRawBounds}
             onViewChange={handleViewChange}
             flyToTarget={flyToTarget}
@@ -421,20 +480,20 @@ export function Places() {
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Loading places…
               </div>
-            ) : allPlaces.length === 0 ? (
-            <div className="py-20 text-center">
-              <EmptyState
-                icon={ImageIcon}
-                title="There are no places yet"
-                action={selectedCommunities.length === 0 ? {
-                  label: 'Create Place',
-                  onClick: () => navigate('/places/create')
-                } : undefined}
-              />
-            </div>
-          )  : (
+            ) : filteredPlaces.length === 0 ? (
+              <div className="py-20 text-center">
+                <EmptyState
+                  icon={ImageIcon}
+                  title="There are no places yet"
+                  action={selectedCommunities.length === 0 ? {
+                    label: 'Create Place',
+                    onClick: () => navigate('/places/create')
+                  } : undefined}
+                />
+              </div>
+            ) : (
               <div className="max-w-3xl mx-auto space-y-6">
-                {allPlaces.map((place) => (
+                {filteredPlaces.map((place) => (
                   <PlaceCard key={place.id} place={place} currentUser={currentUser} className={placeCardClassName} onDelete={handlePlaceDelete} onVote={handlePlaceVote} />
                 ))}
               </div>
