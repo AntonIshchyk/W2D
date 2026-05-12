@@ -263,11 +263,11 @@ export function Home() {
 
           <div className="max-w-xl justify-self-center lg:justify-self-start">
             <h2 className="text-4xl font-black leading-tight tracking-normal md:text-6xl">
-              Get suggestions W2D based on your situation.
+              Get suggestions W2D based on your preferences.
             </h2>
             <p className="mt-5 text-lg leading-8 text-muted-foreground">
-              Let W2D turn your mood, time, and nearby places into activity suggestions you can act on.
-              It is made for the moment when everyone asks what to do.
+              Answer a few questions and get personalized recommendations for things to do. 
+              Whether you want to explore, relax, or connect with others.
             </p>
             <div className="mt-8">
               <FeatureLink to="/suggestions" icon={Sparkles}>Get suggestions</FeatureLink>
