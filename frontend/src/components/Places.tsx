@@ -43,6 +43,16 @@ function applyPlaceVote(place: Place, currentVote: number | undefined | null, ne
   }
 }
 
+function getDefaultScoreRange(stableMin: number, stableMax: number): [number, number] {
+  const rangeMin = Math.min(0, stableMin)
+
+  if (stableMax < 0) {
+    return [rangeMin, stableMax]
+  }
+
+  return [0, stableMax]
+}
+
 export function Places() {
   const navigate = useNavigate()
   const { data: currentUser } = useCurrentUser()
@@ -100,18 +110,24 @@ export function Places() {
   const stableMin = stableMinRef.current
   const stableMax = stableMaxRef.current
   const hasScoreRange = stableMin !== undefined && stableMax !== undefined && stableMin < stableMax
+  const scoreSliderMin = stableMin !== undefined ? Math.min(0, stableMin) : 0
 
   useEffect(() => {
     if (stableMin !== undefined && stableMax !== undefined) {
-      setScoreRange((prev) => prev ?? [stableMin, stableMax])
+      setScoreRange((prev) => prev ?? getDefaultScoreRange(stableMin, stableMax))
     }
   }, [stableMin, stableMax])
 
+  const defaultScoreRange =
+    stableMin !== undefined && stableMax !== undefined
+      ? getDefaultScoreRange(stableMin, stableMax)
+      : null
+
   const isScoreFiltered = Boolean(
     scoreRange &&
-      stableMin !== undefined &&
       stableMax !== undefined &&
-      (scoreRange[0] !== stableMin || scoreRange[1] !== stableMax),
+      defaultScoreRange &&
+      (scoreRange[0] !== defaultScoreRange[0] || scoreRange[1] !== defaultScoreRange[1]),
   )
 
   const filteredPlaces =
@@ -251,8 +267,8 @@ export function Places() {
   const resetFilters = () => {
     setSelectedCommunities([])
     clearSearchLocation()
-    if (stableMin !== undefined && stableMax !== undefined) {
-      setScoreRange([stableMin, stableMax])
+    if (defaultScoreRange) {
+      setScoreRange(defaultScoreRange)
     }
   }
 
@@ -385,7 +401,7 @@ export function Places() {
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="outline" size="sm" className={cn('h-9 text-xs gap-1', isScoreFiltered && 'border-primary text-primary')}>
-                        {isScoreFiltered ? `Score: ${scoreRange[0]} – ${scoreRange[1]}` : 'Score'}
+                        Score: {scoreRange[0]} – {scoreRange[1]}
                         <ChevronsUpDown className="h-3 w-3 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
@@ -404,7 +420,7 @@ export function Places() {
                         </div>
                         <ScoreHistogram
                           scores={allScores}
-                          min={stableMin!}
+                          min={scoreSliderMin}
                           max={stableMax!}
                           low={scoreRange[0]}
                           high={scoreRange[1]}

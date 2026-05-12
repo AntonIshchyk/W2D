@@ -27,7 +27,7 @@ export function Navbar() {
     },
     {
       path: '/places',
-      label: 'Map',
+      label: 'Places',
       icon: <Map className="w-5 h-5" />,
       active: isPlacesActive
     },
@@ -39,7 +39,7 @@ export function Navbar() {
     },
     {
       path: '/suggestions',
-      label: 'Suggest',
+      label: 'Suggestions',
       icon: <Sparkles className="w-5 h-5" />,
       active: isActive('/suggestions')
     },

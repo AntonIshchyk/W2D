@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Clock, Map, MapPin, MessageCircle, Sparkles, Users } from 'lucide-react'
 import { PageLayout } from './Navbar'
@@ -83,20 +83,95 @@ function FeatureLink({
   return (
     <Link
       to={to}
-      className="inline-flex w-fit items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/10 transition-transform hover:-translate-y-0.5"
+      className="inline-flex w-fit items-center gap-3 rounded-full bg-primary px-7 py-4 text-base font-bold text-primary-foreground shadow-xl shadow-primary/15 transition-transform hover:-translate-y-0.5"
     >
-      <Icon className="h-4 w-4" />
+      <Icon className="h-5 w-5" />
       {children}
-      <ArrowRight className="h-4 w-4" />
+      <ArrowRight className="h-5 w-5" />
     </Link>
   )
 }
 
+const FEATURE_STEPS = [
+  { label: 'Places', icon: Map },
+  { label: 'Posts', icon: MessageCircle },
+  { label: 'AI suggestions', icon: Sparkles },
+]
+
 export function Home() {
+  const scrollRef = useRef<HTMLElement | null>(null)
+  const [scrollProgress, setScrollProgress] = useState(0)
+  const activeStep = Math.round(scrollProgress * (FEATURE_STEPS.length - 1))
+
+  const scrollToStep = (index: number) => {
+    const scrollContainer = scrollRef.current
+    if (!scrollContainer) return
+
+    scrollContainer.scrollTo({
+      top: index * scrollContainer.clientHeight,
+      behavior: 'smooth',
+    })
+  }
+
+  useEffect(() => {
+    const scrollContainer = scrollRef.current
+    if (!scrollContainer) return
+
+    const updateProgress = () => {
+      const maxScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight
+      const nextProgress = maxScroll > 0 ? scrollContainer.scrollTop / maxScroll : 0
+      setScrollProgress(Math.min(1, Math.max(0, nextProgress)))
+    }
+
+    updateProgress()
+    scrollContainer.addEventListener('scroll', updateProgress, { passive: true })
+    window.addEventListener('resize', updateProgress)
+
+    return () => {
+      scrollContainer.removeEventListener('scroll', updateProgress)
+      window.removeEventListener('resize', updateProgress)
+    }
+  }, [])
+
   return (
     <PageLayout fullWidth>
-      <main className="h-screen overflow-y-auto scroll-smooth">
-        <section className="grid min-h-screen items-center gap-10 px-5 py-10 md:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:px-16">
+      <main ref={scrollRef} className="h-screen overflow-y-auto scroll-smooth">
+        <div className="sticky top-0 z-30 flex justify-center px-5 pt-3">
+          <div className="relative w-full max-w-sm px-8 py-2">
+            <div className="absolute left-10 right-10 top-1/2 h-0.5 -translate-y-1/2 bg-border" />
+            <div className="absolute left-10 right-10 top-1/2 h-0.5 -translate-y-1/2 overflow-hidden">
+              <div
+                className="h-full bg-primary transition-[width] duration-200"
+                style={{ width: `${scrollProgress * 100}%` }}
+              />
+            </div>
+            <div className="relative z-10 flex items-center justify-between">
+              {FEATURE_STEPS.map((step, index) => {
+                const Icon = step.icon
+                const isActive = activeStep === index
+
+                return (
+                  <button
+                    type="button"
+                    onClick={() => scrollToStep(index)}
+                    key={step.label}
+                    className={`flex h-9 w-9 items-center justify-center rounded-xl bg-background transition-all duration-300 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                      isActive
+                        ? 'text-primary'
+                        : 'text-muted-foreground'
+                    }`}
+                    title={step.label}
+                    aria-label={step.label}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+
+        <section className="grid min-h-screen items-center gap-10 px-5 pb-10 pt-4 md:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:px-16">
           <div className="relative h-[58vh] min-h-105 overflow-hidden rounded-3xl border border-border bg-card shadow-2xl shadow-primary/10">
             <div className="absolute inset-0 pointer-events-none">
               <Suspense fallback={<div className="h-full w-full animate-pulse bg-muted" />}>
