@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Clock, ImagePlus, Map, MapPin, MessageCircle, Sparkles, Users } from 'lucide-react'
+import { ArrowRight, Clock, Map, MapPin, MessageCircle, Sparkles, Users } from 'lucide-react'
 import { PageLayout } from './Navbar'
 import { PostAuthorInfo } from './PostAuthorInfo'
 import { VoteButtons } from './VoteButtons'
@@ -8,6 +8,7 @@ import { PostType, type Post } from '../types/posts'
 import type { LucideIcon } from 'lucide-react'
 import type { Place } from '../types/places'
 import parkImage from '../assets/park.jpg'
+import suggestionsImage from '../assets/suggestions.png'
 
 const PlacesMap = lazy(() => import('./PlacesMap').then((m) => ({ default: m.PlacesMap })))
 
@@ -34,11 +35,11 @@ const FEATURE_POST: Post = {
   id: 42,
   title: 'Best quiet place for a Saturday reset?',
   description:
-    'Looking for somewhere peaceful, easy to reach, and good for a long walk after coffee. Bonus points if it works well when the weather is unpredictable.',
-  type: PostType.Recommendation,
+    'Looking for somewhere peaceful, easy to reach, and good for a long walk after coffee. Preferably around Utrecht but open to nearby areas too. Any suggestions?',
+  type: PostType.Question,
   author: {
     id: 7,
-    username: 'Jules',
+    username: 'Maria',
   },
   communityId: 3,
   communityName: 'Weekend Ideas',
@@ -156,11 +157,11 @@ export function Home() {
 
           <div className="max-w-xl justify-self-center lg:justify-self-start">
             <h1 className="text-4xl font-black leading-tight tracking-normal md:text-6xl">
-              Find places worth leaving the house for.
+              Every pin - <br />a potential plan <br />for your day.
             </h1>
             <p className="mt-5 text-lg leading-8 text-muted-foreground">
-              Explore cafes, study corners, outdoor breaks, and local favorites pinned by the
-              communities around you. Every marker can become a plan.
+              Explore local favorites pinned by the communities around you. <br />
+              Share your own go-to spots and hidden gems to help others find their next adventure.
             </p>
             <div className="mt-8">
               <FeatureLink to="/places" icon={Map}>Explore places</FeatureLink>
@@ -174,7 +175,7 @@ export function Home() {
               Join the conversation around what to do next.
             </h2>
             <p className="mt-5 text-lg leading-8 text-muted-foreground">
-              Share plans, ask for recommendations, comment on local ideas, and build small
+              Share ideas, ask for recommendations, comment on local activities, and build
               communities around the things you care about.
             </p>
             <div className="mt-8">
@@ -252,28 +253,24 @@ export function Home() {
         </section>
 
         <section className="grid min-h-screen items-center gap-10 border-t border-border px-5 py-10 md:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:px-16">
-          <div className="flex h-[58vh] min-h-105 items-center justify-center rounded-3xl border border-dashed border-border bg-card">
-            <div className="flex max-w-xs flex-col items-center text-center">
-              <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-muted">
-                <ImagePlus className="h-9 w-9 text-muted-foreground" />
-              </div>
-              <p className="text-lg font-black">Suggestion image placeholder</p>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Drop your AI suggestions showcase image here later.
-              </p>
-            </div>
+          <div className="relative h-[58vh] min-h-105 overflow-hidden rounded-3xl border border-border bg-card shadow-2xl shadow-primary/10 flex items-center justify-center">
+            <img
+              src={suggestionsImage}
+              alt="AI Suggestions"
+              className="h-full w-full object-contain"
+            />
           </div>
 
           <div className="max-w-xl justify-self-center lg:justify-self-start">
             <h2 className="text-4xl font-black leading-tight tracking-normal md:text-6xl">
-              Get ideas when you know the vibe, not the plan.
+              Get suggestions W2D based on your situation.
             </h2>
             <p className="mt-5 text-lg leading-8 text-muted-foreground">
               Let W2D turn your mood, time, and nearby places into activity suggestions you can act on.
               It is made for the moment when everyone asks what to do.
             </p>
             <div className="mt-8">
-              <FeatureLink to="/suggestions" icon={Sparkles}>Try suggestions</FeatureLink>
+              <FeatureLink to="/suggestions" icon={Sparkles}>Get suggestions</FeatureLink>
             </div>
           </div>
         </section>
