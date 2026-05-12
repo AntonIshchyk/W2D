@@ -468,12 +468,9 @@ export function Comments({ target, entityId, currentUserId }: CommentsProps) {
   return (
     <div className="mt-8 pt-6 border-t border-border/60">
       <div className="flex items-center gap-2 mb-5">
-        <h3 className="text-sm font-semibold text-foreground">Comments</h3>
-        {total > 0 && (
-          <span className="text-sm text-primary bg-primary/10 rounded-full px-2 py-0.5 tabular-nums">
-            {total}
-          </span>
-        )}
+        <h2 className="text-sm font-semibold text-foreground">
+          Comments{total > 0 ? ` (${total})` : ''}
+        </h2>
         <div className="ml-auto flex items-center gap-4">
           <button
             onClick={() => setSort('top')}

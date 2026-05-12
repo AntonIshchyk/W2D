@@ -1,75 +1,283 @@
+import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
+import { ArrowRight, Clock, ImagePlus, Map, MapPin, MessageCircle, Sparkles, Users } from 'lucide-react'
 import { PageLayout } from './Navbar'
-import { Sparkles } from 'lucide-react'
+import { PostAuthorInfo } from './PostAuthorInfo'
+import { VoteButtons } from './VoteButtons'
+import { PostType, type Post } from '../types/posts'
+import type { LucideIcon } from 'lucide-react'
+import type { Place } from '../types/places'
+import parkImage from '../assets/park.jpg'
+
+const PlacesMap = lazy(() => import('./PlacesMap').then((m) => ({ default: m.PlacesMap })))
+
+const RHON_PLACE: Place = {
+  id: 1,
+  title: 'Bavarian Rhon Nature Park',
+  description: 'Wide trails, quiet forest paths, and open highland views for a full-day nature reset.',
+  userId: 1,
+  userName: '',
+  communityId: 2,
+  communityName: 'Nature',
+  latitude: 50.4977,
+  longitude: 10.0707,
+  locationName: 'Rhon, Bavaria',
+  score: 37,
+  commentCount: 12,
+  currentUserVote: 1,
+  photoUrls: [],
+  createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
+  updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
+}
+
+const FEATURE_POST: Post = {
+  id: 42,
+  title: 'Best quiet place for a Saturday reset?',
+  description:
+    'Looking for somewhere peaceful, easy to reach, and good for a long walk after coffee. Bonus points if it works well when the weather is unpredictable.',
+  type: PostType.Recommendation,
+  author: {
+    id: 7,
+    username: 'Jules',
+  },
+  communityId: 3,
+  communityName: 'Weekend Ideas',
+  score: 32,
+  locationName: 'Utrecht Centraal area',
+  latitude: 52.0894,
+  longitude: 5.1103,
+  photoUrls: [],
+  commentCount: 18,
+  createdAt: new Date(Date.now() - 1000 * 60 * 38).toISOString(),
+  updatedAt: new Date(Date.now() - 1000 * 60 * 38).toISOString(),
+  currentUserVote: 1,
+}
+
+const FEATURE_COMMENTS = [
+  {
+    id: 1,
+    name: 'Sam',
+    content: 'Try the botanical gardens near the science park. Calm, green, and not too crowded.',
+    score: 9,
+    createdAt: '25min',
+  },
+  {
+    id: 2,
+    name: 'Lina',
+    content: 'The canal route is great if you want coffee stops along the way.',
+    score: 6,
+    createdAt: '32min',
+  },
+]
+
+function FeatureLink({
+  to,
+  icon: Icon,
+  children,
+}: {
+  to: string
+  icon: LucideIcon
+  children: React.ReactNode
+}) {
+  return (
+    <Link
+      to={to}
+      className="inline-flex w-fit items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/10 transition-transform hover:-translate-y-0.5"
+    >
+      <Icon className="h-4 w-4" />
+      {children}
+      <ArrowRight className="h-4 w-4" />
+    </Link>
+  )
+}
 
 export function Home() {
-
   return (
-    <PageLayout>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 auto-rows-fr">
-        <Link 
-          to="/communities" 
-          className="lg:col-span-2 group relative bg-primary rounded-2xl p-10 flex flex-col justify-between overflow-hidden transition-transform hover:scale-[1.01] duration-300"
-        >
-          <div className="relative z-10">
-            <span className="inline-block text-xs font-medium uppercase tracking-widest text-primary-foreground/70 mb-4">
-              Browse
-            </span>
-            <h2 className="text-4xl lg:text-5xl font-bold text-primary-foreground leading-tight">
-              What to do<br />today?
+    <PageLayout fullWidth>
+      <main className="h-screen overflow-y-auto scroll-smooth">
+        <section className="grid min-h-screen items-center gap-10 px-5 py-10 md:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:px-16">
+          <div className="relative h-[58vh] min-h-105 overflow-hidden rounded-3xl border border-border bg-card shadow-2xl shadow-primary/10">
+            <div className="absolute inset-0 pointer-events-none">
+              <Suspense fallback={<div className="h-full w-full animate-pulse bg-muted" />}>
+                <PlacesMap
+                  places={[RHON_PLACE]}
+                  onBoundsChange={() => {}}
+                  initialCenter={[50.4977, 10.0707]}
+                  initialZoom={10}
+                  selectedPlaceId={RHON_PLACE.id}
+                />
+              </Suspense>
+            </div>
+
+            <article className="absolute right-4 top-4 w-[calc(100%-2rem)] max-w-sm rounded-3xl border border-border/70 bg-card p-4 shadow-2xl md:right-5 md:top-5 md:p-5">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-semibold text-foreground">{RHON_PLACE.userName}</p>
+                </div>
+                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">
+                  <Users className="h-3 w-3" />
+                  {RHON_PLACE.communityName}
+                </span>
+              </div>
+
+              <h3 className="text-xl font-bold leading-snug text-foreground md:text-2xl">
+                {RHON_PLACE.title}
+              </h3>
+              <div className="mt-2 flex w-fit items-center gap-1.5 text-sm text-primary">
+                <MapPin className="h-4 w-4 shrink-0" />
+                <span>{RHON_PLACE.locationName}</span>
+              </div>
+
+              <div className="mt-4 overflow-hidden rounded-2xl bg-muted">
+                <img
+                  src={parkImage}
+                  alt="Bavarian Rhon Nature Park"
+                  className="h-44 w-full object-cover md:h-52"
+                />
+              </div>
+
+              <p className="mt-4 line-clamp-2 text-sm leading-6 text-foreground">
+                {RHON_PLACE.description}
+              </p>
+
+              <div className="mt-5 flex items-center gap-3 border-t border-border/40 pt-4">
+                <VoteButtons score={RHON_PLACE.score} currentUserVote={RHON_PLACE.currentUserVote ?? undefined} onVote={() => {}} />
+                <div className="flex items-center gap-1.5 rounded-full border border-border/50 bg-muted/40 px-3 py-2 text-sm font-bold">
+                  <MessageCircle className="h-4 w-4" />
+                  <span>{RHON_PLACE.commentCount}</span>
+                </div>
+                <div className="flex items-center gap-1.5 rounded-full border border-border/50 bg-muted/40 px-3 py-2 text-sm font-bold">
+                  <Clock className="h-4 w-4" />
+                  <span>5 days ago</span>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div className="max-w-xl justify-self-center lg:justify-self-start">
+            <h1 className="text-4xl font-black leading-tight tracking-normal md:text-6xl">
+              Find places worth leaving the house for.
+            </h1>
+            <p className="mt-5 text-lg leading-8 text-muted-foreground">
+              Explore cafes, study corners, outdoor breaks, and local favorites pinned by the
+              communities around you. Every marker can become a plan.
+            </p>
+            <div className="mt-8">
+              <FeatureLink to="/places" icon={Map}>Explore places</FeatureLink>
+            </div>
+          </div>
+        </section>
+
+        <section className="grid min-h-screen items-center gap-10 border-t border-border px-5 py-10 md:px-10 lg:grid-cols-[0.9fr_1.1fr] lg:px-16">
+          <div className="max-w-xl justify-self-center lg:justify-self-end">
+            <h2 className="text-4xl font-black leading-tight tracking-normal md:text-6xl">
+              Join the conversation around what to do next.
             </h2>
+            <p className="mt-5 text-lg leading-8 text-muted-foreground">
+              Share plans, ask for recommendations, comment on local ideas, and build small
+              communities around the things you care about.
+            </p>
+            <div className="mt-8">
+              <FeatureLink to="/posts" icon={MessageCircle}>Browse posts</FeatureLink>
+            </div>
           </div>
-          <div className="relative z-10 mt-8">
-            <span className="inline-flex items-center gap-2 text-sm font-medium text-primary-foreground/80 group-hover:text-primary-foreground transition-colors">
-              Explore communities
-              <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </span>
+
+          <div className="relative mx-auto w-full max-w-2xl">
+            <article className="rounded-3xl border border-border/50 bg-card p-5 shadow-2xl shadow-primary/10 md:p-7">
+              <div className="mb-5 flex items-center justify-between gap-3">
+                <PostAuthorInfo author={FEATURE_POST.author} type={FEATURE_POST.type} />
+                <span className="rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">
+                  {FEATURE_POST.communityName}
+                </span>
+              </div>
+
+              <h3 className="text-2xl font-bold leading-snug text-foreground md:text-3xl">
+                {FEATURE_POST.title}
+              </h3>
+              <div className="mt-2 flex w-fit items-center gap-1.5 text-sm text-primary">
+                <MapPin className="h-4 w-4 shrink-0" />
+                <span>{FEATURE_POST.locationName}</span>
+              </div>
+
+              <p className="mt-4 text-sm leading-7 text-foreground md:text-base">
+                {FEATURE_POST.description}
+              </p>
+
+              <div className="mt-5 flex items-center gap-3 border-t border-border/40 pt-5">
+                <VoteButtons
+                  score={FEATURE_POST.score}
+                  currentUserVote={FEATURE_POST.currentUserVote}
+                  onVote={() => {}}
+                />
+                <div className="flex items-center gap-1.5 rounded-full border border-border/50 bg-muted/40 px-3 py-2 text-sm font-bold">
+                  <MessageCircle className="h-4 w-4" />
+                  <span>{FEATURE_POST.commentCount}</span>
+                </div>
+                <div className="flex items-center gap-1.5 rounded-full border border-border/50 bg-muted/40 px-3 py-2 text-sm font-bold">
+                  <Clock className="h-4 w-4" />
+                  <span>38m</span>
+                </div>
+              </div>
+
+              <div className="mt-7 border-t border-border/60 pt-5">
+                <div className="mb-4 flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-foreground">
+                    Comments{FEATURE_COMMENTS.length > 0 ? ` (${FEATURE_COMMENTS.length})` : ''}
+                  </h2>
+                </div>
+                <div className="space-y-4">
+                  {FEATURE_COMMENTS.map((comment) => (
+                    <div key={comment.id} className="flex gap-2.5">
+                      <VoteButtons
+                        score={comment.score}
+                        onVote={() => {}}
+                        className="min-w-10 flex-col gap-0.5 border-transparent bg-transparent px-1 py-1"
+                      />
+                      <div className="min-w-0 flex-1 border-b border-border/60 pb-4 last:border-0 last:pb-0">
+                        <div className="mb-1.5 flex items-center gap-2">
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-xs font-black text-accent-foreground">
+                            {comment.name.slice(0, 1)}
+                          </div>
+                          <span className="text-sm font-medium">{comment.name}</span>
+                          <span className="text-sm text-muted-foreground">{comment.createdAt}</span>
+                        </div>
+                        <p className="text-sm leading-relaxed text-foreground">{comment.content}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </article>
           </div>
-          <div className="absolute -right-10 -bottom-10 w-60 h-60 bg-green-900/20 rounded-full opacity-50" />
-          <div className="absolute right-20 -bottom-5 w-32 h-32 bg-green-800/20 rounded-full opacity-30" />
-        </Link>
+        </section>
 
-        <div className="flex flex-col gap-5">
-          <Link 
-            to="/posts" 
-            className="group flex-1 bg-card border border-border rounded-2xl p-7 flex flex-col justify-between hover:border-foreground/30 transition-colors"
-          >
-            <svg className="w-7 h-7 text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-            </svg>
-            <div>
-              <h3 className="text-lg font-semibold text-card-foreground mb-1">Community</h3>
-              <p className="text-sm text-muted-foreground">Experiences, guides, questions</p>
+        <section className="grid min-h-screen items-center gap-10 border-t border-border px-5 py-10 md:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:px-16">
+          <div className="flex h-[58vh] min-h-105 items-center justify-center rounded-3xl border border-dashed border-border bg-card">
+            <div className="flex max-w-xs flex-col items-center text-center">
+              <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-muted">
+                <ImagePlus className="h-9 w-9 text-muted-foreground" />
+              </div>
+              <p className="text-lg font-black">Suggestion image placeholder</p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                Drop your AI suggestions showcase image here later.
+              </p>
             </div>
-          </Link>
+          </div>
 
-          <Link
-            to="/suggestions"
-            className="group flex-1 bg-card border border-border rounded-2xl p-7 flex flex-col justify-between hover:border-foreground/30 transition-colors"
-          >
-            <Sparkles className="w-7 h-7 text-muted-foreground mb-4" />
-            <div>
-              <h3 className="text-lg font-semibold text-card-foreground mb-1">Find activities</h3>
-              <p className="text-sm text-muted-foreground">Get tailored ideas based on mood and company</p>
+          <div className="max-w-xl justify-self-center lg:justify-self-start">
+            <h2 className="text-4xl font-black leading-tight tracking-normal md:text-6xl">
+              Get ideas when you know the vibe, not the plan.
+            </h2>
+            <p className="mt-5 text-lg leading-8 text-muted-foreground">
+              Let W2D turn your mood, time, and nearby places into activity suggestions you can act on.
+              It is made for the moment when everyone asks what to do.
+            </p>
+            <div className="mt-8">
+              <FeatureLink to="/suggestions" icon={Sparkles}>Try suggestions</FeatureLink>
             </div>
-          </Link>
-
-          <Link 
-            to="/profile" 
-            className="group flex-1 bg-card border border-border rounded-2xl p-7 flex flex-col justify-between hover:border-foreground/30 transition-colors"
-          >
-            <svg className="w-7 h-7 text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-            </svg>
-            <div>
-              <h3 className="text-lg font-semibold text-card-foreground mb-1">Your Plans</h3>
-              <p className="text-sm text-muted-foreground">Your profile</p>
-            </div>
-          </Link>
-        </div>
-      </div>
+          </div>
+        </section>
+      </main>
     </PageLayout>
   )
 }
