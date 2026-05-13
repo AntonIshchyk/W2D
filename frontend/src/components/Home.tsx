@@ -18,8 +18,8 @@ const RHON_PLACE: Place = {
   description: 'Wide trails, quiet forest paths, and open highland views for a full-day nature reset.',
   userId: 1,
   userName: '',
-  communityId: 2,
-  communityName: 'Nature',
+  communityId: null,
+  communityName: '',
   latitude: 50.4977,
   longitude: 10.0707,
   locationName: 'Rhon, Bavaria',
@@ -186,44 +186,46 @@ export function Home() {
             </div>
 
             <article className="absolute right-2 top-2 w-80 max-w-[calc(100%-1rem)] rounded-3xl border border-border/50 bg-card p-5 md:p-5">
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <div className="min-w-0 truncate">
-                  <p className="truncate text-xs font-semibold text-foreground sm:text-sm">{RHON_PLACE.userName}</p>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-semibold text-foreground">{RHON_PLACE.userName}</p>
                 </div>
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
-                  <Users className="h-2.5 w-2.5" />
-                  <span className="hidden sm:inline">{RHON_PLACE.communityName}</span>
-                </span>
+                {RHON_PLACE.communityName && (
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">
+                    <Users className="h-3 w-3" />
+                    {RHON_PLACE.communityName}
+                  </span>
+                )}
               </div>
 
-              <h3 className="text-base font-bold leading-snug text-foreground sm:text-lg">
+              <h3 className="text-xl font-bold leading-snug text-foreground md:text-2xl">
                 {RHON_PLACE.title}
               </h3>
-              <div className="mt-1.5 flex w-fit items-center gap-1 text-xs text-primary sm:text-sm">
-                <MapPin className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
-                <span className="truncate">{RHON_PLACE.locationName}</span>
+              <div className="mt-2 flex w-fit items-center gap-1.5 text-sm text-primary">
+                <MapPin className="h-4 w-4 shrink-0" />
+                <span>{RHON_PLACE.locationName}</span>
               </div>
 
-              <div className="mt-3 overflow-hidden rounded-xl bg-muted">
+              <div className="mt-4 overflow-hidden rounded-2xl bg-muted">
                 <img
                   src={parkImage}
                   alt="Bavarian Rhon Nature Park"
-                  className="h-32 w-full object-cover sm:h-40"
+                  className="h-40 w-full object-cover sm:h-56"
                 />
               </div>
 
-              <p className="mt-2 line-clamp-1 text-xs leading-5 text-foreground sm:line-clamp-2 sm:text-sm">
+              <p className="mt-4 line-clamp-2 text-sm leading-6 text-foreground">
                 {RHON_PLACE.description}
               </p>
 
               <div className="mt-3 flex items-center gap-2 border-t border-border/40 pt-2.5">
                 <VoteButtons score={RHON_PLACE.score} currentUserVote={RHON_PLACE.currentUserVote ?? undefined} onVote={() => {}} />
-                <div className="flex items-center gap-1 rounded-full border border-border/50 bg-muted/40 px-2 py-1 text-xs font-bold">
-                  <MessageCircle className="h-3 w-3" />
+                <div className="flex items-center gap-1.5 rounded-full border border-border/50 bg-muted/40 px-3 py-2 text-sm font-bold">
+                  <MessageCircle className="h-4 w-4" />
                   <span>{RHON_PLACE.commentCount}</span>
                 </div>
-                <div className="hidden items-center gap-1 rounded-full border border-border/50 bg-muted/40 px-2 py-1 text-xs font-bold sm:flex">
-                  <Clock className="h-3 w-3" />
+                <div className="hidden items-center gap-1.5 rounded-full border border-border/50 bg-muted/40 px-3 py-2 text-sm font-bold sm:flex">
+                  <Clock className="h-4 w-4" />
                   <span>5d</span>
                 </div>
               </div>
