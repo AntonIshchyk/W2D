@@ -254,74 +254,18 @@ public class PostService : IPostService
         return Result<bool>.Success(true);
     }
 
-    public async Task<Result<bool>> VotePostAsync(int postId, int userId, int value)
-    {
-        if (value is not (-1 or 0 or 1))
-        {
-            return Result<bool>.Invalid("Vote value must be -1, 0, or 1.");
-        }
-
-        bool postExists = await _context.Posts
-            .AnyAsync(p => p.Id == postId);
-
-        if (!postExists)
-        {
-            return Result<bool>.NotFound("Post not found.");
-        }
-
-        using var transaction = await _context.Database.BeginTransactionAsync();
-        try
-        {
-            PostVote? existingVote = await _context.PostVotes
-                .FirstOrDefaultAsync(v => v.UserId == userId && v.PostId == postId);
-
-            int scoreDelta = 0;
-
-            if (value == 0)
-            {
-                if (existingVote != null)
-                {
-                    scoreDelta = -existingVote.Value;
-                    _context.PostVotes.Remove(existingVote);
-                }
-            }
-            else
-            {
-                if (existingVote != null)
-                {
-                    scoreDelta = value - existingVote.Value;
-                    existingVote.Value = value;
-                    existingVote.UpdatedAt = DateTime.UtcNow;
-                }
-                else
-                {
-                    scoreDelta = value;
-                    PostVote newVote = new()
-                    {
-                        UserId = userId,
-                        PostId = postId,
-                        Value = value
-                    };
-                    _context.PostVotes.Add(newVote);
-                }
-            }
-
-            await _context.SaveChangesAsync();
-
-            if (scoreDelta != 0)
-            {
-                await _context.Posts
-                    .Where(p => p.Id == postId)
-                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.Score, x => x.Score + scoreDelta));
-            }
-
-            await transaction.CommitAsync();
-            return Result<bool>.Success(true);
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
-    }
+    public Task<Result<bool>> VotePostAsync(int postId, int userId, int value) => VoteHelper.VoteAsync(
+        _context,
+        postId,
+        userId,
+        value,
+        entityExists: () => _context.Posts.AnyAsync(p => p.Id == postId),
+        getExistingVote: () => _context.PostVotes.FirstOrDefaultAsync(v => v.UserId == userId && v.PostId == postId),
+        getVoteValue: v => v.Value,
+        setVoteValue: (v, val) => { v.Value = val; v.UpdatedAt = DateTime.UtcNow; },
+        createVote: () => new PostVote { UserId = userId, PostId = postId, Value = value },
+        updateScore: delta => _context.Posts
+            .Where(p => p.Id == postId)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.Score, x => x.Score + delta))
+    );
 }

@@ -29,6 +29,33 @@ export function Profile() {
   const { data: user, isLoading, isError, error: userError } = useCurrentUser()
   const navigate = useNavigate()
 
+  const [tab, setTab] = useState<'all' | 'posts' | 'places'>('all')
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const placesQueryKey = ['places', user?.userId]
+
+  const postsQuery = useInfiniteQuery({
+    queryKey: ['user-posts', user?.userId],
+    queryFn: ({ pageParam = null }) => fetchPosts({ cursor: pageParam, userId: user?.userId, sortBy: 'new' }),
+    getNextPageParam: (last) => last.hasMore ? last.nextCursor : undefined,
+    initialPageParam: null as number | null,
+    enabled: !!user?.userId,
+  })
+
+  const placesQuery = useQuery({
+    queryKey: placesQueryKey,
+    queryFn: () => fetchPlaces(undefined, undefined, user?.userId),
+    enabled: !!user?.userId,
+  })
+
+  const { handlePostVote } = usePostVoteMutation(['user-posts', user?.userId])
+  const { handleVote: handlePlaceVote } = useEntityVoteMutation({
+    queryKey: placesQueryKey,
+    mutationFn: votePlace,
+    invalidateKeys: [['places'], ['place'], ['user-places']],
+  })
+
   useAuthErrorHandler(isError, userError)
 
   if (isLoading) {
@@ -47,21 +74,11 @@ export function Profile() {
     )
   }
 
-  if (isError || !user) {
-    return null
-  }
+  if (isError || !user) return null
 
-  const [tab, setTab] = useState<'all' | 'posts' | 'places'>('all')
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const handleEdit = () => navigate('/profile/edit')
 
-  const handleEdit = () => {
-    navigate('/profile/edit')
-  }
-
-  const handleDeleteClick = () => {
-    setShowDeleteConfirm(true)
-  }
+  const handleDeleteClick = () => setShowDeleteConfirm(true)
 
   const confirmDelete = async () => {
     setIsDeleting(true)
@@ -69,31 +86,10 @@ export function Profile() {
       await deleteCurrentUserAccount()
       clearAuthToken()
       navigate('/login')
-    } catch (error) {
+    } catch {
       setIsDeleting(false)
     }
   }
-
-  const postsQuery = useInfiniteQuery({
-    queryKey: ['user-posts', user.userId],
-    queryFn: ({ pageParam = null }) => fetchPosts({ cursor: pageParam, userId: user.userId, sortBy: 'new' }),
-    getNextPageParam: (last) => last.hasMore ? last.nextCursor : undefined,
-    initialPageParam: null as number | null,
-  })
-
-  const placesQueryKey = ['places', user.userId]
-
-  const placesQuery = useQuery({
-    queryKey: placesQueryKey,
-    queryFn: () => fetchPlaces(undefined, undefined, user.userId),
-  })
-
-  const { handlePostVote } = usePostVoteMutation(['user-posts', user.userId])
-  const { handleVote: handlePlaceVote } = useEntityVoteMutation({
-    queryKey: placesQueryKey,
-    mutationFn: votePlace,
-    invalidateKeys: [['places'], ['place'], ['user-places']],
-  })
 
   const allPosts = postsQuery.data?.pages.flatMap(p => p.items) ?? []
   const userPlaces: Place[] = placesQuery.data ?? []
@@ -118,26 +114,18 @@ export function Profile() {
                 </div>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="h-9 w-9 p-0"
-                    >
+                    <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
                       <Menu className="w-4 h-4" />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent align="end" className="w-40 p-2">
                     <div className="flex flex-col gap-1">
-                      <Button 
-                        variant="ghost" 
-                        className="justify-start gap-2 h-9"
-                        onClick={handleEdit}
-                      >
+                      <Button variant="ghost" className="justify-start gap-2 h-9" onClick={handleEdit}>
                         <Pencil className="w-4 h-4" />
                         Edit Profile
                       </Button>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         className="justify-start gap-2 h-9 text-destructive hover:text-destructive hover:bg-destructive/10"
                         onClick={handleDeleteClick}
                       >
@@ -191,7 +179,9 @@ export function Profile() {
 
                   {postsQuery.hasNextPage && (
                     <div className="pt-4">
-                      <Button onClick={() => postsQuery.fetchNextPage()}>{postsQuery.isFetchingNextPage ? 'Loading…' : 'Load more'}</Button>
+                      <Button onClick={() => postsQuery.fetchNextPage()}>
+                        {postsQuery.isFetchingNextPage ? 'Loading…' : 'Load more'}
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -213,7 +203,9 @@ export function Profile() {
 
               <TabsContent value="places">
                 <div className="space-y-4">
-                  {placesQuery.isLoading ? <LoadingSpinner /> : userPlaces.length === 0 ? (
+                  {placesQuery.isLoading ? (
+                    <LoadingSpinner />
+                  ) : userPlaces.length === 0 ? (
                     <p className="text-sm text-muted-foreground">No places yet.</p>
                   ) : (
                     userPlaces.map((pl) => (
@@ -230,35 +222,27 @@ export function Profile() {
               </TabsContent>
             </Tabs>
           </div>
-          </div>
         </div>
+      </div>
 
-        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-          <DialogContent className="[&>button]:hidden">
-            <DialogHeader>
-              <DialogTitle>Delete Account</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowDeleteConfirm(false)}
-                disabled={isDeleting}
-              >
-                Cancel
-              </Button>
-              <Button 
-                variant="destructive" 
-                onClick={confirmDelete}
-                disabled={isDeleting}
-              >
-                {isDeleting ? 'Deleting...' : 'Delete Account'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="[&>button]:hidden">
+          <DialogHeader>
+            <DialogTitle>Delete Account</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)} disabled={isDeleting}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete} disabled={isDeleting}>
+              {isDeleting ? 'Deleting...' : 'Delete Account'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageLayout>
   )
 }

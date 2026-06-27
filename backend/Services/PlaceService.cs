@@ -17,7 +17,7 @@ public class PlaceService : IPlaceService
         _context = context;
     }
 
-    private static readonly Expression<Func<Place, PlaceResponse>> ProjectPlace = e => new PlaceResponse
+    private static readonly Func<Place, PlaceResponse> ProjectPlace = e => new PlaceResponse
     {
         Id = e.Id,
         Title = e.Title,
@@ -94,7 +94,7 @@ public class PlaceService : IPlaceService
 
         return items.Select(p =>
         {
-            PlaceResponse response = ProjectPlace.Compile().Invoke(p);
+            PlaceResponse response = ProjectPlace(p);
             response.CurrentUserVote = currentUserId.HasValue
                 ? (userVotes.TryGetValue(p.Id, out int voteValue) ? voteValue : 0)
                 : null;
@@ -129,7 +129,7 @@ public class PlaceService : IPlaceService
             .AsNoTracking()
             .CountAsync(c => c.PlaceId == id);
 
-        PlaceResponse response = ProjectPlace.Compile().Invoke(place);
+        PlaceResponse response = ProjectPlace(place);
         response.CurrentUserVote = currentUserVote;
         response.CommentCount = commentCount;
         return Result<PlaceResponse>.Success(response);
@@ -211,6 +211,9 @@ public class PlaceService : IPlaceService
         if (request.Description != null) eventEntity.Description = request.Description;
         if (request.CommunityId.HasValue) eventEntity.CommunityId = request.CommunityId;
         if (request.PhotoUrls != null) eventEntity.PhotoUrls = request.PhotoUrls;
+        if (request.Latitude.HasValue) eventEntity.Latitude = request.Latitude;
+        if (request.Longitude.HasValue) eventEntity.Longitude = request.Longitude;
+        if (request.LocationName != null) eventEntity.LocationName = request.LocationName;
 
         eventEntity.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
@@ -239,72 +242,18 @@ public class PlaceService : IPlaceService
         return Result<bool>.Success(true);
     }
 
-    public async Task<Result<bool>> VotePlaceAsync(int placeId, int userId, int value)
-    {
-        if (value is not (-1 or 0 or 1))
-        {
-            return Result<bool>.Invalid("Vote value must be -1, 0, or 1.");
-        }
-
-        bool placeExists = await _context.Places.AnyAsync(p => p.Id == placeId);
-
-        if (!placeExists)
-        {
-            return Result<bool>.NotFound("Place not found.");
-        }
-
-        using var transaction = await _context.Database.BeginTransactionAsync();
-        try
-        {
-            PlaceVote? existingVote = await _context.PlaceVotes
-                .FirstOrDefaultAsync(v => v.UserId == userId && v.PlaceId == placeId);
-
-            int scoreDelta = 0;
-
-            if (value == 0)
-            {
-                if (existingVote != null)
-                {
-                    scoreDelta = -existingVote.Value;
-                    _context.PlaceVotes.Remove(existingVote);
-                }
-            }
-            else
-            {
-                if (existingVote != null)
-                {
-                    scoreDelta = value - existingVote.Value;
-                    existingVote.Value = value;
-                    existingVote.UpdatedAt = DateTime.UtcNow;
-                }
-                else
-                {
-                    scoreDelta = value;
-                    _context.PlaceVotes.Add(new PlaceVote
-                    {
-                        UserId = userId,
-                        PlaceId = placeId,
-                        Value = value
-                    });
-                }
-            }
-
-            await _context.SaveChangesAsync();
-
-            if (scoreDelta != 0)
-            {
-                await _context.Places
-                    .Where(p => p.Id == placeId)
-                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.Score, x => x.Score + scoreDelta));
-            }
-
-            await transaction.CommitAsync();
-            return Result<bool>.Success(true);
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
-    }
+    public Task<Result<bool>> VotePlaceAsync(int placeId, int userId, int value) => VoteHelper.VoteAsync(
+        _context,
+        placeId,
+        userId,
+        value,
+        entityExists: () => _context.Places.AnyAsync(p => p.Id == placeId),
+        getExistingVote: () => _context.PlaceVotes.FirstOrDefaultAsync(v => v.UserId == userId && v.PlaceId == placeId),
+        getVoteValue: v => v.Value,
+        setVoteValue: (v, val) => { v.Value = val; v.UpdatedAt = DateTime.UtcNow; },
+        createVote: () => new PlaceVote { UserId = userId, PlaceId = placeId, Value = value },
+        updateScore: delta => _context.Places
+            .Where(p => p.Id == placeId)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.Score, x => x.Score + delta))
+    );
 }
