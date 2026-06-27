@@ -1,5 +1,5 @@
 import { useNavigate, Link, useLocation } from 'react-router-dom'
-import { Home, Map, MessageCircle, User, LogOut, Sparkles } from 'lucide-react'
+import { Home, Map, MessageCircle, User, LogOut, Sparkles, Coffee } from 'lucide-react'
 import { clearAuthToken } from '../hooks/useAuthSync'
 import { hasAuthToken } from '../lib/authToken'
 
@@ -77,15 +77,29 @@ export function Navbar() {
       </div>
 
       {isLoggedIn && (
-        <button
-          onClick={handleLogout}
-          className="group relative w-11 h-11 rounded-xl flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-secondary transition-all duration-200"
-        >
-          <LogOut className="w-5 h-5" />
-          <span className="absolute left-full ml-3 px-2.5 py-1 bg-popover text-popover-foreground text-xs rounded-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-lg border border-border">
-            Logout
-          </span>
-        </button>
+        <div className="flex flex-col items-center gap-1">
+          <a
+            href="https://buymeacoffee.com/antonishchyk"
+            target="_blank"
+            rel="noreferrer"
+            className="group relative w-11 h-11 rounded-xl flex items-center justify-center text-muted-foreground hover:text-yellow-500 hover:bg-secondary transition-all duration-200"
+          >
+            <Coffee className="w-5 h-5" />
+            <span className="absolute left-full ml-3 px-2.5 py-1 bg-popover text-popover-foreground text-xs rounded-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-lg border border-border">
+              Buy me a coffee
+            </span>
+          </a>
+
+          <button
+            onClick={handleLogout}
+            className="group relative w-11 h-11 rounded-xl flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-secondary transition-all duration-200"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="absolute left-full ml-3 px-2.5 py-1 bg-popover text-popover-foreground text-xs rounded-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-lg border border-border">
+              Logout
+            </span>
+          </button>
+        </div>
       )}
     </nav>
   )
