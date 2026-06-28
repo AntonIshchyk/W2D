@@ -79,7 +79,7 @@ export function Navbar() {
       {isLoggedIn && (
         <div className="flex flex-col items-center gap-1">
           <a
-            href="https://buymeacoffee.com/antonishchyk"
+            href="https://buymeacoffee.com/whatodo"
             target="_blank"
             rel="noreferrer"
             className="group relative w-11 h-11 rounded-xl flex items-center justify-center text-muted-foreground hover:text-yellow-500 hover:bg-secondary transition-all duration-200"
