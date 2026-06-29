@@ -65,7 +65,7 @@ public class PlaceService : IPlaceService
         }
 
         List<Place> items = await query
-            .OrderBy(e => e.Score)
+            .OrderByDescending(e => e.Score)
             .ThenByDescending(e => e.Id)
             .Take(500)
             .ToListAsync();
