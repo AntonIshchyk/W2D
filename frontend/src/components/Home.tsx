@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Clock, Map, MapPin, MessageCircle, Sparkles, Users } from 'lucide-react'
+import { ArrowRight, Clock, Map, MapPin, MessageCircle, Users } from 'lucide-react'
 import { PageLayout } from './Navbar'
 import { PostAuthorInfo } from './PostAuthorInfo'
 import { VoteButtons } from './VoteButtons'
@@ -8,7 +8,6 @@ import { PostType, type Post } from '../types/posts'
 import type { LucideIcon } from 'lucide-react'
 import type { Place } from '../types/places'
 import parkImage from '../assets/park.jpg'
-import suggestionsImage from '../assets/suggestions.png'
 
 const PlacesMap = lazy(() => import('./PlacesMap').then((m) => ({ default: m.PlacesMap })))
 
@@ -95,7 +94,6 @@ function FeatureLink({
 const FEATURE_STEPS = [
   { label: 'Places', icon: Map },
   { label: 'Posts', icon: MessageCircle },
-  { label: 'AI suggestions', icon: Sparkles },
 ]
 
 export function Home() {
@@ -326,29 +324,6 @@ export function Home() {
                 </div>
               </div>
             </article>
-          </div>
-        </section>
-
-        <section className="grid min-h-screen items-center gap-10 border-t border-border px-5 py-10 md:px-10 lg:grid-cols-[1.2fr_0.8fr] lg:px-16">
-          <div className="relative h-[58vh] min-h-105 overflow-hidden rounded-3xl bg-card shadow-2xl shadow-primary/10 flex items-center justify-center">
-            <img
-              src={suggestionsImage}
-              alt="AI Suggestions"
-              className="h-full w-full object-contain"
-            />
-          </div>
-
-          <div className="max-w-xl justify-self-center lg:justify-self-start">
-            <h2 className="text-4xl font-black leading-tight tracking-normal md:text-6xl">
-              Get suggestions W2D based on your preferences.
-            </h2>
-            <p className="mt-5 text-lg leading-8 text-muted-foreground">
-              Answer a few questions and get personalized recommendations for things to do. 
-              Whether you want to explore, relax, or connect with others.
-            </p>
-            <div className="mt-8">
-              <FeatureLink to="/suggestions" icon={Sparkles}>Get suggestions</FeatureLink>
-            </div>
           </div>
         </section>
       </main>

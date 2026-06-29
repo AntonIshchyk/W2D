@@ -29,10 +29,7 @@ export const API_ENDPOINTS = {
   },
   uploads: {
       presign: `${API_BASE_URL}/api/uploads/presign`,
-    },
-  activities: {
-    suggestions: `${API_BASE_URL}/api/activities/suggestions`,
-  },
+    }
 } as const;
 
 export function getAuthHeaders(): HeadersInit {

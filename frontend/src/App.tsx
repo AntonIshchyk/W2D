@@ -15,7 +15,6 @@ import { PostDetail } from './components/PostDetail'
 import { PlaceDetail } from './components/PlaceDetail'
 import { useAuthSync } from './hooks/useAuthSync'
 import { ProtectedRoute } from './components/ProtectedRoute'
-import { ActivitySuggestionsPage } from './components/ActivitySuggestions'
 
 function App() {
   useAuthSync()
@@ -37,7 +36,6 @@ function App() {
         <Route path="/posts/create" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
         <Route path="/posts/:id" element={<ProtectedRoute><PostDetail /></ProtectedRoute>} />
         <Route path="/posts/:postId/edit" element={<ProtectedRoute><EditPost /></ProtectedRoute>} />
-        <Route path="/suggestions" element={<ProtectedRoute><ActivitySuggestionsPage /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
