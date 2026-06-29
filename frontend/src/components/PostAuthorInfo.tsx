@@ -1,12 +1,10 @@
 import { PostType } from '../types/posts'
 import { POST_TYPE_LABELS, POST_TYPE_COLORS, POST_TYPE_ICONS } from '../api/posts'
-import { UserAvatar } from './UserAvatar'
 import { cn } from '../lib/utils'
 
 interface PostAuthorInfoProps {
   author?: {
     username?: string
-    profilePhotoUrl?: string | null
   }
   type: PostType
 }
@@ -17,7 +15,6 @@ export function PostAuthorInfo({ author, type }: PostAuthorInfoProps) {
 
   return (
     <div className="flex items-center gap-3">
-      <UserAvatar url={author?.profilePhotoUrl} username={author?.username} />
       <div>
         <p className="text-sm font-semibold text-foreground leading-tight">
           {author?.username || 'Anonymous'}

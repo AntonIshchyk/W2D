@@ -23,13 +23,12 @@ import { PostCard } from './PostCard'
 export function Posts() {
   const navigate = useNavigate()
   const [selectedCommunities, setSelectedCommunities] = useState<number[]>([])
-  const [selectedType, setSelectedType]         = useState<number | undefined>()
-  const [sortBy, setSortBy]                     = useState('top')
-  const [communityOpen, setCommunityOpen]         = useState(false)
+  const [selectedType, setSelectedType] = useState<number | undefined>()
+  const [sortBy, setSortBy] = useState('top')
+  const [communityOpen, setCommunityOpen] = useState(false)
   const observerTarget = useRef<HTMLDivElement>(null)
 
   const { data: currentUser } = useCurrentUser()
-
   const { data: communities } = useQuery({
     queryKey: ['communities'],
     queryFn: fetchCommunities,

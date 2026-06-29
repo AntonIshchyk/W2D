@@ -13,7 +13,6 @@ import { fetchPlace, deletePlace, votePlace } from '../api/places'
 import { VoteButtons } from './VoteButtons'
 import { Button } from './ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-import { UserAvatar } from './UserAvatar'
 
 export function PlaceDetail() {
   const { id } = useParams<{ id: string }>()
@@ -91,7 +90,6 @@ export function PlaceDetail() {
         <article className="bg-card border border-border/50 rounded-3xl p-6 md:p-8">
           <div className="flex items-center justify-between mb-5">
             <div className="min-w-0 flex items-center gap-3">
-              <UserAvatar url={place.userPhotoUrl} username={place.userName} className="h-10 w-10" />
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-sm font-medium text-muted-foreground">{place.userName}</span>

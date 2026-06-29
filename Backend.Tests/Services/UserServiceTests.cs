@@ -65,7 +65,6 @@ public class UserServiceTests
         {
             Username = "taken",
             Bio = "bio",
-            ProfilePhotoUrl = null
         });
 
         result.Status.Should().Be(ResultStatus.Invalid);
@@ -89,21 +88,18 @@ public class UserServiceTests
         {
             Username = "  new_name  ",
             Bio = "  hello bio  ",
-            ProfilePhotoUrl = "  https://example.com/photo.jpg  "
         });
 
         result.Status.Should().Be(ResultStatus.Success);
         result.Value.Should().NotBeNull();
         result.Value!.Username.Should().Be("new_name");
         result.Value.Bio.Should().Be("hello bio");
-        result.Value.ProfilePhotoUrl.Should().Be("https://example.com/photo.jpg");
         result.Value.ProfileSetupComplete.Should().BeTrue();
         result.Value.Token.Should().Be("token-3");
 
         var user = await context.Users.AsNoTracking().FirstAsync(u => u.Id == 1);
         user.Username.Should().Be("new_name");
         user.Bio.Should().Be("hello bio");
-        user.ProfilePhotoUrl.Should().Be("https://example.com/photo.jpg");
         user.ProfileSetupComplete.Should().BeTrue();
     }
 

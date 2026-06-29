@@ -7,7 +7,6 @@ export interface UserInfo {
   email: string
   username: string
   bio?: string | null
-  profilePhotoUrl?: string | null
   profileSetupComplete: boolean
 }
 

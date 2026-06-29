@@ -2,10 +2,8 @@ import { PageLayout } from './Navbar'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Separator } from './ui/separator'
 import { Skeleton } from './ui/skeleton'
-import { isValidPhotoUrl } from '../lib/utils/validation'
 import { useState } from 'react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
@@ -104,12 +102,6 @@ export function Profile() {
             <Card className="overflow-hidden border-2">
               <CardHeader className="flex-row items-start justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-16 w-16 border-2 border-background">
-                    {user.profilePhotoUrl && isValidPhotoUrl(user.profilePhotoUrl) && <AvatarImage src={user.profilePhotoUrl} alt={user.username} />}
-                    <AvatarFallback className="bg-linear-to-br from-primary to-primary/70 text-primary-foreground text-lg font-bold">
-                      {user.username.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
                   <CardTitle className="text-xl">{user.username}</CardTitle>
                 </div>
                 <Popover>

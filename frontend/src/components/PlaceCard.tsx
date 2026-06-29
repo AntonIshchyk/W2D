@@ -3,7 +3,6 @@ import { MapPin, Users, Menu, Pencil, Trash2, MessageSquare, Clock } from 'lucid
 import { cn } from '../lib/utils'
 import { getGoogleMapsUrl } from '../lib/utils/maps'
 import { PhotoCarousel } from './PhotoCarousel'
-import { UserAvatar } from './UserAvatar'
 import type { Place } from '../types/places'
 import { Button } from './ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
@@ -50,7 +49,6 @@ export function PlaceCard({ place, currentUser, onDelete, onVote, className, isP
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3 min-w-0">
-          <UserAvatar url={place.userPhotoUrl} username={place.userName} className={compact ? 'h-8 w-8' : 'h-10 w-10'} />
           <div className="min-w-0">
             <p className="font-semibold text-foreground truncate">{place.userName}</p>
           </div>

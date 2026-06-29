@@ -4,8 +4,6 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { setAuthToken } from '../hooks/useAuthSync'
-import { AvatarUpload } from './AvatarUpload'
-import { isValidPhotoUrl } from '../lib/utils/validation'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { updateCurrentUserProfile } from '../api/users'
 
@@ -30,7 +28,6 @@ export function ProfileSetup() {
   const [profile, setProfile] = useState({
     username: '',
     bio: '',
-    profilePhotoUrls: [] as string[],
   })
 
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -45,7 +42,6 @@ export function ProfileSetup() {
     setProfile({
       username: currentUser.profileSetupComplete ? (currentUser.username ?? '') : '',
       bio: currentUser.bio ?? '',
-      profilePhotoUrls: currentUser.profilePhotoUrl && isValidPhotoUrl(currentUser.profilePhotoUrl) ? [currentUser.profilePhotoUrl] : [],
     })
     setIsInitialized(true)
   }, [currentUser, isInitialized])
@@ -65,7 +61,6 @@ export function ProfileSetup() {
     mutationFn: () => updateCurrentUserProfile({
       username: profile.username,
       bio: profile.bio,
-      profilePhotoUrl: profile.profilePhotoUrls[0] ?? null,
     }),
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: ['currentUser'] })
@@ -117,19 +112,9 @@ export function ProfileSetup() {
         
         <div className="text-center">
           <h2 className="text-4xl font-black tracking-tight text-foreground">Complete your profile</h2>
-          <p className="mt-3 text-base text-muted-foreground">Add a photo, pick a username, and write a short bio.</p>
         </div>
 
         <div className="mt-12 space-y-8">
-          <div className="flex flex-col items-center justify-center space-y-4 pb-4 pt-2">
-            <AvatarUpload
-              value={profile.profilePhotoUrls[0] || ''}
-              onChange={(url) => handleInputChange('profilePhotoUrls', url ? [url] : [])}
-              disabled={completeMutation.isPending}
-            />
-            <p className="text-sm font-bold uppercase tracking-widest text-foreground">Profile Photo (Optional)</p>
-          </div>
-
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-bold tracking-wide uppercase text-foreground">

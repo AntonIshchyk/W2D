@@ -28,7 +28,6 @@ public class CommentService : ICommentService
             Content = c.IsDeleted ? "[deleted]" : (c.Content ?? string.Empty),
             UserId = c.IsDeleted ? 0 : c.UserId,
             UserName = c.IsDeleted ? null : c.User.Username,
-            UserPhotoUrl = c.IsDeleted ? null : c.User.ProfilePhotoUrl,
             PostId = c.PostId,
             PlaceId = c.PlaceId,
             Score = c.Score,

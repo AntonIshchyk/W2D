@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Reply, Trash2, X, Menu, Pencil } from 'lucide-react'
 import { cn } from '../lib/utils'
-import { UserAvatar } from './UserAvatar'
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
@@ -84,9 +83,6 @@ const CommentNode: React.FC<CommentNodeProps> = React.memo(({
       <div className={`flex-1 min-w-0 pb-3 ${!isLast && depth === 0 ? 'border-b border-border/60' : ''}`}>
         <div className="flex items-center justify-between gap-2 mb-1.5">
           <div className="flex items-center gap-2 min-w-0">
-            {!comment.isDeleted && (
-              <UserAvatar url={comment.userPhotoUrl} username={comment.userName} className="w-6 h-6" />
-            )}
             <span className="text-sm font-medium text-foreground">
               {comment.isDeleted ? 'deleted' : (comment.userName || 'Anonymous')}
             </span>

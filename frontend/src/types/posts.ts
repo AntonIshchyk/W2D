@@ -12,7 +12,6 @@ export type PostType = typeof PostType[keyof typeof PostType]
 export interface UserSummary {
   id: number
   username: string
-  profilePhotoUrl?: string
 }
 
 export interface Post {

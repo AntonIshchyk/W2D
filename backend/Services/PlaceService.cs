@@ -24,7 +24,6 @@ public class PlaceService : IPlaceService
         Description = e.Description,
         UserId = e.UserId,
         UserName = e.User!.Username,
-        UserPhotoUrl = e.User.ProfilePhotoUrl,
         CommunityId = e.CommunityId,
         CommunityName = e.Community != null ? e.Community.Name : null,
         Latitude = e.Latitude,

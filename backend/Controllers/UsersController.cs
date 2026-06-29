@@ -44,7 +44,6 @@ public class UsersController : ControllerBase
             email = user.Email,
             username = user.Username,
             bio = user.Bio,
-            profilePhotoUrl = user.ProfilePhotoUrl,
             profileSetupComplete = user.ProfileSetupComplete,
         });
     }

@@ -3,8 +3,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 import { setAuthToken } from '../hooks/useAuthSync'
-import { AvatarUpload } from './AvatarUpload'
-import { isValidPhotoUrl } from '../lib/utils/validation'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { updateCurrentUserProfile } from '../api/users'
 import { PageLayout } from './Navbar'
@@ -26,7 +24,6 @@ export function EditProfile() {
   const [profile, setProfile] = useState({
     username: '',
     bio: '',
-    profilePhotoUrls: [] as string[],
   })
 
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -41,7 +38,6 @@ export function EditProfile() {
     setProfile({
       username: currentUser.username ?? '',
       bio: currentUser.bio ?? '',
-      profilePhotoUrls: currentUser.profilePhotoUrl && isValidPhotoUrl(currentUser.profilePhotoUrl) ? [currentUser.profilePhotoUrl] : [],
     })
     setIsInitialized(true)
   }, [currentUser, isInitialized])
@@ -53,8 +49,6 @@ export function EditProfile() {
     } else if (field === 'bio') {
       const limited = (value as string).slice(0, 160)
       setProfile((prev) => ({ ...prev, [field]: limited }))
-    } else if (field === 'profilePhotoUrls') {
-      setProfile((prev) => ({ ...prev, profilePhotoUrls: Array.isArray(value) ? value : [] }))
     }
 
     if (field === 'username' || field === 'bio') {
@@ -66,7 +60,6 @@ export function EditProfile() {
     mutationFn: () => updateCurrentUserProfile({
       username: profile.username,
       bio: profile.bio,
-      profilePhotoUrl: profile.profilePhotoUrls[0] ?? null,
     }),
     onSuccess: async (data) => {
       setAuthToken(data.token)
@@ -137,19 +130,9 @@ export function EditProfile() {
         <div className="w-full max-w-xl space-y-10 rounded-[2rem] bg-background p-10 shadow-sm ring-1 ring-border sm:p-14">
           <div className="text-center">
             <h2 className="text-4xl font-black tracking-tight text-foreground">Edit your profile</h2>
-            <p className="mt-3 text-base text-muted-foreground">Update your photo, username, and bio.</p>
           </div>
 
           <div className="mt-12 space-y-8">
-            <div className="flex flex-col items-center justify-center space-y-4 pb-4 pt-2">
-              <AvatarUpload
-                value={profile.profilePhotoUrls[0] || ''}
-                onChange={(url) => handleInputChange('profilePhotoUrls', url ? [url] : [])}
-                disabled={updateMutation.isPending}
-              />
-              <p className="text-sm font-bold uppercase tracking-widest text-foreground">Profile Photo (Optional)</p>
-            </div>
-
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-bold tracking-wide uppercase text-foreground">

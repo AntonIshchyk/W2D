@@ -10,7 +10,4 @@ public class UpdateUserProfileRequest
 
     [MaxLength(160)]
     public string? Bio { get; set; }
-
-    [MaxLength(500)]
-    public string? ProfilePhotoUrl { get; set; }
 }

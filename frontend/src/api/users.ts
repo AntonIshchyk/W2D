@@ -8,7 +8,6 @@ export interface LoginResponse {
 export interface UpdateCurrentUserProfileRequest {
   username: string
   bio: string
-  profilePhotoUrl: string | null
 }
 
 export async function googleLogin(credential: string): Promise<LoginResponse> {

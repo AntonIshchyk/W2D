@@ -6,7 +6,6 @@ public class LoginResponse
     public string Email { get; set; } = null!;
     public string? Username { get; set; }
     public string? Bio { get; set; }
-    public string? ProfilePhotoUrl { get; set; }
     public bool ProfileSetupComplete { get; set; }
     public string Token { get; set; } = null!;
 }

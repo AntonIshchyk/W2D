@@ -102,14 +102,8 @@ public class UserService : IUserService
             return Result<LoginResponse>.Invalid("Username is already taken.");
         }
 
-        if (!PhotoUrlValidationExtensions.TryValidateOptionalPhotoUrl(request.ProfilePhotoUrl, nameof(request.ProfilePhotoUrl), out string? profilePhotoError))
-        {
-            return Result<LoginResponse>.Invalid(profilePhotoError!);
-        }
-
         user.Username = trimmedUsername;
         user.Bio = string.IsNullOrWhiteSpace(request.Bio) ? null : request.Bio.Trim();
-        user.ProfilePhotoUrl = string.IsNullOrWhiteSpace(request.ProfilePhotoUrl) ? null : request.ProfilePhotoUrl.Trim();
         user.ProfileSetupComplete = true;
 
         await _context.SaveChangesAsync();
