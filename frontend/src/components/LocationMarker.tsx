@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Marker, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 
@@ -9,32 +9,28 @@ interface LocationMarkerProps {
 }
 
 export function LocationMarker({ onLocationSelect, defaultLocation, location }: LocationMarkerProps) {
-  const [position, setPosition] = useState<L.LatLng | null>(
+  const [clickedPosition, setClickedPosition] = useState<L.LatLng | null>(
     defaultLocation ? new L.LatLng(defaultLocation[0], defaultLocation[1]) : null,
   )
 
   const map = useMapEvents({
     click(e) {
-      setPosition(e.latlng)
+      setClickedPosition(e.latlng)
       onLocationSelect(e.latlng.lat, e.latlng.lng)
       map.flyTo(e.latlng, map.getZoom())
     },
   })
 
+  const controlledPosition = useMemo(
+    () => location ? new L.LatLng(location[0], location[1]) : null,
+    [location],
+  )
+
   useEffect(() => {
-    if (!location) return
+    if (controlledPosition) map.flyTo(controlledPosition, Math.max(map.getZoom(), 13))
+  }, [controlledPosition, map])
 
-    const [lat, lng] = location
-    const next = new L.LatLng(lat, lng)
-    setPosition((prev) => {
-      if (prev && prev.lat === next.lat && prev.lng === next.lng) {
-        return prev
-      }
-      return next
-    })
-
-    map.flyTo(next, Math.max(map.getZoom(), 13))
-  }, [location, map])
+  const position = controlledPosition ?? clickedPosition
 
   return position ? <Marker position={position} /> : null
 }

@@ -46,7 +46,7 @@ export function AvatarUpload({ value, onChange, disabled }: AvatarUploadProps) {
       const { uploadUrl, publicUrl } = await getPresignedUrl(croppedFile)
       await uploadToR2(uploadUrl, croppedFile)
       onChange(publicUrl)
-    } catch (error) {
+    } catch {
       toast.error('Failed to upload profile photo')
     } finally {
       setIsUploading(false)

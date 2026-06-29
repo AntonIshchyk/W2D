@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import type { InfiniteData } from '@tanstack/react-query'
 
 type VoteTarget = {
   id: number
@@ -18,27 +19,37 @@ type UseEntityVoteMutationOptions = {
   invalidateKeys: unknown[][]
 }
 
+type EntityPage<T extends VoteTarget> = {
+  items: T[]
+}
+
+type VoteCache<T extends VoteTarget> = T | T[] | InfiniteData<EntityPage<T>>
+
 function updateVoteState<T extends VoteTarget>(item: T, value: number): T {
   const newVote = item.currentUserVote === value ? 0 : value
   const delta = newVote - (item.currentUserVote ?? 0)
   return { ...item, currentUserVote: newVote, score: item.score + delta }
 }
 
-function updateCachedData(data: any, entityId: number, value: number): any {
+function isInfiniteVoteData<T extends VoteTarget>(data: VoteCache<T>): data is InfiniteData<EntityPage<T>> {
+  return typeof data === 'object' && data !== null && 'pages' in data
+}
+
+function updateCachedData<T extends VoteTarget>(data: VoteCache<T> | undefined, entityId: number, value: number): VoteCache<T> | undefined {
   if (!data) return data
 
-  if (data.pages) {
+  if (isInfiniteVoteData(data)) {
     return {
       ...data,
-      pages: data.pages.map((page: any) => ({
+      pages: data.pages.map((page) => ({
         ...page,
-        items: page.items.map((item: any) => (item.id === entityId ? updateVoteState(item, value) : item)),
+        items: page.items.map((item) => (item.id === entityId ? updateVoteState(item, value) : item)),
       })),
     }
   }
 
   if (Array.isArray(data)) {
-    return data.map((item: any) => (item.id === entityId ? updateVoteState(item, value) : item))
+    return data.map((item) => (item.id === entityId ? updateVoteState(item, value) : item))
   }
 
   if (data.id === entityId) {
@@ -55,12 +66,12 @@ export function useEntityVoteMutation({ queryKey, mutationFn, invalidateKeys }: 
     mutationFn: ({ entityId, value }: VoteMutationArgs) => mutationFn(entityId, value),
     onMutate: async ({ entityId, value }) => {
       await queryClient.cancelQueries({ queryKey })
-      const previous = queryClient.getQueryData(queryKey)
+      const previous = queryClient.getQueryData<VoteCache<VoteTarget>>(queryKey)
 
-      queryClient.setQueryData(queryKey, (data: any) => updateCachedData(data, entityId, value))
+      queryClient.setQueryData<VoteCache<VoteTarget>>(queryKey, (data) => updateCachedData(data, entityId, value))
       return { previous }
     },
-    onError: (_err, _variables, context: any) => {
+    onError: (_err, _variables, context) => {
       if (context?.previous) {
         queryClient.setQueryData(queryKey, context.previous)
       }

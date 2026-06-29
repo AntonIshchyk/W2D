@@ -222,55 +222,23 @@ public class CommentService : ICommentService
 
     public async Task<Result<bool>> VoteCommentAsync(int entityId, int commentId, CommentTarget target, int userId, int value)
     {
-        if (value is not (-1 or 0 or 1))
-            return Result<bool>.Invalid("Vote value must be -1, 0, or 1.");
-
         var existsQuery = _context.Comments.Where(c => c.Id == commentId && !c.IsDeleted);
         existsQuery = FilterByTarget(existsQuery, target, entityId);
 
-        if (!await existsQuery.AnyAsync())
-            return Result<bool>.NotFound("Comment not found.");
-
-        var existingVote = await _context.CommentVotes
-            .FirstOrDefaultAsync(v => v.UserId == userId && v.CommentId == commentId);
-
-        int oldValue = existingVote?.Value ?? 0;
-        int delta = value - oldValue;
-
-        if (delta == 0)
-            return Result<bool>.Success(true);
-
-        using var tx = await _context.Database.BeginTransactionAsync();
-
-        if (value == 0 && existingVote != null)
-        {
-            _context.CommentVotes.Remove(existingVote);
-        }
-        else if (existingVote != null)
-        {
-            existingVote.Value = value;
-            existingVote.UpdatedAt = DateTime.UtcNow;
-        }
-        else
-        {
-            _context.CommentVotes.Add(new CommentVote
-            {
-                UserId = userId,
-                CommentId = commentId,
-                Value = value
-            });
-        }
-
-        await _context.SaveChangesAsync();
-
-        await _context.Comments
-            .Where(c => c.Id == commentId)
-            .ExecuteUpdateAsync(c => c
-                .SetProperty(x => x.Score, x => x.Score + delta)
-                .SetProperty(x => x.UpdatedAt, DateTime.UtcNow));
-
-        await tx.CommitAsync();
-
-        return Result<bool>.Success(true);
+        return await VoteHelper.VoteAsync(
+            _context,
+            commentId,
+            userId,
+            value,
+            entityExists: () => existsQuery.AnyAsync(),
+            getExistingVote: () => _context.CommentVotes.FirstOrDefaultAsync(v => v.UserId == userId && v.CommentId == commentId),
+            getVoteValue: v => v.Value,
+            setVoteValue: (v, val) => { v.Value = val; v.UpdatedAt = DateTime.UtcNow; },
+            createVote: () => new CommentVote { UserId = userId, CommentId = commentId, Value = value },
+            updateScore: delta => _context.Comments
+                .Where(c => c.Id == commentId)
+                .ExecuteUpdateAsync(c => c
+                    .SetProperty(x => x.Score, x => x.Score + delta)
+                    .SetProperty(x => x.UpdatedAt, DateTime.UtcNow)));
     }
 }

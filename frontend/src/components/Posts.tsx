@@ -9,14 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Skeleton } from './ui/skeleton'
 import { PageLayout } from './Navbar'
 import { useCurrentUser } from '../hooks/useCurrentUser'
-import { usePostVoteMutation } from '../hooks/usePostVoteMutation'
+import { useEntityVoteMutation } from '../hooks/useEntityVoteMutation'
 import { PostType } from '../types/posts'
 import { EmptyState } from './ui/empty-state'
 import { LoadingSpinner } from './ui/loading-spinner'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import { cn } from '../lib/utils'
-import { fetchPosts, POST_TYPE_LABELS, POST_TYPE_ICONS } from '../api/posts'
+import { fetchPosts, POST_TYPE_LABELS, POST_TYPE_ICONS, votePost } from '../api/posts'
 import { fetchCommunities } from '../api/communities'
 import { PostCard } from './PostCard'
 
@@ -50,7 +50,11 @@ export function Posts() {
     retry: false,
   })
 
-  const { handlePostVote } = usePostVoteMutation(['posts', selectedCommunities, selectedType, sortBy])
+  const { handleVote: handlePostVote } = useEntityVoteMutation({
+    queryKey: ['posts', selectedCommunities, selectedType, sortBy],
+    mutationFn: votePost,
+    invalidateKeys: [['posts'], ['user-posts'], ['post']],
+  })
 
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
     const [target] = entries

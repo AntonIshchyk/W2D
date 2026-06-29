@@ -9,24 +9,33 @@ interface AvatarCropModalProps {
   onCropComplete: (croppedFile: File) => void
 }
 
+type Area = {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 export function AvatarCropModal({ imageSrc, onClose, onCropComplete }: AvatarCropModalProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null)
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
 
-  const onCropCompleteHandler = useCallback((_croppedArea: any, croppedAreaPixels: any) => {
-    setCroppedAreaPixels(croppedAreaPixels)
+  const onCropCompleteHandler = useCallback((_croppedArea: Area, nextCroppedAreaPixels: Area) => {
+    setCroppedAreaPixels(nextCroppedAreaPixels)
   }, [])
 
   const handleSave = async () => {
+    if (!croppedAreaPixels) return
+
     try {
       setIsProcessing(true)
       const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels)
       if (croppedImage) {
         onCropComplete(croppedImage)
       }
-    } catch (e) {
+    } catch {
     } finally {
       setIsProcessing(false)
     }

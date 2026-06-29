@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { X, ImagePlus, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -17,6 +17,10 @@ interface UploadingFile {
   progress: 'uploading' | 'done' | 'error'
 }
 
+type PhotoPreview =
+  | { type: 'done'; url: string }
+  | { type: 'uploading' | 'error'; url: string; id: string }
+
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
 
@@ -29,7 +33,10 @@ export function PhotoUpload({
   const [uploading, setUploading] = useState<UploadingFile[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
   const confirmedRef = useRef<string[]>(value)
-  confirmedRef.current = value
+
+  useEffect(() => {
+    confirmedRef.current = value
+  }, [value])
 
   const canAddMore = value.length + uploading.filter(u => u.progress === 'uploading').length < maxPhotos
 
@@ -57,7 +64,7 @@ export function PhotoUpload({
 
       setUploading(prev => prev.filter(u => u.id !== tempId))
       URL.revokeObjectURL(previewUrl)
-    } catch (err) {
+    } catch {
       setUploading(prev =>
         prev.map(u => u.id === tempId ? { ...u, progress: 'error' } : u)
       )
@@ -86,7 +93,7 @@ export function PhotoUpload({
     })
   }
 
-  const allPreviews = [
+  const allPreviews: PhotoPreview[] = [
     ...value.map(url => ({ type: 'done' as const, url })),
     ...uploading.map(u => ({ type: u.progress, url: u.previewUrl, id: u.id })),
   ]
@@ -115,7 +122,7 @@ export function PhotoUpload({
                 type="button"
                 onClick={() => item.type === 'done'
                   ? removePhoto(item.url)
-                  : removeUploading((item as any).id)
+                  : removeUploading(item.id)
                 }
                 className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
               >
