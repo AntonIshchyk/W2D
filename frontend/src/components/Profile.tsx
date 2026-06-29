@@ -10,20 +10,20 @@ import { useState } from 'react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { fetchPosts } from '../api/posts'
+import { fetchPosts, votePost } from '../api/posts'
 import { fetchPlaces, votePlace } from '../api/places'
 import { PostCard } from './PostCard'
 import { PlaceCard } from './PlaceCard'
 import type { Place } from '../types/places'
 import { LoadingSpinner } from './ui/loading-spinner'
 import { Button } from './ui/button'
-import { usePostVoteMutation } from '../hooks/usePostVoteMutation'
 import { useEntityVoteMutation } from '../hooks/useEntityVoteMutation'
 import { Pencil, Trash2, Menu } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog'
 import { deleteCurrentUserAccount } from '../api/users'
 import { clearAuthToken } from '../hooks/useAuthSync'
+
 
 export function Profile() {
   const { data: user, isLoading, isError, error: userError } = useCurrentUser()
@@ -49,7 +49,12 @@ export function Profile() {
     enabled: !!user?.userId,
   })
 
-  const { handlePostVote } = usePostVoteMutation(['user-posts', user?.userId])
+  const { handleVote: handlePostVote } = useEntityVoteMutation({
+    queryKey: ['user-posts', user?.userId],
+    mutationFn: votePost,
+    invalidateKeys: [['posts'], ['user-posts']],
+  })
+
   const { handleVote: handlePlaceVote } = useEntityVoteMutation({
     queryKey: placesQueryKey,
     mutationFn: votePlace,
